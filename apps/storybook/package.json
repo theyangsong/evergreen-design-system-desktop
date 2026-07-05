@@ -1,0 +1,27 @@
+{
+  "name": "@evergreen/storybook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@evergreen/components": "workspace:*",
+    "@evergreen/tokens": "workspace:*",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^8.5.0",
+    "@storybook/addon-docs": "^8.5.0",
+    "@storybook/addon-essentials": "^8.5.0",
+    "@storybook/addon-themes": "^8.5.0",
+    "@storybook/blocks": "^8.5.0",
+    "@storybook/vue3-vite": "^8.5.0",
+    "storybook": "^8.5.0",
+    "typescript": "^5.7.3",
+    "vue-tsc": "^2.2.0"
+  }
+}

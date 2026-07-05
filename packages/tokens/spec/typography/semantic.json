@@ -1,0 +1,101 @@
+{
+  "$description": "Typography System semantic role tokens (语义角色令牌 → base).",
+  "groups": [
+    {
+      "comment": "Display",
+      "tokens": [
+        { "name": "typography-display-size", "value": "var(--size-4xl)" },
+        { "name": "typography-display-weight", "value": "var(--weight-bold)" },
+        { "name": "typography-display-line-height", "value": "var(--line-height-4xl)" }
+      ]
+    },
+    {
+      "comment": "Headline",
+      "tokens": [
+        { "name": "typography-headline-size", "value": "var(--size-3xl)" },
+        { "name": "typography-headline-weight", "value": "var(--weight-bold)" },
+        { "name": "typography-headline-line-height", "value": "var(--line-height-3xl)" }
+      ]
+    },
+    {
+      "comment": "Title",
+      "tokens": [
+        { "name": "typography-title-size", "value": "var(--size-2xl)" },
+        { "name": "typography-title-weight", "value": "var(--weight-bold)" },
+        { "name": "typography-title-line-height", "value": "var(--line-height-2xl)" }
+      ]
+    },
+    {
+      "comment": "Body Large",
+      "tokens": [
+        { "name": "typography-body-large-size", "value": "var(--size-xl)" },
+        { "name": "typography-body-large-weight", "value": "var(--weight-regular)" },
+        { "name": "typography-body-large-line-height", "value": "var(--line-height-xl)" }
+      ]
+    },
+    {
+      "comment": "Body Large Strong",
+      "tokens": [
+        { "name": "typography-body-large-strong-size", "value": "var(--size-xl)" },
+        { "name": "typography-body-large-strong-weight", "value": "var(--weight-medium)" },
+        { "name": "typography-body-large-strong-line-height", "value": "var(--line-height-xl)" }
+      ]
+    },
+    {
+      "comment": "Body Medium",
+      "tokens": [
+        { "name": "typography-body-medium-size", "value": "var(--size-lg)" },
+        { "name": "typography-body-medium-weight", "value": "var(--weight-regular)" },
+        { "name": "typography-body-medium-line-height", "value": "var(--line-height-lg)" }
+      ]
+    },
+    {
+      "comment": "Body Medium Strong",
+      "tokens": [
+        { "name": "typography-body-medium-strong-size", "value": "var(--size-lg)" },
+        { "name": "typography-body-medium-strong-weight", "value": "var(--weight-medium)" },
+        { "name": "typography-body-medium-strong-line-height", "value": "var(--line-height-lg)" }
+      ]
+    },
+    {
+      "comment": "Body Small",
+      "tokens": [
+        { "name": "typography-body-small-size", "value": "var(--size-md)" },
+        { "name": "typography-body-small-weight", "value": "var(--weight-regular)" },
+        { "name": "typography-body-small-line-height", "value": "var(--line-height-md)" }
+      ]
+    },
+    {
+      "comment": "Body Small Strong",
+      "tokens": [
+        { "name": "typography-body-small-strong-size", "value": "var(--size-md)" },
+        { "name": "typography-body-small-strong-weight", "value": "var(--weight-medium)" },
+        { "name": "typography-body-small-strong-line-height", "value": "var(--line-height-md)" }
+      ]
+    },
+    {
+      "comment": "Footnote",
+      "tokens": [
+        { "name": "typography-footnote-size", "value": "var(--size-sm)" },
+        { "name": "typography-footnote-weight", "value": "var(--weight-regular)" },
+        { "name": "typography-footnote-line-height", "value": "var(--line-height-sm)" }
+      ]
+    },
+    {
+      "comment": "Footnote Strong",
+      "tokens": [
+        { "name": "typography-footnote-strong-size", "value": "var(--size-sm)" },
+        { "name": "typography-footnote-strong-weight", "value": "var(--weight-medium)" },
+        { "name": "typography-footnote-strong-line-height", "value": "var(--line-height-sm)" }
+      ]
+    },
+    {
+      "comment": "Bar",
+      "tokens": [
+        { "name": "typography-bar-size", "value": "var(--size-xs)" },
+        { "name": "typography-bar-weight", "value": "var(--weight-medium)" },
+        { "name": "typography-bar-line-height", "value": "var(--line-height-xs)" }
+      ]
+    }
+  ]
+}

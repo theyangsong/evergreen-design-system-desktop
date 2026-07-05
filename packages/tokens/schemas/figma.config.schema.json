@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Figma Config",
+  "type": "object",
+  "properties": {
+    "fileKey": { "type": "string" },
+    "fileName": { "type": "string" },
+    "tokensStudio": {
+      "type": "object",
+      "properties": {
+        "exportPath": { "type": "string" },
+        "syncDirection": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "$description": "Global typography defaults applied to document body.",
+  "selector": "body",
+  "properties": {
+    "font-family": "var(--font-family-text)",
+    "text-rendering": "geometricPrecision",
+    "-webkit-font-smoothing": "antialiased",
+    "-moz-osx-font-smoothing": "grayscale"
+  }
+}

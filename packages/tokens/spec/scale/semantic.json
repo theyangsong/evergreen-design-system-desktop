@@ -1,0 +1,85 @@
+{
+  "$description": "Scale System semantic mappings (语义尺度 → scale 基数).",
+  "groups": [
+    {
+      "comment": "间距（Spacing）",
+      "tokens": [
+        { "name": "spacing-0", "value": "var(--scale-0)" },
+        { "name": "spacing-025", "value": "var(--scale-025)" },
+        { "name": "spacing-05", "value": "var(--scale-05)" },
+        { "name": "spacing-1", "value": "var(--scale-1)" },
+        { "name": "spacing-1-5", "value": "var(--scale-1-5)" },
+        { "name": "spacing-2", "value": "var(--scale-2)" },
+        { "name": "spacing-3", "value": "var(--scale-3)" },
+        { "name": "spacing-4", "value": "var(--scale-4)" },
+        { "name": "spacing-5", "value": "var(--scale-5)" },
+        { "name": "spacing-6", "value": "var(--scale-6)" },
+        { "name": "spacing-7", "value": "var(--scale-7)" },
+        { "name": "spacing-8", "value": "var(--scale-8)" },
+        { "name": "spacing-9", "value": "var(--scale-9)" },
+        { "name": "spacing-10", "value": "var(--scale-10)" },
+        { "name": "spacing-12", "value": "var(--scale-12)" },
+        { "name": "spacing-14", "value": "var(--scale-14)" },
+        { "name": "spacing-16", "value": "var(--scale-16)" },
+        { "name": "spacing-18", "value": "var(--scale-18)" },
+        { "name": "spacing-20", "value": "var(--scale-20)" }
+      ]
+    },
+    {
+      "comment": "圆角（Radius）",
+      "tokens": [
+        { "name": "radius-0", "value": "var(--scale-0)" },
+        { "name": "radius-xs", "value": "var(--scale-1)", "comment": "4px" },
+        { "name": "radius-sm", "value": "var(--scale-2)", "comment": "8px" },
+        { "name": "radius-md", "value": "var(--scale-3)", "comment": "12px" },
+        { "name": "radius-lg", "value": "var(--scale-4)", "comment": "16px" },
+        { "name": "radius-full", "value": "var(--scale-full)", "comment": "888px" }
+      ]
+    },
+    {
+      "comment": "模糊（Blur）",
+      "tokens": [
+        { "name": "blur-subtle", "value": "var(--scale-4)", "comment": "16px" },
+        { "name": "blur-shallow", "value": "var(--scale-12)", "comment": "48px" },
+        { "name": "blur-deep", "value": "var(--scale-20)", "comment": "80px" }
+      ]
+    },
+    {
+      "comment": "层级（Depth / Elevation）",
+      "tokens": [
+        { "name": "depth-subtle", "value": "var(--scale-1-5)", "comment": "6px" },
+        { "name": "depth-shallow", "value": "var(--scale-2)", "comment": "8px" },
+        { "name": "depth-deep", "value": "var(--scale-6)", "comment": "24px" }
+      ]
+    },
+    {
+      "comment": "图标尺寸（Icon Size）",
+      "tokens": [
+        { "name": "icon-sm", "value": "var(--scale-3)", "comment": "12px" },
+        { "name": "icon-md", "value": "var(--scale-4)", "comment": "16px" },
+        { "name": "icon-lg", "value": "var(--scale-5)", "comment": "20px" },
+        { "name": "icon-xl", "value": "var(--scale-6)", "comment": "24px" }
+      ]
+    },
+    {
+      "comment": "控件按钮（Control Button）",
+      "tokens": [
+        { "name": "control-button-xs", "value": "var(--scale-8)", "comment": "32px" },
+        { "name": "control-button-sm", "value": "var(--scale-10)", "comment": "40px" },
+        { "name": "control-button-md", "value": "var(--scale-12)", "comment": "48px" },
+        { "name": "control-button-lg", "value": "var(--scale-14)", "comment": "56px" },
+        { "name": "control-button-xl", "value": "var(--scale-15)", "comment": "60px" }
+      ]
+    },
+    {
+      "comment": "控件图标容器（Control Icon）",
+      "tokens": [
+        { "name": "control-icon-xs", "value": "var(--scale-9)", "comment": "36px" },
+        { "name": "control-icon-sm", "value": "var(--scale-10)", "comment": "40px" },
+        { "name": "control-icon-md", "value": "var(--scale-12)", "comment": "48px" },
+        { "name": "control-icon-lg", "value": "var(--scale-13)", "comment": "52px" },
+        { "name": "control-icon-xl", "value": "var(--scale-14)", "comment": "56px" }
+      ]
+    }
+  ]
+}

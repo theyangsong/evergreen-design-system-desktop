@@ -1,0 +1,81 @@
+<script setup lang="ts">
+import { RouterLink } from 'vue-router';
+import { useThemeProvider } from '@evergreen/components';
+import { appRailIcons, type EdsIconName } from '@/assets/icons';
+import EdsIcon from '@/components/EdsIcon/EdsIcon.vue';
+import { primaryNav, sectionDefaultRoute } from '@/config/navigation';
+import styles from './AppRail.module.css';
+
+const props = defineProps<{
+  activeSectionId?: string;
+}>();
+
+const emit = defineEmits<{
+  toggleSectionNav: [];
+  openSectionNav: [];
+}>();
+
+const { theme, toggleTheme } = useThemeProvider();
+
+function handleNavClick(event: MouseEvent, itemId: string) {
+  if (props.activeSectionId === itemId) {
+    event.preventDefault();
+    emit('toggleSectionNav');
+  } else {
+    emit('openSectionNav');
+  }
+}
+
+function iconName(id: string): EdsIconName {
+  return appRailIcons[id as keyof typeof appRailIcons] as EdsIconName;
+}
+</script>
+
+<template>
+  <aside :class="styles.rail" aria-label="Primary navigation">
+    <div :class="styles.logoShell">
+      <div :class="styles.logo" aria-label="EverGreen Design System">
+        <img :src="appRailIcons.logo" alt="" :class="styles.logoImage" />
+      </div>
+    </div>
+
+    <nav :class="styles.navItems">
+      <template v-for="item in primaryNav" :key="item.id">
+        <div v-if="item.type === 'divider'" :class="styles.divider" role="separator">
+          <span :class="styles.dividerLine" />
+        </div>
+
+        <RouterLink
+          v-else
+          :to="sectionDefaultRoute[item.id] ?? item.to"
+          :class="styles.item"
+          @click="handleNavClick($event, item.id)"
+        >
+          <span
+            :class="[
+              styles.iconButton,
+              activeSectionId === item.id && styles.iconButtonActive,
+            ]"
+          >
+            <EdsIcon :name="iconName(item.id)" :class="styles.icon" />
+          </span>
+          <span :class="styles.label">{{ item.label }}</span>
+        </RouterLink>
+      </template>
+    </nav>
+
+    <div :class="styles.footer">
+      <button type="button" :class="styles.helpButton" aria-label="Help">
+        <span :class="styles.helpDot" />
+      </button>
+      <button
+        type="button"
+        :class="styles.themeButton"
+        :aria-label="`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`"
+        @click="toggleTheme"
+      >
+        <EdsIcon name="light" :class="styles.themeIcon" />
+      </button>
+    </div>
+  </aside>
+</template>

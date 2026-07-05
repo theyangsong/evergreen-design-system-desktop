@@ -1,0 +1,113 @@
+{
+  "$description": "Text styles referencing typography semantic tokens. Class names match Figma Text Styles.",
+  "styles": [
+    {
+      "title": "Display",
+      "className": "typography-display",
+      "properties": {
+        "font-size": "var(--typography-display-size)",
+        "font-weight": "var(--typography-display-weight)",
+        "line-height": "var(--typography-display-line-height)"
+      }
+    },
+    {
+      "title": "Headline",
+      "className": "typography-headline",
+      "properties": {
+        "font-size": "var(--typography-headline-size)",
+        "font-weight": "var(--typography-headline-weight)",
+        "line-height": "var(--typography-headline-line-height)"
+      }
+    },
+    {
+      "title": "Title",
+      "className": "typography-title",
+      "properties": {
+        "font-size": "var(--typography-title-size)",
+        "font-weight": "var(--typography-title-weight)",
+        "line-height": "var(--typography-title-line-height)"
+      }
+    },
+    {
+      "title": "Body Large",
+      "className": "typography-body-large",
+      "properties": {
+        "font-size": "var(--typography-body-large-size)",
+        "font-weight": "var(--typography-body-large-weight)",
+        "line-height": "var(--typography-body-large-line-height)"
+      }
+    },
+    {
+      "title": "Body Large Strong",
+      "className": "typography-body-large-strong",
+      "properties": {
+        "font-size": "var(--typography-body-large-strong-size)",
+        "font-weight": "var(--typography-body-large-strong-weight)",
+        "line-height": "var(--typography-body-large-strong-line-height)"
+      }
+    },
+    {
+      "title": "Body Medium",
+      "className": "typography-body-medium",
+      "properties": {
+        "font-size": "var(--typography-body-medium-size)",
+        "font-weight": "var(--typography-body-medium-weight)",
+        "line-height": "var(--typography-body-medium-line-height)"
+      }
+    },
+    {
+      "title": "Body Medium Strong",
+      "className": "typography-body-medium-strong",
+      "properties": {
+        "font-size": "var(--typography-body-medium-strong-size)",
+        "font-weight": "var(--typography-body-medium-strong-weight)",
+        "line-height": "var(--typography-body-medium-strong-line-height)"
+      }
+    },
+    {
+      "title": "Body Small",
+      "className": "typography-body-small",
+      "properties": {
+        "font-size": "var(--typography-body-small-size)",
+        "font-weight": "var(--typography-body-small-weight)",
+        "line-height": "var(--typography-body-small-line-height)"
+      }
+    },
+    {
+      "title": "Body Small Strong",
+      "className": "typography-body-small-strong",
+      "properties": {
+        "font-size": "var(--typography-body-small-strong-size)",
+        "font-weight": "var(--typography-body-small-strong-weight)",
+        "line-height": "var(--typography-body-small-strong-line-height)"
+      }
+    },
+    {
+      "title": "Footnote",
+      "className": "typography-footnote",
+      "properties": {
+        "font-size": "var(--typography-footnote-size)",
+        "font-weight": "var(--typography-footnote-weight)",
+        "line-height": "var(--typography-footnote-line-height)"
+      }
+    },
+    {
+      "title": "Footnote Strong",
+      "className": "typography-footnote-strong",
+      "properties": {
+        "font-size": "var(--typography-footnote-strong-size)",
+        "font-weight": "var(--typography-footnote-strong-weight)",
+        "line-height": "var(--typography-footnote-strong-line-height)"
+      }
+    },
+    {
+      "title": "Bar",
+      "className": "typography-bar",
+      "properties": {
+        "font-size": "var(--typography-bar-size)",
+        "font-weight": "var(--typography-bar-weight)",
+        "line-height": "var(--typography-bar-line-height)"
+      }
+    }
+  ]
+}

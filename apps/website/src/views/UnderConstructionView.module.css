@@ -1,0 +1,8 @@
+.image {
+  display: block;
+  height: 80%;
+  width: auto;
+  max-width: 100%;
+  max-height: 80%;
+  object-fit: contain;
+}

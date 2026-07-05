@@ -1,0 +1,99 @@
+{
+  "$figma": "https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2931-5280",
+  "$description": "Effect System semantic classes — 组合应用（Figma 2931:5280）.",
+  "groups": [
+    {
+      "comment": "组合应用（Composite Applications）",
+      "styles": [
+        {
+          "title": "Flotation Box",
+          "className": "effect-flotation-box",
+          "properties": {
+            "position": "relative",
+            "border-radius": "var(--scale-3)",
+            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-flotation-box)",
+            "background-blend-mode": "normal, luminosity",
+            "box-shadow": "var(--effect-shadow-light)",
+            "backdrop-filter": "var(--effect-glass-bg-fallback)",
+            "-webkit-backdrop-filter": "var(--effect-glass-bg-fallback)",
+            "isolation": "isolate"
+          },
+          "pseudo": {
+            "::before": {
+              "content": "''",
+              "position": "absolute",
+              "inset": "0",
+              "border-radius": "inherit",
+              "box-shadow": "var(--effect-glass-box)",
+              "pointer-events": "none"
+            }
+          },
+          "notes": ["组成：Glass + Inner Shadow + Fill + Shadow", "initLiquidGlass() 启用液态玻璃"]
+        },
+        {
+          "title": "Popup Box",
+          "className": "effect-popup-box",
+          "properties": {
+            "position": "relative",
+            "border-radius": "var(--scale-4)",
+            "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--effect-flotation-box)",
+            "background-blend-mode": "normal, luminosity",
+            "box-shadow": "var(--effect-shadow-light)",
+            "backdrop-filter": "var(--effect-glass-bg-fallback)",
+            "-webkit-backdrop-filter": "var(--effect-glass-bg-fallback)",
+            "isolation": "isolate"
+          },
+          "pseudo": {
+            "::before": {
+              "content": "''",
+              "position": "absolute",
+              "inset": "0",
+              "border-radius": "inherit",
+              "box-shadow": "var(--effect-glass-box)",
+              "pointer-events": "none"
+            }
+          },
+          "notes": ["组成：Glass + Inner Shadow（scale-3）+ Fill + Shadow（scale-4）", "initLiquidGlass() 启用液态玻璃"]
+        },
+        {
+          "title": "Subtle Card",
+          "className": "effect-subtle-card",
+          "properties": {
+            "border-radius": "var(--scale-3)",
+            "border": "var(--stroke-xs) solid var(--stroke-outline-subtle)",
+            "background": "var(--box-page)",
+            "box-shadow": "var(--effect-shadow-subtle)"
+          },
+          "notes": ["组成：Fill + Border + Shadow"]
+        }
+      ]
+    },
+    {
+      "comment": "Molde Card",
+      "styles": [
+        {
+          "title": "Molde Level",
+          "className": "effect-molde-level",
+          "properties": {
+            "box-shadow": "var(--effect-shadow-molde)"
+          },
+          "notes": ["组成：Shadow", "用于模块左弱阴影"]
+        }
+      ]
+    },
+    {
+      "comment": "拓展类（后续可添加类）",
+      "styles": [
+        {
+          "title": "Add Item",
+          "className": "add-item",
+          "properties": {
+            "backdrop-filter": "none !important",
+            "-webkit-backdrop-filter": "none !important"
+          },
+          "notes": ["拓展类：添加项"]
+        }
+      ]
+    }
+  ]
+}

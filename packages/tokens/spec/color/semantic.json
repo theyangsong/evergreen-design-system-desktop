@@ -1,0 +1,511 @@
+{
+  "$figma": "https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2536-5814",
+  "$description": "Color System semantic colors (语义色). Use Variable Name column; ignore Original Name.",
+  "tokens": [
+    {
+      "name": "box-container",
+      "light": "color(var(--eds-container) / .6)",
+      "dark": "color(var(--eds-container) / .6)"
+    },
+    {
+      "name": "box-menu",
+      "light": "color(var(--eds-menu) / 1)",
+      "dark": "color(var(--eds-menu) / 1)"
+    },
+    {
+      "name": "box-page",
+      "light": "color(var(--eds-face) / 1)",
+      "dark": "color(var(--eds-face) / 1)"
+    },
+    {
+      "name": "box-flotation",
+      "light": "color(var(--eds-flotation) / 1)",
+      "dark": "color(var(--eds-flotation) / 1)"
+    },
+    {
+      "name": "event-hover-primary",
+      "light": "color(var(--eds-brand) / 1)",
+      "dark": "color(var(--eds-brand) / 1)"
+    },
+    {
+      "name": "event-hover-secondary",
+      "light": "color(var(--eds-base) / .05)",
+      "dark": "color(var(--eds-base) / .07)"
+    },
+    {
+      "name": "event-hover-tertiary",
+      "light": "color(var(--eds-page) / 1)",
+      "dark": "color(var(--eds-page) / 1)"
+    },
+    {
+      "name": "event-focus-primary",
+      "light": "color(var(--eds-brand) / 1)",
+      "dark": "color(var(--eds-brand) / 1)"
+    },
+    {
+      "name": "event-focus-secondary",
+      "light": "color(var(--eds-base) / .07)",
+      "dark": "color(var(--eds-base) / .1)"
+    },
+    {
+      "name": "event-focus-tertiary",
+      "light": "color(var(--eds-brand) / .2)",
+      "dark": "color(var(--eds-brand) / .2)"
+    },
+    {
+      "name": "stroke-hide",
+      "light": "color(var(--eds-base) / 0)",
+      "dark": "color(var(--eds-base) / 0)"
+    },
+    {
+      "name": "stroke-base-primary",
+      "light": "color(var(--eds-base) / 1)",
+      "dark": "color(var(--eds-base) / 1)"
+    },
+    {
+      "name": "stroke-base-secondary",
+      "light": "color(var(--eds-base) / .6)",
+      "dark": "color(var(--eds-base) / .6)"
+    },
+    {
+      "name": "stroke-base-tertiary",
+      "light": "color(var(--eds-base) / .4)",
+      "dark": "color(var(--eds-base) / .4)"
+    },
+    {
+      "name": "stroke-base-quaternary",
+      "light": "color(var(--eds-base) / .2)",
+      "dark": "color(var(--eds-base) / .2)"
+    },
+    {
+      "name": "stroke-face-primary",
+      "light": "color(var(--eds-face) / 1)",
+      "dark": "color(var(--eds-face) / 1)"
+    },
+    {
+      "name": "stroke-face-secondary",
+      "light": "color(var(--eds-face) / .6)",
+      "dark": "color(var(--eds-face) / .6)"
+    },
+    {
+      "name": "stroke-divider-module",
+      "light": "color(var(--eds-module-stroke) / 1)",
+      "dark": "color(var(--eds-module-stroke) / 1)"
+    },
+    {
+      "name": "stroke-divider-page",
+      "light": "color(var(--eds-base) / .1)",
+      "dark": "color(var(--eds-base) / .1)"
+    },
+    {
+      "name": "stroke-divider-table",
+      "light": "color(var(--eds-base) / .04)",
+      "dark": "color(var(--eds-base) / .04)"
+    },
+    {
+      "name": "stroke-outline-shallow",
+      "light": "color(var(--eds-base) / .12)",
+      "dark": "color(var(--eds-base) / .14)"
+    },
+    {
+      "name": "stroke-outline-deep",
+      "light": "color(var(--eds-base) / .18)",
+      "dark": "color(var(--eds-base) / .2)"
+    },
+    {
+      "name": "stroke-outline-subtle",
+      "light": "color(var(--eds-base) / .06)",
+      "dark": "color(var(--eds-base) / .1)"
+    },
+    {
+      "name": "stroke-color-brand",
+      "light": "color(var(--eds-brand) / 1)",
+      "dark": "color(var(--eds-brand) / 1)"
+    },
+    {
+      "name": "stroke-color-brand-active",
+      "light": "color(var(--eds-brand) / .6)",
+      "dark": "color(var(--eds-brand) / .6)"
+    },
+    {
+      "name": "stroke-color-table-hover",
+      "light": "color(var(--eds-brand) / .4)",
+      "dark": "color(var(--eds-brand) / .4)"
+    },
+    {
+      "name": "stroke-color-success",
+      "light": "color(var(--eds-success) / 1)",
+      "dark": "color(var(--eds-success) / 1)"
+    },
+    {
+      "name": "stroke-color-decor",
+      "light": "color(var(--eds-decor) / 1)",
+      "dark": "color(var(--eds-decor) / 1)"
+    },
+    {
+      "name": "stroke-color-danger",
+      "light": "color(var(--eds-danger) / 1)",
+      "dark": "color(var(--eds-danger) / 1)"
+    },
+    {
+      "name": "stroke-color-danger-active",
+      "light": "color(var(--eds-danger) / .6)",
+      "dark": "color(var(--eds-danger) / .6)"
+    },
+    {
+      "name": "stroke-same-white-primary",
+      "light": "color(var(--eds-same-white) / 1)",
+      "dark": "color(var(--eds-same-white) / 1)"
+    },
+    {
+      "name": "stroke-same-white-secondary",
+      "light": "color(var(--eds-same-white) / .6)",
+      "dark": "color(var(--eds-same-white) / .6)"
+    },
+    {
+      "name": "stroke-same-black-primary",
+      "light": "color(var(--eds-same-black) / 1)",
+      "dark": "color(var(--eds-same-black) / 1)"
+    },
+    {
+      "name": "stroke-same-black-secondary",
+      "light": "color(var(--eds-same-black) / .6)",
+      "dark": "color(var(--eds-same-black) / .6)"
+    },
+    {
+      "name": "text-brand-primary",
+      "light": "color(var(--eds-brand) / 1)",
+      "dark": "color(var(--eds-brand) / 1)"
+    },
+    {
+      "name": "text-brand-secondary",
+      "light": "color(var(--eds-brand) / .6)",
+      "dark": "color(var(--eds-brand) / .6)"
+    },
+    {
+      "name": "text-brand-tertiary",
+      "light": "color(var(--eds-brand) / .4)",
+      "dark": "color(var(--eds-brand) / .4)"
+    },
+    {
+      "name": "text-brand-quaternary",
+      "light": "color(var(--eds-brand) / .2)",
+      "dark": "color(var(--eds-brand) / .2)"
+    },
+    {
+      "name": "text-match",
+      "light": "color(var(--eds-match) / 1)",
+      "dark": "color(var(--eds-match) / 1)"
+    },
+    {
+      "name": "text-success",
+      "light": "color(var(--eds-success) / 1)",
+      "dark": "color(var(--eds-success) / 1)"
+    },
+    {
+      "name": "text-danger-primary",
+      "light": "color(var(--eds-danger) / 1)",
+      "dark": "color(var(--eds-danger) / 1)"
+    },
+    {
+      "name": "text-danger-secondary",
+      "light": "color(var(--eds-danger) / .6)",
+      "dark": "color(var(--eds-danger) / .6)"
+    },
+    {
+      "name": "text-warning",
+      "light": "color(var(--eds-warning) / 1)",
+      "dark": "color(var(--eds-warning) / 1)"
+    },
+    {
+      "name": "text-same-black-primary",
+      "light": "color(var(--eds-same-black) / 1)",
+      "dark": "color(var(--eds-same-black) / 1)"
+    },
+    {
+      "name": "text-same-black-secondary",
+      "light": "color(var(--eds-same-black) / .6)",
+      "dark": "color(var(--eds-same-black) / .6)"
+    },
+    {
+      "name": "text-same-white-primary",
+      "light": "color(var(--eds-same-white) / 1)",
+      "dark": "color(var(--eds-same-white) / 1)"
+    },
+    {
+      "name": "text-same-white-secondary",
+      "light": "color(var(--eds-same-white) / .6)",
+      "dark": "color(var(--eds-same-white) / .6)"
+    },
+    {
+      "name": "text-base-primary",
+      "light": "color(var(--eds-base) / 1)",
+      "dark": "color(var(--eds-base) / 1)"
+    },
+    {
+      "name": "text-base-secondary",
+      "light": "color(var(--eds-base) / .6)",
+      "dark": "color(var(--eds-base) / .6)"
+    },
+    {
+      "name": "text-base-tertiary",
+      "light": "color(var(--eds-base) / .4)",
+      "dark": "color(var(--eds-base) / .4)"
+    },
+    {
+      "name": "text-base-quaternary",
+      "light": "color(var(--eds-base) / .2)",
+      "dark": "color(var(--eds-base) / .2)"
+    },
+    {
+      "name": "text-face-primary",
+      "light": "color(var(--eds-face) / 1)",
+      "dark": "color(var(--eds-face) / 1)"
+    },
+    {
+      "name": "text-face-secondary",
+      "light": "color(var(--eds-face) / .6)",
+      "dark": "color(var(--eds-face) / .6)"
+    },
+    {
+      "name": "text-face-tertiary",
+      "light": "color(var(--eds-face) / .4)",
+      "dark": "color(var(--eds-face) / .4)"
+    },
+    {
+      "name": "text-face-quaternary",
+      "light": "color(var(--eds-face) / .2)",
+      "dark": "color(var(--eds-face) / .2)"
+    },
+    {
+      "name": "material-hide",
+      "light": "color(var(--eds-base) / 0)",
+      "dark": "color(var(--eds-base) / 0)"
+    },
+    {
+      "name": "material-brand-primary",
+      "light": "color(var(--eds-brand) / 1)",
+      "dark": "color(var(--eds-brand) / 1)"
+    },
+    {
+      "name": "material-brand-tertiary",
+      "light": "color(var(--eds-brand) / .4)",
+      "dark": "color(var(--eds-brand) / .4)"
+    },
+    {
+      "name": "material-brand-quaternary",
+      "light": "color(var(--eds-brand) / .2)",
+      "dark": "color(var(--eds-brand) / .2)"
+    },
+    {
+      "name": "material-brand-quinary",
+      "light": "color(var(--eds-brand) / .1)",
+      "dark": "color(var(--eds-brand) / .1)"
+    },
+    {
+      "name": "material-match-primary",
+      "light": "color(var(--eds-match) / 1)",
+      "dark": "color(var(--eds-match) / 1)"
+    },
+    {
+      "name": "material-match-quaternary",
+      "light": "color(var(--eds-match) / .2)",
+      "dark": "color(var(--eds-match) / .2)"
+    },
+    {
+      "name": "material-decor-primary",
+      "light": "color(var(--eds-decor) / 1)",
+      "dark": "color(var(--eds-decor) / 1)"
+    },
+    {
+      "name": "material-decor-quaternary",
+      "light": "color(var(--eds-decor) / .2)",
+      "dark": "color(var(--eds-decor) / .2)"
+    },
+    {
+      "name": "material-success-primary",
+      "light": "color(var(--eds-success) / 1)",
+      "dark": "color(var(--eds-success) / 1)"
+    },
+    {
+      "name": "material-success-quaternary",
+      "light": "color(var(--eds-success) / .2)",
+      "dark": "color(var(--eds-success) / .2)"
+    },
+    {
+      "name": "material-danger-primary",
+      "light": "color(var(--eds-danger) / 1)",
+      "dark": "color(var(--eds-danger) / 1)"
+    },
+    {
+      "name": "material-danger-quaternary",
+      "light": "color(var(--eds-danger) / .2)",
+      "dark": "color(var(--eds-danger) / .2)"
+    },
+    {
+      "name": "material-warning-primary",
+      "light": "color(var(--eds-warning) / 1)",
+      "dark": "color(var(--eds-warning) / 1)"
+    },
+    {
+      "name": "material-warning-quaternary",
+      "light": "color(var(--eds-warning) / .2)",
+      "dark": "color(var(--eds-warning) / .2)"
+    },
+    {
+      "name": "material-same-black",
+      "light": "color(var(--eds-same-black) / 1)",
+      "dark": "color(var(--eds-same-black) / 1)"
+    },
+    {
+      "name": "material-same-white-primary",
+      "light": "color(var(--eds-same-white) / 1)",
+      "dark": "color(var(--eds-same-white) / 1)"
+    },
+    {
+      "name": "material-same-white-secondary",
+      "light": "color(var(--eds-same-white) / .6)",
+      "dark": "color(var(--eds-same-white) / .6)"
+    },
+    {
+      "name": "material-same-white-tertiary",
+      "light": "color(var(--eds-same-white) / .8)",
+      "dark": "color(var(--eds-same-white) / .2)"
+    },
+    {
+      "name": "material-same-white-quaternary",
+      "light": "color(var(--eds-same-white) / .1)",
+      "dark": "color(var(--eds-same-white) / .04)"
+    },
+    {
+      "name": "material-card-shallow",
+      "light": "color(var(--eds-base) / .02)",
+      "dark": "color(var(--eds-base) / .02)"
+    },
+    {
+      "name": "material-card-moderate",
+      "light": "color(var(--eds-base) / .05)",
+      "dark": "color(var(--eds-base) / .07)"
+    },
+    {
+      "name": "material-card-subtle",
+      "light": "color(var(--eds-base) / .04)",
+      "dark": "color(var(--eds-base) / .04)"
+    },
+    {
+      "name": "material-card-deep",
+      "light": "color(var(--eds-base) / .1)",
+      "dark": "color(var(--eds-base) / .1)"
+    },
+    {
+      "name": "material-base-primary",
+      "light": "color(var(--eds-base) / 1)",
+      "dark": "color(var(--eds-base) / 1)"
+    },
+    {
+      "name": "material-base-secondary",
+      "light": "color(var(--eds-base) / .6)",
+      "dark": "color(var(--eds-base) / .6)"
+    },
+    {
+      "name": "material-base-tertiary",
+      "light": "color(var(--eds-base) / .4)",
+      "dark": "color(var(--eds-base) / .4)"
+    },
+    {
+      "name": "material-base-quaternary",
+      "light": "color(var(--eds-base) / .2)",
+      "dark": "color(var(--eds-base) / .2)"
+    },
+    {
+      "name": "material-face-primary",
+      "light": "color(var(--eds-face) / 1)",
+      "dark": "color(var(--eds-face) / 1)"
+    },
+    {
+      "name": "material-face-secondary",
+      "light": "color(var(--eds-face) / .6)",
+      "dark": "color(var(--eds-face) / .6)"
+    },
+    {
+      "name": "material-face-tertiary",
+      "light": "color(var(--eds-face) / .4)",
+      "dark": "color(var(--eds-face) / .4)"
+    },
+    {
+      "name": "material-face-quaternary",
+      "light": "color(var(--eds-face) / .2)",
+      "dark": "color(var(--eds-face) / .2)"
+    },
+    {
+      "name": "data-table-head",
+      "light": "color(var(--eds-data-table) / .9)",
+      "dark": "color(var(--eds-data-table) / .9)"
+    },
+    {
+      "name": "data-table-scroll-bar-background",
+      "light": "color(var(--eds-data-table) / .9)",
+      "dark": "color(var(--eds-data-table) / .9)"
+    },
+    {
+      "name": "data-table-scroll-bar-indicator",
+      "light": "color(var(--eds-base) / .04)",
+      "dark": "color(var(--eds-base) / .07)"
+    },
+    {
+      "name": "data-table-scroll-bar-indicator-hover",
+      "light": "color(var(--eds-base) / .2)",
+      "dark": "color(var(--eds-base) / .2)"
+    },
+    {
+      "name": "effect-vulvar-shadow",
+      "light": "color(var(--eds-same-black) / .2)",
+      "dark": "color(var(--eds-same-black) / .6)"
+    },
+    {
+      "name": "effect-vulvar-shadow-subtle",
+      "light": "color(var(--eds-same-black) / .03)",
+      "dark": "color(var(--eds-same-black) / .2)"
+    },
+    {
+      "name": "effect-vulvar-shadow-glow",
+      "light": "color(var(--eds-vulvar-glow) / 1)",
+      "dark": "color(var(--eds-vulvar-glow) / 1)"
+    },
+    {
+      "name": "effect-inner-shadow",
+      "light": "color(var(--eds-same-black) / 1)",
+      "dark": "color(var(--eds-same-black) / 1)"
+    },
+    {
+      "name": "effect-inner-shadow-glow",
+      "light": "color(var(--eds-inner-glow) / 1)",
+      "dark": "color(var(--eds-inner-glow) / 1)"
+    },
+    {
+      "name": "effect-popup-background",
+      "light": "color(var(--eds-same-black) / .5)",
+      "dark": "color(var(--eds-same-black) / .5)"
+    },
+    {
+      "name": "effect-popup-box",
+      "light": "color(var(--eds-popup) / 1)",
+      "dark": "color(var(--eds-popup) / 1)"
+    },
+    {
+      "name": "effect-flotation-box",
+      "light": "color(var(--eds-flotation) / .6)",
+      "dark": "color(var(--eds-flotation) / .6)"
+    },
+    {
+      "name": "effect-mask",
+      "light": "color(var(--eds-page) / .6)",
+      "dark": "color(var(--eds-page) / .6)"
+    },
+    {
+      "name": "effect-prompt",
+      "light": "color(var(--eds-base) / .9)",
+      "dark": "color(var(--eds-base) / .2)"
+    }
+  ]
+}

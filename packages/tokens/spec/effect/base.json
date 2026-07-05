@@ -1,0 +1,128 @@
+{
+  "$description": "Effect System base tokens. Effect color primitives (--effect-*) live in spec/color/semantic.json; composed tokens reference scale + those colors.",
+  "groups": [
+    {
+      "comment": "阴影系统（Shadow System）",
+      "tokens": [
+        {
+          "name": "effect-shadow-deep",
+          "title": "Deep Shadows（系统级）—— Modal / Dialog",
+          "layers": [
+            "1.25px 0 0 -0.75px var(--effect-vulvar-shadow-glow)",
+            "-1.25px 0 0 -0.75px var(--effect-vulvar-shadow-glow)",
+            "0 0 0 0.5px var(--effect-vulvar-shadow-glow)",
+            "0 var(--scale-6) var(--scale-20) 0 var(--effect-vulvar-shadow)",
+            "0 0 0 0.5px var(--effect-inner-shadow-glow) inset"
+          ],
+          "usageNotes": [
+            "容器使用，该特效不用于业务。使用该特效时：",
+            "1、正确：添加背景色",
+            "2、正确：添加圆角",
+            "3、错误：添加边框",
+            "4、可调节参数：圆角、阴影颜色、阴影大小、阴影模糊度、阴影偏移量"
+          ]
+        },
+        {
+          "name": "effect-shadow-light",
+          "title": "Light Shadows（业务级）—— Card / Panel",
+          "layers": [
+            "1.25px 0 0 -0.75px var(--effect-vulvar-shadow-glow)",
+            "-1.25px 0 0 -0.75px var(--effect-vulvar-shadow-glow)",
+            "0 0 0 0.5px var(--effect-vulvar-shadow-glow)",
+            "0 var(--scale-2) var(--scale-6) 0 var(--effect-vulvar-shadow)"
+          ],
+          "usageNotes": [
+            "Box阴影，业务大面积使用，建议配合 Glass Box 叠层。也可以单独使用（不建议）。使用该特效时：",
+            "1、正确：添加背景色",
+            "2、正确：添加圆角",
+            "3、错误：添加边框",
+            "4、可调节参数：圆角"
+          ]
+        },
+        {
+          "name": "effect-shadow-subtle",
+          "title": "Subtle Shadows（结构级）—— List / Table Row",
+          "layers": [
+            "0 var(--scale-1-5) var(--scale-4) 0 var(--effect-vulvar-shadow-subtle)"
+          ],
+          "usageNotes": [
+            "极浅阴影，视觉弱化，用于模块、大卡片等。使用该特效时：",
+            "1、正确：添加背景色",
+            "2、正确：添加圆角",
+            "3、正确：添加边框，唯一绑定 border: var(--stroke-xs) solid var(--stroke-outline-subtle);",
+            "4、可调节参数：圆角"
+          ]
+        },
+        {
+          "name": "effect-shadow-molde",
+          "title": "Molde Shadows（模块层级）—— Module",
+          "layers": [
+            "-2px 0 var(--scale-4) 0 var(--effect-vulvar-shadow-subtle)"
+          ],
+          "usageNotes": [
+            "用于模块左弱阴影。使用该特效时：",
+            "1、直接添加"
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "玻璃材质系统（Glass System）",
+      "tokens": [
+        {
+          "name": "effect-glass-box",
+          "title": "Glass Box（浮层容器）—— Modal / Dropdown / Popover",
+          "layers": [
+            "0 40px 10px -40px var(--effect-inner-shadow) inset",
+            "0 -40px 10px -40px var(--effect-inner-shadow) inset",
+            "0 0 0 0.5px var(--effect-inner-shadow-glow) inset"
+          ],
+          "usageNotes": [
+            "Box 玻璃，与 Light Shadows 叠层使用。使用该特效时：",
+            "1、正确：独立的玻璃层",
+            "2、正确：与阴影绑定",
+            "3、错误：单独使用",
+            "4、可调节参数：圆角"
+          ]
+        },
+        {
+          "name": "effect-glass-bg",
+          "title": "Glass BG（组件表面）—— Card / Button / Input",
+          "placeholder": true,
+          "implementationNotes": [
+            "使用液态玻璃实现",
+            "参考：https://github.com/shuding/liquid-glass（MIT © Shu Ding）",
+            "① Canvas 按 rounded-rect SDF 生成 displacement map（按元素尺寸动态计算）",
+            "② 注入 SVG <filter>：feImage + feDisplacementMap（x→R, y→G）",
+            "③ backdrop-filter: url(#filter) blur() contrast() brightness() saturate()",
+            "④ CSS 变量：effect/liquid-glass.css → --effect-glass-bg-* / --effect-glass-bg-surface",
+            "⑤ JS 入口：import { initLiquidGlass } from '@evergreen/tokens/liquid-glass'",
+            "⑥ 语义类：.effect-flotation-box / .effect-popup-box（init 前 fallback → --effect-glass-bg-fallback）",
+            "⑦ 用于 Card / Button / Input 表面；不与 shadow 层级混用"
+          ],
+          "usageNotes": [
+            "实现细节见 effect/liquid-glass.css 与 src/liquid-glass.js",
+            "Box 玻璃，与 Light Shadows 叠层使用。使用该特效时：",
+            "1、正确：独立的玻璃层",
+            "2、正确：与阴影绑定",
+            "3、错误：单独使用",
+            "4、可调节参数：圆角"
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "背景模糊系统（Blur System）",
+      "tokens": [
+        {
+          "name": "effect-blur-bg",
+          "title": "Blurred BG —— 背景模糊 / 滚动遮罩",
+          "value": "saturate(360%) blur(50px)",
+          "usageNotes": [
+            "用于背景模糊与滚动遮罩层"
+          ]
+        }
+      ]
+    }
+  ]
+}

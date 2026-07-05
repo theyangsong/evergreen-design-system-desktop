@@ -1,0 +1,37 @@
+{
+  "name": "@evergreen/tokens",
+  "version": "0.1.0",
+  "description": "Design tokens for EverGreen Design System (Desktop)",
+  "type": "module",
+  "main": "./dist/css/index.css",
+  "exports": {
+    ".": "./dist/css/index.css",
+    "./scale": "./dist/css/scale/index.css",
+    "./scale/base": "./dist/css/scale/base.css",
+    "./scale/semantic": "./dist/css/scale/semantic.css",
+    "./typography": "./dist/css/typography/index.css",
+    "./typography/base": "./dist/css/typography/base.css",
+    "./typography/semantic": "./dist/css/typography/semantic.css",
+    "./text": "./dist/css/text/index.css",
+    "./text/styles": "./dist/css/text/styles.css",
+    "./effect": "./dist/css/effect/index.css",
+    "./effect/light": "./dist/css/effect/themes/light.css",
+    "./effect/dark": "./dist/css/effect/themes/dark.css",
+    "./effect/ready": "./dist/css/effect/ready.css",
+    "./liquid-glass": "./dist/js/liquid-glass.js",
+    "./color": "./dist/css/color/index.css",
+    "./color/light": "./dist/css/color/themes/light.css",
+    "./color/dark": "./dist/css/color/themes/dark.css",
+    "./json": "./dist/json/tokens.json"
+  },
+  "files": [
+    "dist",
+    "spec",
+    "src"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "sync:figma": "node scripts/sync-from-figma.mjs",
+    "typecheck": "echo \"No TypeScript in tokens package\""
+  }
+}

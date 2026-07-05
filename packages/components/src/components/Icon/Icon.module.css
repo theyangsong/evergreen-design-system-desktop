@@ -1,0 +1,21 @@
+.sm {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.md {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.lg {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+}
+
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  color: currentColor;
+  vertical-align: middle;
+}
