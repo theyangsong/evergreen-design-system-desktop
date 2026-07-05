@@ -2,25 +2,76 @@
   "$description": "Liquid Glass — SVG feDisplacementMap + backdrop-filter. Based on https://github.com/shuding/liquid-glass (MIT).",
   "$reference": "https://github.com/shuding/liquid-glass",
   "filterPrefix": "eds-liquid-glass",
-  "backdrop": {
-    "blur": "0.25px",
-    "contrast": "1.2",
-    "brightness": "1.05",
-    "saturate": "1.1"
-  },
-  "surface": {
-    "background": "color(var(--eds-face) / .72)"
-  },
-  "shader": {
-    "edgeStart": 0.8,
-    "edgeEnd": 0,
-    "edgeOffset": 0.15,
-    "rectInsetX": 0.2,
-    "rectInsetY": 0.15,
-    "cornerRadius": 0.6
-  },
-  "fallback": {
-    "backdropFilter": "blur(12px) saturate(180%)",
-    "background": "color(var(--eds-face) / .85)"
+  "profiles": {
+    "glassBg": {
+      "cssPrefix": "effect-glass-bg",
+      "title": "Glass BG — Card / Button / Input",
+      "backdrop": {
+        "blur": "0.25px",
+        "contrast": "1.2",
+        "brightness": "1.05",
+        "saturate": "1.1"
+      },
+      "shader": {
+        "edgeStart": 0.8,
+        "edgeEnd": 0,
+        "edgeOffset": 0.15,
+        "rectInsetX": 0.2,
+        "rectInsetY": 0.15,
+        "cornerRadius": 0.6,
+        "refractionScale": 0.5
+      },
+      "surface": {
+        "background": "color-mix(in display-p3, var(--eds-face) 72%, transparent)"
+      },
+      "fallback": {
+        "backdropFilter": "blur(12px) saturate(180%)",
+        "background": "color-mix(in display-p3, var(--eds-face) 85%, transparent)"
+      }
+    },
+    "glassBox": {
+      "cssPrefix": "effect-glass-box-liquid",
+      "title": "Glass Box — Flotation / Popup（Figma Glass 层）",
+      "figma": {
+        "lightAngle": 0,
+        "lightIntensity": 20,
+        "refraction": 70,
+        "depth": 40,
+        "dispersion": 40,
+        "frost": 25,
+        "splay": 20
+      },
+      "backdrop": {
+        "blur": "0.25px",
+        "contrast": "1.21",
+        "brightness": "1.05",
+        "saturate": "1.125"
+      },
+      "shader": {
+        "edgeStart": 0.8,
+        "edgeEnd": 0,
+        "edgeOffset": 0.11,
+        "rectInsetX": 0.18,
+        "rectInsetY": 0.15,
+        "cornerRadius": 0.6,
+        "refractionScale": 0.7
+      },
+      "surface": {
+        "background": "color-mix(in display-p3, var(--eds-face) 72%, transparent)"
+      },
+      "tint": "color(display-p3 0 0 0 / 0.004)",
+      "fallback": {
+        "backdropFilter": "blur(10px) saturate(160%)",
+        "background": "color-mix(in display-p3, var(--eds-face) 85%, transparent)"
+      },
+      "mappingNotes": [
+        "lightIntensity 20 → brightness 1 + 20/100×0.25",
+        "refraction 70 → contrast 1 + 70/100×0.3；refractionScale 0.7",
+        "depth 40 → edgeOffset / rectInset",
+        "frost 25 → blur 0.25px；fallback blur(10px)",
+        "splay 20 → edgeStart 1 − 20/100",
+        "dispersion 40 → 暂未映射（需 chromatic feOffset）"
+      ]
+    }
   }
 }

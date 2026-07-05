@@ -135,8 +135,7 @@
   min-height: 260px;
 }
 
-.themeButton,
-.helpButton {
+.themeButton {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -153,23 +152,14 @@
     outline-color 0.15s ease;
 }
 
-.helpButton:hover,
 .themeButton:hover {
   background: var(--event-focus-secondary);
 }
 
-.helpButton:focus-visible,
 .themeButton:focus-visible {
   background: var(--event-focus-secondary);
   outline: var(--stroke-lg) solid var(--event-focus-primary);
   outline-offset: 2px;
-}
-
-.helpDot {
-  width: var(--icon-md);
-  height: var(--icon-md);
-  border-radius: var(--radius-full);
-  background: var(--material-brand-primary);
 }
 
 .themeIcon {

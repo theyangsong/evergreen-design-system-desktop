@@ -4,9 +4,13 @@
  *
  * Usage:
  *   import { initLiquidGlass, attachLiquidGlass } from '@evergreen/tokens/liquid-glass';
- *   initLiquidGlass(); // auto-bind .effect-flotation-box, .effect-popup-box
+ *   initLiquidGlass(); // auto-bind .effect-flotation-box__glass, .effect-popup-box__glass
  *   attachLiquidGlass(element);
  */
+
+const GLASS_BOX_SELECTOR = '.effect-flotation-box__glass, .effect-popup-box__glass';
+const DEFAULT_GLASS_BG_PREFIX = '--effect-glass-bg';
+const GLASS_BOX_LIQUID_PREFIX = '--effect-glass-box-liquid';
 
 function smoothStep(edge0, edge1, value) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -55,11 +59,39 @@ function readCssVar(name, fallback) {
   return value || fallback;
 }
 
-function buildBackdropFilter(filterId) {
-  const blur = readCssVar('--effect-glass-bg-blur', '0.25px');
-  const contrast = readCssVar('--effect-glass-bg-contrast', '1.2');
-  const brightness = readCssVar('--effect-glass-bg-brightness', '1.05');
-  const saturate = readCssVar('--effect-glass-bg-saturate', '1.1');
+function readCssNumber(name, fallback) {
+  const parsed = Number.parseFloat(readCssVar(name, String(fallback)));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function resolveVarPrefix(element, options = {}) {
+  if (options.varPrefix) {
+    return options.varPrefix;
+  }
+
+  if (element.matches?.(GLASS_BOX_SELECTOR)) {
+    return GLASS_BOX_LIQUID_PREFIX;
+  }
+
+  return DEFAULT_GLASS_BG_PREFIX;
+}
+
+function readShaderOptions(varPrefix) {
+  return {
+    edgeStart: readCssNumber(`${varPrefix}-shader-edge-start`, 0.8),
+    edgeEnd: readCssNumber(`${varPrefix}-shader-edge-end`, 0),
+    edgeOffset: readCssNumber(`${varPrefix}-shader-edge-offset`, 0.15),
+    rectInsetX: readCssNumber(`${varPrefix}-shader-rect-inset-x`, 0.2),
+    rectInsetY: readCssNumber(`${varPrefix}-shader-rect-inset-y`, 0.15),
+    cornerRadius: readCssNumber(`${varPrefix}-shader-corner-radius`, 0.6),
+  };
+}
+
+function buildBackdropFilter(filterId, varPrefix) {
+  const blur = readCssVar(`${varPrefix}-blur`, '0.25px');
+  const contrast = readCssVar(`${varPrefix}-contrast`, '1.2');
+  const brightness = readCssVar(`${varPrefix}-brightness`, '1.05');
+  const saturate = readCssVar(`${varPrefix}-saturate`, '1.1');
   return `url(#${filterId}) blur(${blur}) contrast(${contrast}) brightness(${brightness}) saturate(${saturate})`;
 }
 
@@ -67,10 +99,11 @@ class LiquidGlassSurface {
   constructor(element, options = {}) {
     this.element = element;
     this.options = options;
+    this.varPrefix = resolveVarPrefix(element, options);
     this.canvasDpi = 1;
     this.id = `${options.filterPrefix ?? 'eds-liquid-glass'}-${Math.random().toString(36).slice(2, 9)}`;
     this.filterId = `${this.id}-filter`;
-    this.fragment = createFragment(options.shader ?? {});
+    this.fragment = createFragment(readShaderOptions(this.varPrefix));
     this.svg = null;
     this.feImage = null;
     this.feDisplacementMap = null;
@@ -122,13 +155,19 @@ class LiquidGlassSurface {
 
   applyStyles() {
     this.element.dataset.liquidGlassReady = 'true';
-    this.element.style.backdropFilter = buildBackdropFilter(this.filterId);
-    this.element.style.webkitBackdropFilter = buildBackdropFilter(this.filterId);
+    const backdropFilter = buildBackdropFilter(this.filterId, this.varPrefix);
+    this.element.style.backdropFilter = backdropFilter;
+    this.element.style.webkitBackdropFilter = backdropFilter;
 
-    if (!this.element.style.background) {
+    const computedBackground = getComputedStyle(this.element).backgroundImage;
+    const hasBackground =
+      Boolean(this.element.style.background) ||
+      (computedBackground && computedBackground !== 'none');
+
+    if (!hasBackground) {
       this.element.style.background = readCssVar(
-        '--effect-glass-bg-surface',
-        'color(var(--eds-face) / .72)',
+        `${this.varPrefix}-surface`,
+        'color-mix(in display-p3, var(--eds-face) 72%, transparent)',
       );
     }
   }
@@ -142,6 +181,8 @@ class LiquidGlassSurface {
   }
 
   updateMap() {
+    this.fragment = createFragment(readShaderOptions(this.varPrefix));
+
     const { width, height } = this.getSize();
     const w = width * this.canvasDpi;
     const h = height * this.canvasDpi;
@@ -183,7 +224,11 @@ class LiquidGlassSurface {
     filterNode.setAttribute('width', String(width));
     filterNode.setAttribute('height', String(height));
 
-    this.feDisplacementMap.setAttribute('scale', String(maxScale / this.canvasDpi));
+    const refractionScale = readCssNumber(`${this.varPrefix}-refraction-scale`, 0.5);
+    this.feDisplacementMap.setAttribute(
+      'scale',
+      String((maxScale / this.canvasDpi) * refractionScale),
+    );
   }
 
   observeSize() {
@@ -204,6 +249,7 @@ class LiquidGlassSurface {
 }
 
 const instances = new WeakMap();
+let mutationObserver = null;
 
 export function attachLiquidGlass(element, options = {}) {
   if (!(element instanceof HTMLElement)) {
@@ -230,16 +276,28 @@ export function detachLiquidGlass(element) {
   instances.delete(element);
 }
 
-export function initLiquidGlass(options = {}) {
-  const selector = options.selector ?? '.effect-flotation-box, .effect-popup-box';
-  const elements = document.querySelectorAll(selector);
+function bindLiquidGlassElements(options = {}) {
+  const selector = options.selector ?? GLASS_BOX_SELECTOR;
   const surfaces = [];
 
-  for (const element of elements) {
+  for (const element of document.querySelectorAll(selector)) {
     if (element.dataset.liquidGlassBound === 'true') {
       continue;
     }
     surfaces.push(attachLiquidGlass(element, options));
+  }
+
+  return surfaces;
+}
+
+export function initLiquidGlass(options = {}) {
+  const surfaces = bindLiquidGlassElements(options);
+
+  if (!mutationObserver && typeof MutationObserver !== 'undefined') {
+    mutationObserver = new MutationObserver(() => {
+      bindLiquidGlassElements(options);
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   return surfaces;

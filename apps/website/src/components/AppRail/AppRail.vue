@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router';
 import { useThemeProvider } from '@evergreen/components';
 import { appRailIcons, type EdsIconName } from '@/assets/icons';
 import EdsIcon from '@/components/EdsIcon/EdsIcon.vue';
+import BrandSwitcher from '@/components/BrandSwitcher/BrandSwitcher.vue';
 import { primaryNav, sectionDefaultRoute } from '@/config/navigation';
 import styles from './AppRail.module.css';
 
@@ -65,9 +66,7 @@ function iconName(id: string): EdsIconName {
     </nav>
 
     <div :class="styles.footer">
-      <button type="button" :class="styles.helpButton" aria-label="Help">
-        <span :class="styles.helpDot" />
-      </button>
+      <BrandSwitcher />
       <button
         type="button"
         :class="styles.themeButton"

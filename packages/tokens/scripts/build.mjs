@@ -313,7 +313,7 @@ function appendEffectGroupTokens(lines, groups) {
         lines.push(`  /* ${token.title} */`);
       }
 
-      if (token.placeholder || (!token.layers && !token.value)) {
+      if (token.placeholder || (!token.layers && !token.value && !token.glowLayers?.length)) {
         appendCssCommentBlock(lines, token.implementationNotes ?? []);
         if (token.note) {
           appendCssCommentBlock(lines, [token.note]);
@@ -324,7 +324,34 @@ function appendEffectGroupTokens(lines, groups) {
       }
 
       const value = token.layers ? formatEffectLayers(token.layers) : token.value;
-      lines.push(`  --${token.name}: ${value};`);
+
+      if (token.glowLayers?.length) {
+        const blendMode = token.glowBlendMode ?? 'plus-darker';
+        const normalLayerCount = token.layers?.length ?? 0;
+        const pseudoElement = token.glowPseudo ?? (token.glowOnly ? '::before' : '::after');
+
+        if (token.glowOnly || normalLayerCount === 0) {
+          lines.push(
+            `  /* Figma 共 ${token.glowLayers.length} 层：全部 ${blendMode}（${pseudoElement} + mix-blend-mode） */`,
+          );
+        } else {
+          lines.push(
+            `  /* Figma 共 ${token.glowLayers.length + normalLayerCount} 层：第 1–${token.glowLayers.length} 层 ${blendMode}（${pseudoElement} + mix-blend-mode） */`,
+          );
+          lines.push(`  /* 第 ${token.glowLayers.length + 1} 层起：Normal */`);
+        }
+
+        lines.push(`  --${token.name}-glow: ${formatEffectLayers(token.glowLayers)};`);
+        lines.push(`  --${token.name}-glow-blend-mode: ${blendMode};`);
+      }
+
+      if (token.glowOnly) {
+        lines.push(`  --${token.name}: var(--${token.name}-glow);`);
+      } else if (token.layers) {
+        lines.push(`  --${token.name}: ${value};`);
+      } else if (token.value) {
+        lines.push(`  --${token.name}: ${value};`);
+      }
       appendCssCommentBlock(lines, token.usageNotes ?? []);
       lines.push('');
     }
@@ -332,20 +359,61 @@ function appendEffectGroupTokens(lines, groups) {
 }
 
 function appendLiquidGlassTokens(lines, liquidGlassSpec) {
-  const { backdrop, surface, fallback } = liquidGlassSpec;
-
   lines.push('');
   lines.push('  /* Liquid Glass — https://github.com/shuding/liquid-glass (MIT) */');
-  lines.push(`  --effect-glass-bg-blur: ${backdrop.blur};`);
-  lines.push(`  --effect-glass-bg-contrast: ${backdrop.contrast};`);
-  lines.push(`  --effect-glass-bg-brightness: ${backdrop.brightness};`);
-  lines.push(`  --effect-glass-bg-saturate: ${backdrop.saturate};`);
-  lines.push(`  --effect-glass-bg-surface: ${mapColorTokenValue(surface.background)};`);
-  lines.push(`  --effect-glass-bg-fallback: ${fallback.backdropFilter};`);
-  lines.push(`  --effect-glass-bg-fallback-surface: ${mapColorTokenValue(fallback.background)};`);
+
+  const profiles = liquidGlassSpec.profiles ?? {
+    glassBg: {
+      cssPrefix: 'effect-glass-bg',
+      backdrop: liquidGlassSpec.backdrop,
+      shader: liquidGlassSpec.shader,
+      surface: liquidGlassSpec.surface,
+      fallback: liquidGlassSpec.fallback,
+    },
+  };
+
+  for (const profile of Object.values(profiles)) {
+    appendLiquidGlassProfileTokens(lines, profile);
+  }
+}
+
+function appendLiquidGlassProfileTokens(lines, profile) {
+  const prefix = profile.cssPrefix;
+  const { backdrop, shader, surface, fallback } = profile;
+
+  if (profile.title) {
+    lines.push(`  /* ${profile.title} */`);
+  }
+
+  if (profile.figma) {
+    lines.push(
+      `  /* Figma Glass: angle ${profile.figma.lightAngle}° intensity ${profile.figma.lightIntensity} refraction ${profile.figma.refraction} depth ${profile.figma.depth} frost ${profile.figma.frost} splay ${profile.figma.splay} */`,
+    );
+  }
+
+  appendCssCommentBlock(lines, profile.mappingNotes ?? []);
+
+  lines.push(`  --${prefix}-blur: ${backdrop.blur};`);
+  lines.push(`  --${prefix}-contrast: ${backdrop.contrast};`);
+  lines.push(`  --${prefix}-brightness: ${backdrop.brightness};`);
+  lines.push(`  --${prefix}-saturate: ${backdrop.saturate};`);
+  lines.push(`  --${prefix}-shader-edge-start: ${shader.edgeStart};`);
+  lines.push(`  --${prefix}-shader-edge-end: ${shader.edgeEnd};`);
+  lines.push(`  --${prefix}-shader-edge-offset: ${shader.edgeOffset};`);
+  lines.push(`  --${prefix}-shader-rect-inset-x: ${shader.rectInsetX};`);
+  lines.push(`  --${prefix}-shader-rect-inset-y: ${shader.rectInsetY};`);
+  lines.push(`  --${prefix}-shader-corner-radius: ${shader.cornerRadius};`);
+  lines.push(`  --${prefix}-refraction-scale: ${shader.refractionScale};`);
+  lines.push(`  --${prefix}-surface: ${mapColorTokenValue(surface.background)};`);
+  if (profile.tint) {
+    lines.push(`  --${prefix}-tint: ${mapColorTokenValue(profile.tint)};`);
+  }
+  lines.push(`  --${prefix}-fallback: ${fallback.backdropFilter};`);
+  lines.push(`  --${prefix}-fallback-surface: ${mapColorTokenValue(fallback.background)};`);
   lines.push(
-    '  --effect-glass-bg: blur(var(--effect-glass-bg-blur)) contrast(var(--effect-glass-bg-contrast)) brightness(var(--effect-glass-bg-brightness)) saturate(var(--effect-glass-bg-saturate));',
+    `  --${prefix}: blur(var(--${prefix}-blur)) contrast(var(--${prefix}-contrast)) brightness(var(--${prefix}-brightness)) saturate(var(--${prefix}-saturate));`,
   );
+  lines.push('');
 }
 
 function writeEffectThemeBaseCssFile(
@@ -389,7 +457,7 @@ function writeEffectReadyCssFile(destination, headerLines = []) {
     ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
     ' */',
     '',
-    '.effect-flotation-box[data-liquid-glass-ready], .effect-popup-box[data-liquid-glass-ready] {',
+    '.effect-flotation-box__glass[data-liquid-glass-ready], .effect-popup-box__glass[data-liquid-glass-ready] {',
     '  /* backdrop-filter 由 initLiquidGlass() 按元素尺寸注入 SVG filter url */',
     '}',
     '',
@@ -414,7 +482,316 @@ function buildEffectSemanticClassSelector(themeName, className, pseudo = '') {
   return `[data-theme="${themeName}"] .${className}${pseudo}`;
 }
 
-function writeEffectThemeSemanticCssFile(destination, themeName, semanticSpec, headerLines = []) {
+function findEffectToken(baseSpec, name) {
+  for (const group of baseSpec.groups ?? []) {
+    const token = group.tokens?.find((entry) => entry.name === name);
+    if (token) {
+      return token;
+    }
+  }
+
+  return null;
+}
+
+function applyShadowStack(style, baseSpec, options = {}) {
+  if (!style.shadowStack) {
+    return style;
+  }
+
+  const token = findEffectToken(baseSpec, style.shadowStack);
+  if (!token?.glowLayers?.length) {
+    throw new Error(`Unknown effect shadowStack token: ${style.shadowStack}`);
+  }
+
+  const properties = { ...(style.properties ?? {}) };
+  const pseudo = { ...(style.pseudo ?? {}) };
+
+  properties.position = properties.position ?? 'relative';
+  properties.isolation = properties.isolation ?? 'isolate';
+  properties.overflow = properties.overflow ?? 'visible';
+  properties['box-shadow'] = `var(--${token.name})`;
+
+  pseudo['::after'] = {
+    content: "''",
+    position: 'absolute',
+    inset: '0',
+    'z-index': '0',
+    'border-radius': 'inherit',
+    'box-shadow': `var(--${token.name}-glow)`,
+    'mix-blend-mode': 'plus-darker',
+    '-webkit-mix-blend-mode': 'plus-darker',
+    'pointer-events': 'none',
+    ...pseudo['::after'],
+  };
+
+  if (options.skipChild) {
+    return { ...style, properties, pseudo };
+  }
+
+  const hasBefore = Boolean(pseudo['::before']);
+  const child = style.child ?? {
+    selector: '> *',
+    properties: {
+      position: 'relative',
+      'z-index': hasBefore ? '2' : '1',
+    },
+  };
+
+  if (hasBefore && child.properties?.['z-index'] === '1') {
+    child.properties = { ...child.properties, 'z-index': '2' };
+  }
+
+  return { ...style, properties, pseudo, child };
+}
+
+function applyGlassStack(style, baseSpec, options = {}) {
+  if (!style.glassStack) {
+    return style;
+  }
+
+  const token = findEffectToken(baseSpec, style.glassStack);
+  if (!token?.glowLayers?.length) {
+    throw new Error(`Unknown effect glassStack token: ${style.glassStack}`);
+  }
+
+  const pseudo = { ...(style.pseudo ?? {}) };
+
+  const shadowVar = token.glowOnly ? `var(--${token.name})` : `var(--${token.name}-glow)`;
+
+  pseudo['::before'] = {
+    content: "''",
+    position: 'absolute',
+    inset: '0',
+    'z-index': '1',
+    'border-radius': 'inherit',
+    'box-shadow': shadowVar,
+    'mix-blend-mode': 'plus-lighter',
+    '-webkit-mix-blend-mode': 'plus-lighter',
+    'pointer-events': 'none',
+    ...pseudo['::before'],
+  };
+
+  if (options.skipChild) {
+    return { ...style, pseudo };
+  }
+
+  const child = style.child ?? {
+    selector: '> *',
+    properties: {
+      position: 'relative',
+      'z-index': '2',
+    },
+  };
+
+  if (child.properties?.['z-index'] === '1') {
+    child.properties = { ...child.properties, 'z-index': '2' };
+  }
+
+  return { ...style, pseudo, child };
+}
+
+function resolveLayerStyle(baseStyle, layer, baseSpec) {
+  let layerStyle = {
+    className: `${baseStyle.className}${layer.suffix}`,
+    properties: { ...(layer.properties ?? {}) },
+    pseudo: { ...(layer.pseudo ?? {}) },
+  };
+
+  if (layer.shadowStack) {
+    layerStyle = applyShadowStack(
+      { ...layerStyle, shadowStack: layer.shadowStack },
+      baseSpec,
+      { skipChild: true },
+    );
+  }
+
+  if (layer.glassStack) {
+    layerStyle = applyGlassStack(
+      { ...layerStyle, glassStack: layer.glassStack },
+      baseSpec,
+      { skipChild: true },
+    );
+  }
+
+  return layerStyle;
+}
+
+function appendEffectStyleRules(lines, themeName, resolvedStyle, { includeNotes = false } = {}) {
+  lines.push(`${buildEffectSemanticClassSelector(themeName, resolvedStyle.className)} {`);
+  for (const [property, value] of Object.entries(resolvedStyle.properties ?? {})) {
+    lines.push(`  ${property}: ${value};`);
+  }
+
+  if (includeNotes) {
+    for (const note of resolvedStyle.notes ?? []) {
+      lines.push(`  /* ${note} */`);
+    }
+  }
+
+  lines.push('}', '');
+
+  for (const [pseudo, properties] of Object.entries(resolvedStyle.pseudo ?? {})) {
+    lines.push(`${buildEffectSemanticClassSelector(themeName, resolvedStyle.className, pseudo)} {`);
+    for (const [property, value] of Object.entries(properties)) {
+      lines.push(`  ${property}: ${value};`);
+    }
+    lines.push('}', '');
+  }
+
+  if (resolvedStyle.child) {
+    const childSelector = resolvedStyle.child.selector ?? '> *';
+    lines.push(
+      `${buildEffectSemanticClassSelector(themeName, resolvedStyle.className)} ${childSelector} {`,
+    );
+    for (const [property, value] of Object.entries(resolvedStyle.child.properties ?? {})) {
+      lines.push(`  ${property}: ${value};`);
+    }
+    lines.push('}', '');
+  }
+}
+
+function appendLayeredComposition(lines, themeName, style, baseSpec) {
+  if (style.title) {
+    lines.push(`/* ${style.title} */`);
+  }
+
+  appendEffectStyleRules(
+    lines,
+    themeName,
+    {
+      className: style.className,
+      properties: {
+        position: 'relative',
+        isolation: 'isolate',
+        overflow: 'visible',
+        ...(style.properties ?? {}),
+      },
+      notes: style.notes,
+    },
+    { includeNotes: true },
+  );
+
+  if (style.bgLayer) {
+    appendEffectStyleRules(lines, themeName, {
+      className: `${style.className}${style.bgLayer.suffix}`,
+      properties: style.bgLayer.properties ?? {},
+    });
+    for (const layer of style.bgLayer.layers ?? []) {
+      appendEffectStyleRules(lines, themeName, resolveLayerStyle(style, layer, baseSpec));
+    }
+  } else {
+    for (const layer of style.layers ?? []) {
+      appendEffectStyleRules(lines, themeName, resolveLayerStyle(style, layer, baseSpec));
+    }
+  }
+
+  if (style.contentLayer) {
+    appendEffectStyleRules(lines, themeName, {
+      className: `${style.className}${style.contentLayer.suffix}`,
+      properties: style.contentLayer.properties ?? {},
+    });
+  }
+}
+
+function formatShadowStackComment(token) {
+  const blendMode = token.glowBlendMode ?? 'plus-darker';
+  const normalLayerCount = token.layers?.length ?? 0;
+
+  if (token.glowOnly || normalLayerCount === 0) {
+    return `${token.title ?? token.name} — ${token.glowLayers.length} layers, all ${blendMode}`;
+  }
+
+  return `${token.title ?? token.name} — layers 1–${token.glowLayers.length} ${blendMode}, layer ${token.glowLayers.length + 1}+ Normal`;
+}
+
+function appendShadowStackUtilityClasses(lines, themeName, baseSpec) {
+  lines.push('/* ========================================');
+  lines.push('   Shadow Stack Utilities');
+  lines.push('   ======================================== */');
+  lines.push('');
+
+  for (const group of baseSpec.groups ?? []) {
+    for (const token of group.tokens ?? []) {
+      if (!token.glowLayers?.length || token.glowOnly) {
+        continue;
+      }
+
+      const className = `${token.name}-stack`;
+      lines.push(`/* ${formatShadowStackComment(token)} */`);
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className)} {`);
+      lines.push('  position: relative;');
+      lines.push('  isolation: isolate;');
+      lines.push('  overflow: visible;');
+      lines.push(`  box-shadow: var(--${token.name});`);
+      lines.push('}', '');
+
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className, '::after')} {`);
+      lines.push("  content: '';");
+      lines.push('  position: absolute;');
+      lines.push('  inset: 0;');
+      lines.push('  z-index: 0;');
+      lines.push('  border-radius: inherit;');
+      lines.push(`  box-shadow: var(--${token.name}-glow);`);
+      lines.push(`  mix-blend-mode: plus-darker;`);
+      lines.push(`  -webkit-mix-blend-mode: plus-darker;`);
+      lines.push('  pointer-events: none;');
+      lines.push('}', '');
+
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className)} > * {`);
+      lines.push('  position: relative;');
+      lines.push('  z-index: 1;');
+      lines.push('}', '');
+    }
+  }
+}
+
+function appendGlassStackUtilityClasses(lines, themeName, baseSpec) {
+  lines.push('/* ========================================');
+  lines.push('   Glass Stack Utilities');
+  lines.push('   ======================================== */');
+  lines.push('');
+
+  for (const group of baseSpec.groups ?? []) {
+    for (const token of group.tokens ?? []) {
+      if (!token.glowLayers?.length || !token.glowOnly) {
+        continue;
+      }
+
+      const className = `${token.name}-stack`;
+      lines.push(`/* ${formatShadowStackComment(token)} */`);
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className)} {`);
+      lines.push('  position: relative;');
+      lines.push('  isolation: isolate;');
+      lines.push('  overflow: visible;');
+      lines.push('}', '');
+
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className, '::before')} {`);
+      lines.push("  content: '';");
+      lines.push('  position: absolute;');
+      lines.push('  inset: 0;');
+      lines.push('  z-index: 1;');
+      lines.push('  border-radius: inherit;');
+      lines.push(`  box-shadow: var(--${token.name}-glow);`);
+      lines.push(`  mix-blend-mode: plus-darker;`);
+      lines.push(`  -webkit-mix-blend-mode: plus-darker;`);
+      lines.push('  pointer-events: none;');
+      lines.push('}', '');
+
+      lines.push(`${buildEffectSemanticClassSelector(themeName, className)} > * {`);
+      lines.push('  position: relative;');
+      lines.push('  z-index: 2;');
+      lines.push('}', '');
+    }
+  }
+}
+
+function writeEffectThemeSemanticCssFile(
+  destination,
+  themeName,
+  semanticSpec,
+  baseSpec,
+  headerLines = [],
+) {
   const lines = [
     '/**',
     ' * Do not edit directly, this file was auto-generated from Figma tokens.',
@@ -430,30 +807,23 @@ function writeEffectThemeSemanticCssFile(destination, themeName, semanticSpec, h
     lines.push('');
 
     for (const style of group.styles) {
-      if (style.title) {
-        lines.push(`/* ${style.title} */`);
+      if (style.composition === 'layered') {
+        appendLayeredComposition(lines, themeName, style, baseSpec);
+        continue;
       }
 
-      lines.push(`${buildEffectSemanticClassSelector(themeName, style.className)} {`);
-      for (const [property, value] of Object.entries(style.properties ?? {})) {
-        lines.push(`  ${property}: ${value};`);
+      const resolvedStyle = applyGlassStack(applyShadowStack(style, baseSpec), baseSpec);
+
+      if (resolvedStyle.title) {
+        lines.push(`/* ${resolvedStyle.title} */`);
       }
 
-      for (const note of style.notes ?? []) {
-        lines.push(`  /* ${note} */`);
-      }
-
-      lines.push('}', '');
-
-      for (const [pseudo, properties] of Object.entries(style.pseudo ?? {})) {
-        lines.push(`${buildEffectSemanticClassSelector(themeName, style.className, pseudo)} {`);
-        for (const [property, value] of Object.entries(properties)) {
-          lines.push(`  ${property}: ${value};`);
-        }
-        lines.push('}', '');
-      }
+      appendEffectStyleRules(lines, themeName, resolvedStyle, { includeNotes: true });
     }
   }
+
+  appendShadowStackUtilityClasses(lines, themeName, baseSpec);
+  appendGlassStackUtilityClasses(lines, themeName, baseSpec);
 
   mkdirSync(dirname(destination), { recursive: true });
   writeFileSync(destination, lines.join('\n'));
@@ -702,10 +1072,16 @@ function buildEffectSystem() {
       ],
     );
 
-    writeEffectThemeSemanticCssFile(join(themeDir, 'semantic.css'), themeName, semanticSpec, [
-      ` * Effect System — semantic classes (${themeName}).`,
-      ' * Source: spec/effect/semantic.json',
-    ]);
+    writeEffectThemeSemanticCssFile(
+      join(themeDir, 'semantic.css'),
+      themeName,
+      semanticSpec,
+      baseSpec,
+      [
+        ` * Effect System — semantic classes (${themeName}).`,
+        ' * Source: spec/effect/semantic.json, spec/effect/base.json (shadow stacks)',
+      ],
+    );
 
     writeImportAggregator(
       join(cssDir, 'effect/themes', `${themeName}.css`),

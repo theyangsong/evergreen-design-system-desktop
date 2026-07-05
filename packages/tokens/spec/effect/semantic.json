@@ -6,54 +6,177 @@
       "comment": "组合应用（Composite Applications）",
       "styles": [
         {
-          "title": "Flotation Box",
+          "title": "Flotation Box（Menu）",
           "className": "effect-flotation-box",
+          "composition": "layered",
           "properties": {
-            "position": "relative",
-            "border-radius": "var(--scale-3)",
-            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-flotation-box)",
-            "background-blend-mode": "normal, luminosity",
-            "box-shadow": "var(--effect-shadow-light)",
-            "backdrop-filter": "var(--effect-glass-bg-fallback)",
-            "-webkit-backdrop-filter": "var(--effect-glass-bg-fallback)",
-            "isolation": "isolate"
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "width": "max-content",
+            "padding": "var(--spacing-1)",
+            "border-radius": "var(--scale-3)"
           },
-          "pseudo": {
-            "::before": {
-              "content": "''",
+          "bgLayer": {
+            "suffix": "__bg",
+            "properties": {
               "position": "absolute",
               "inset": "0",
+              "z-index": "0",
               "border-radius": "inherit",
-              "box-shadow": "var(--effect-glass-box)",
+              "overflow": "visible",
               "pointer-events": "none"
+            },
+            "layers": [
+              {
+                "suffix": "__fill",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-flotation-box)",
+                  "background-blend-mode": "normal, luminosity",
+                  "box-shadow": "var(--effect-shadow-light)"
+                }
+              },
+              {
+                "suffix": "__shadow-glow",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "box-shadow": "var(--effect-shadow-light-glow)",
+                  "mix-blend-mode": "plus-darker",
+                  "-webkit-mix-blend-mode": "plus-darker",
+                  "pointer-events": "none"
+                }
+              },
+              {
+                "suffix": "__glass",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "background": "var(--effect-glass-box-liquid-tint)",
+                  "backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
+                  "-webkit-backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
+                  "pointer-events": "none"
+                }
+              },
+              {
+                "suffix": "__glass-shadow",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "box-shadow": "var(--effect-glass-box)",
+                  "mix-blend-mode": "plus-lighter",
+                  "-webkit-mix-blend-mode": "plus-lighter",
+                  "pointer-events": "none"
+                }
+              }
+            ]
+          },
+          "contentLayer": {
+            "suffix": "__content",
+            "properties": {
+              "position": "relative",
+              "z-index": "1",
+              "display": "flex",
+              "flex-direction": "column",
+              "align-items": "flex-start",
+              "align-self": "stretch"
             }
           },
-          "notes": ["组成：Glass + Inner Shadow + Fill + Shadow", "initLiquidGlass() 启用液态玻璃"]
+          "notes": [
+            "Menu Box BG：__fill → __shadow-glow(Plus darker) → __glass → __glass-shadow(Plus lighter)",
+            "initLiquidGlass() 绑定 __glass"
+          ]
         },
         {
           "title": "Popup Box",
           "className": "effect-popup-box",
+          "composition": "layered",
           "properties": {
-            "position": "relative",
-            "border-radius": "var(--scale-4)",
-            "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--effect-flotation-box)",
-            "background-blend-mode": "normal, luminosity",
-            "box-shadow": "var(--effect-shadow-light)",
-            "backdrop-filter": "var(--effect-glass-bg-fallback)",
-            "-webkit-backdrop-filter": "var(--effect-glass-bg-fallback)",
-            "isolation": "isolate"
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "width": "max-content",
+            "padding": "var(--spacing-1)",
+            "border-radius": "var(--scale-4)"
           },
-          "pseudo": {
-            "::before": {
-              "content": "''",
+          "bgLayer": {
+            "suffix": "__bg",
+            "properties": {
               "position": "absolute",
               "inset": "0",
+              "z-index": "0",
               "border-radius": "inherit",
-              "box-shadow": "var(--effect-glass-box)",
+              "overflow": "visible",
               "pointer-events": "none"
+            },
+            "layers": [
+              {
+                "suffix": "__fill",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--effect-flotation-box)",
+                  "background-blend-mode": "normal, luminosity",
+                  "box-shadow": "var(--effect-shadow-light)"
+                }
+              },
+              {
+                "suffix": "__shadow-glow",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "box-shadow": "var(--effect-shadow-light-glow)",
+                  "mix-blend-mode": "plus-darker",
+                  "-webkit-mix-blend-mode": "plus-darker",
+                  "pointer-events": "none"
+                }
+              },
+              {
+                "suffix": "__glass",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "background": "var(--effect-glass-box-liquid-tint)",
+                  "backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
+                  "-webkit-backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
+                  "pointer-events": "none"
+                }
+              },
+              {
+                "suffix": "__glass-shadow",
+                "properties": {
+                  "position": "absolute",
+                  "inset": "0",
+                  "border-radius": "inherit",
+                  "box-shadow": "var(--effect-glass-box)",
+                  "mix-blend-mode": "plus-lighter",
+                  "-webkit-mix-blend-mode": "plus-lighter",
+                  "pointer-events": "none"
+                }
+              }
+            ]
+          },
+          "contentLayer": {
+            "suffix": "__content",
+            "properties": {
+              "position": "relative",
+              "z-index": "1",
+              "display": "flex",
+              "flex-direction": "column",
+              "align-items": "flex-start",
+              "align-self": "stretch"
             }
           },
-          "notes": ["组成：Glass + Inner Shadow（scale-3）+ Fill + Shadow（scale-4）", "initLiquidGlass() 启用液态玻璃"]
+          "notes": ["同 Menu 结构，圆角 scale-4", "initLiquidGlass() 绑定 __glass"]
         },
         {
           "title": "Subtle Card",
