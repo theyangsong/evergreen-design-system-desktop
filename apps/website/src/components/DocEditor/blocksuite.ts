@@ -160,8 +160,12 @@ export function extractHeadings(doc: Doc) {
   const items: Array<{ id: string; label: string }> = [];
   const used = new Map<string, number>();
 
-  for (const block of doc.getBlocksByFlavour('affine:paragraph')) {
-    const type = block.model.props?.type;
+    for (const block of doc.getBlocksByFlavour('affine:paragraph')) {
+    const model = block.model as {
+      props?: { type?: string };
+      text?: { toString(): string };
+    };
+    const type = model.props?.type;
 
     if (typeof type !== 'string' || !/^h[1-6]$/.test(type)) {
       continue;
@@ -182,8 +186,12 @@ export function extractHeadings(doc: Doc) {
 export function subscribeDocChanges(
   doc: Doc,
   onChange: () => void,
-) {
-  return doc.slots.blockUpdated.on(onChange);
+): () => void {
+  const disposable = doc.slots.blockUpdated.on(onChange);
+
+  return () => {
+    disposable.dispose();
+  };
 }
 
 export function clearDocSnapshot(pagePath: string) {
