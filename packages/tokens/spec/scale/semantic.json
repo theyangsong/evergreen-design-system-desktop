@@ -37,6 +37,12 @@
       ]
     },
     {
+      "comment": "平滑圆角（Corner Smoothing）— Figma/iOS squircle，0–1 对应 0%–100%",
+      "tokens": [
+        { "name": "corner-smoothing", "value": "0.6", "comment": "60% — iOS 风格平滑圆角" }
+      ]
+    },
+    {
       "comment": "模糊（Blur）",
       "tokens": [
         { "name": "blur-subtle", "value": "var(--scale-4)", "comment": "16px" },

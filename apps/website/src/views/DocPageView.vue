@@ -4,13 +4,20 @@ import { useRoute, useRouter } from 'vue-router';
 import DocPageCommon from '@/components/DocPageCommon/DocPageCommon.vue';
 import DocPageFooter from '@/components/DocPageFooter/DocPageFooter.vue';
 import PageToc from '@/components/PageToc/PageToc.vue';
+import { usePageEnterAnimation } from '@/composables/usePageEnterAnimation';
+import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
 import { getDocPage } from '@/config/navigation';
+import { renderMarkdown } from '@/utils/renderMarkdown';
 import NotFoundView from '@/views/NotFoundView.vue';
 import styles from './DocPageView.module.css';
 
 const route = useRoute();
 const router = useRouter();
 const mode = ref<'design' | 'develop'>('design');
+const contentRef = ref<HTMLElement | null>(null);
+const pageEnterAnimationEnabled = usePageEnterAnimation();
+
+usePreventScrollChaining(contentRef);
 
 const docPath = computed(
   () => (route.meta.docPath as string | undefined) ?? route.path,
@@ -28,6 +35,26 @@ const sections = computed(() => {
 
   return page.value.designSections ?? page.value.placeholderSections ?? [];
 });
+
+const sectionIdsByTitle = computed(() =>
+  Object.fromEntries(sections.value.map((section) => [section.title, section.id])),
+);
+
+const markdownContent = computed(() => {
+  if (!page.value) {
+    return '';
+  }
+
+  if (mode.value === 'develop') {
+    return page.value.developContent ?? page.value.defaultContent ?? '';
+  }
+
+  return page.value.designContent ?? page.value.defaultContent ?? '';
+});
+
+const renderedBodyHtml = computed(() =>
+  renderMarkdown(markdownContent.value, sectionIdsByTitle.value),
+);
 
 const tocItems = computed(() =>
   sections.value.map((section) => ({ id: section.id, label: section.title })),
@@ -47,32 +74,33 @@ watch(
 
 <template>
   <template v-if="page">
-    <article :class="styles.content" data-doc-scroll>
-      <DocPageCommon
-        :title="page.title"
-        :description="page.description"
-        :meta="page.meta"
+    <div
+      :key="docPath"
+      :class="[styles.pageShell, pageEnterAnimationEnabled && styles.pageShellEnter]"
+    >
+      <article ref="contentRef" :class="styles.content" data-doc-scroll>
+        <DocPageCommon
+          :title="page.title"
+          :meta="page.meta"
+        />
+
+        <div :class="styles.body" data-doc-body>
+          <div
+            v-if="renderedBodyHtml"
+            :class="styles.markdownBody"
+            v-html="renderedBodyHtml"
+          />
+        </div>
+
+        <DocPageFooter />
+      </article>
+
+      <PageToc
+        v-model:mode="mode"
+        :class="styles.tocColumn"
+        :items="tocItems"
       />
-
-      <div :class="styles.body" data-doc-body>
-        <section
-          v-for="section in sections"
-          :id="section.id"
-          :key="`${mode}-${section.id}`"
-          :class="styles.section"
-        >
-          <h2 :class="styles.sectionTitle">{{ section.title }}</h2>
-        </section>
-      </div>
-
-      <DocPageFooter />
-    </article>
-
-    <PageToc
-      v-model:mode="mode"
-      :class="styles.tocColumn"
-      :items="tocItems"
-    />
+    </div>
   </template>
 
   <NotFoundView v-else />

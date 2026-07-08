@@ -19,6 +19,7 @@
     "./effect/dark": "./dist/css/effect/themes/dark.css",
     "./effect/ready": "./dist/css/effect/ready.css",
     "./liquid-glass": "./dist/js/liquid-glass.js",
+    "./corner-smoothing": "./dist/js/corner-smoothing.js",
     "./color": "./dist/css/color/index.css",
     "./color/light": "./dist/css/color/themes/light.css",
     "./color/dark": "./dist/css/color/themes/dark.css",
@@ -33,5 +34,11 @@
     "build": "node scripts/build.mjs",
     "sync:figma": "node scripts/sync-from-figma.mjs",
     "typecheck": "echo \"No TypeScript in tokens package\""
+  },
+  "dependencies": {
+    "figma-squircle": "^1.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }

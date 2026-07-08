@@ -1,18 +1,21 @@
 .layout {
+  --doc-app-rail-width: 92px;
+  --doc-section-nav-width: 268px;
   --doc-main-column: minmax(0, 702px);
   --doc-shell-width: 930px;
 
   display: grid;
-  grid-template-columns: 88px 252px minmax(0, 1fr);
+  grid-template-columns: var(--doc-app-rail-width) var(--doc-section-nav-width) minmax(0, 1fr);
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
+  overscroll-behavior: none;
   background: var(--page-background);
   transition: grid-template-columns 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .layoutNoSectionNav {
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: var(--doc-app-rail-width) minmax(0, 1fr);
 }
 
 .layoutExplore {
@@ -25,7 +28,7 @@
   --doc-main-column: minmax(0, 817px);
   --doc-shell-width: 1045px;
 
-  grid-template-columns: 88px 0 minmax(0, 1fr);
+  grid-template-columns: var(--doc-app-rail-width) 0 minmax(0, 1fr);
 }
 
 .sectionNavShell {
@@ -35,12 +38,15 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  width: 252px;
-  transition: width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  width: var(--doc-section-nav-width);
 }
 
 .sectionNavShellCollapsed {
-  width: 0;
+  pointer-events: none;
+}
+
+.layoutSectionNavOpen .sectionNavShell {
+  box-shadow: 2px 0 var(--scale-4) 0 var(--effect-vulvar-shadow-subtle);
 }
 
 .main {
@@ -50,7 +56,9 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
+  /* visible：避免裁切 contentShell 向左延伸的 molde 阴影 */
   overflow: visible;
+  overscroll-behavior: none;
   background: transparent;
 }
 
@@ -78,21 +86,27 @@
   min-height: 0;
   margin: 0;
   background: var(--content-background);
+  transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contentShellDoc {
   --doc-page-inset-top: 3vh;
   --doc-page-inset-bottom: 4vh;
+  --doc-page-max-width: 1280px;
+  --doc-page-inset-inline-min: 10%;
 
   box-sizing: border-box;
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  padding: 0 10%;
+  overscroll-behavior: none;
+  padding-inline: max(
+    var(--doc-page-inset-inline-min),
+    calc((100% - var(--doc-page-max-width)) / 2)
+  );
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  column-gap: 6%;
   row-gap: 0;
   align-items: stretch;
   isolation: isolate;
@@ -101,11 +115,11 @@
 @media (max-width: 1200px) {
   .layout {
     position: relative;
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: var(--doc-app-rail-width) minmax(0, 1fr);
   }
 
   .layoutSectionNavOpen {
-    grid-template-columns: 88px 252px minmax(0, 1fr);
+    grid-template-columns: var(--doc-app-rail-width) var(--doc-section-nav-width) minmax(0, 1fr);
   }
 
   .layoutSectionNavOpen .sectionNavShell {
@@ -115,18 +129,18 @@
     left: auto;
     z-index: auto;
     height: auto;
-    box-shadow: none;
+    box-shadow: 2px 0 var(--scale-4) 0 var(--effect-vulvar-shadow-subtle);
   }
 
   .layoutNavCollapsed {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: var(--doc-app-rail-width) minmax(0, 1fr);
   }
 
   .sectionNavShellCollapsed {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 88px;
+    left: var(--doc-app-rail-width);
     z-index: 10;
     height: 100%;
     box-shadow: 2px 0 var(--scale-4) 0 var(--effect-vulvar-shadow-subtle);

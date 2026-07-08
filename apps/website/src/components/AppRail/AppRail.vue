@@ -35,9 +35,9 @@ function iconName(id: string): EdsIconName {
 <template>
   <aside :class="styles.rail" aria-label="Primary navigation">
     <div :class="styles.logoShell">
-      <div :class="styles.logo" aria-label="EverGreen Design System">
+      <RouterLink to="/" :class="styles.logo" aria-label="返回首页">
         <img :src="appRailIcons.logo" alt="" :class="styles.logoImage" />
-      </div>
+      </RouterLink>
     </div>
 
     <nav :class="styles.navItems">

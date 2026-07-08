@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { rescanCornerSmoothing } from '@evergreen/tokens/corner-smoothing';
 import { formatBrandColor, type BrandId } from '@/config/brands';
 import { useBrand } from '@/composables/useBrand';
 import styles from './BrandSwitcher.module.css';
@@ -40,7 +41,12 @@ function swatchStyle(displayP3: [number, number, number]) {
 
 watch(open, (isOpen) => {
   if (isOpen) {
-    nextTick(updatePopoverPosition);
+    nextTick(() => {
+      updatePopoverPosition();
+      if (popoverRef.value) {
+        rescanCornerSmoothing(popoverRef.value);
+      }
+    });
   }
 });
 

@@ -28,15 +28,12 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 html,
 body,
 #app {
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   background: var(--page-background);
 }
 
@@ -47,6 +44,17 @@ body {
   line-height: var(--typography-body-medium-line-height);
   font-synthesis: none;
   color: var(--text-base-primary);
+}
+
+/*
+ * font-weight / font-size / line-height must not transition — browsers cannot
+ * interpolate them cleanly and glyphs appear clipped ("吃字") during hover/focus.
+ */
+a,
+button,
+[role='tab'],
+[role='link'] {
+  font-synthesis: none;
 }
 
 a {

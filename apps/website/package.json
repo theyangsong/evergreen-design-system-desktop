@@ -15,10 +15,13 @@
     "@blocksuite/store": "0.19.5",
     "@evergreen/components": "workspace:*",
     "@evergreen/tokens": "workspace:*",
+    "marked": "^18.0.5",
+    "three": "0.160.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@types/three": "0.160.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "typescript": "^5.7.3",
     "vite": "^6.0.7",

@@ -1,3 +1,5 @@
+import colorSystemDesignContent from '@/content/docs/atoms/color-system.design.md?raw';
+
 export type PrimaryNavItem =
   | { type: 'link'; id: string; label: string; icon: string; to: string }
   | { type: 'divider'; id: string };
@@ -29,26 +31,72 @@ export type DocPageConfig = {
   developSections?: DocPageSection[];
   /** @deprecated Use designSections */
   placeholderSections?: DocPageSection[];
+  /** Markdown body for design mode */
+  designContent?: string;
+  /** Markdown body for develop mode */
+  developContent?: string;
+  /** Markdown body fallback for both modes */
   defaultContent?: string;
 };
 
-const PLACEHOLDER_SECTION_COUNT = 20;
+const DEFAULT_DESIGN_SECTION_TITLES = [
+  '定位',
+  '设计决策与演进',
+  '使用者指南',
+  '结构拆解',
+  '变体与状态系统',
+  '交互与视觉行为',
+  '数据模型与逻辑',
+  '使用规范',
+  '开发实现',
+  '组合与依赖关系',
+  '无障碍',
+  '性能限制',
+  '边界情况',
+  '拓展性',
+  '生命周期与版本管理',
+] as const;
 
-function createPlaceholderSections(
-  mode: 'design' | 'develop',
-  count = PLACEHOLDER_SECTION_COUNT,
-): DocPageSection[] {
-  const idPrefix = mode === 'design' ? 'design-section' : 'develop-section';
-  const titlePrefix = mode === 'design' ? '模块' : '开发模块';
-
-  return Array.from({ length: count }, (_, index) => ({
-    id: `${idPrefix}-${index + 1}`,
-    title: `${titlePrefix}${index + 1}`,
+function createDesignSections(): DocPageSection[] {
+  return DEFAULT_DESIGN_SECTION_TITLES.map((title, index) => ({
+    id: `design-section-${index + 1}`,
+    title,
   }));
 }
 
-const defaultDesignSections = createPlaceholderSections('design');
-const defaultDevelopSections = createPlaceholderSections('develop');
+function createDevelopSections(): DocPageSection[] {
+  return DEFAULT_DESIGN_SECTION_TITLES.map((title, index) => ({
+    id: `develop-section-${index + 1}`,
+    title,
+  }));
+}
+
+const defaultDesignSections = createDesignSections();
+const defaultDevelopSections = createDevelopSections();
+
+const COLOR_SYSTEM_DESIGN_SECTION_TITLES = [
+  '定位',
+  '设计决策与演进',
+  '使用者指南',
+  '变量映射管理',
+  '变体与状态系统',
+  '交互与视觉行为',
+  '数据模型与逻辑',
+  '使用规范',
+  '开发实现',
+  '组合与依赖关系',
+  '无障碍',
+  '性能限制',
+  '边界情况',
+  '拓展性',
+  '生命周期与版本管理',
+] as const;
+
+const colorSystemDesignSections: DocPageSection[] =
+  COLOR_SYSTEM_DESIGN_SECTION_TITLES.map((title, index) => ({
+    id: `design-section-${index + 1}`,
+    title,
+  }));
 
 export const primaryNav: PrimaryNavItem[] = [
   { type: 'link', id: 'explore', label: '探索', icon: 'book', to: '/explore' },
@@ -225,8 +273,8 @@ const defaultMeta: DocMetaField[] = [
 ];
 
 export const defaultDocContent = defaultDesignSections
-  .map((section) => `<h2 id="${section.id}">${section.title}</h2>`)
-  .join('');
+  .map((section) => `## ${section.title}`)
+  .join('\n\n');
 
 function page(
   sectionId: string,
@@ -277,6 +325,8 @@ export const docPages: Record<string, DocPageConfig> = {
       { label: '贡献', value: 'EDS Yang、Dev.' },
       { label: '最后更新', value: '2026/6/1' },
     ],
+    designSections: colorSystemDesignSections,
+    designContent: colorSystemDesignContent,
   }),
 };
 

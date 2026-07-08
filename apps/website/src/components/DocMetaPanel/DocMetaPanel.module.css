@@ -18,7 +18,7 @@
 }
 
 .label {
-  color: var(--text-base-tertiary);
+  color: var(--text-base-secondary);
   font-size: var(--typography-body-small-size);
   line-height: var(--typography-body-small-line-height);
   font-weight: var(--typography-body-small-weight);

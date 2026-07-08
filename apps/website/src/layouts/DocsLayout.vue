@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import AppRail from '@/components/AppRail/AppRail.vue';
 import SectionNav from '@/components/SectionNav/SectionNav.vue';
+import { pageEnterAnimationKey } from '@/composables/usePageEnterAnimation';
 import {
   getSectionIdFromPath,
   sectionNavById,
@@ -16,16 +17,46 @@ const sectionNav = computed(() =>
   sectionId.value ? sectionNavById[sectionId.value] : undefined,
 );
 const sectionNavOpen = ref(false);
+const pageEnterAnimationEnabled = ref(false);
+const suppressNextPageEnter = ref(false);
+
+provide(pageEnterAnimationKey, pageEnterAnimationEnabled);
 
 const isExplore = computed(() => route.name === 'explore');
+
+const sectionNavCollapsed = computed(() => !sectionNavOpen.value);
 
 function toggleSectionNav() {
   sectionNavOpen.value = !sectionNavOpen.value;
 }
 
 function openSectionNav() {
+  if (!sectionNavOpen.value) {
+    suppressNextPageEnter.value = true;
+  }
   sectionNavOpen.value = true;
 }
+
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    if (!oldPath || newPath === oldPath || isExplore.value) {
+      pageEnterAnimationEnabled.value = false;
+      return;
+    }
+
+    if (suppressNextPageEnter.value) {
+      pageEnterAnimationEnabled.value = false;
+      suppressNextPageEnter.value = false;
+      return;
+    }
+
+    pageEnterAnimationEnabled.value =
+      sectionNavOpen.value &&
+      getSectionIdFromPath(newPath) === getSectionIdFromPath(oldPath);
+  },
+);
+
 </script>
 
 <template>
@@ -53,17 +84,21 @@ function openSectionNav() {
         styles.hideOnMobile,
       ]"
     >
-      <SectionNav :config="sectionNav" :collapsed="!sectionNavOpen" />
+      <SectionNav
+        :key="sectionId"
+        :config="sectionNav"
+        :collapsed="sectionNavCollapsed"
+      />
     </div>
 
-    <main :class="[styles.main, isExplore && styles.mainExplore, 'effect-molde-level']">
+    <main :class="[styles.main, isExplore && styles.mainExplore]">
       <div
         v-if="!isExplore"
-        :class="[styles.contentShell, styles.contentShellDoc]"
+        :class="[styles.contentShell, styles.contentShellDoc, 'effect-molde-level']"
       >
         <RouterView />
       </div>
-      <div v-else :class="styles.contentShell">
+      <div v-else :class="[styles.contentShell, 'effect-molde-level']">
         <RouterView />
       </div>
     </main>

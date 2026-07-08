@@ -11,6 +11,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { pageHeaderIcons } from '@/assets/icons';
 import EdsIcon from '@/components/EdsIcon/EdsIcon.vue';
 import { useScrollSpy } from '@/composables/useScrollSpy';
+import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
 import { scrollToSectionById } from '@/utils/scrollToSection';
 import styles from './PageToc.module.css';
 
@@ -27,12 +28,24 @@ const sectionIds = computed(() => props.items.map((item) => item.id));
 const { activeId, resetActive } = useScrollSpy(sectionIds);
 
 const listRef = ref<HTMLElement | null>(null);
+const tocBlockRef = ref<HTMLElement | null>(null);
+const toggleRef = ref<HTMLElement | null>(null);
+const designButtonRef = ref<HTMLElement | null>(null);
+const developButtonRef = ref<HTMLElement | null>(null);
+
+usePreventScrollChaining(tocBlockRef);
+
 const linkRefs = new Map<string, HTMLElement>();
 const indicatorTop = ref(0);
 const indicatorHeight = ref(0);
 const indicatorVisible = ref(false);
 const indicatorMoveTransition = ref(true);
+const toggleIndicatorLeft = ref(0);
+const toggleIndicatorWidth = ref(0);
+const toggleIndicatorVisible = ref(false);
+const toggleIndicatorMoveTransition = ref(true);
 let resizeObserver: ResizeObserver | undefined;
+let toggleResizeObserver: ResizeObserver | undefined;
 
 function setLinkRef(id: string, element: Element | null) {
   if (element instanceof HTMLElement) {
@@ -85,6 +98,51 @@ async function updateIndicator(
   indicatorVisible.value = true;
 }
 
+function getActiveToggleButton() {
+  return mode.value === 'design' ? designButtonRef.value : developButtonRef.value;
+}
+
+function syncToggleIndicatorPosition() {
+  const button = getActiveToggleButton();
+
+  if (!button) {
+    toggleIndicatorVisible.value = false;
+    return;
+  }
+
+  toggleIndicatorLeft.value = button.offsetLeft;
+  toggleIndicatorWidth.value = button.offsetWidth;
+  toggleIndicatorVisible.value = true;
+}
+
+async function updateToggleIndicator(
+  options: { animateMove?: boolean; previousMode?: 'design' | 'develop' | '' } = {},
+) {
+  const { animateMove = true, previousMode = '' } = options;
+
+  await nextTick();
+
+  if (!getActiveToggleButton()) {
+    toggleIndicatorMoveTransition.value = false;
+    toggleIndicatorVisible.value = false;
+    return;
+  }
+
+  const isFirstAppearance = !previousMode;
+
+  toggleIndicatorMoveTransition.value = animateMove && !isFirstAppearance;
+  syncToggleIndicatorPosition();
+
+  if (isFirstAppearance) {
+    toggleIndicatorVisible.value = false;
+    await nextTick();
+    toggleIndicatorVisible.value = true;
+    return;
+  }
+
+  toggleIndicatorVisible.value = true;
+}
+
 function scrollToSection(event: MouseEvent, id: string) {
   event.preventDefault();
 
@@ -98,9 +156,13 @@ function scrollToSection(event: MouseEvent, id: string) {
   router.replace({ path: route.path, hash }).catch(() => undefined);
 }
 
-watch(mode, () => {
+watch(mode, (_nextMode, previousMode) => {
   resetActive();
   indicatorVisible.value = false;
+  void updateToggleIndicator({
+    animateMove: Boolean(previousMode),
+    previousMode: previousMode ?? '',
+  });
 });
 
 watch(activeId, (nextId, previousId) => {
@@ -119,6 +181,7 @@ watch(
 
 onMounted(() => {
   void updateIndicator({ animateMove: false, previousActiveId: '' });
+  void updateToggleIndicator({ animateMove: false, previousMode: '' });
 
   if (listRef.value) {
     resizeObserver = new ResizeObserver(() => {
@@ -126,17 +189,44 @@ onMounted(() => {
     });
     resizeObserver.observe(listRef.value);
   }
+
+  if (toggleRef.value) {
+    toggleResizeObserver = new ResizeObserver(() => {
+      syncToggleIndicatorPosition();
+    });
+    toggleResizeObserver.observe(toggleRef.value);
+  }
 });
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
+  toggleResizeObserver?.disconnect();
 });
 </script>
 
 <template>
   <aside :class="styles.sidebar" aria-label="Page sidebar">
-    <div :class="styles.toggle" role="tablist" aria-label="Content mode">
+    <div
+      ref="toggleRef"
+      :class="styles.toggle"
+      role="tablist"
+      aria-label="Content mode"
+    >
+      <div
+        :class="[
+          styles.toggleIndicator,
+          toggleIndicatorVisible && styles.toggleIndicatorVisible,
+          toggleIndicatorMoveTransition && styles.toggleIndicatorMove,
+        ]"
+        :style="{
+          transform: `translateX(${toggleIndicatorLeft}px)`,
+          width: `${toggleIndicatorWidth}px`,
+        }"
+        aria-hidden="true"
+      />
+
       <button
+        ref="designButtonRef"
         type="button"
         role="tab"
         :aria-selected="mode === 'design'"
@@ -150,6 +240,7 @@ onBeforeUnmount(() => {
         使用规范
       </button>
       <button
+        ref="developButtonRef"
         type="button"
         role="tab"
         :aria-selected="mode === 'develop'"
@@ -164,7 +255,7 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
-    <div v-if="items.length" :class="styles.tocBlock">
+    <div v-if="items.length" ref="tocBlockRef" :class="styles.tocBlock">
       <p :class="styles.label">On this page</p>
 
       <nav ref="listRef" :class="styles.list">

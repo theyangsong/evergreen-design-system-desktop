@@ -5,21 +5,34 @@
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
-  width: 252px;
-  min-width: 252px;
-  max-width: 252px;
+  width: var(--doc-section-nav-width, 268px);
+  min-width: var(--doc-section-nav-width, 268px);
+  max-width: var(--doc-section-nav-width, 268px);
   height: 100%;
   min-height: 0;
-  padding: var(--spacing-7) var(--spacing-5) var(--spacing-4);
+  /* 固定顶部间距，避免折叠时随宽度百分比变化产生上下跳动 */
+  padding: calc(var(--doc-section-nav-width, 268px) * 0.12) var(--spacing-3) 0;
   background: var(--section-nav-background);
   box-shadow: inset var(--stroke-xs) 0 0 var(--stroke-divider-page);
   overflow: hidden;
+  transform: translateX(0);
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.navCollapsed {
+  transform: translateX(-100%);
+}
+
+.navInstant {
+  transition: none;
 }
 
 .title {
   flex: none;
+  align-self: stretch;
   margin: 0;
-  padding-bottom: var(--spacing-7);
+  padding: 0 0 var(--spacing-7) var(--spacing-4);
   font-size: var(--typography-title-size);
   line-height: var(--typography-title-line-height);
   font-weight: var(--typography-title-weight);
@@ -35,12 +48,12 @@
   width: 100%;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
 }
 
 .groupTitle {
   margin: 0;
-  padding-bottom: var(--spacing-2);
+  padding: 0 0 var(--spacing-2) var(--spacing-4);
   font-size: var(--typography-footnote-size);
   line-height: var(--typography-footnote-line-height);
   font-weight: var(--weight-bold);
@@ -85,7 +98,7 @@
 }
 
 .linkActive {
-  background: var(--event-focus-secondary);
+  background: color-mix(in srgb, var(--material-brand-primary) 12%, transparent);
   color: var(--text-base-primary);
 }
 

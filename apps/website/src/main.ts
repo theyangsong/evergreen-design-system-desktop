@@ -4,6 +4,7 @@ import App from './App.vue';
 import { initBrandProvider } from '@/composables/useBrand';
 import { router } from './router';
 import { initLiquidGlass } from '@evergreen/tokens/liquid-glass';
+import { initCornerSmoothing } from '@evergreen/tokens/corner-smoothing';
 import './styles/global.css';
 
 function getWebsiteTheme(): ThemeMode {
@@ -16,3 +17,4 @@ initBrandProvider();
 
 createApp(App).use(router).mount('#app');
 initLiquidGlass();
+initCornerSmoothing();

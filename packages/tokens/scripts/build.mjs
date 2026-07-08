@@ -474,6 +474,21 @@ function buildLiquidGlassAssets() {
   copyFileSync(source, destination);
 }
 
+async function buildCornerSmoothingAssets() {
+  const esbuild = await import('esbuild');
+  const destination = join(distDir, 'js/corner-smoothing.js');
+  mkdirSync(dirname(destination), { recursive: true });
+
+  await esbuild.build({
+    entryPoints: [join(rootDir, 'src/corner-smoothing.js')],
+    outfile: destination,
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    target: 'es2022',
+  });
+}
+
 function effectThemeSelector(themeName) {
   return `[data-theme="${themeName}"]`;
 }
@@ -1250,7 +1265,7 @@ function buildJsonExport() {
   writeFileSync(join(distDir, 'json/tokens.json'), JSON.stringify(payload, null, 2));
 }
 
-function buildAll() {
+async function buildAll() {
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 
@@ -1261,8 +1276,12 @@ function buildAll() {
   buildColorSystem();
   buildRootIndex();
   buildJsonExport();
+  await buildCornerSmoothingAssets();
 
   console.log('✓ Tokens built with layered CSS architecture');
 }
 
-buildAll();
+buildAll().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

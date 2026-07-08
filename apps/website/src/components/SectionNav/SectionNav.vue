@@ -1,25 +1,35 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import type { SectionNavConfig } from '@/config/navigation';
+import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
 import styles from './SectionNav.module.css';
 
 defineProps<{
   config: SectionNavConfig;
   collapsed?: boolean;
+  instant?: boolean;
 }>();
 
 const route = useRoute();
+const groupsRef = ref<HTMLElement | null>(null);
+
+usePreventScrollChaining(groupsRef);
 </script>
 
 <template>
   <aside
-    :class="styles.nav"
+    :class="[
+      styles.nav,
+      collapsed && styles.navCollapsed,
+      instant && styles.navInstant,
+    ]"
     :aria-label="`${config.title} section navigation`"
     :aria-hidden="collapsed"
   >
     <h2 :class="styles.title">{{ config.title }}</h2>
 
-    <div :class="styles.groups">
+    <div ref="groupsRef" :class="styles.groups">
       <section v-for="(group, index) in config.groups" :key="index">
         <p v-if="group.title" :class="styles.groupTitle">{{ group.title }}</p>
 

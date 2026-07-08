@@ -1,6 +1,7 @@
 node_modules/
 dist/
 storybook-static/
+.tmp-video-frames/
 *.local
 .DS_Store
 .env

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import DocsLayout from '@/layouts/DocsLayout.vue';
 import DocPageView from '@/views/DocPageView.vue';
+import HomeView from '@/views/HomeView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import UnderConstructionView from '@/views/UnderConstructionView.vue';
 import {
@@ -22,9 +23,13 @@ const sectionRedirects = Object.entries(sectionDefaultRoute).map(([section, full
 }));
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: sectionDefaultRoute.atoms },
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView,
+    },
     {
       path: '/',
       component: DocsLayout,

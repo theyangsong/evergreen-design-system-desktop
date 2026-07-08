@@ -15,6 +15,16 @@ declare module '*.svg?raw' {
   export default content;
 }
 
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.glsl?raw' {
+  const content: string;
+  export default content;
+}
+
 declare module '*.png' {
   const src: string;
   export default src;
@@ -31,4 +41,16 @@ declare module '@evergreen/tokens/liquid-glass' {
   export function initLiquidGlass(
     options?: Record<string, unknown>,
   ): unknown[];
+}
+
+declare module '@evergreen/tokens/corner-smoothing' {
+  export function attachCornerSmoothing(element: HTMLElement): unknown;
+
+  export function detachCornerSmoothing(element: HTMLElement): void;
+
+  export function initCornerSmoothing(
+    options?: Record<string, unknown>,
+  ): unknown[];
+
+  export function rescanCornerSmoothing(root?: HTMLElement): unknown[];
 }
