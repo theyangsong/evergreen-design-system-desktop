@@ -173,7 +173,7 @@
   color: var(--text-base-primary);
   font-size: var(--typography-body-small-strong-size);
   line-height: var(--typography-body-small-strong-line-height);
-  font-weight: var(--typography-body-small-strong-weight);
+  font-weight: var(--typography-body-small-weight);
   white-space: nowrap;
   transition:
     background-color 0.2s ease,
@@ -189,11 +189,13 @@
 .link:focus-visible {
   background-color: var(--event-focus-secondary);
   color: var(--text-base-primary);
+  font-weight: var(--typography-body-small-strong-weight);
   outline: none;
 }
 
 .linkActive {
   color: var(--text-base-primary);
+  font-weight: var(--typography-body-small-strong-weight);
 }
 
 .linkActive:hover {
@@ -204,6 +206,7 @@
 .linkActive:focus-visible {
   background-color: var(--event-focus-secondary);
   color: var(--text-base-primary);
+  font-weight: var(--typography-body-small-strong-weight);
 }
 
 @media (max-width: 1100px) {

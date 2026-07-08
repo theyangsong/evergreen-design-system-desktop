@@ -160,7 +160,7 @@ export function extractHeadings(doc: Doc) {
   const items: Array<{ id: string; label: string }> = [];
   const used = new Map<string, number>();
 
-    for (const block of doc.getBlocksByFlavour('affine:paragraph')) {
+  for (const block of doc.getBlocksByFlavour('affine:paragraph')) {
     const model = block.model as {
       props?: { type?: string };
       text?: { toString(): string };
