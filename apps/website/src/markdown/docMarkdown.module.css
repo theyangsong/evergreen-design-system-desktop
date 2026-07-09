@@ -392,7 +392,7 @@
   height: 38px;
   min-height: 38px;
   padding: var(--spacing-2) var(--spacing-3);
-  border: var(--stroke-xs) solid var(--stroke-outline-shallow);
+  border: var(--stroke-xs) solid var(--stroke-outline-deep);
   text-align: left;
   vertical-align: middle;
 }

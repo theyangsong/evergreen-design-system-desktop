@@ -82,7 +82,7 @@ Syntax colors: hex fallback + display-p3 canonical pairs in `docMarkdown.module.
 ## Table (frozen)
 
 - `th, td` — `box-sizing: border-box`; `height: 38px`; `padding: spacing-2 spacing-3`; `vertical-align: middle`
-- Border: `stroke-xs solid stroke-outline-shallow`
+- Border: `stroke-xs solid stroke-outline-deep`
 - `th` weight: `typography-body-medium-strong`
 
 ## HR (frozen)
