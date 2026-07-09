@@ -35,15 +35,20 @@
   background-color: var(--material-same-white-tertiary);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
   will-change: transform, width, opacity;
 }
 
-.toggleIndicatorMove {
-  transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.3s ease;
+@media (prefers-reduced-motion: no-preference) {
+  .toggleIndicator {
+    transition: opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
+
+  .toggleIndicatorMove {
+    transition:
+      transform var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      width var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
 }
 
 .toggleIndicatorVisible {
@@ -140,15 +145,20 @@
   border-radius: var(--radius-full);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
-  will-change: transform, opacity;
+  will-change: transform, height, opacity;
 }
 
-.activeIndicatorMove {
-  transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.3s ease;
+@media (prefers-reduced-motion: no-preference) {
+  .activeIndicator {
+    transition: opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
+
+  .activeIndicatorMove {
+    transition:
+      transform var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      height var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
 }
 
 .activeIndicatorVisible {
@@ -176,9 +186,9 @@
   font-weight: var(--typography-body-small-weight);
   white-space: nowrap;
   transition:
-    background-color var(--eds-hover-transition-duration) ease,
-    color var(--eds-hover-transition-duration) ease,
-    border-color var(--eds-hover-transition-duration) ease;
+    background-color var(--eds-motion-hover-duration) ease,
+    color var(--eds-motion-hover-duration) ease,
+    border-color var(--eds-motion-hover-duration) ease;
 }
 
 .link:hover {

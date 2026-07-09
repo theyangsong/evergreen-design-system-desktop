@@ -1,17 +1,17 @@
 .layout {
   --doc-app-rail-width: 92px;
   --doc-section-nav-width: 268px;
+  --section-nav-current-width: 0px;
   --doc-main-column: minmax(0, 702px);
   --doc-shell-width: 930px;
 
   display: grid;
-  grid-template-columns: var(--doc-app-rail-width) var(--doc-section-nav-width) minmax(0, 1fr);
+  grid-template-columns: var(--doc-app-rail-width) var(--section-nav-current-width) minmax(0, 1fr);
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
   overscroll-behavior: none;
-  background: var(--page-background);
-  transition: grid-template-columns 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--content-background);
 }
 
 .layoutNoSectionNav {
@@ -27,8 +27,6 @@
 .layoutNavCollapsed {
   --doc-main-column: minmax(0, 817px);
   --doc-shell-width: 1045px;
-
-  grid-template-columns: var(--doc-app-rail-width) 0 minmax(0, 1fr);
 }
 
 .sectionNavShell {
@@ -38,7 +36,12 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  width: var(--doc-section-nav-width);
+  width: 100%;
+  max-width: var(--doc-section-nav-width);
+}
+
+.sectionNavShellAnimating {
+  max-width: none;
 }
 
 .sectionNavShellCollapsed {
@@ -130,7 +133,7 @@
   }
 
   .layoutSectionNavOpen {
-    grid-template-columns: var(--doc-app-rail-width) var(--doc-section-nav-width) minmax(0, 1fr);
+    grid-template-columns: var(--doc-app-rail-width) var(--section-nav-current-width) minmax(0, 1fr);
   }
 
   .layoutSectionNavOpen .sectionNavShell {

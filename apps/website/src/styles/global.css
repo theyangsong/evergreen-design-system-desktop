@@ -1,9 +1,25 @@
 @import '@evergreen/tokens';
+@import '@/motion/tokens.css';
+@import '@/motion/animations.css';
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('@/assets/fonts/IBMPlexMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('@/assets/fonts/IBMPlexMono-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root,
 [data-theme='light'] {
-  --eds-hover-transition-duration: 0.35s;
-
   /* 壳层背景：设计稿硬编码 display-p3，不映射 token */
   --page-background: #faf9f6;
   --page-background: color(display-p3 0.9804 0.9765 0.9647);
@@ -58,13 +74,13 @@ button,
 [role='link'] {
   font-synthesis: none;
   transition:
-    background-color var(--eds-hover-transition-duration) ease,
-    background var(--eds-hover-transition-duration) ease,
-    color var(--eds-hover-transition-duration) ease,
-    border-color var(--eds-hover-transition-duration) ease,
-    outline-color var(--eds-hover-transition-duration) ease,
-    box-shadow var(--eds-hover-transition-duration) ease,
-    opacity var(--eds-hover-transition-duration) ease;
+    background-color var(--eds-motion-hover-duration) ease,
+    background var(--eds-motion-hover-duration) ease,
+    color var(--eds-motion-hover-duration) ease,
+    border-color var(--eds-motion-hover-duration) ease,
+    outline-color var(--eds-motion-hover-duration) ease,
+    box-shadow var(--eds-motion-hover-duration) ease,
+    opacity var(--eds-motion-hover-duration) ease;
 }
 
 a {

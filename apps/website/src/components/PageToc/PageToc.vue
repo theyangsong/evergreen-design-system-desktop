@@ -12,6 +12,7 @@ import { pageHeaderIcons } from '@/assets/icons';
 import EdsIcon from '@/components/EdsIcon/EdsIcon.vue';
 import { useScrollSpy } from '@/composables/useScrollSpy';
 import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
+import { waitForIndicatorPaint } from '@/motion/waitForIndicatorPaint';
 import { scrollToSectionById } from '@/utils/scrollToSection';
 import styles from './PageToc.module.css';
 
@@ -86,6 +87,12 @@ async function updateIndicator(
   const isFirstAppearance = !previousActiveId;
 
   indicatorMoveTransition.value = animateMove && !isFirstAppearance;
+
+  if (indicatorMoveTransition.value) {
+    await nextTick();
+    await waitForIndicatorPaint();
+  }
+
   syncIndicatorPosition();
 
   if (isFirstAppearance) {
@@ -131,6 +138,12 @@ async function updateToggleIndicator(
   const isFirstAppearance = !previousMode;
 
   toggleIndicatorMoveTransition.value = animateMove && !isFirstAppearance;
+
+  if (toggleIndicatorMoveTransition.value) {
+    await nextTick();
+    await waitForIndicatorPaint();
+  }
+
   syncToggleIndicatorPosition();
 
   if (isFirstAppearance) {

@@ -1,4 +1,5 @@
 import colorSystemDesignContent from '@/content/docs/atoms/color-system.design.md?raw';
+import dataListDesignContent from '@/content/docs/organisms/data-list.design.md?raw';
 
 export type PrimaryNavItem =
   | { type: 'link'; id: string; label: string; icon: string; to: string }
@@ -66,6 +67,20 @@ function createDesignSections(): DocPageSection[] {
   }));
 }
 
+function createDesignSectionsFromTitles(
+  titles: readonly string[],
+  options?: { leadingPreview?: boolean },
+): DocPageSection[] {
+  return titles.map((title, index) => {
+    if (options?.leadingPreview && index === 0) {
+      return { id: 'design-section-preview', title };
+    }
+
+    const sectionIndex = options?.leadingPreview ? index : index + 1;
+    return { id: `design-section-${sectionIndex}`, title };
+  });
+}
+
 function createDevelopSectionTitle(index: number): string {
   const number = index + 1;
   return number % 2 === 1 ? `开发定义 ${number}` : `开发单位 ${number}`;
@@ -104,6 +119,30 @@ const colorSystemDesignSections: DocPageSection[] =
     id: `design-section-${index + 1}`,
     title,
   }));
+
+const DATA_LIST_DESIGN_SECTION_TITLES = [
+  '预览',
+  '定位',
+  '设计决策与演进',
+  '使用者指南',
+  '结构拆解',
+  '变体与状态系统',
+  '交互行为',
+  '数据模型与逻辑',
+  '使用规范',
+  '开发实现',
+  '组合与依赖关系',
+  '无障碍',
+  '性能限制',
+  '边界',
+  '拓展性',
+  '生命周期与版本管理',
+] as const;
+
+const dataListDesignSections = createDesignSectionsFromTitles(
+  DATA_LIST_DESIGN_SECTION_TITLES,
+  { leadingPreview: true },
+);
 
 export const primaryNav: PrimaryNavItem[] = [
   { type: 'link', id: 'explore', label: '探索', icon: 'book', to: '/explore' },
@@ -339,6 +378,22 @@ export const docPages: Record<string, DocPageConfig> = {
     ],
     designSections: colorSystemDesignSections,
     designContent: colorSystemDesignContent,
+  }),
+  '/organisms/data-list': page('organisms', 'Data List', {
+    description:
+      'eds-org-data-list 是一个响应式只读数据列表，用于在固定宽度容器内展示结构化数据，支持多选、批处理、列排序与渐进式响应式适配。',
+    meta: [
+      { label: '名称', value: 'Data List' },
+      { label: 'ID', value: 'eds-org-data-list' },
+      { label: '类型', value: 'Organisms' },
+      { label: '状态', value: 'Enable' },
+      { label: '版本', value: 'v1.0' },
+      { label: '维护', value: 'EDS Yang' },
+      { label: '贡献', value: 'EDS Yang、Jojo、Sam、Dev.' },
+      { label: '最后更新', value: '2026/6/9' },
+    ],
+    designSections: dataListDesignSections,
+    designContent: dataListDesignContent,
   }),
 };
 

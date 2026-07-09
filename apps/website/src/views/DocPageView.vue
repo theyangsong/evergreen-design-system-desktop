@@ -6,7 +6,11 @@ import DocPageFooter from '@/components/DocPageFooter/DocPageFooter.vue';
 import PageToc from '@/components/PageToc/PageToc.vue';
 import { usePageEnterAnimation } from '@/composables/usePageEnterAnimation';
 import { getDocPage } from '@/config/navigation';
-import { renderMarkdown } from '@/utils/renderMarkdown';
+import {
+  docMarkdownStyles,
+  renderMarkdown,
+  useDocMarkdownCopy,
+} from '@/markdown';
 import NotFoundView from '@/views/NotFoundView.vue';
 import styles from './DocPageView.module.css';
 
@@ -14,6 +18,7 @@ const route = useRoute();
 const router = useRouter();
 const mode = ref<'design' | 'develop'>('design');
 const pageEnterAnimationEnabled = usePageEnterAnimation();
+const { handleMarkdownBodyClick } = useDocMarkdownCopy();
 
 const docPath = computed(
   () => (route.meta.docPath as string | undefined) ?? route.path,
@@ -72,7 +77,7 @@ watch(
   <template v-if="page">
     <div
       :key="docPath"
-      :class="[styles.pageShell, pageEnterAnimationEnabled && styles.pageShellEnter]"
+      :class="[styles.pageShell, pageEnterAnimationEnabled && 'eds-motion-page-enter']"
     >
       <article :class="styles.content">
         <DocPageCommon
@@ -83,8 +88,9 @@ watch(
         <div :class="styles.body" data-doc-body>
           <div
             v-if="renderedBodyHtml"
-            :class="styles.markdownBody"
+            :class="docMarkdownStyles.markdownBody"
             v-html="renderedBodyHtml"
+            @click="handleMarkdownBodyClick"
           />
         </div>
 

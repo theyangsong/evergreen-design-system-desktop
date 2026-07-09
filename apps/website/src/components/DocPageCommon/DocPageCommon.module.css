@@ -26,7 +26,7 @@
 
 .pageTitleText {
   color: var(--text-base-primary);
-  font-size: var(--scale-12);
+  font-size: var(--scale-16);
   font-weight: var(--weight-bold);
   /* Break inherited px line-height from body; let metrics follow this font-size. */
   line-height: normal;
@@ -43,7 +43,7 @@
   height: var(--scale-10);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.24s ease;
+  transition: opacity var(--eds-motion-chrome-fade-duration) ease;
   background: linear-gradient(
     to bottom,
     var(--content-background) 0%,

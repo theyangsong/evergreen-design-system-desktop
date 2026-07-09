@@ -9,12 +9,14 @@ import {
 import { RouterLink, useRoute } from 'vue-router';
 import type { SectionNavConfig } from '@/config/navigation';
 import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
+import { waitForIndicatorPaint } from '@/motion/waitForIndicatorPaint';
 import styles from './SectionNav.module.css';
 
 const props = defineProps<{
   config: SectionNavConfig;
   collapsed?: boolean;
   instant?: boolean;
+  revealProgress?: number;
 }>();
 
 const route = useRoute();
@@ -76,6 +78,12 @@ async function updateIndicator(
   const isFirstAppearance = !previousActivePath;
 
   indicatorMoveTransition.value = animateMove && !isFirstAppearance;
+
+  if (indicatorMoveTransition.value) {
+    await nextTick();
+    await waitForIndicatorPaint();
+  }
+
   syncIndicatorPosition();
 
   if (isFirstAppearance) {
@@ -148,47 +156,52 @@ onBeforeUnmount(() => {
       collapsed && styles.navCollapsed,
       instant && styles.navInstant,
     ]"
+    :style="{
+      '--section-nav-reveal-progress': String(revealProgress ?? 1),
+    }"
     :aria-label="`${config.title} section navigation`"
     :aria-hidden="collapsed"
   >
-    <h2 :class="styles.title">{{ config.title }}</h2>
+    <div :class="styles.navContent">
+      <h2 :class="styles.title">{{ config.title }}</h2>
 
-    <div ref="groupsRef" :class="styles.groups">
-      <div
-        :class="[
-          styles.activeIndicator,
-          indicatorVisible && styles.activeIndicatorVisible,
-          indicatorMoveTransition && styles.activeIndicatorMove,
-        ]"
-        :style="{
-          transform: `translateY(${indicatorTop}px)`,
-          height: `${indicatorHeight}px`,
-        }"
-        aria-hidden="true"
-      />
+      <div ref="groupsRef" :class="styles.groups">
+        <div
+          :class="[
+            styles.activeIndicator,
+            indicatorVisible && styles.activeIndicatorVisible,
+            indicatorMoveTransition && styles.activeIndicatorMove,
+          ]"
+          :style="{
+            transform: `translateY(${indicatorTop}px)`,
+            height: `${indicatorHeight}px`,
+          }"
+          aria-hidden="true"
+        />
 
-      <section v-for="(group, index) in config.groups" :key="index">
-        <p v-if="group.title" :class="styles.groupTitle">{{ group.title }}</p>
+        <section v-for="(group, index) in config.groups" :key="index">
+          <p v-if="group.title" :class="styles.groupTitle">{{ group.title }}</p>
 
-        <div :class="styles.list">
-          <RouterLink
-            v-for="item in group.items"
-            :key="item.to"
-            v-slot="{ href, navigate, isActive }"
-            :to="item.to"
-            custom
-          >
-            <a
-              :ref="(element) => setLinkRef(item.to, element as Element | null)"
-              :href="href"
-              :class="[styles.link, isActive && styles.linkActive]"
-              @click="navigate"
+          <div :class="styles.list">
+            <RouterLink
+              v-for="item in group.items"
+              :key="item.to"
+              v-slot="{ href, navigate, isActive }"
+              :to="item.to"
+              custom
             >
-              {{ item.label }}
-            </a>
-          </RouterLink>
-        </div>
-      </section>
+              <a
+                :ref="(element) => setLinkRef(item.to, element as Element | null)"
+                :href="href"
+                :class="[styles.link, isActive && styles.linkActive]"
+                @click="navigate"
+              >
+                {{ item.label }}
+              </a>
+            </RouterLink>
+          </div>
+        </section>
+      </div>
     </div>
   </aside>
 </template>

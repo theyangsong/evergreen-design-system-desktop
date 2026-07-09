@@ -10,21 +10,35 @@
   max-width: var(--doc-section-nav-width, 268px);
   height: 100%;
   min-height: 0;
-  /* 固定顶部间距，避免折叠时随宽度百分比变化产生上下跳动 */
-  padding: calc(var(--doc-section-nav-width, 268px) * 0.12) var(--spacing-3) 0;
   background: var(--section-nav-background);
   box-shadow: inset var(--stroke-xs) 0 0 var(--stroke-divider-page);
   overflow: hidden;
-  transform: translateX(0);
-  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
 }
 
-.navCollapsed {
-  transform: translateX(-100%);
+.navContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 0;
+  padding: calc(var(--doc-section-nav-width, 268px) * 0.12) var(--spacing-3) 0;
+  opacity: clamp(
+    calc((var(--section-nav-reveal-progress, 1) - 0.18) / 0.55),
+    0,
+    1
+  );
+  transform: translateX(
+    calc((1 - var(--section-nav-reveal-progress, 1)) * -20px)
+  );
+  will-change: opacity, transform;
 }
 
-.navInstant {
+.navCollapsed .navContent {
+  pointer-events: none;
+}
+
+.navInstant .navContent {
   transition: none;
 }
 
@@ -62,15 +76,20 @@
   background: color-mix(in srgb, var(--material-brand-primary) 12%, transparent);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
   will-change: transform, height, opacity;
 }
 
-.activeIndicatorMove {
-  transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.3s ease;
+@media (prefers-reduced-motion: no-preference) {
+  .activeIndicator {
+    transition: opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
+
+  .activeIndicatorMove {
+    transition:
+      transform var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      height var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
 }
 
 .activeIndicatorVisible {
@@ -110,9 +129,9 @@
   white-space: nowrap;
   flex-shrink: 0;
   transition:
-    background-color var(--eds-hover-transition-duration) ease,
-    color var(--eds-hover-transition-duration) ease,
-    outline-color var(--eds-hover-transition-duration) ease;
+    background-color var(--eds-motion-hover-duration) ease,
+    color var(--eds-motion-hover-duration) ease,
+    outline-color var(--eds-motion-hover-duration) ease;
 }
 
 .link:hover {
