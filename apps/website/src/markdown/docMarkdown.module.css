@@ -95,7 +95,7 @@
 
 .markdownBody li ul li + li,
 .markdownBody li ol li + li {
-  margin-top: var(--spacing-1);
+  margin-top: var(--spacing-4);
 }
 
 .markdownBody a {
@@ -398,6 +398,7 @@
 }
 
 .markdownBody th {
+  background: var(--material-card-shallow);
   font-weight: var(--typography-body-medium-strong-weight);
 }
 

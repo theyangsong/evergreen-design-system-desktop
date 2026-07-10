@@ -23,12 +23,12 @@
   /* 壳层背景：设计稿硬编码 display-p3，不映射 token */
   --page-background: #faf9f6;
   --page-background: color(display-p3 0.9804 0.9765 0.9647);
-  --content-background: #faf9f6;
-  --content-background: color(display-p3 0.9804 0.9765 0.9647);
-  --nav-background: #f2f1ee;
-  --nav-background: color(display-p3 0.9318 0.9283 0.9153);
-  --section-nav-background: #eeedea;
-  --section-nav-background: color(display-p3 0.9333 0.9294 0.9176);
+  --content-background: #fcfbf8;
+  --content-background: color(display-p3 0.9882 0.9843 0.9725);
+  --nav-background: #f4f3f0;
+  --nav-background: color(display-p3 0.9569 0.9529 0.9412);
+  --section-nav-background: #f4f3f0;
+  --section-nav-background: color(display-p3 0.9569 0.9529 0.9412);
 }
 
 [data-theme='dark'] {

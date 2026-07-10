@@ -8,6 +8,15 @@ alwaysApply: false
 
 **Do not** add per-page or per-document markdown CSS in `DocPageView.module.css`. All prose rules live in one module.
 
+## Frozen decisions (session checkpoint)
+
+| Area | Rule | Do not |
+|------|------|--------|
+| Lists | Top-level **and** nested `li + li` → `margin-top: spacing-4` | Revert nested to `spacing-1` without explicit request |
+| Table `th` | bg `material-card-shallow`; border `stroke-outline-deep` | Use `moderate` / `subtle` for header bg |
+| Table cells | `height: 38px`; `padding: spacing-2 spacing-3` | Change per-doc |
+| Code blocks | Chrome + highlighted `pre`; **no line-number gutter** | Re-add line nums (reverted) |
+
 ## Single source of truth
 
 | Concern | File |
@@ -51,8 +60,8 @@ import { docMarkdownStyles, renderMarkdown, useDocMarkdownCopy } from '@/markdow
 ## Lists (frozen)
 
 - Indent: `ul, ol` → `padding-left: spacing-6`
-- **Top-level** sibling gap — selector `.markdownBody > ul > li + li`, `.markdownBody > ol > li + li` → `margin-top: spacing-4`
-- **Nested** sibling gap — selector `.markdownBody li ul li + li`, `.markdownBody li ol li + li` → `margin-top: spacing-1`
+- **Top-level** — `.markdownBody > ul > li + li`, `.markdownBody > ol > li + li` → `margin-top: spacing-4`
+- **Nested** — `.markdownBody li ul li + li`, `.markdownBody li ol li + li` → `margin-top: spacing-4` (same as top-level)
 
 ## Inline code (frozen)
 
@@ -67,7 +76,7 @@ import { docMarkdownStyles, renderMarkdown, useDocMarkdownCopy } from '@/markdow
 - Lang label: EDS Text (`font-family-text`), `typography-body-medium`
 - Copy: 14px icon, `spacing-1` padding; green check on copy
 
-**Highlighted pre** (inside block): padding `spacing-4 spacing-8 spacing-8`
+**Highlighted pre** (inside block): padding `spacing-4 spacing-8 spacing-8` — **no line numbers**
 **Plain pre**: padding `spacing-4`; bg `material-card-subtle`
 **Font**: IBM Plex Mono 14px / 20px lh; `pre-wrap`
 
@@ -81,9 +90,10 @@ Syntax colors: hex fallback + display-p3 canonical pairs in `docMarkdown.module.
 
 ## Table (frozen)
 
-- `th, td` — `box-sizing: border-box`; `height: 38px`; `padding: spacing-2 spacing-3`; `vertical-align: middle`
-- Border: `stroke-xs solid stroke-outline-deep`
-- `th` weight: `typography-body-medium-strong`
+- `th, td` — `box-sizing: border-box`; `height: 38px`; `padding: spacing-2 spacing-3`; `vertical-align: middle`; `text-align: left`
+- Border (all cells): `stroke-xs solid stroke-outline-deep`
+- `th` only — `background: material-card-shallow`; weight `typography-body-medium-strong`
+- `td` — no background override (inherits page)
 
 ## HR (frozen)
 

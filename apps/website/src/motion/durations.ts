@@ -14,7 +14,7 @@ export const MOTION_INDICATOR_MS = 280;
 export const MOTION_INDICATOR_OPACITY_MS = 300;
 
 /** Doc page content enter animation. */
-export const MOTION_PAGE_ENTER_MS = 1200;
+export const MOTION_PAGE_ENTER_MS = 1800;
 
 /** Sticky title / scroll chrome opacity. */
 export const MOTION_CHROME_FADE_MS = 240;
