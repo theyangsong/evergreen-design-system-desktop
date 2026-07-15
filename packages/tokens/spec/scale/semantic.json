@@ -66,26 +66,6 @@
         { "name": "icon-lg", "value": "var(--scale-5)", "comment": "20px" },
         { "name": "icon-xl", "value": "var(--scale-6)", "comment": "24px" }
       ]
-    },
-    {
-      "comment": "控件按钮（Control Button）",
-      "tokens": [
-        { "name": "control-button-xs", "value": "var(--scale-8)", "comment": "32px" },
-        { "name": "control-button-sm", "value": "var(--scale-10)", "comment": "40px" },
-        { "name": "control-button-md", "value": "var(--scale-12)", "comment": "48px" },
-        { "name": "control-button-lg", "value": "var(--scale-14)", "comment": "56px" },
-        { "name": "control-button-xl", "value": "var(--scale-15)", "comment": "60px" }
-      ]
-    },
-    {
-      "comment": "控件图标容器（Control Icon）",
-      "tokens": [
-        { "name": "control-icon-xs", "value": "var(--scale-9)", "comment": "36px" },
-        { "name": "control-icon-sm", "value": "var(--scale-10)", "comment": "40px" },
-        { "name": "control-icon-md", "value": "var(--scale-12)", "comment": "48px" },
-        { "name": "control-icon-lg", "value": "var(--scale-13)", "comment": "52px" },
-        { "name": "control-icon-xl", "value": "var(--scale-14)", "comment": "56px" }
-      ]
     }
   ]
 }
