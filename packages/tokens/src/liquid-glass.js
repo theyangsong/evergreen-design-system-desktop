@@ -3,7 +3,7 @@
  * Adapted from https://github.com/shuding/liquid-glass (MIT © Shu Ding, 2025).
  *
  * Usage:
- *   import { initLiquidGlass, attachLiquidGlass } from '@evergreen/tokens/liquid-glass';
+ *   import { initLiquidGlass, attachLiquidGlass } from '@eds/desktop-tokens/liquid-glass';
  *   initLiquidGlass(); // auto-bind .effect-flotation-box__glass, .effect-popup-box__glass
  *   attachLiquidGlass(element);
  */

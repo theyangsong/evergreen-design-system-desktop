@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { verifyColorSpecAgainstDist } from './verify-color-spec.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
@@ -39,6 +40,8 @@ function appendCssCommentBlock(lines, commentLines, indent = '  ') {
 const COLOR_SEMANTIC_GROUP_ORDER = [
   { prefix: 'box', comment: 'Box（容器 / 背景）' },
   { prefix: 'event', comment: 'Event（交互状态）' },
+  { prefix: 'tag', comment: 'Tag（Status / Colorful 色板）' },
+  { prefix: 'status', comment: 'Status' },
   { prefix: 'stroke', comment: 'Stroke（描边 / 分割线）' },
   { prefix: 'text', comment: 'Text（文本色）' },
   { prefix: 'material', comment: 'Material（材质 / 填充）' },
@@ -72,7 +75,7 @@ function groupColorSemanticTokens(tokens) {
 
   const remaining = tokens.filter((token) => !assigned.has(token.name));
   if (remaining.length > 0) {
-    groups.push({ comment: 'Other', tokens: remaining });
+    groups.push({ comment: 'Status', tokens: remaining });
   }
 
   return groups;
@@ -103,13 +106,11 @@ function buildScaleBaseVariables(baseSpec) {
     scaleVars.push({ name, value: entry });
   }
 
-  const strokeVars = Object.entries(baseSpec.stroke).map(([name, value]) => ({ name, value }));
-
-  return { unit, scaleVars, strokeVars };
+  return { unit, scaleVars };
 }
 
 function writeScaleBaseCssFile(destination, selector, baseSpec, headerLines = []) {
-  const { unit, scaleVars, strokeVars } = buildScaleBaseVariables(baseSpec);
+  const { unit, scaleVars } = buildScaleBaseVariables(baseSpec);
   const lines = [
     '/**',
     ' * Do not edit directly, this file was auto-generated from Figma tokens.',
@@ -132,13 +133,6 @@ function writeScaleBaseCssFile(destination, selector, baseSpec, headerLines = []
       continue;
     }
 
-    lines.push(`  --${token.name}: ${token.value};`);
-  }
-
-  lines.push('');
-  lines.push('  /* 描边系统（Stroke System）');
-  lines.push('     独立于 4px 体系，用于视觉精度 */');
-  for (const token of strokeVars) {
     lines.push(`  --${token.name}: ${token.value};`);
   }
 
@@ -259,34 +253,21 @@ function writeTypographyGlobalCssFile(destination, globalSpec, headerLines = [])
   writeFileSync(destination, lines.join('\n'));
 }
 
-function writeTextStylesCssFile(destination, stylesSpec, headerLines = []) {
+function writeBarSubpixelCssFile(destination, spec, headerLines = []) {
   const lines = [
     '/**',
     ' * Do not edit directly, this file was auto-generated from Figma tokens.',
     ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
     ' */',
     '',
-    '/* ========================================',
-    '   语义角色类',
-    '   名称与 Figma Text Styles 完全一致',
-    '   ======================================== */',
-    '',
+    `.${spec.className} {`,
   ];
 
-  for (const style of stylesSpec.styles) {
-    if (style.title) {
-      lines.push(`/* ${style.title} */`);
-    }
-
-    lines.push(`.${style.className} {`);
-    for (const [property, value] of Object.entries(style.properties)) {
-      lines.push(`  ${property}: ${value};`);
-    }
-
-    appendCssCommentBlock(lines, style.notes ?? [], '  ');
-
-    lines.push('}', '');
+  for (const [property, value] of Object.entries(spec.properties)) {
+    lines.push(`  ${property}: ${value};`);
   }
+
+  lines.push('}', '');
 
   mkdirSync(dirname(destination), { recursive: true });
   writeFileSync(destination, lines.join('\n'));
@@ -848,12 +829,64 @@ function formatDisplayP3Component(value) {
   return Number(value.toFixed(4)).toString();
 }
 
+function hexToDisplayP3Components(hex) {
+  const normalized = hex.replace('#', '');
+  return [
+    parseInt(normalized.slice(0, 2), 16) / 255,
+    parseInt(normalized.slice(2, 4), 16) / 255,
+    parseInt(normalized.slice(4, 6), 16) / 255,
+  ];
+}
+
 function resolveColorBaseEntry(entry) {
   if (typeof entry === 'string') {
-    return { hex: entry, displayP3: null };
+    return { hex: entry, displayP3: hexToDisplayP3Components(entry) };
+  }
+
+  if (entry.displayP3 == null && entry.hex) {
+    return { ...entry, displayP3: hexToDisplayP3Components(entry.hex) };
   }
 
   return entry;
+}
+
+function mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette) {
+  const light = { ...baseSpec.light };
+  const dark = { ...baseSpec.dark };
+
+  for (const groupKey of ['status', 'colorful']) {
+    for (const [key, themeValues] of Object.entries(tagPalette[groupKey] ?? {})) {
+      for (const role of ['bg', 'text']) {
+        const varName = `eds-tag-${groupKey}-${key}-${role}`;
+        light[varName] = {
+          hex: themeValues.light[role],
+          displayP3: hexToDisplayP3Components(themeValues.light[role]),
+        };
+        dark[varName] = {
+          hex: themeValues.dark[role],
+          displayP3: hexToDisplayP3Components(themeValues.dark[role]),
+        };
+      }
+    }
+  }
+
+  return { light, dark };
+}
+
+function expandTagPaletteSemanticTokens(tagPalette) {
+  const tokens = [];
+
+  for (const groupKey of ['status', 'colorful']) {
+    for (const key of Object.keys(tagPalette[groupKey] ?? {})) {
+      for (const role of ['bg', 'text']) {
+        const name = `tag-${groupKey}-${key}-${role}`;
+        const reference = `color(var(--eds-${name}) / 1)`;
+        tokens.push({ name, light: reference, dark: reference });
+      }
+    }
+  }
+
+  return tokens;
 }
 
 function formatColorBaseCssDeclarations(name, entry) {
@@ -998,7 +1031,7 @@ function buildScaleSystem() {
   writeScaleBaseCssFile(join(cssDir, 'scale/base.css'), ':root', baseSpec, [
     ' * Scale System — base primitives (基数).',
     ' * Source: spec/scale/base.json',
-    ' * Formula: scale(n) = n × var(--scale-base). Stroke is independent of the 4px grid.',
+    ' * Formula: scale(n) = n × var(--scale-base).',
   ]);
 
   writeScaleSemanticCssFile(
@@ -1022,6 +1055,7 @@ function buildTypographySystem() {
   const baseSpec = loadJson('typography/base.json');
   const semanticSpec = loadJson('typography/semantic.json');
   const globalSpec = loadJson('typography/global.json');
+  const barSubpixelSpec = loadJson('typography/bar-subpixel.json');
 
   writeTypographyBaseCssFile(join(cssDir, 'typography/base.css'), ':root', baseSpec, [
     ' * Typography System — base primitives (原始字体排印令牌).',
@@ -1043,26 +1077,15 @@ function buildTypographySystem() {
     ' * Source: spec/typography/global.json',
   ]);
 
-  writeImportAggregator(
-    join(cssDir, 'typography/index.css'),
-    ['./base.css', './semantic.css', './global.css'],
-    'Typography System entry',
-  );
-}
-
-function buildTextSystem() {
-  const stylesSpec = loadJson('text/styles.json');
-
-  writeTextStylesCssFile(join(cssDir, 'text/styles.css'), stylesSpec, [
-    ' * Text System — semantic role classes (文本样式 → typography).',
-    ' * Source: spec/text/styles.json',
-    ' * Class names match Figma Text Styles.',
+  writeBarSubpixelCssFile(join(cssDir, 'typography/bar-subpixel.css'), barSubpixelSpec, [
+    ' * Bar 11px subpixel utility (2× + scale 0.5).',
+    ' * Source: spec/typography/bar-subpixel.json',
   ]);
 
   writeImportAggregator(
-    join(cssDir, 'text/index.css'),
-    ['../typography/index.css', './styles.css'],
-    'Text System entry',
+    join(cssDir, 'typography/index.css'),
+    ['./base.css', './semantic.css', './global.css', './bar-subpixel.css'],
+    'Typography System entry',
   );
 }
 
@@ -1118,23 +1141,26 @@ function buildEffectSystem() {
 
 function buildColorSystem() {
   const baseSpec = loadJson('color/base.json');
+  const tagPalette = loadJson('color/tag-palette.json');
   const semanticSpec = loadJson('color/semantic.json');
+  const mergedBaseSpec = mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette);
+  const mergedSemanticTokens = [...semanticSpec.tokens, ...expandTagPaletteSemanticTokens(tagPalette)];
 
   for (const themeName of ['light', 'dark']) {
     const selector = themeSelector(themeName);
     const themeDir = join(cssDir, 'color/themes', themeName);
 
-    const semanticGroups = groupColorSemanticTokens(semanticSpec.tokens);
+    const semanticGroups = groupColorSemanticTokens(mergedSemanticTokens);
 
-    writeColorBaseCssFile(join(themeDir, 'base.css'), selector, themeName, baseSpec, [
+    writeColorBaseCssFile(join(themeDir, 'base.css'), selector, themeName, mergedBaseSpec, [
       ` * Color System — base palette (${themeName}).`,
-      ' * Source: spec/color/base.json',
-      ' * Figma: node 2008:41 (Primitives@Cregis)',
+      ' * Source: spec/color/base.json + spec/color/tag-palette.json',
+      ' * Figma: node 2008:41 (Primitives@Cregis); tag nodes in tag-palette.json',
     ]);
 
     writeColorSemanticCssFile(join(themeDir, 'semantic.css'), selector, semanticGroups, themeName, [
       ` * Color System — semantic colors referencing base (${themeName}).`,
-      ' * Source: spec/color/semantic.json',
+      ' * Source: spec/color/semantic.json + tag-palette.json',
       ' * Figma: node 2536:5814 (Variable Name column)',
     ]);
 
@@ -1158,7 +1184,6 @@ function buildRootIndex() {
     [
       './scale/index.css',
       './typography/index.css',
-      './text/index.css',
       './color/index.css',
       './effect/index.css',
     ],
@@ -1198,7 +1223,6 @@ function buildJsonExport() {
     scaleBase: scaleUnit,
     multipliers: scaleMultipliers,
     literals: scaleLiterals,
-    stroke: scaleBaseSpec.stroke,
     formulas: scaleFormulas,
     resolved: scaleResolved,
   };
@@ -1219,7 +1243,6 @@ function buildJsonExport() {
     scale: {
       'scale-base': `${scaleUnit}px`,
       ...scaleFormulas,
-      ...scaleBaseSpec.stroke,
       ...scaleSemantic,
     },
     typographyBase,
@@ -1271,12 +1294,16 @@ async function buildAll() {
 
   buildScaleSystem();
   buildTypographySystem();
-  buildTextSystem();
   buildEffectSystem();
   buildColorSystem();
   buildRootIndex();
   buildJsonExport();
   await buildCornerSmoothingAssets();
+
+  const colorErrors = verifyColorSpecAgainstDist();
+  if (colorErrors.length > 0) {
+    throw new Error(`Color spec verification failed:\n${colorErrors.join('\n')}`);
+  }
 
   console.log('✓ Tokens built with layered CSS architecture');
 }

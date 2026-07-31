@@ -1,8 +1,8 @@
 {
   "$description": "Global typography defaults applied to document body.",
-  "selector": "body",
+  "selector": "body, input, textarea, button",
   "properties": {
-    "font-family": "var(--font-family-text)",
+    "font-family": "var(--eds-family-sans)",
     "text-rendering": "geometricPrecision",
     "-webkit-font-smoothing": "antialiased",
     "-moz-osx-font-smoothing": "grayscale"

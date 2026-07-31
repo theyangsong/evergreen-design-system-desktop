@@ -3,7 +3,7 @@
  * Uses figma-squircle (MIT © Tien Pham).
  *
  * Usage:
- *   import { initCornerSmoothing, attachCornerSmoothing, rescanCornerSmoothing } from '@evergreen/tokens/corner-smoothing';
+ *   import { initCornerSmoothing, attachCornerSmoothing, rescanCornerSmoothing } from '@eds/desktop-tokens/corner-smoothing';
  *   initCornerSmoothing(); // auto-bind elements with non-zero border-radius
  *   attachCornerSmoothing(element);
  *   rescanCornerSmoothing(popoverRoot); // after Teleport / v-if mount

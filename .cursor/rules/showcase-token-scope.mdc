@@ -1,0 +1,48 @@
+---
+description: Desktop Showcase token scope — Website shell vs Desktop component previews
+globs: apps/showcase/**/*
+alwaysApply: false
+---
+
+# Desktop Showcase Token Scope
+
+**除组件本身的参数、属性外，Preview 站其余一切（壳层、布局、导航、标签、间距、颜色、排版）均使用 `@eds/website-tokens` / `@eds/website-components`（Website 侧 **`--eds-*` 排版角色**、`--text-base-*`、`--spacing-*` 等）。**
+
+完整原则与禁止项见 **`eds-project.mdc` §5**。
+
+仅以下内容来自 `@eds/desktop-*`：
+
+- Live preview 中的 **Desktop 组件**（如 `EgInput`、`EgButton`）
+- 组件 **props / 事件 / 插槽** 文档与示例代码
+- `/tokens` 页的 Desktop token 数据（`@eds/desktop-tokens/json`）及 Spacing / Text Style 预览的 `.desktopTokens` 作用域
+- 包裹组件的最小 `.desktopTokens` 容器（PostCSS 注入 `@eds/desktop-tokens`）
+- Desktop 组件样式：`apps/showcase/src/styles/desktop-components-scope.css`（PostCSS 将 `@eds/desktop-components/style.css` 限定在 `.desktopTokens` 下；**勿**在 Showcase 全局 `@import` 未 scoped 的 `style.css`）
+
+## DOM 结构
+
+```vue
+<!-- ✅ 标签、布局在 Website token 作用域内 -->
+<div :class="styles.previewStack">
+  <div :class="styles.sizeRow">
+    <span :class="styles.sizeLabel">Small</span>
+    <!-- ✅ 仅组件 subtree 在 desktopTokens 内；desktopTokens 必须是包裹层，不能打在组件根节点上 -->
+    <div class="desktopTokens">
+      <EgInput ... />
+    </div>
+  </div>
+</div>
+
+<!-- ❌ 不要把 label / previewStack 包进 desktopTokens -->
+<div class="desktopTokens">
+  <span :class="styles.sizeLabel">Small</span>
+  <EgInput ... />
+</div>
+
+<!-- ❌ 不要把 desktopTokens 打在 Desktop 组件根上（PostCSS 生成 .desktopTokens .hash，同元素匹配失败，尺寸会炸） -->
+<EgIconButton class="desktopTokens" ... />
+```
+
+## CSS
+
+- Preview 模块样式（`InputPreview.module.css` 等）使用 Website CSS 变量：`--text-base-secondary`、`--eds-body-small-*`、`--eds-footnote-large-*`、`--spacing-*` 等
+- 不要在 showcase 壳层 CSS 中引用 **Desktop** `packages/tokens` 的排版 **`--eds-*`**（单档 Headline/Body）；壳层动效可用 `apps/showcase/src/motion/tokens.css` 的 `--eds-motion-*`（见 `eds-project.mdc` §5）

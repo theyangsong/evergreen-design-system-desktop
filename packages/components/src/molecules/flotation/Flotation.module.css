@@ -1,0 +1,346 @@
+.menuBody {
+  display: flex;
+  flex-direction: column;
+  /* spacing-025 = 1px；Website :root 无此 token，缺 .desktopTokens 时回退 1px */
+  gap: var(--spacing-025, 1px);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025, 1px);
+  width: 100%;
+  min-width: 0;
+}
+
+.menuDivider {
+  flex-shrink: 0;
+  width: 100%;
+  padding-inline: var(--spacing-2);
+  box-sizing: border-box;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--material-hide);
+  color: var(--text-base-primary);
+  font: inherit;
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+.addRow:hover {
+  background-color: var(--event-hover);
+}
+
+.addIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--stroke-base-secondary);
+}
+
+.addIcon :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+/* ── Trigger（Figma 2059:3679）— #trigger 插槽预置 ── */
+
+.triggerRoot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5);
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  border: var(--stroke-xs) solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--material-hide);
+  color: var(--text-base-primary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+.triggerWidthAdaptive {
+  width: 100%;
+}
+
+.triggerWidthTrigger {
+  width: auto;
+}
+
+.triggerWidthFixed {
+  width: auto;
+}
+
+.triggerRoot:disabled {
+  cursor: not-allowed;
+  color: var(--text-base-quaternary);
+}
+
+.triggerSizeLg {
+  padding: var(--spacing-2) var(--spacing-2) var(--spacing-2) var(--spacing-3);
+}
+
+.triggerSizeMd {
+  padding: var(--spacing-1-5) var(--spacing-2) var(--spacing-1-5) var(--spacing-3);
+}
+
+.triggerSizeSm {
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--spacing-2);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.triggerSizeXs {
+  padding: var(--spacing-05) var(--spacing-2) var(--spacing-05) var(--spacing-2);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+}
+
+.triggerStyleSubtle {
+  background-color: var(--material-card-moderate);
+  border-color: transparent;
+}
+
+.triggerStyleSubtle:hover:not(:disabled) {
+  background-color: var(--event-hover);
+}
+
+.triggerStyleSubtle:active:not(:disabled),
+.triggerStyleSubtle.triggerExpanded:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.triggerStyleOutline {
+  background-color: var(--material-hide);
+  border-color: var(--stroke-outline-shallow);
+}
+
+.triggerStyleOutline:hover:not(:disabled) {
+  background-color: var(--event-hover);
+}
+
+.triggerStyleOutline:active:not(:disabled),
+.triggerStyleOutline.triggerExpanded:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.triggerStyleText {
+  background-color: var(--material-hide);
+  border-color: transparent;
+  width: auto;
+}
+
+.triggerStyleText:hover:not(:disabled) {
+  background-color: var(--event-hover);
+}
+
+.triggerStyleText:active:not(:disabled),
+.triggerStyleText.triggerExpanded:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.triggerSymbol {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.triggerSizeSm .triggerSymbol,
+.triggerSizeXs .triggerSymbol {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.triggerTitle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.triggerRaw {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.triggerLabel {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerTag {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.triggerMessage {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.triggerArrow {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  color: var(--stroke-base-secondary);
+}
+
+.triggerSizeSm .triggerArrow,
+.triggerSizeXs .triggerArrow {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.triggerArrow :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+.triggerRoot:disabled .triggerArrow {
+  color: var(--stroke-base-quaternary);
+}
+
+/* ── Box（Figma 2059:4167）— #content 内菜单行预置 ── */
+
+.boxRoot {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  min-width: 0;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--material-hide);
+  color: var(--text-base-primary);
+  font: inherit;
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+.boxRoot:hover:not(:disabled):not(.boxFocused) {
+  background-color: var(--event-hover);
+}
+
+.boxFocused {
+  background-color: var(--event-focus-brand-weaken);
+}
+
+.boxDisabled,
+.boxRoot:disabled {
+  cursor: not-allowed;
+  color: var(--text-base-quaternary);
+}
+
+.boxCheckbox {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.boxLeading {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--stroke-base-secondary);
+}
+
+.boxLeading :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+.boxMain {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.boxLabel {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boxTag {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.boxTrailing {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-0);
+  margin-left: auto;
+}
+
+.boxMessage {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.boxCascader {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--stroke-base-secondary);
+}
+
+.boxCascader :global(.eds-i-f) {
+  fill: currentColor;
+}

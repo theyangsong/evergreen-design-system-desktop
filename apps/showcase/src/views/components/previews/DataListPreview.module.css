@@ -1,0 +1,16 @@
+.host {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: var(--spacing-4);
+  box-sizing: border-box;
+}
+
+.host :deep(.eds-data-list) {
+  width: 100%;
+  height: 100%;
+  min-height: var(--scale-50);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--box-page);
+}

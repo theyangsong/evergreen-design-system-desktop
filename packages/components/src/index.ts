@@ -1,13 +1,14 @@
 import './styles/global.css';
+import { initEdsDesktopRuntime } from './setup/initEdsDesktopRuntime';
 
-export { EgButton } from './components/Button';
-export type { ButtonVariant, ButtonSize } from './components/Button';
+initEdsDesktopRuntime();
 
-export { EgTypography } from './components/Typography';
-export type { TypographyVariant, TypographyTag } from './components/Typography';
-
-export { EgIcon, iconNames } from './components/Icon';
-export type { IconName } from './components/Icon';
+export * from './atoms';
+export * from './text';
+export * from './molecules';
+export * from './organisms';
+export * from './templates';
+export * from './pages';
 
 export {
   applyTheme,
@@ -17,3 +18,9 @@ export {
 } from './composables/useTheme';
 
 export { initThemeProvider, useThemeProvider } from './composables/useThemeProvider';
+
+export {
+  initEdsDesktopRuntime,
+  initCornerSmoothing,
+  rescanCornerSmoothing,
+} from './setup/initEdsDesktopRuntime';

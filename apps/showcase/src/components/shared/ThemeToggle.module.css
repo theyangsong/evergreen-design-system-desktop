@@ -1,0 +1,12 @@
+.button {
+  padding: var(--spacing-2) var(--spacing-4);
+  border: var(--stroke-xs) solid var(--stroke-base-secondary);
+  border-radius: var(--radius-full);
+  background: var(--material-card-moderate);
+  color: var(--text-base-primary);
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--event-hover);
+}

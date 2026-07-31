@@ -1,0 +1,67 @@
+.root {
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.horizontal {
+  width: 100%;
+  min-width: var(--scale-6);
+}
+
+.vertical {
+  height: 100%;
+  min-height: var(--scale-6);
+  align-self: stretch;
+}
+
+.typeModule {
+  background: var(--stroke-divider-module);
+}
+
+.typeModule.horizontal {
+  height: var(--stroke-sm);
+  min-height: var(--stroke-sm);
+  max-height: var(--stroke-sm);
+}
+
+.typeModule.vertical {
+  width: var(--stroke-sm);
+  min-width: var(--stroke-sm);
+  max-width: var(--stroke-sm);
+}
+
+.typePage {
+  background: var(--stroke-divider-page);
+}
+
+.typePage.horizontal {
+  height: var(--stroke-xs);
+  min-height: var(--stroke-xs);
+  max-height: var(--stroke-xs);
+}
+
+.typePage.vertical {
+  width: var(--stroke-xs);
+  min-width: var(--stroke-xs);
+  max-width: var(--stroke-xs);
+}
+
+.typeNavigator {
+  background: var(--stroke-base-quaternary);
+}
+
+.typeNavigator.horizontal {
+  height: var(--stroke-xs);
+  min-height: var(--stroke-xs);
+  max-height: var(--stroke-xs);
+}
+
+.typeNavigator.vertical {
+  width: var(--stroke-xs);
+  min-width: var(--stroke-xs);
+  max-width: var(--stroke-xs);
+}
+
+.hide {
+  background: var(--stroke-hide);
+}

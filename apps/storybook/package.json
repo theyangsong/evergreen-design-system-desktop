@@ -1,5 +1,5 @@
 {
-  "name": "@evergreen/storybook",
+  "name": "@eds/desktop-storybook",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,9 +9,9 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@evergreen/components": "workspace:*",
-    "@evergreen/tokens": "workspace:*",
-    "vue": "^3.5.13"
+    "@eds/desktop-components": "workspace:*",
+    "vue": "^3.5.13",
+    "@eds/desktop-tokens": "workspace:*"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^8.5.0",

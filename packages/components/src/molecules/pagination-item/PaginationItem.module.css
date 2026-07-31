@@ -1,0 +1,169 @@
+.item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--scale-6);
+  height: var(--scale-6);
+  min-width: var(--scale-6);
+  min-height: var(--scale-6);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0;
+  background-color: var(--material-hide);
+  cursor: pointer;
+  transition:
+    background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.number:hover:not(:disabled),
+.number:active:not(:disabled),
+.number:focus-visible:not(:disabled),
+.symbol:hover:not(:disabled),
+.symbol:active:not(:disabled),
+.symbol:focus-visible:not(:disabled) {
+  background-color: var(--event-hover);
+}
+
+.item:disabled {
+  cursor: not-allowed;
+}
+
+.label {
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
+  color: var(--text-base-secondary);
+}
+
+.item:hover:not(:disabled) .label,
+.item:focus-visible:not(:disabled) .label {
+  color: var(--text-base-primary);
+}
+
+.item:active:not(:disabled) .label {
+  color: var(--text-base-secondary);
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon :global(svg) {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Number ── */
+
+.number.decor:disabled .label,
+.number.brand:disabled .label {
+  color: var(--text-base-quaternary);
+}
+
+.number.decor:focus-visible:not(:disabled) {
+  background-color: var(--material-decor-primary);
+}
+
+.number.decor:focus-visible:not(:disabled) .label {
+  color: var(--text-face-primary);
+}
+
+.number.brand:focus-visible:not(:disabled) {
+  background-color: var(--material-brand-primary);
+}
+
+.number.brand:focus-visible:not(:disabled) .label {
+  color: var(--text-same-white-primary);
+}
+
+/* ── Symbol（Figma：16px eds-arrow-left-mini-ios，描边色 token）── */
+
+.symbol .icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--stroke-base-secondary);
+}
+
+.symbol:hover:not(:disabled) .icon,
+.symbol:focus-visible:not(:disabled) .icon {
+  color: var(--stroke-base-primary);
+}
+
+.symbol:active:not(:disabled) .icon {
+  color: var(--stroke-base-secondary);
+}
+
+.symbol:disabled .icon {
+  color: var(--stroke-base-quaternary);
+}
+
+.symbol.decor:focus-visible:not(:disabled) {
+  background-color: var(--material-decor-primary);
+}
+
+.symbol.decor:focus-visible:not(:disabled) .icon {
+  color: var(--text-face-primary);
+}
+
+.symbol.brand:focus-visible:not(:disabled) {
+  background-color: var(--material-brand-primary);
+}
+
+.symbol.brand:focus-visible:not(:disabled) .icon {
+  color: var(--text-same-white-primary);
+}
+
+/* ── Button kind（Figma：12px eds-arrow-right，白字/面色）── */
+
+.button .icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: var(--text-same-white-primary);
+}
+
+.button.decor {
+  background-color: var(--material-decor-primary);
+}
+
+.button.brand {
+  background-color: var(--material-brand-primary);
+}
+
+.button.decor:active:not(:disabled) .icon {
+  color: var(--text-face-secondary);
+}
+
+.button.brand:active:not(:disabled) .icon {
+  color: var(--text-same-white-secondary);
+}
+
+.button.decor:disabled {
+  background-color: var(--material-decor-quaternary);
+}
+
+.button.brand:disabled {
+  background-color: var(--material-brand-quaternary);
+}
+
+.button.decor:disabled .icon,
+.button.brand:disabled .icon {
+  color: var(--text-base-quaternary);
+}
+
+.button.decor:hover:not(:disabled),
+.button.decor:active:not(:disabled),
+.button.decor:focus-visible:not(:disabled) {
+  background-color: var(--material-decor-primary);
+}
+
+.button.brand:hover:not(:disabled),
+.button.brand:active:not(:disabled),
+.button.brand:focus-visible:not(:disabled) {
+  background-color: var(--material-brand-primary);
+}

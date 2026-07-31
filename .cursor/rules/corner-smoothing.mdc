@@ -12,8 +12,8 @@ Every rounded corner in this project uses **Figma/iOS squircle** at **60%** smoo
 
 - Smoothing level: `--corner-smoothing: 0.6` (in `packages/tokens/spec/scale/semantic.json`)
 - Radius tokens: `var(--radius-xs|sm|md|lg|full)` — never hardcode px radii in components
-- Global init (already wired): `initCornerSmoothing()` in `apps/website/src/main.ts` and Storybook `preview.ts`
-- Engine: `@evergreen/tokens/corner-smoothing` (bundles `figma-squircle`, applies `clip-path: path(...)`)
+- Global init (already wired): `initCornerSmoothing()` in Storybook `preview.ts`
+- Engine: `@eds/desktop-tokens/corner-smoothing` (bundles `figma-squircle`, applies `clip-path: path(...)`)
 
 ## CSS rules
 
@@ -42,7 +42,7 @@ Every rounded corner in this project uses **Figma/iOS squircle** at **60%** smoo
 After async mount, rescan so elements with layout get bound:
 
 ```ts
-import { rescanCornerSmoothing } from '@evergreen/tokens/corner-smoothing';
+import { rescanCornerSmoothing } from '@eds/desktop-tokens/corner-smoothing';
 
 nextTick(() => {
   if (rootRef.value) rescanCornerSmoothing(rootRef.value);

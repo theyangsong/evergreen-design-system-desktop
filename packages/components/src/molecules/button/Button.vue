@@ -1,0 +1,86 @@
+<script setup lang="ts">
+import { computed, useSlots } from 'vue';
+import styles from './Button.module.css';
+
+/** Figma Style */
+export type ButtonVariant = 'solid' | 'outline' | 'text';
+/** Figma tone sets (Brand / Danger / Decor / Subtle / Same White) */
+export type ButtonTone = 'brand' | 'danger' | 'decor' | 'subtle' | 'sameWhite';
+export type ButtonSize = 'lg' | 'md' | 'sm' | 'xs';
+
+/** @deprecated Use `solid` */
+export type LegacyButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariantInput = ButtonVariant | LegacyButtonVariant;
+
+const props = withDefaults(
+  defineProps<{
+    tone?: ButtonTone;
+    variant?: ButtonVariantInput;
+    size?: ButtonSize;
+    disabled?: boolean;
+    loading?: boolean;
+    type?: 'button' | 'submit' | 'reset';
+  }>(),
+  {
+    tone: 'brand',
+    variant: 'solid',
+    size: 'lg',
+    disabled: false,
+    loading: false,
+    type: 'button',
+  },
+);
+
+const slots = useSlots();
+
+const resolvedVariant = computed<ButtonVariant>(() => {
+  switch (props.variant) {
+    case 'primary':
+      return 'solid';
+    case 'secondary':
+      return 'outline';
+    case 'ghost':
+      return 'text';
+    default:
+      return props.variant;
+  }
+});
+
+const isDisabled = computed(() => props.disabled || props.loading);
+</script>
+
+<template>
+  <button
+    :class="[
+      'eds-button',
+      styles.button,
+      styles[props.tone],
+      styles[resolvedVariant],
+      styles[props.size],
+      loading && styles.loading,
+    ]"
+    :disabled="isDisabled"
+    :type="type"
+    :aria-busy="loading || undefined"
+  >
+    <span v-if="loading" :class="styles.spinner" aria-hidden="true">
+      <svg
+        :class="styles.spinnerIcon"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="8" cy="8" r="6" stroke-dasharray="9 28" />
+      </svg>
+    </span>
+
+    <template v-else>
+      <span v-if="slots.icon" :class="styles.icon">
+        <slot name="icon" />
+      </span>
+      <span :class="styles.label">
+        <slot />
+      </span>
+    </template>
+  </button>
+</template>

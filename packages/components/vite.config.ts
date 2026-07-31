@@ -19,7 +19,7 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['vue'],
+      external: ['vue', '@eds/desktop-tokens/corner-smoothing'],
       output: {
         globals: {
           vue: 'Vue',

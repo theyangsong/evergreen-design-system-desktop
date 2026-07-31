@@ -1,0 +1,21 @@
+.root {
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.widthAdaptive {
+  width: max-content;
+}
+
+.widthFixed {
+  /* width from inline style when widthMode is fixed */
+}
+
+.heightAdaptive {
+  height: auto;
+  min-height: 0;
+}
+
+.heightFixed {
+  /* height from inline style when heightMode is fixed */
+}

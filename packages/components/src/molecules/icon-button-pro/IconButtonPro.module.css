@@ -1,0 +1,93 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: var(--scale-11);
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.root:disabled {
+  cursor: not-allowed;
+}
+
+/* Badge / reddot anchor around nested EgIconButton */
+.iconSlot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+ * Whole-control hover (including label) should drive nested Simple container.
+ * Same Desktop stroke tokens as EgIconButton.
+ */
+.root:hover:not(:disabled) :global(.eds-icon-button),
+.root:active:not(:disabled) :global(.eds-icon-button),
+.root:focus-visible:not(:disabled) :global(.eds-icon-button) {
+  background-color: var(--event-hover);
+}
+
+.root:hover:not(:disabled) :global(.eds-icon-button path),
+.root:hover:not(:disabled) :global(.eds-icon-button line),
+.root:focus-visible:not(:disabled) :global(.eds-icon-button path),
+.root:focus-visible:not(:disabled) :global(.eds-icon-button line) {
+  stroke: var(--stroke-base-primary);
+}
+
+.root:active:not(:disabled) :global(.eds-icon-button path),
+.root:active:not(:disabled) :global(.eds-icon-button line) {
+  stroke: var(--stroke-base-secondary);
+}
+
+.root:disabled :global(.eds-icon-button path),
+.root:disabled :global(.eds-icon-button line) {
+  stroke: var(--stroke-base-quaternary);
+}
+
+.label {
+  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
+  display: block;
+  width: 100%;
+  margin-top: var(--spacing-05);
+  margin-inline: auto;
+  color: var(--text-base-secondary);
+  text-align: center;
+}
+
+.root:disabled .label {
+  color: var(--text-base-quaternary);
+}
+
+.badge {
+  position: absolute;
+  top: -3px;
+  left: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--scale-4);
+  padding: var(--spacing-025) var(--spacing-1);
+  border-radius: var(--radius-full);
+  background-color: var(--material-brand-primary);
+  color: var(--text-same-white-primary);
+}
+
+.badgeText {
+  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
+}
+
+.reddot {
+  position: absolute;
+  top: 2px;
+  left: 28px;
+  width: var(--scale-2);
+  height: var(--scale-2);
+  border-radius: var(--radius-md);
+  background-color: var(--status-danger);
+}

@@ -1,0 +1,578 @@
+.shell {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex-shrink: 0;
+  height: 100%;
+  min-height: calc(200 * var(--scale-base));
+}
+
+.edgeDivider {
+  flex-shrink: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+.root {
+  --eds-nav-bar-width: calc(var(--scale-18) + var(--scale-05));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--eds-nav-bar-width);
+  min-width: var(--eds-nav-bar-width);
+  max-width: var(--eds-nav-bar-width);
+  height: 100%;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  background-color: var(--box-container);
+  font: inherit;
+}
+
+.split {
+  gap: var(--spacing-0);
+}
+
+.corporation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-0);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  background-color: var(--box-container);
+}
+
+.corporation::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 1;
+  height: var(--scale-1);
+  pointer-events: none;
+  opacity: 0;
+  border-top: var(--stroke-xs) solid var(--stroke-outline-shallow);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in display-p3, var(--effect-shadow-shallow) 70%, transparent),
+    transparent
+  );
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.corporationOverflow::after {
+  opacity: 1;
+}
+
+.moduleRegion {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+  padding-block: var(--spacing-2) var(--spacing-4);
+  padding-inline: var(--spacing-1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background-color: var(--box-container);
+}
+
+.moduleRegionContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.moduleRegion::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.moduleRegionDivider {
+  width: var(--scale-6);
+  flex-shrink: 0;
+}
+
+.individuals {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  width: 100%;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  padding: var(--spacing-2) var(--spacing-0) var(--spacing-4);
+  background-color: var(--box-container);
+}
+
+.individuals::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  z-index: 1;
+  height: var(--scale-1);
+  pointer-events: none;
+  opacity: 0;
+  border-bottom: var(--stroke-xs) solid var(--stroke-outline-shallow);
+  background: linear-gradient(
+    to top,
+    color-mix(in display-p3, var(--effect-shadow-shallow) 70%, transparent),
+    transparent
+  );
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.individualsOverflow::after {
+  opacity: 1;
+}
+
+.bottomIcons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.splitDivider {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.systemButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1-5);
+  width: var(--eds-nav-bar-width);
+  padding: var(--spacing-0) var(--spacing-3);
+  cursor: default;
+}
+
+.trafficDot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  min-width: var(--icon-sm);
+  min-height: var(--icon-sm);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  cursor: default;
+  overflow: visible;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: none;
+}
+
+.trafficClose {
+  background: var(--status-danger);
+}
+
+.trafficMinimize {
+  background: var(--status-warning);
+}
+
+.trafficExpand {
+  background: var(--status-success);
+}
+
+.trafficGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  opacity: 0;
+  line-height: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.trafficGlyph :global(.eds-icon) {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.trafficDot:hover .trafficGlyph {
+  opacity: 1;
+}
+
+.trafficDot:active,
+.trafficDot:active .trafficGlyph {
+  transform: none;
+}
+
+.trafficClose:active {
+  background: var(--status-danger);
+}
+
+.trafficMinimize:active {
+  background: var(--status-warning);
+}
+
+.trafficExpand:active {
+  background: var(--status-success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trafficGlyph {
+    transition: none;
+  }
+}
+
+.corporationMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--scale-10);
+  height: var(--scale-10);
+  border: var(--stroke-xl) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--material-same-white-tertiary);
+  color: var(--text-base-primary);
+  font-size: var(--eds-title-size);
+  font-weight: var(--eds-title-weight);
+  line-height: var(--scale-10);
+  text-align: center;
+  cursor: pointer;
+}
+
+.corporationMark:hover:not(:disabled):not(.corporationMarkFocused) {
+  border-color: color-mix(in display-p3, var(--stroke-color-brand) 40%, transparent);
+}
+
+.corporationMarkFocused:not(:disabled) {
+  outline: none;
+  border-color: var(--stroke-color-brand);
+}
+
+.corporationMark:focus {
+  outline: none;
+}
+
+.corporationMark:focus-visible {
+  outline: var(--stroke-sm) solid var(--stroke-color-brand);
+  outline-offset: var(--spacing-025);
+}
+
+.moduleItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-0);
+  width: 100%;
+  max-width: var(--scale-17);
+  overflow: visible;
+}
+
+.moduleIconHost {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* Figma NavBar-Module Reddot=Yes — left 28px / top 2px on 38px icon host */
+.moduleReddot {
+  position: absolute;
+  top: var(--scale-05);
+  left: var(--scale-7);
+  width: var(--scale-2);
+  height: var(--scale-2);
+  border-radius: var(--radius-md);
+  background-color: var(--status-danger);
+  pointer-events: none;
+}
+
+/* Bar 11px：2× + scale(0.5)（与 PersonAvatar 同思路）；外层 clip，sizer 用 token 字号撑高/换行 */
+.moduleLabel {
+  position: relative;
+  align-self: stretch;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  color: var(--text-base-secondary);
+  text-align: center;
+}
+
+.moduleLabelSizer {
+  display: block;
+  visibility: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
+  overflow-wrap: break-word;
+  word-break: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.moduleLabelPaint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 200%;
+  padding: 0;
+  margin: 0;
+  font-size: calc(var(--eds-bar-size) * 2);
+  font-weight: var(--eds-bar-weight);
+  line-height: calc(var(--eds-bar-line-height) * 2);
+  transform: scale(0.5);
+  transform-origin: top left;
+  color: inherit;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  pointer-events: none;
+}
+
+.moduleLabelActive {
+  color: var(--text-base-primary);
+}
+
+.moduleIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* Figma iCon Container Simple Lg — py 5px / px 9px */
+  padding: calc(var(--scale-1) + var(--scale-025)) calc(var(--scale-2) + var(--scale-025));
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--material-hide);
+  cursor: pointer;
+}
+
+.moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused) {
+  background-color: var(--event-hover);
+}
+
+.moduleIconButtonFocused:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.moduleIconGlyph {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  line-height: 0;
+}
+
+.moduleIconDefault,
+.moduleIconFocus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.moduleIconFocus {
+  display: none;
+}
+
+.moduleIconButtonFocused:not(:disabled) .moduleIconGlyphWithFocus .moduleIconDefault {
+  display: none;
+}
+
+.moduleIconButtonFocused:not(:disabled) .moduleIconGlyphWithFocus .moduleIconFocus {
+  display: inline-flex;
+}
+
+/* 模块 icon：仅通过 color 驱动 token 描边/填充配色；fixed / appEntry 不覆盖 */
+.moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
+  color: var(--stroke-base-secondary);
+}
+
+.moduleIconGlyph:not(.moduleIconGlyphAppEntry) :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+.moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused)
+  .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
+  color: var(--stroke-base-primary);
+}
+
+.moduleIconButtonFocused:not(:disabled) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
+  color: var(--material-brand-primary);
+}
+
+/* 应用入口：库内 icon 原样渲染，不参与 Nav Bar token 换色 */
+.moduleIconGlyphAppEntry {
+  color: unset;
+}
+
+.bottomIconHost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--material-hide);
+  cursor: pointer;
+}
+
+.bottomIconHost:hover:not(:disabled):not(.bottomIconHostFocused) {
+  background-color: var(--event-hover);
+}
+
+.bottomIconHostFocused:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.bottomIconHost:focus {
+  outline: none;
+}
+
+.bottomIconHost:focus-visible {
+  outline: var(--stroke-sm) solid var(--stroke-color-brand);
+  outline-offset: var(--spacing-025);
+}
+
+.bottomIconGlyph {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  line-height: 0;
+  color: var(--stroke-base-secondary);
+}
+
+.bottomIconDefault,
+.bottomIconFocus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.bottomIconFocus {
+  display: none;
+}
+
+.bottomIconHostFocused:not(:disabled) .bottomIconGlyphWithFocus .bottomIconDefault {
+  display: none;
+}
+
+.bottomIconHostFocused:not(:disabled) .bottomIconGlyphWithFocus .bottomIconFocus {
+  display: inline-flex;
+}
+
+.bottomIconGlyph :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+.bottomIconHost:hover:not(:disabled):not(.bottomIconHostFocused) .bottomIconGlyph {
+  color: var(--stroke-base-primary);
+}
+
+.bottomIconHostFocused:not(:disabled) .bottomIconGlyph {
+  color: var(--material-brand-primary);
+}
+
+.avatarHost {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-025);
+  border: var(--stroke-xl) solid transparent;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+}
+
+.avatarHost:hover:not(:disabled):not(.avatarHostFocused) {
+  border-color: color-mix(in display-p3, var(--stroke-color-brand) 40%, transparent);
+}
+
+.avatarHostFocused:not(:disabled) {
+  outline: none;
+  border-color: var(--stroke-color-brand);
+}
+
+.avatarHost:focus {
+  outline: none;
+}
+
+.avatarHost:focus-visible {
+  outline: var(--stroke-sm) solid var(--stroke-color-brand);
+  outline-offset: var(--spacing-025);
+}
+
+.avatarCircle {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: var(--scale-9);
+  height: var(--scale-9);
+  border-radius: var(--radius-full);
+  background: var(--material-brand-primary);
+  color: var(--text-same-white-primary);
+}
+
+.avatarInitial {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: calc(var(--scale-9) * 2);
+  height: calc(var(--scale-9) * 2);
+  font-size: calc(var(--eds-bar-size) * 2);
+  font-weight: var(--eds-bar-weight);
+  line-height: 1;
+  text-transform: uppercase;
+  transform: scale(0.5);
+  transform-origin: 0 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

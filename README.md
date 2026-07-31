@@ -13,20 +13,20 @@ Vue 3 design system with CSS Modules, Figma-synced design tokens, and Storybook 
 pnpm install
 pnpm build:tokens
 pnpm build:components
-pnpm dev                # 文档站 → http://localhost:5173
+pnpm dev                # Showcase 预览站 → http://localhost:5177
 pnpm dev:storybook      # Storybook → http://localhost:6006
 ```
 
 ## Project structure
 
 ```
-evergreen-design-system-desktop/
+eds-desktop/
 ├── packages/
 │   ├── tokens/          # Design tokens (spec → CSS)
-│   └── components/      # Vue 3 components (CSS Modules)
+│   └── components/      # Vue 3 components (CSS Modules) — see packages/components/README.md
 ├── apps/
-│   ├── storybook/       # 组件文档 + 设计规范（Storybook）
-│   └── website/         # 设计系统文档站（面向设计/产品/开发）
+│   ├── showcase/        # Desktop 预览站（token + 组件画廊）
+│   └── storybook/       # 组件文档 + 设计规范（Storybook）
 └── figma.config.json    # Figma file configuration
 ```
 
@@ -34,7 +34,9 @@ evergreen-design-system-desktop/
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | Start Storybook |
+| `pnpm dev` | Start Showcase preview site |
+| `pnpm dev:showcase` | Start Showcase preview site |
+| `pnpm dev:storybook` | Start Storybook |
 | `pnpm build` | Build all packages |
 | `pnpm build:tokens` | Build CSS variables from tokens |
 | `pnpm build:components` | Build Vue component library |

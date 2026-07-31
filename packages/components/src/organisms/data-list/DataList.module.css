@@ -1,0 +1,255 @@
+/* EgDataList — ported from @cregis/ui TableList; Desktop tokens only. */
+
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+}
+
+.initing {
+  position: absolute;
+  z-index: 11;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: var(--box-page);
+}
+
+.initingContent {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  /* Optical nudge from source TableList (keeps spinner above vertical center). */
+  transform: translate(-50%, calc(var(--spacing-10) * -1 - var(--spacing-0-5)));
+}
+
+.initingIcon {
+  color: var(--stroke-base-secondary);
+  animation: eds-data-list-spin 2s linear infinite;
+}
+
+.initingText {
+  color: var(--text-base-secondary);
+  text-align: center;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-size);
+  font-style: normal;
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.operationBar {
+  position: absolute;
+  bottom: var(--spacing-8);
+  z-index: 11;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tableContent {
+  border-top: var(--stroke-xs) solid transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tableContent::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+}
+
+.loadingRow {
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+
+.loadingRow td {
+  padding: 0;
+  border: none;
+}
+
+.loadingInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0;
+  color: var(--stroke-base-secondary);
+}
+
+.loadingSpin {
+  animation: eds-data-list-spin 2s linear infinite;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.emptyIcon {
+  color: var(--text-base-quaternary);
+}
+
+.emptyText {
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  color: var(--text-base-tertiary);
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Header cell */
+.headerCell {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  white-space: nowrap;
+}
+
+.headerSelect {
+  display: flex;
+  padding-left: var(--spacing-6);
+  align-items: center;
+  align-self: stretch;
+}
+
+.headerContent {
+  display: flex;
+  padding: 0 var(--spacing-6);
+  align-items: center;
+  align-self: stretch;
+  color: var(--text-base-tertiary);
+  text-align: center;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-strong-size);
+  font-style: normal;
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
+}
+
+.sortTrigger {
+  position: relative;
+  display: flex;
+  padding: var(--spacing-1);
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  color: var(--text-base-tertiary);
+  cursor: pointer;
+}
+
+.sortTriggerDisabled {
+  cursor: not-allowed;
+}
+
+.sortTriggerFocus,
+.sortTriggerActive {
+  background: var(--event-hover-secondary);
+}
+
+.sortPopover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025);
+  min-width: var(--scale-20);
+  padding: var(--spacing-1);
+  border-radius: var(--radius-sm);
+  overflow-y: auto;
+}
+
+.sortItem {
+  width: 100%;
+  display: flex;
+  padding: var(--spacing-1) var(--spacing-2);
+  align-items: center;
+  gap: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--material-hide);
+  color: var(--text-base-primary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sortItem:hover,
+.sortItemActive {
+  background-color: var(--event-focus-tertiary);
+}
+
+/* Body cell */
+.column {
+  user-select: text;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+}
+
+.cellSelect {
+  display: flex;
+  padding-left: var(--spacing-6);
+  align-items: center;
+  align-self: stretch;
+}
+
+.cellContent {
+  display: flex;
+  padding: 0 var(--spacing-6);
+  align-items: center;
+  align-self: stretch;
+}
+
+.cellText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  color: var(--text-base-primary);
+}
+
+@keyframes eds-data-list-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

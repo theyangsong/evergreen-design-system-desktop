@@ -1,16 +1,14 @@
-@import '@evergreen/tokens';
-
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: var(--font-family-text);
-  font-size: var(--typography-body-medium-size);
-  line-height: var(--typography-body-medium-line-height);
-  color: var(--text-base-primary);
-  background-color: var(--box-page);
+/* Stable hooks — native inputs may not inherit body text-rendering in WebKit. */
+.eds-input-field,
+.eds-input-control,
+.eds-input-unit {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

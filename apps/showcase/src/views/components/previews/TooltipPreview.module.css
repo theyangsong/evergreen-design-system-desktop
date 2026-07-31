@@ -1,0 +1,35 @@
+.previewHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--showcase-doc-preview-height);
+  padding: var(--spacing-8);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.anchoredScene {
+  background: linear-gradient(
+    90deg,
+    rgb(9 135 160) 0%,
+    rgb(128 90 213) 100%
+  );
+}
+
+.panelScene {
+  background: transparent;
+}
+
+.slotDemo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--scale-20) + var(--scale-6));
+  min-height: var(--scale-15);
+  padding: var(--spacing-2);
+  text-align: center;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
+}

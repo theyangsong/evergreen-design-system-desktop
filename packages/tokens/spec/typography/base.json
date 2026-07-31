@@ -38,7 +38,7 @@
     {
       "comment": "字体家族",
       "tokens": {
-        "font-family-text": "\"EDS Text\", \"PingFang SC\", \"SourceHanSansSC\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif"
+        "eds-family-sans": "\"EDS Text\", \"PingFang SC\", \"SourceHanSansSC\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif"
       }
     }
   ]

@@ -15,6 +15,12 @@ const config: StorybookConfig = {
     defaultName: 'Documentation',
   },
   staticDirs: ['../public'],
+  async viteFinal(config) {
+    if (process.env.VITE_BASE_PATH) {
+      config.base = process.env.VITE_BASE_PATH;
+    }
+    return config;
+  },
 };
 
 export default config;

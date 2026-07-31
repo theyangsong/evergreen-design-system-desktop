@@ -1,0 +1,112 @@
+.anchors {
+  position: sticky;
+  top: var(--spacing-4);
+  align-self: start;
+  width: max-content;
+  max-width: 100%;
+}
+
+.nav {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: var(--spacing-05);
+}
+
+.activeIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 100%;
+  border: var(--stroke-sm) solid var(--stroke-base-secondary);
+  border-radius: var(--radius-full);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, height, opacity;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .activeIndicator {
+    transition: opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
+
+  .activeIndicatorMove {
+    transition:
+      transform var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      height var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      opacity var(--eds-motion-indicator-opacity-duration) ease;
+  }
+}
+
+.activeIndicatorVisible {
+  opacity: 1;
+}
+
+.link {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding-block: var(--spacing-1-5);
+  padding-inline: var(--spacing-3);
+  border: var(--stroke-xs) solid transparent;
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
+  font-weight: var(--eds-footnote-large-strong-weight);
+  white-space: nowrap;
+  transition:
+    background-color var(--eds-motion-hover-duration) ease,
+    color var(--eds-motion-hover-duration) ease,
+    border-color var(--eds-motion-hover-duration) ease;
+}
+
+.link:hover:not(.linkActive) {
+  background-color: var(--event-hover);
+  color: var(--text-base-primary);
+}
+
+.link:focus {
+  outline: none;
+}
+
+.link:focus-visible,
+.link.linkNested:focus-visible,
+.link.linkActive:focus-visible,
+.link.linkNested.linkActive:focus-visible {
+  background-color: var(--event-focus);
+  color: var(--text-base-primary);
+  font-weight: var(--eds-footnote-large-strong-weight);
+  border-color: var(--stroke-color-brand);
+}
+
+.linkNested {
+  padding-block: var(--spacing-05);
+  padding-inline-start: calc(var(--spacing-3) + var(--spacing-2));
+}
+
+.linkActive {
+  color: var(--text-base-primary);
+  font-weight: var(--eds-footnote-large-strong-weight);
+}
+
+.linkActive:hover:not(:focus-visible) {
+  background-color: transparent;
+  color: var(--text-base-primary);
+}
+
+.nav:has(.linkActive:focus-visible) .activeIndicator {
+  opacity: 0;
+}
+
+@media (max-width: 1100px) {
+  .anchors {
+    display: none;
+  }
+}

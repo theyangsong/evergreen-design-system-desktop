@@ -1,5 +1,5 @@
 {
-  "$description": "Scale System base primitives. scale(n) = n × scaleBase. Stroke is independent of the 4px grid.",
+  "$description": "Scale System base primitives. scale(n) = n × scaleBase.",
   "scaleBase": 4,
   "scale": {
     "scale-0": 0,
@@ -31,12 +31,5 @@
     "scale-40": 40,
     "scale-50": 50,
     "scale-full": "888px"
-  },
-  "stroke": {
-    "stroke-xs": "0.5px",
-    "stroke-sm": "1px",
-    "stroke-md": "1.1px",
-    "stroke-lg": "1.4px",
-    "stroke-xl": "2px"
   }
 }

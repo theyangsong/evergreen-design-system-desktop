@@ -1,0 +1,241 @@
+---
+description: EDS Desktop 项目约定（维护者自管）— token、语义映射、命名、Showcase 文档、锚点、嵌套滚动边界
+globs: packages/**/*,apps/showcase/**/*
+alwaysApply: false
+---
+
+# EDS Desktop — 项目约定
+
+> 技术规则不重复：颜色见 `display-p3-color-usage.mdc`；圆角见 `corner-smoothing.mdc`；描边 SVG 缩放见 `stroke-svg-scaling.mdc`；Showcase Website/Desktop 作用域见 **§5** 与 `showcase-token-scope.mdc`。
+
+## 1. 属性与数值必须使用变量
+
+- **Desktop 组件**（`packages/components/**`）、**`.desktopTokens` 作用域内**、以及 Showcase 中 **组件 props/示例** 的可配置取值，须通过 Desktop token / CSS 变量 / prop 枚举表达。
+- **展示站点壳层**（布局、文档排版、导航、demo 标签等）须通过 **Website** token / 变量表达，见 **§5**。
+- 若任务需要某个数值，而 **对应作用域的仓库中不存在** token、变量或 prop 取值：
+  1. **停止继续改代码**；
+  2. **先向维护者确认**是否允许临时硬编码，以及硬编码的范围与位置；
+  3. 仅在得到明确同意后再写硬编码，并在变更中注明原因。
+- 颜色仅通过 `var(--*)` 消费，遵守 Display P3 规则文件。
+
+### 1.1 数字 → 语义 token（禁止「数值碰巧相同就用 scale」）
+
+**作用域**：`packages/components/**` 的样式，以及 Showcase 内 **`.desktopTokens`  subtree**（Desktop 组件 live 预览、Desktop `/tokens` 文本样式预览等）。**Showcase 壳层 CSS 不用 Desktop `packages/tokens` 的 `--eds-*` 排版**（如 `--eds-headline-size` 单档）；壳层改用 **`@eds/website-tokens`** 导出的 **`--eds-*` 角色 token**（带档位后缀，如 `--eds-headline-small-*`、`--eds-body-medium-*`），见 §5。
+
+维护者或设计稿用 **px / 字号 / 字重** 描述时，须映射到 **带语义的 CSS 变量**，而不是仅因数值相等就使用 `--scale-*`、`--size-*` 等 **基数 primitive**。
+
+**原则**
+
+1. **先判断用途（语义角色）**，再选 token；查 `packages/tokens/spec/scale/semantic.json`、`packages/tokens/dist/css/scale/semantic.css`、`packages/tokens/dist/css/typography/semantic.css`（或 Figma 同名角色）。
+2. **`--scale-*` 是尺度基数**（间距网格）；**圆角、间距、描边、图标、模糊、层级** 各有语义层，默认 **不要** 在组件里直接写 `--scale-3` 当圆角或当间距，除非现有 effect / spec 已明确绑定（effect 内层仍引用 scale 时以 spec 与 `corner-smoothing.mdc` 为准）。
+3. 映射后使用 **`var(--语义-token)`**；禁止 `12px`、`1px`、`13px`、`font-weight: 500` 等硬编码，除非上文「先询问是否硬编码」已获批。
+4. 同一 px 在不同语义下 **变量不同**（例如 12px 可能是圆角 `--radius-md`，也可能是图标 `--icon-sm` 或间距 `--spacing-3`）——**以用途为准，不以数字为准**。
+
+**常用映射（示例）**
+
+| 维护者说法 / 设计稿 | 语义 | 应使用的变量（示例） |
+|---------------------|------|----------------------|
+| 圆角 12 | 圆角 Radius | `var(--radius-md)`（12px） |
+| 描边 1 / 1px 边框 | 描边 Stroke | `var(--stroke-sm)` |
+| 间距 12 | 布局 Spacing | `var(--spacing-3)` |
+| 文本 13、常规 | Body Small | `--eds-body-small-size` / `-weight` / `-line-height` |
+| 文本 13、中黑 / Medium | Body Small Strong | `--eds-body-small-strong-size` + `-weight` + `-line-height` |
+
+排版优先 **整组 typography 角色 token**（size + weight + line-height 同角色），避免单独拼 `--size-md` + `--weight-medium` 替代已有 Strong 角色。
+
+**Bar（11px / `--eds-bar-size`）**：Chrome 等会把小于 12px 的字抬到最小字号。消费 Bar 字号时用 **`barTextSubpixel.module.css`**（2× `font-size` + `transform: scale(0.5)`，与 eds-doc `PersonAvatar` 8px initials 同手法），或 token 工具类 **`.eds-bar-text-subpixel`**（`spec/typography/bar-subpixel.json`）。不要指望裸写 `font-size: var(--eds-bar-size)` 在所有浏览器里视觉仍是 11px。**`EgNavBar` 模块 Label**：Nav 根 `overflow-x: clip`，不可用会横向溢出的 2× 排版；用 **`.moduleLabel` 外层 clip + `.moduleLabelPaint`（2×+scale，origin top left，宽 200%）+ `.moduleLabelSizer`（隐藏、直出 `--eds-bar-*` 撑换行/高度）**，与头像 initials 同一类子像素策略。
+
+**禁止 / 推荐示例**
+
+```css
+/* ❌ 圆角 12 — 数值对，语义错 */
+border-radius: var(--scale-3);
+
+/* ✅ */
+border-radius: var(--radius-md);
+
+/* ❌ 1px 描边 */
+border: 1px solid …;
+
+/* ✅ */
+border: var(--stroke-sm) solid …;
+
+/* ❌ 13px 中黑 — 只用 primitive */
+font-size: var(--size-md);
+font-weight: var(--weight-medium);
+
+/* ✅ Body Small Strong */
+font-size: var(--eds-body-small-strong-size);
+font-weight: var(--eds-body-small-strong-weight);
+line-height: var(--eds-body-small-strong-line-height);
+```
+
+**无法一一对应时**：spec / dist 中找不到与语义匹配的 token → 按第 1 节 **先问维护者**，不得默认 `--scale-n` 或裸 px。
+
+## 2. 维度命名规则（关联变量类）
+
+用于 **需要唯一标识某一组 prop 组合** 的命名（如 preview 行 key、demo id、测试 fixture 名、内部常量名等），格式固定为 **5 段、下划线连接、小写**，且 **不得增加第六段或任意前缀/后缀**：
+
+```text
+{component}_{style}_{tone}_{size}_{status}
+```
+
+- **component**：组件在约定中的英文名，与 Showcase / 目录一致（如 `button`；子类用 catalog 子项语义，如 `icon_button`、`link`）。**DOM 锚点 id** 仍用现有 kebab-case（如 `button-sizes`），与本节的 snake 名区分。
+- **style**：对应 prop `variant` 的取值：`solid` | `outline` | `text`（Figma Style；命名中不用 `primary` 等别名）。
+- **tone**：与组件 API 一致的 literal（如 `brand` | `danger` | `decor` | `subtle` | `sameWhite`）。
+- **size**：与组件 API 一致的 literal（如 `lg` | `md` | `sm` | `xs`）。
+- **status**：与状态 prop 一致（如 `disabled` | `loading`）；无特殊状态时仍须占一段，使用该组件 Preview data 中统一约定的默认状态 literal（如 `enabled` 或 `default`）。
+
+**示例**：`button_solid_brand_lg_disabled`
+
+**禁止**：`button-solid-brand-lg`、`btn_solid_brand_lg_disabled_extra`、`button_solid_brand_large_disabled`（size 必须用 `lg` 而非英文全称）。
+
+## 3. 多子类组件：拆分锚点
+
+- 一个 Molecule 下若有 **多个独立小组件**（如 Button 下的 Button / IconButton / Link / Pagination / Combo），Showcase 必须：
+  - 在 `catalog.ts` 的 `children` 中列出子类，**id 与预览页顶层容器 `id` 一致**（如 `button-text`、`button-icon`）；
+  - 每个子类单独一块预览区；子类内部再用 `section` + `id`（如 `button-sizes`、`button-tones`）做二级锚点；
+  - 侧栏/页内导航只链到这些稳定 id，结构参考 `Button` + `ButtonPreview.vue`。
+- 新增子类时：**先加 catalog child + 预览根节点 id，再加 section**，避免只有 DOM 没有导航项。
+- **Import 语句**：同一 Molecule 家族在 Showcase 页 **顶部只保留一条整合 import**（列出该族下所有已发布/规划中的 `Eg*` 导出，格式同 Button 页）；子类区块（Textarea / Search 等）仅保留属性与示例，**不再重复 import**。侧栏子锚点用于跳转；**第一个** `catalog.children` 预览根节点（如 `#input-input`、`#button-text`）**不加** `previewGroupLabel`；从**第二个**子类起，在分割线下方 `padding-top: var(--spacing-6)`（24px）后显示标题（**Body Medium Strong**（18px / medium）+ `text-brand-primary`；文案 `getCatalogChildLabel`）。
+
+## 4. Showcase 文案语言
+
+### 4.1 章节标题（如 `<h2 class="sectionTitle">`）
+
+- 面向读者的 **章节名使用中文**（必要时括号保留设计系统英文名）。
+- 示例：`Size` → **尺寸**；`Style` → **风格**；`Tone` → **色调**；`States` → **状态**。
+
+### 4.2 变量取值标签（如 `sizeLabel`）
+
+- 展示 **token / prop 取值** 时，使用 **「中文 + 英文 token」**，中间空格；**英文 token 必须与组件 props / 类型字面量一致**（如 `lg`、`rectangular`、`sameWhite`、`disabled`）。
+- 统一维护：`apps/showcase/src/data/showcasePropLabels.ts`（预览行 `key` 绑定真实 prop 值，`label` 为展示文案）。
+- 示例：
+  - `Large` → **大 Lg**
+  - `Medium` → **中 Md**
+  - `Small` → **小 Sm**
+  - `Extra Small` → **特小 Xs**
+  - `Solid` → **实心 Solid**
+  - `Disabled` → **禁用 disabled**
+  - `rectangular` → **矩形 rectangular**
+- **prop 名、类型、import、组件标签名（EgButton）** 保持英文；说明句、表格 description 用中文。
+
+### 4.3 组件文档撰写
+
+- 新增或修改组件 Showcase 页时，**默认按中文读者撰写**（属性表 description、段落说明、按钮 aria-label 等）；与上两条冲突时，以本文件为准。
+
+## 5. 库引用：Website 承载层 vs Desktop 组件层
+
+预览站、文档站、官网等 **承载组件展示的站点**，页面壳（布局、导航、文档排版、demo 外壳、标签与间距）一律使用 **`@eds/website-tokens` / `@eds/website-components`** 的变量与组件（如 **`--eds-headline-small-*` / `--eds-body-medium-*` 等 Website 排版角色**、`--text-base-*`、`--spacing-*`、`--box-page`、`--eds-family-sans` 等）。
+
+**Desktop 库**（`@eds/desktop-tokens`、`@eds/desktop-components`）仅用于：
+
+1. **`packages/components/**`** 组件实现（含 `--eds-*`、material、radius、stroke 等）；
+2. 展示站中的 **Desktop 组件实例** 及其 **props / 事件 / 示例代码**；
+3. Showcase 中 **`.desktopTokens`** 最小包裹容器内的 subtree（PostCSS 注入 Desktop token，细则见 `showcase-token-scope.mdc`）；
+4. **`/tokens`** 等专门展示 Desktop token 的区域（`.desktopTokens` 或等价作用域内的 `--eds-*` 文本预览）。
+
+**禁止**：
+
+- 在 PageHeader、侧栏、preview 模块壳层 CSS 中使用 **Desktop token 包**（`packages/tokens`）的排版 **`--eds-*`**（如 `--eds-headline-size` 无档位后缀），或已废弃的 **`--typography-*`**（Website 侧已统一为 `@eds/website-tokens` 的 `--eds-*` 角色名）；
+- 把 demo 的 `sizeLabel`、`previewStack` 等文档 chrome 包进 `.desktopTokens`（仅组件 subtree 进入 Desktop 作用域）；
+- 在 Desktop 组件 `.module.css` 中用 **Website 壳层 token** 冒充组件样式。
+
+**例外**：`apps/showcase/src/motion/tokens.css` 为 Showcase **壳层动效** 时长/缓动（`--eds-motion-*`），不是 Desktop 组件 API；新壳层动效优先加在此文件，勿扩散到 `packages/components`。
+
+**交叉引用**：DOM 与 CSS 结构见 `showcase-token-scope.mdc`；Desktop 数字→语义映射见 §1.1。
+
+## 6. Desktop 组件：嵌套滚动边界（滚到顶/底不晃动）
+
+**作用域**：`packages/components/**` 内所有带 **内部可滚动区域** 的 Desktop 组件（Nav Bar 模块区、Module Menu、Layout 侧栏等）。滚轮 / 触控板滚到 **顶或底** 时，**不得**把滚动链传给外层页面，也 **不得**出现边界回弹、页面跟着抖。
+
+**参考实现**：`packages/components/src/organisms/nav-bar/NavBar.vue` + `NavBar.module.css`（`.moduleRegion`）。
+
+### 6.1 CSS（滚动容器）
+
+- 滚动容器使用 `overflow-y: auto`（或 `scroll`）+ `overscroll-behavior: none`（**不用** `contain`）。
+- 按需隐藏滚动条（`scrollbar-width: none` 等），但不影响边界行为。
+
+```css
+.scrollRegion {
+  overflow-y: auto;
+  overscroll-behavior: none;
+}
+```
+
+### 6.2 JS（边界拦截 + 钳制）
+
+对同一滚动容器 **同时** 做三件事：
+
+1. **`wheel` 监听**（`{ passive: false }`）：已到顶仍向上滚、已到底仍向下滚时 `event.preventDefault()`。
+2. **`scroll` 回调内钳制** `scrollTop` 到 `[0, scrollHeight - clientHeight]`，避免负值或越界。
+3. **边界容差**：用常量（如 `SCROLL_EDGE_EPSILON = 2`）判断顶/底；若滚动边界还驱动 UI（溢出阴影、渐变遮罩等），同一容差复用，避免边界闪烁。
+
+```typescript
+const SCROLL_EDGE_EPSILON = 2;
+
+function clampScrollRegionScroll(region: HTMLElement) {
+  const maxScrollTop = Math.max(0, region.scrollHeight - region.clientHeight);
+  if (region.scrollTop < 0) region.scrollTop = 0;
+  else if (region.scrollTop > maxScrollTop) region.scrollTop = maxScrollTop;
+}
+
+function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
+  const maxScrollTop = region.scrollHeight - region.clientHeight;
+  if (maxScrollTop <= 0) return;
+
+  const atTop = region.scrollTop <= 0;
+  const atBottom = region.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
+  const scrollingUp = event.deltaY < 0;
+  const scrollingDown = event.deltaY > 0;
+
+  if ((scrollingUp && atTop) || (scrollingDown && atBottom)) {
+    event.preventDefault();
+  }
+}
+```
+
+- 在 `onMounted` / `onUpdated` 绑定 `wheel`（ref 就绪后）；`onBeforeUnmount` **必须** `removeEventListener`。
+- 新建或改可滚动 Desktop 组件时，**默认按本节实现**；勿只依赖 CSS 或只拦 `@scroll` 而不拦 `wheel`。
+
+## 7. Organism Showcase：场景化（组件本体 + 业务薄组件）
+
+**作用域**：`apps/showcase` 中 **Organisms / Templates** 文档页（Nav Bar、Module Menu 等）。
+
+每个 Organism 文档页采用 **单一 `ComponentDocLayout` 预览块**，在「定制」**第一项**增加 **场景化** 下拉：
+
+| 场景值（示例） | 预览 | 代码 / AI 提示词 | 定制项 |
+|----------------|------|------------------|--------|
+| 组件名（如 `Nav Bar`） | `@eds/desktop-components` 本体 | `EgNavBar` + props | 全部 DS 定制 + 嵌套面板 |
+| 业务产品线（如 `Cregis`） | 同 `EgNavBar` 声明式 props | `EgNavBar` + `module-count` / `module-labelN` 等 | 仅场景化；隐藏 DS 逐 prop 定制 |
+
+**Cregis / 声明式场景约定**
+
+- 配置：`apps/showcase/src/presets/<domain>/`（如 `presets/nav/cregisNavBarDeclarative.ts`）。
+- Showcase 预览与 AI 提示词使用 **同一套 `EgNavBar` 声明式 attributes**（kebab-case），不单独导出薄 Vue 组件。
+- 组件库侧：`EgNavBar` 在无 default slot 时读取 `moduleCount` + `moduleLabelN` / `moduleIconN` / `moduleFocusIconN` 及 `appEntry*` 索引 props 渲染模块与应用入口。
+- 不进入 `@eds/desktop-components` 之外的业务封装；不修改 DS 组件 DOM / 样式。
+
+**组合式场景约定**（Nav Bar 本体）
+
+- 仍通过 slots + 子组件（`EgNavBarModuleItem` 等）拼装；Showcase 定制面板驱动预览。
+- **Icon 尺寸（勿混淆 EgIcon `size` prop 与语义 token）**：
+  - 模块 / 应用入口 glyph 容器：`var(--icon-lg)`（`.moduleIconGlyph`）；`EgIcon` 用 **`size="md"`**（`md` → `--icon-lg`），勿用 `size="lg"`（`lg` → `--icon-xl`）。
+  - 底部工具 icon 容器：`var(--icon-md)`；`EgIcon` 用 **`size="sm"`**。
+
+**实现要点**
+
+- `customize.scenario` 为 Showcase 专用，**不出现在** DS 组件 usage snippet（`omitKeys: ['scenario']`）。
+- 切换场景时同步：`#preview`、`usage-snippet-override`、`component-tag`、`import-code`、Props 表。
+- 后续 Organism（Module Menu、Tool Bar 等）按同一模式扩展场景选项。
+
+**参考**：`NavBarPreview.vue`、`organismTemplateDocData.ts`（`navBarScenarioOptions`）、`presets/nav/cregisNavBarDeclarative.ts`。
+
+## 8. 变更记录
+
+- 2026-07-30：§7 — Organism Showcase 场景化（DS 本体 vs 业务薄组件；Nav Bar + Cregis 参考实现）。
+- 2026-07-30：§6 — Desktop 嵌套滚动边界（`overscroll-behavior: none` + wheel 拦截 + scrollTop 钳制）；参考 Nav Bar `.moduleRegion`。
+
+- 2026-07-28：§5 — Website 壳层排版为 **`@eds/website-tokens` 的 `--eds-*`（带档位）**；勿用 `--typography-*` 或 Desktop 单档 `--eds-headline-size` 于壳层。
+- 2026-07-28：§5 — Website 承载层与 Desktop 组件层库引用；§1.1 作用域说明。
+- 2026-07-28：初版 — token/硬编码确认、语义数字映射、维度命名、锚点拆分、Showcase 中文与标签格式。

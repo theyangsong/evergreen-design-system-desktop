@@ -1,0 +1,2 @@
+/* 仅全局 reset；组件样式由各 SFC 的 CSS Modules 随 @eds/desktop-components 源码 import 注入 */
+@import '../../../../packages/components/src/styles/global.css';

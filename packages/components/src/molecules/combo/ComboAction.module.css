@@ -1,0 +1,120 @@
+.divider {
+  flex-shrink: 0;
+  width: 100%;
+  height: var(--scale-025);
+  min-height: var(--scale-025);
+  max-height: var(--scale-025);
+  background: var(--stroke-divider-page);
+}
+
+.skidRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  max-width: 350px;
+  padding-bottom: var(--spacing-5);
+  border-bottom-right-radius: var(--radius-md);
+  backdrop-filter: blur(var(--blur-shallow));
+  background: var(--material-hide);
+}
+
+.skidActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding-inline: var(--spacing-4);
+  overflow: clip;
+}
+
+.fullWidth {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.popupRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  width: 280px;
+  max-width: 100%;
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  background: var(--material-hide);
+}
+
+.flotationRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 328px;
+}
+
+.flotationBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-5);
+  overflow: clip;
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  backdrop-filter: blur(var(--blur-shallow));
+  background: var(--material-hide);
+}
+
+.flotationBarEnd {
+  justify-content: flex-end;
+}
+
+.flotationActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: clip;
+}
+
+.pageRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  border-bottom-right-radius: var(--radius-md);
+}
+
+.pageRootAlignStart {
+  align-items: flex-start;
+}
+
+.pageRootAlignEnd {
+  align-items: flex-end;
+}
+
+.pageActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-6) var(--spacing-5) 0;
+  box-sizing: border-box;
+}
+
+.pageActionsRight {
+  justify-content: flex-end;
+}
+
+.pageActionsLeft {
+  justify-content: flex-start;
+  padding-left: var(--spacing-6);
+  padding-right: 0;
+}

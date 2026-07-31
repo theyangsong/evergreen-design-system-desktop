@@ -1,4 +1,4 @@
-name: Deploy website to GitHub Pages
+name: Deploy Storybook to GitHub Pages
 
 on:
   push:
@@ -44,16 +44,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build website
-        run: pnpm build:tokens && pnpm build:components && pnpm --filter @evergreen/website build
-
-      - name: SPA fallback for GitHub Pages
-        run: cp apps/website/dist/index.html apps/website/dist/404.html
+      - name: Build Storybook
+        run: pnpm build:tokens && pnpm build:components && pnpm --filter @eds/desktop-storybook build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/website/dist
+          path: apps/storybook/storybook-static
 
   deploy:
     needs: build

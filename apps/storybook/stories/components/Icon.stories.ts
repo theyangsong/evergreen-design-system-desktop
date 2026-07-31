@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3';
-import { EgIcon, iconNames } from '@evergreen/components';
+import { EgIcon, iconNames } from '@eds/desktop-components';
 
 const meta = {
   title: 'Components/Icon',
@@ -16,7 +16,7 @@ const meta = {
     },
   },
   args: {
-    name: 'check',
+    name: 'eds-add',
     size: 'md',
   },
 } satisfies Meta<typeof EgIcon>;

@@ -1,12 +1,12 @@
 import type { Preview } from '@storybook/vue3';
 import { withThemeByDataAttribute } from '@storybook/addon-themes';
-import { initCornerSmoothing } from '@evergreen/tokens/corner-smoothing';
-import { initLiquidGlass } from '@evergreen/tokens/liquid-glass';
-import '@evergreen/tokens';
-import '@evergreen/components/style.css';
+import { initEdsDesktopRuntime } from '@eds/desktop-components';
+import { initLiquidGlass } from '@eds/desktop-tokens/liquid-glass';
+import '@eds/desktop-tokens';
+import '@eds/desktop-components/style.css';
 
 initLiquidGlass();
-initCornerSmoothing();
+initEdsDesktopRuntime();
 
 const preview: Preview = {
   parameters: {

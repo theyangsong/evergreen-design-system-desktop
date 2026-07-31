@@ -1,0 +1,145 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { EgLink } from '../link';
+import styles from './Textarea.module.css';
+
+export type TextareaWidthMode = 'fixed' | 'full';
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string;
+    placeholder?: string;
+    disabled?: boolean;
+    readonly?: boolean;
+    widthMode?: TextareaWidthMode;
+  }>(),
+  {
+    modelValue: '',
+    placeholder: '请输入',
+    disabled: false,
+    readonly: false,
+    widthMode: 'fixed',
+  },
+);
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+  paste: [];
+  clear: [];
+  focus: [event: FocusEvent];
+  blur: [event: FocusEvent];
+}>();
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null);
+
+const clearDisabled = computed(
+  () => props.disabled || props.readonly || props.modelValue.length === 0,
+);
+
+function onInput(event: Event) {
+  emit('update:modelValue', (event.target as HTMLTextAreaElement).value);
+}
+
+function onFocus(event: FocusEvent) {
+  emit('focus', event);
+}
+
+function onBlur(event: FocusEvent) {
+  emit('blur', event);
+}
+
+function onFieldClick(event: MouseEvent) {
+  if (props.disabled || props.readonly) {
+    return;
+  }
+
+  const target = event.target as HTMLElement;
+  if (target.closest('a, button')) {
+    return;
+  }
+
+  textareaRef.value?.focus();
+}
+
+async function onPasteClick(event: MouseEvent) {
+  event.preventDefault();
+  if (props.disabled || props.readonly) {
+    return;
+  }
+
+  emit('paste');
+
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) {
+      return;
+    }
+
+    emit('update:modelValue', props.modelValue + text);
+    textareaRef.value?.focus();
+  } catch {
+    textareaRef.value?.focus();
+  }
+}
+
+function onClearClick(event: MouseEvent) {
+  event.preventDefault();
+  if (clearDisabled.value) {
+    return;
+  }
+
+  emit('update:modelValue', '');
+  emit('clear');
+  textareaRef.value?.focus();
+}
+</script>
+
+<template>
+  <div
+    :class="[
+      styles.root,
+      widthMode === 'full' ? styles.widthFull : styles.widthFixed,
+    ]"
+  >
+    <div
+      :class="[styles.field, disabled && styles.fieldDisabled]"
+      @click="onFieldClick"
+    >
+      <textarea
+        ref="textareaRef"
+        :class="styles.control"
+        :value="modelValue"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :readonly="readonly"
+        spellcheck="false"
+        @input="onInput"
+        @focus="onFocus"
+        @blur="onBlur"
+      />
+
+      <div :class="styles.actions">
+        <span :class="styles.actionGap">
+          <EgLink
+            tone="brand"
+            size="sm"
+            href="#"
+            :disabled="disabled"
+            @click="onPasteClick"
+          >
+            Paste
+          </EgLink>
+          <EgLink
+            tone="brand"
+            size="sm"
+            href="#"
+            :disabled="clearDisabled"
+            @click="onClearClick"
+          >
+            Clear
+          </EgLink>
+        </span>
+      </div>
+    </div>
+  </div>
+</template>

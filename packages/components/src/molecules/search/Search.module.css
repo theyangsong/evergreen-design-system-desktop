@@ -1,0 +1,106 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.widthFixed {
+  width: auto;
+  max-width: 100%;
+}
+
+.widthFull {
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  box-sizing: border-box;
+  max-height: var(--scale-8);
+  padding: var(--spacing-1-5) var(--spacing-1) var(--spacing-1-5) var(--spacing-2);
+  border: var(--stroke-xs) solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--material-card-moderate);
+  cursor: text;
+  transition:
+    background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fieldEntering {
+  border-width: var(--stroke-xl);
+  border-color: var(--stroke-color-brand);
+  background-color: var(--material-same-white-tertiary);
+}
+
+.fieldFocused {
+  /* Marker for focused placeholder (quaternary). */
+}
+
+.fieldDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--text-base-secondary);
+}
+
+.inputWrap {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  height: var(--scale-4);
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-base-primary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-base-tertiary);
+  transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fieldFocused .input::placeholder {
+  color: var(--text-base-quaternary);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  color: var(--text-base-quaternary);
+}
+
+.clearButton {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-1);
+  border: 0;
+  border-radius: var(--scale-1-5);
+  background: var(--material-hide);
+  color: var(--text-base-secondary);
+  cursor: pointer;
+}
+
+.clearButton:focus-visible {
+  outline: var(--stroke-sm) solid var(--stroke-color-brand);
+  outline-offset: 1px;
+}

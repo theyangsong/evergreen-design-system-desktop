@@ -58,7 +58,7 @@ console.log('');
 console.log('Expected token naming (examples):');
 console.log('  Color:  Text/Base Primary  →  --text-base-primary');
 console.log('  Scale:  spacing-4 / radius-md / stroke-sm');
-console.log('  Type:   typography-body-medium / .typography-body-medium');
+console.log('  Type:   eds-body-medium / .typography-body-medium');
 console.log('  Effect: .effect-flotation-box / .effect-popup-box');
 console.log('');
 console.log('✓ Sync helper complete. No remote changes made.');

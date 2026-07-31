@@ -1,0 +1,64 @@
+.glass {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-025);
+  padding: var(--spacing-1);
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+      0deg,
+      var(--material-same-white-quaternary) 0%,
+      var(--material-same-white-quaternary) 100%
+    ),
+    var(--effect-flotation-box);
+  backdrop-filter: blur(var(--blur-shallow));
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--scale-8);
+  padding: var(--spacing-0) var(--spacing-4);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--material-hide);
+  color: var(--text-base-primary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-strong-line-height);
+  cursor: pointer;
+}
+
+.actionSymbol {
+  padding: var(--spacing-2-5) var(--spacing-4);
+}
+
+.actionStatistics {
+  gap: var(--spacing-05);
+}
+
+.statPrimary {
+  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
+  color: var(--text-base-primary);
+}
+
+.statSecondary {
+  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
+  color: var(--text-base-secondary);
+  font-weight: var(--eds-body-small-weight);
+}
+
+.divider {
+  align-self: stretch;
+  width: var(--stroke-xs);
+  margin: var(--spacing-2) var(--spacing-0);
+}
+
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+}

@@ -1,0 +1,18 @@
+/**
+ * Bar typography (11px) — 2× render + scale(0.5).
+ * Bypasses browser minimum font size (often 12px). Same technique as eds-doc PersonAvatar (8px).
+ */
+
+.barTextSubpixel {
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: var(--eds-family-sans);
+  font-size: calc(var(--eds-bar-size) * 2);
+  font-weight: var(--eds-bar-weight);
+  line-height: calc(var(--eds-bar-line-height) * 2);
+  transform: scale(0.5);
+  transform-origin: top center;
+  margin-bottom: calc(var(--eds-bar-line-height) * -1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

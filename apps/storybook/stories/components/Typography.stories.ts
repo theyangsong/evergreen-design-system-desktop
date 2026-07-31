@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3';
-import { EgTypography } from '@evergreen/components';
+import { EgTypography } from '@eds/desktop-components';
 
 const meta = {
   title: 'Components/Typography',

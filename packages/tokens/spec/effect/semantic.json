@@ -89,7 +89,7 @@
             }
           },
           "notes": [
-            "Menu Box BG：__fill → __shadow-glow(Plus darker) → __glass → __glass-shadow(Plus lighter)",
+            "Tooltip / Menu Flotation BG：__fill → __shadow-glow(Plus darker) → __glass → __glass-shadow(Plus lighter)",
             "initLiquidGlass() 绑定 __glass"
           ]
         },

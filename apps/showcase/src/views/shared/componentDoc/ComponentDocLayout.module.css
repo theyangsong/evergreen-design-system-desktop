@@ -1,0 +1,290 @@
+.docBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
+}
+
+.docHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-4);
+}
+
+.docTitle {
+  margin: 0;
+  font-size: var(--eds-headline-small-size);
+  line-height: var(--eds-headline-small-line-height);
+  font-weight: var(--eds-headline-small-weight);
+  color: var(--text-base-primary);
+}
+
+.previewStage {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.previewShellToolbar {
+  position: absolute;
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.previewShellToolbar > * {
+  pointer-events: auto;
+}
+
+.previewShellToolbarActions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.previewShell {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--showcase-doc-preview-height);
+  padding: var(--spacing-6);
+  background: var(--showcase-doc-preview-bg);
+}
+
+.docBlockTallPreview {
+  --showcase-doc-preview-height: var(--showcase-doc-preview-height-organism);
+}
+
+.previewShellTall {
+  align-items: stretch;
+}
+
+.previewInnerTall {
+  align-items: stretch;
+  justify-content: center;
+  height: 100%;
+}
+
+.previewInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.previewInner > * {
+  max-width: 100%;
+}
+
+.codeInner {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: var(--spacing-2);
+}
+
+.codeBlock {
+  margin: 0;
+  width: 100%;
+  color: var(--text-base-secondary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.customizeSection {
+  gap: var(--spacing-3);
+}
+
+.customizeEmbedded {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.customizeNestedTitle {
+  margin: 0;
+  color: var(--text-base-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.customizeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.customizeGridSequential {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  max-width: min(100%, 360px);
+}
+
+.customizeGridSequentialRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  max-width: min(100%, 960px);
+}
+
+.customizeRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-3);
+}
+
+.customizeField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.customizeLabel {
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-large-size);
+  font-weight: var(--eds-footnote-large-strong-weight);
+  line-height: var(--eds-footnote-large-line-height);
+}
+
+.customizeControl {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: var(--stroke-xs) solid var(--stroke-outline-shallow);
+  border-radius: var(--radius-sm);
+  background: var(--material-card-subtle);
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.customizeControl:focus-visible {
+  outline: none;
+  border-color: var(--stroke-outline-deep);
+}
+
+.customizeCheckbox {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin: 0;
+  accent-color: var(--text-brand-primary);
+}
+
+.propName {
+  color: var(--text-base-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.propType {
+  color: var(--text-base-secondary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.propGroupTitle {
+  margin: var(--spacing-4) 0 var(--spacing-2);
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+}
+
+.propsTablesBare {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.subPreviewWidth {
+  width: 100%;
+  max-width: 319px;
+}
+
+.previewInputHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.previewInputHost > * {
+  max-width: 100%;
+}
+
+.previewButtonHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comboActionSkidHost,
+.comboActionPopupHost,
+.comboActionFlotationHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comboActionPageHost {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comboPlaceholder {
+  margin: 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+  text-align: center;
+}
+
+.comboMenu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  align-items: flex-start;
+  width: 100%;
+  max-width: 319px;
+}
+
+.comboFeedbackNote {
+  margin: var(--spacing-2) 0 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-medium-size);
+  line-height: var(--eds-footnote-medium-line-height);
+}

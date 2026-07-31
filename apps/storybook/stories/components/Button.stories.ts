@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3';
-import { EgButton } from '@evergreen/components';
+import { EgButton } from '@eds/desktop-components';
 
 const meta = {
   title: 'Components/Button',

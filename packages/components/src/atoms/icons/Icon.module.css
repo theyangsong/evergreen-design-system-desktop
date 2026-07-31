@@ -1,0 +1,64 @@
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  overflow: visible;
+  line-height: 0;
+  color: inherit;
+}
+
+.sm {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.md {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.lg {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+}
+
+.svgHost {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.svgHost :global(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * token 图标：仅替换配色，不增删描边/填充结构。
+ * eds-i-s / eds-i-f 由 processSvg 按 SVG 原结构标注。
+ */
+.tokenKind :global(.eds-i-s) {
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+}
+
+.tokenFillPrimary :global(.eds-i-f) {
+  fill: currentColor;
+}
+
+.tokenFillBrand :global(.eds-i-f) {
+  fill: var(--text-brand-primary);
+}
+
+/* fixed 彩色：保留 SVG 原 fill/stroke，仅统一描边缩放 */
+.fixedKind :global([stroke-width]),
+.fixedKind :global(line),
+.fixedKind :global(polyline) {
+  vector-effect: non-scaling-stroke;
+}

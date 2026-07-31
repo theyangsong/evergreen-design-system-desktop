@@ -1,0 +1,63 @@
+/* Organism doc — Nav Bar 等纵向铺满预览区 */
+.previewOrganismNavHost {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.previewOrganismPanelHost {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.previewOrganismPanelHost :deep(.eds-module-menu) {
+  height: 100%;
+  min-height: 0;
+}
+
+.previewOrganismWideHost {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--scale-30);
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.previewOrganismLayoutHost {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--scale-50);
+  max-height: var(--scale-50);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.previewOrganismLayoutHost :deep(.eds-layout) {
+  width: 100%;
+  max-width: 100%;
+  transform: scale(0.72);
+  transform-origin: top center;
+}
+
+.previewOrganismPopupHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--scale-50);
+  box-sizing: border-box;
+}

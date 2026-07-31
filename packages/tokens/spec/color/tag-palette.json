@@ -1,0 +1,105 @@
+{
+  "$figma": {
+    "statusLight": "2460:6398",
+    "statusDark": "2933:9118",
+    "colorfulLight": "2933:9342",
+    "colorfulDark": "2933:9009"
+  },
+  "$description": "Tag Status / Colorful fill + text (Figma hard-coded). Built into --eds-tag-* base + --tag-* semantic.",
+  "status": {
+    "danger": {
+      "light": { "bg": "#ffcdd2", "text": "#7c0b17" },
+      "dark": { "bg": "#50302a", "text": "#ff6262" }
+    },
+    "warning": {
+      "light": { "bg": "#ffebb2", "text": "#78370f" },
+      "dark": { "bg": "#55412d", "text": "#ffc373" }
+    },
+    "success": {
+      "light": { "bg": "#b5f4c7", "text": "#096122" },
+      "dark": { "bg": "#08462d", "text": "#00d888" }
+    },
+    "ready": {
+      "light": { "bg": "#c8d7fa", "text": "#04398b" },
+      "dark": { "bg": "#263b5b", "text": "#297eff" }
+    },
+    "invalid": {
+      "light": { "bg": "#d7d9db", "text": "#56585a" },
+      "dark": { "bg": "#3e454a", "text": "#7f8993" }
+    }
+  },
+  "colorful": {
+    "apricot": {
+      "light": { "bg": "#fae1c8", "text": "#a23f0e" },
+      "dark": { "bg": "#4d372c", "text": "#ff8042" }
+    },
+    "khaki": {
+      "light": { "bg": "#e4e4bc", "text": "#836127" },
+      "dark": { "bg": "#4c462d", "text": "#e1e195" }
+    },
+    "grass": {
+      "light": { "bg": "#c2f3b5", "text": "#1d8a00" },
+      "dark": { "bg": "#2b4a22", "text": "#7fff5d" }
+    },
+    "sage": {
+      "light": { "bg": "#a9e3d8", "text": "#007676" },
+      "dark": { "bg": "#1f523b", "text": "#35e7a8" }
+    },
+    "cyan": {
+      "light": { "bg": "#8ef2f2", "text": "#007878" },
+      "dark": { "bg": "#1c5353", "text": "#5ed3d3" }
+    },
+    "ice-blue": {
+      "light": { "bg": "#b0f4fe", "text": "#066472" },
+      "dark": { "bg": "#015c6a", "text": "#26cfe7" }
+    },
+    "periwinkle": {
+      "light": { "bg": "#bce1ff", "text": "#004c8a" },
+      "dark": { "bg": "#174163", "text": "#48adff" }
+    },
+    "lilac": {
+      "light": { "bg": "#c8caff", "text": "#381191" },
+      "dark": { "bg": "#3a3a6f", "text": "#9b87ff" }
+    },
+    "orchid": {
+      "light": { "bg": "#d7c3fe", "text": "#6d0b81" },
+      "dark": { "bg": "#513270", "text": "#bc80f1" }
+    },
+    "mallow": {
+      "light": { "bg": "#f1bcfc", "text": "#770886" },
+      "dark": { "bg": "#623069", "text": "#d579df" }
+    },
+    "rose": {
+      "light": { "bg": "#fdb9ed", "text": "#850956" },
+      "dark": { "bg": "#5e2e53", "text": "#de6fb3" }
+    },
+    "coral": {
+      "light": { "bg": "#ff9adc", "text": "#970565" },
+      "dark": { "bg": "#612b49", "text": "#f669c5" }
+    },
+    "mauve": {
+      "light": { "bg": "#d6bebe", "text": "#8f2525" },
+      "dark": { "bg": "#514141", "text": "#d78a8a" }
+    },
+    "moss": {
+      "light": { "bg": "#afd1be", "text": "#086c22" },
+      "dark": { "bg": "#3e5143", "text": "#7ec591" }
+    },
+    "steel": {
+      "light": { "bg": "#98c6d4", "text": "#09607b" },
+      "dark": { "bg": "#3e565e", "text": "#82b7c7" }
+    },
+    "grape": {
+      "light": { "bg": "#cea5d4", "text": "#770d87" },
+      "dark": { "bg": "#624966", "text": "#c586ce" }
+    },
+    "samewhite": {
+      "light": { "bg": "#ffffff", "text": "#020304" },
+      "dark": { "bg": "#ffffff", "text": "#020304" }
+    },
+    "lime": {
+      "light": { "bg": "#a8f858", "text": "#284908" },
+      "dark": { "bg": "#a8f858", "text": "#284908" }
+    }
+  }
+}

@@ -1,16 +1,16 @@
 {
-  "name": "evergreen-design-system-desktop",
+  "name": "eds-desktop",
   "version": "0.1.0",
   "private": true,
   "description": "EverGreen Design System (Desktop) — Vue 3 component library with Figma-synced tokens",
   "scripts": {
-    "dev": "pnpm --filter @evergreen/website dev",
-    "dev:storybook": "pnpm --filter @evergreen/storybook dev",
-    "dev:website": "pnpm --filter @evergreen/website dev",
+    "dev": "pnpm --filter @eds/desktop-showcase dev",
+    "dev:showcase": "pnpm --filter @eds/desktop-showcase dev",
+    "dev:storybook": "pnpm --filter @eds/desktop-storybook dev",
     "build": "pnpm -r build",
-    "build:tokens": "pnpm --filter @evergreen/tokens build",
-    "build:components": "pnpm --filter @evergreen/components build",
-    "sync:tokens": "pnpm --filter @evergreen/tokens sync:figma",
+    "build:tokens": "pnpm --filter @eds/desktop-tokens build",
+    "build:components": "pnpm --filter @eds/desktop-components build",
+    "sync:tokens": "pnpm --filter @eds/desktop-tokens sync:figma",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"
   },
