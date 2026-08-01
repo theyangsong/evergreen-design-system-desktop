@@ -269,8 +269,7 @@ export const showcasePageBgLabels = {
 
 export const showcaseLayoutTypeLabels = {
   empty: tokenLabel('空', 'empty'),
-  navigation: tokenLabel('导航', 'navigation'),
-  'module-menu': tokenLabel('模块菜单', 'module-menu'),
+  free: tokenLabel('自由布局', 'free'),
 } as const;
 
 export const showcasePopupUsesLabels = {

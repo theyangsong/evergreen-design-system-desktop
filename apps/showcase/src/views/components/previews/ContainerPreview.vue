@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { EgContainer, EgTooltip } from '@eds/desktop-components';
+import { EgContainer } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import ContainerBoxPreviewShell from './ContainerBoxPreviewShell.vue';
 import {
   ORGANISM_IMPORT,
   containerCustomizeControls,
@@ -36,12 +37,12 @@ const customize = reactive({
           class="desktopTokens"
           :class="[docStyles.previewEffectPanelHost, docStyles.previewEffectPanelHostTall]"
         >
-          <EgTooltip panel-kind="container">
+          <ContainerBoxPreviewShell>
             <EgContainer
               v-if="customize.pageBg !== 'none'"
               :page-bg="customize.pageBg"
             />
-          </EgTooltip>
+          </ContainerBoxPreviewShell>
         </div>
       </template>
     </ComponentDocLayout>

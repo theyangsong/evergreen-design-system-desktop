@@ -44,6 +44,7 @@
   align-items: stretch;
   width: 100%;
   box-sizing: border-box;
+  background: var(--box-page);
 }
 
 .heading {
@@ -100,4 +101,5 @@
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+  background: var(--box-page);
 }

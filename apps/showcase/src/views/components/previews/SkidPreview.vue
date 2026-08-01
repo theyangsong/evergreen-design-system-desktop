@@ -5,6 +5,7 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import previewStyles from './SkidPreview.module.css';
 import {
   ORGANISM_IMPORT,
   buildSkidUsageSnippet,
@@ -40,7 +41,14 @@ const usageSnippet = computed(() => buildSkidUsageSnippet(customize));
       tall-preview
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewEffectPanelHost">
+        <div
+          class="desktopTokens"
+          :class="[
+            docStyles.previewEffectPanelHost,
+            docStyles.previewEffectPanelHostTall,
+            previewStyles.previewSkidHost,
+          ]"
+        >
           <EgSkid
             :title="String(customize.title)"
             :show-button="Boolean(customize.showButton)"

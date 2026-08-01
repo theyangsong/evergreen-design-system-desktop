@@ -1,32 +1,39 @@
 <script setup lang="ts">
 import { onBeforeUnmount, provide, ref, watch } from 'vue';
 import styles from './Layout.module.css';
-import { SKID_AFFECTING_MAIN_KEY, SKID_PUSH_TRANSITION_MS } from '../../shared/skidContext';
+import {
+  SKID_AFFECTING_MAIN_KEY,
+  SKID_PUSH_TRANSITION_MS,
+  SKID_REQUEST_CLOSE_KEY,
+} from '../../shared/skidContext';
 
-export type LayoutType = 'empty' | 'navigation' | 'module-menu';
+export type LayoutType = 'empty' | 'navigation' | 'module-menu' | 'free';
 
 const props = withDefaults(
   defineProps<{
     type?: LayoutType;
     showToolbar?: boolean;
     showPaginer?: boolean;
-    showSkid?: boolean;
   }>(),
   {
     type: 'navigation',
     showToolbar: false,
     showPaginer: false,
-    showSkid: false,
   },
 );
 
-const skidAffectingMain = ref(Boolean(props.showSkid));
+const showSkid = defineModel<boolean>('showSkid', { default: false });
+
+const skidAffectingMain = ref(Boolean(showSkid.value));
 provide(SKID_AFFECTING_MAIN_KEY, skidAffectingMain);
+provide(SKID_REQUEST_CLOSE_KEY, () => {
+  showSkid.value = false;
+});
 
 let skidReleaseTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
-  () => props.showSkid,
+  showSkid,
   (open) => {
     if (skidReleaseTimer !== undefined) {
       clearTimeout(skidReleaseTimer);
@@ -39,7 +46,7 @@ watch(
     }
 
     skidReleaseTimer = window.setTimeout(() => {
-      if (!props.showSkid) {
+      if (!showSkid.value) {
         skidAffectingMain.value = false;
       }
       skidReleaseTimer = undefined;
@@ -58,7 +65,10 @@ onBeforeUnmount(() => {
     <div v-if="type !== 'empty' && $slots.nav" :class="styles.nav">
       <slot name="nav" />
     </div>
-    <div v-if="type === 'module-menu' && $slots.moduleMenu" :class="styles.moduleMenu">
+    <div
+      v-if="type !== 'empty' && $slots.moduleMenu && (type === 'module-menu' || type === 'free')"
+      :class="styles.moduleMenu"
+    >
       <slot name="moduleMenu" />
     </div>
     <div :class="[styles.main, showSkid && $slots.skid && styles.mainSkidOpen]">

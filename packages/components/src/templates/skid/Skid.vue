@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue';
+import { SKID_REQUEST_CLOSE_KEY } from '../../shared/skidContext';
 import { EgDivider } from '../../atoms/divider';
 import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
@@ -30,6 +31,13 @@ const emit = defineEmits<{
   close: [];
   confirm: [];
 }>();
+
+const requestLayoutSkidClose = inject(SKID_REQUEST_CLOSE_KEY, undefined);
+
+function onCloseClick() {
+  emit('close');
+  requestLayoutSkidClose?.();
+}
 
 const scrollRef = ref<HTMLElement | null>(null);
 const bodyCanScroll = ref(false);
@@ -117,14 +125,14 @@ onBeforeUnmount(() => {
       <EgDivider direction="vertical" />
     </div>
     <div ref="scrollRef" :class="['eds-scroll-area-hidden-scrollbar', styles.panel]" @scroll="onPanelScroll">
-      <header :class="['eds-frosted-page-chrome', styles.title]">
+      <header :class="[styles.title, titleScrollDividerVisible && 'eds-frosted-page-chrome']">
         <div :class="styles.heading">
           <p :class="styles.titleText">{{ title }}</p>
           <EgIconButton
             :class="styles.closeAction"
             label="关闭"
             size="md"
-            @click="emit('close')"
+            @click="onCloseClick"
           >
             <EgIcon name="eds-close" fit />
           </EgIconButton>
@@ -138,7 +146,7 @@ onBeforeUnmount(() => {
       <div :class="styles.body">
         <slot />
       </div>
-      <footer v-if="showButton" :class="['eds-frosted-page-chrome', styles.action]">
+      <footer v-if="showButton" :class="[styles.action, actionDividerVisible && 'eds-frosted-page-chrome']">
         <slot name="action">
           <EgComboActionSkid
             :tone="actionTone"

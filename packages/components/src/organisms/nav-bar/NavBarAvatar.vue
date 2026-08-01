@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, useId } from 'vue';
+import { EgAvatar } from '../../atoms/avatar';
 import styles from './NavBar.module.css';
 import { useNavBarModuleFocus } from './navBarModuleFocus';
 
@@ -7,10 +8,12 @@ withDefaults(
   defineProps<{
     initials?: string;
     label?: string;
+    colorIndex?: number;
   }>(),
   {
     initials: 'N',
     label: 'User avatar',
+    colorIndex: 10,
   },
 );
 
@@ -41,8 +44,8 @@ function onAvatarClick(event: MouseEvent) {
     :aria-pressed="isFocused"
     @click="onAvatarClick"
   >
-    <span :class="styles.avatarCircle">
-      <span :class="styles.avatarInitial"><slot>{{ initials }}</slot></span>
+    <span aria-hidden="true" :class="styles.avatarGraphic">
+      <EgAvatar :initials="initials" size="xl" :color-index="colorIndex" />
     </span>
   </button>
 </template>

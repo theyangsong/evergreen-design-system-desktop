@@ -1311,23 +1311,25 @@ const layoutTypeOf = (state: Record<string, unknown>) =>
 const isEmptyLayout = (state: Record<string, unknown>) =>
   layoutTypeOf(state) === 'empty';
 
-const hasLayoutShell = (state: Record<string, unknown>) => !isEmptyLayout(state);
-
 export const layoutCustomizeDefaults = {
-  type: 'navigation' as 'empty' | 'navigation' | 'module-menu',
+  type: 'free' as 'empty' | 'free',
   pageBg: containerCustomizeDefaults.pageBg,
+  showNavBar: false,
+  showModuleMenu: false,
+  showToolbar: false,
+  showPaginer: false,
+  showDataList: false,
   showSkid: false,
 };
+
+const isFreeLayout = (state: Record<string, unknown>) => layoutTypeOf(state) === 'free';
 
 export const layoutCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
     label: '类型',
-    options: propLabelSelectOptions(
-      ['empty', 'navigation', 'module-menu'] as const,
-      showcaseLayoutTypeLabels,
-    ),
+    options: propLabelSelectOptions(['empty', 'free'] as const, showcaseLayoutTypeLabels),
   },
   {
     kind: 'select',
@@ -1336,19 +1338,35 @@ export const layoutCustomizeControls: DocCustomizeControl[] = [
     options: propLabelSelectOptions(['none', 'right', 'center'] as const, showcasePageBgLabels),
     visibleWhen: isEmptyLayout,
   },
-  { kind: 'boolean', key: 'showSkid', label: '滑层', visibleWhen: hasLayoutShell },
+  { kind: 'boolean', key: 'showNavBar', label: 'Nav Bar', visibleWhen: isFreeLayout },
+  { kind: 'boolean', key: 'showModuleMenu', label: 'Module Menu', visibleWhen: isFreeLayout },
+  { kind: 'boolean', key: 'showToolbar', label: 'Tool Bar', visibleWhen: isFreeLayout },
+  { kind: 'boolean', key: 'showPaginer', label: 'Paginer', visibleWhen: isFreeLayout },
+  { kind: 'boolean', key: 'showDataList', label: 'Data List', visibleWhen: isFreeLayout },
+  { kind: 'boolean', key: 'showSkid', label: 'Skid', visibleWhen: isFreeLayout },
 ];
 
 export const layoutPropRows: OrganismPropRow[] = [
-  { name: 'type', type: "'empty' | 'navigation' | 'module-menu'", defaultValue: "'navigation'", description: 'Layout 骨架类型。' },
+  {
+    name: 'type',
+    type: "'empty' | 'navigation' | 'module-menu' | 'free'",
+    defaultValue: "'free'",
+    description:
+      'Layout 骨架类型；Showcase 自由布局对应 free。外层 Container Box 客户端最小 960×720，默认参考 1280×800。',
+  },
   { name: 'showToolbar', type: 'boolean', defaultValue: 'false', description: 'ToolBar=Yes。' },
   { name: 'showPaginer', type: 'boolean', defaultValue: 'false', description: 'Paginer=Yes。' },
-  { name: 'showSkid', type: 'boolean', defaultValue: 'false', description: 'Skid=Yes。' },
+  { name: 'showSkid', type: 'boolean', defaultValue: 'false', description: 'Skid 滑层开合；支持 v-model:show-skid。EgSkid 关闭按钮会将其置为 false。' },
 ];
 
 export const layoutSlotRows: OrganismPropRow[] = [
-  { name: 'nav', type: 'slot', defaultValue: 'EgNavBar', description: 'type≠empty 时左侧 Nav Bar。' },
-  { name: 'moduleMenu', type: 'slot', defaultValue: 'EgModuleMenu', description: 'type=module-menu。' },
+  { name: 'nav', type: 'slot', defaultValue: 'EgNavBar', description: '左侧 Nav Bar（自由布局可选）。' },
+  {
+    name: 'moduleMenu',
+    type: 'slot',
+    defaultValue: 'EgModuleMenu',
+    description: 'Module Menu 侧栏（type=module-menu | free 且传入插槽时）。',
+  },
   { name: 'toolbar', type: 'slot', defaultValue: 'EgToolBar', description: 'showToolbar。' },
   { name: 'default', type: 'slot', defaultValue: '-', description: '主内容区。' },
   { name: 'paginer', type: 'slot', defaultValue: 'EgPaginer', description: 'showPaginer。' },
@@ -1363,14 +1381,7 @@ export function layoutPropRowsForType(type: string): OrganismPropRow[] {
 export function layoutSlotRowsForType(type: string): OrganismPropRow[] {
   if (type === 'empty') return [];
 
-  const rows: OrganismPropRow[] = [
-    layoutSlotRows[0],
-    ...(type === 'module-menu' ? [layoutSlotRows[1]] : []),
-    layoutSlotRows[3],
-    layoutSlotRows[5],
-  ];
-
-  return rows;
+  return [...layoutSlotRows];
 }
 
 /** Desktop 无限嵌套：Container（底层）→ box-page 插槽 → Layout */
@@ -1387,32 +1398,76 @@ export function buildLayoutUsageSnippet(
     );
   }
 
+  const includeLayoutSkid = Boolean(customize.showSkid);
+
   const layoutOpen = buildVueOpeningTag(
     'EgLayout',
     {
       type: customize.type,
-      showSkid: customize.showSkid,
+      showToolbar: customize.showDataList ? false : customize.showToolbar,
+      showPaginer: customize.showDataList ? false : customize.showPaginer,
     },
     { defaults: layoutCustomizeDefaults },
+  ).replace(
+    '<EgLayout',
+    includeLayoutSkid ? '<EgLayout\n    v-model:show-skid="skidOpen"' : '<EgLayout',
   );
 
   const lines: string[] = [layoutOpen];
 
-  if (type !== 'empty') {
+  const includeNavBar = type === 'free' && Boolean(customize.showNavBar);
+
+  if (includeNavBar) {
     lines.push('    <template #nav>');
-    lines.push('      <EgNavBar />');
+    lines.push('      <EgNavBar>');
+    lines.push('        <template #corporation>');
+    lines.push('          <EgNavBarCorporation label="G" />');
+    lines.push('        </template>');
+    lines.push('        <EgNavBarModuleItem label="Label">');
+    lines.push('          <EgIcon name="eds-add" size="md" />');
+    lines.push('        </EgNavBarModuleItem>');
+    lines.push('        <template #utilities>');
+    lines.push('          <EgNavBarBottomIcon label="Setting">');
+    lines.push('            <EgIcon name="eds-setting" size="sm" />');
+    lines.push('          </EgNavBarBottomIcon>');
+    lines.push('        </template>');
+    lines.push('        <template #avatar>');
+    lines.push('          <EgNavBarAvatar initials="N" />');
+    lines.push('        </template>');
+    lines.push('      </EgNavBar>');
     lines.push('    </template>');
   }
 
-  if (type === 'module-menu') {
+  if (type === 'free' && Boolean(customize.showModuleMenu)) {
     lines.push('    <template #moduleMenu>');
     lines.push('      <EgModuleMenu />');
     lines.push('    </template>');
   }
 
-  lines.push('    <!-- 主内容 -->');
+  if (customize.showToolbar && !customize.showDataList) {
+    lines.push('    <template #toolbar>');
+    lines.push('      <EgToolBar title="Item" />');
+    lines.push('    </template>');
+  }
 
-  if (customize.showSkid) {
+  if (customize.showDataList) {
+    lines.push('    <!-- Data List 页面（EgLayout + ToolBar + EgDataList + Paginer） -->');
+    lines.push('    <EgLayout type="empty" show-toolbar show-paginer>');
+    lines.push('      <EgDataList :data-list="rows">');
+    lines.push('        <EgDataListColumn prop="primary" label="Header" min-width="160px" />');
+    lines.push('      </EgDataList>');
+    lines.push('    </EgLayout>');
+  } else {
+    lines.push('    <!-- 主内容 -->');
+  }
+
+  if (customize.showPaginer && !customize.showDataList) {
+    lines.push('    <template #paginer>');
+    lines.push('      <EgPaginer />');
+    lines.push('    </template>');
+  }
+
+  if (includeLayoutSkid) {
     lines.push('    <template #skid>');
     lines.push('      <EgSkid />');
     lines.push('    </template>');
@@ -1534,7 +1589,6 @@ export const dataListCustomizeDefaults = {
   initing: false,
   empty: false,
   selectMode: false,
-  skidOpen: false,
   showBatch: true,
   showExport: true,
   showBack: false,
@@ -1596,7 +1650,6 @@ export const dataListCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'dataVolume', label: '数据量' },
   { kind: 'boolean', key: 'initing', label: '初始化' },
   { kind: 'boolean', key: 'empty', label: '空数据' },
-  { kind: 'boolean', key: 'skidOpen', label: 'Skid 打开' },
   { kind: 'boolean', key: 'showBatch', label: '批处理' },
   { kind: 'boolean', key: 'showExport', label: '导出' },
   { kind: 'boolean', key: 'showBack', label: '返回' },

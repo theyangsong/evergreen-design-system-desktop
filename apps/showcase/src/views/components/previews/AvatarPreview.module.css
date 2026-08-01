@@ -1,0 +1,29 @@
+.host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--showcase-doc-preview-height, 280px);
+}
+
+.paletteSection {
+  margin-top: var(--spacing-6);
+}
+
+.paletteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.paletteCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.paletteLabel {
+  font-size: var(--eds-bar-size);
+  line-height: var(--eds-bar-line-height);
+  color: var(--text-secondary);
+}

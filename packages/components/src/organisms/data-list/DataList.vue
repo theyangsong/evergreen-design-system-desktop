@@ -106,7 +106,9 @@ const slots = useSlots() as {
 };
 
 const layoutSkidAffecting = inject(SKID_AFFECTING_MAIN_KEY, null);
-const effectiveSkidOpen = computed(() => layoutSkidAffecting?.value ?? props.skidOpen);
+const effectiveSkidOpen = computed(() =>
+  Boolean(layoutSkidAffecting?.value || props.skidOpen),
+);
 
 const tableWrapperRef = ref<HTMLElement | null>(null);
 const tableContentRef = ref<HTMLElement | null>(null);

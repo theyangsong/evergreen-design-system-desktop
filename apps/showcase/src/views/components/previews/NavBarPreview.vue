@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue';
-import {
-  EgIcon,
-  EgNavBar,
-  EgNavBarAvatar,
-  EgNavBarBottomIcon,
-  EgNavBarCorporation,
-  EgNavBarModuleItem,
-  navBarDefaultBottomUtilities,
-} from '@eds/desktop-components';
+import { EgNavBar } from '@eds/desktop-components';
 import {
   cregisNavBarDeclarativeProps,
   cregisNavBarUsageSnippet,
@@ -17,9 +9,9 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
-import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
+import NavBarPreviewNest from './NavBarPreviewNest.vue';
 import {
   ORGANISM_IMPORT,
   cregisNavBarPropRows,
@@ -53,79 +45,6 @@ const docUsageSnippet = computed(() => {
     omitKeys: ['scenario'],
   });
 });
-
-const moduleCount = computed(() => {
-  const count = Number(customize.moduleCount);
-  if (!Number.isFinite(count)) return 4;
-  return Math.min(20, Math.max(1, Math.round(count)));
-});
-
-const appEntryCount = computed(() => {
-  const count = Number(customize.appEntryCount);
-  if (!Number.isFinite(count)) return 0;
-  return Math.min(20, Math.max(0, Math.round(count)));
-});
-
-function labelAt(prefix: 'moduleLabel' | 'appEntryLabel', order: number): string {
-  const key = `${prefix}${order}` as keyof typeof customize;
-  const value = customize[key];
-  return value != null && String(value).trim().length > 0 ? String(value).trim() : 'Label';
-}
-
-function iconAt(
-  prefix: 'moduleIcon' | 'moduleFocusIcon' | 'appEntryIcon' | 'appEntryFocusIcon',
-  order: number,
-): string {
-  const key = `${prefix}${order}` as keyof typeof customize;
-  const value = customize[key];
-  const name = value != null ? String(value).trim() : '';
-  return name || showcaseDefaultIconName;
-}
-
-function trackModuleCustomize(count: number) {
-  for (let index = 1; index <= count; index += 1) {
-    void customize[`moduleLabel${index}`];
-    void customize[`moduleIcon${index}`];
-    void customize[`moduleFocusIcon${index}`];
-    void customize[`moduleReddot${index}`];
-  }
-}
-
-function trackAppEntryCustomize(count: number) {
-  for (let index = 1; index <= count; index += 1) {
-    void customize[`appEntryLabel${index}`];
-    void customize[`appEntryIcon${index}`];
-    void customize[`appEntryFocusIcon${index}`];
-    void customize[`appEntryReddot${index}`];
-  }
-}
-
-function reddotAt(prefix: 'moduleReddot' | 'appEntryReddot', order: number): boolean {
-  const key = `${prefix}${order}` as keyof typeof customize;
-  return Boolean(customize[key]);
-}
-
-const moduleItems = computed(() => {
-  trackModuleCustomize(moduleCount.value);
-  return Array.from({ length: moduleCount.value }, (_, index) => ({
-    order: index + 1,
-    label: labelAt('moduleLabel', index + 1),
-    icon: iconAt('moduleIcon', index + 1),
-    focusIcon: iconAt('moduleFocusIcon', index + 1),
-    showReddot: reddotAt('moduleReddot', index + 1),
-  }));
-});
-
-const appEntryItems = computed(() => {
-  trackAppEntryCustomize(appEntryCount.value);
-  return Array.from({ length: appEntryCount.value }, (_, index) => ({
-    order: index + 1,
-    label: labelAt('appEntryLabel', index + 1),
-    icon: iconAt('appEntryIcon', index + 1),
-    focusIcon: iconAt('appEntryFocusIcon', index + 1),
-    showReddot: reddotAt('appEntryReddot', index + 1),
-  }));
-});
 </script>
 
 <template>
@@ -150,53 +69,7 @@ const appEntryItems = computed(() => {
           class="desktopTokens"
           :class="[docStyles.previewInputHost, organismStyles.previewOrganismNavHost]"
         >
-          <EgNavBar v-if="isNavBarScenario" :show-divider="Boolean(customize.showDivider)">
-            <template #corporation>
-              <EgNavBarCorporation :label="String(customize.corporationLabel)" />
-            </template>
-            <EgNavBarModuleItem
-              v-for="item in moduleItems"
-              :key="`module-${item.order}-${item.icon}-${item.focusIcon}`"
-              :label="item.label"
-              :show-reddot="item.showReddot"
-            >
-              <EgIcon :key="`module-icon-${item.order}-${item.icon}`" :name="item.icon" size="md" fit />
-              <template v-if="item.focusIcon !== item.icon" #focusIcon>
-                <EgIcon
-                  :key="`module-focus-icon-${item.order}-${item.focusIcon}`"
-                  :name="item.focusIcon"
-                  size="md"
-                  fit
-                />
-              </template>
-            </EgNavBarModuleItem>
-            <template v-if="appEntryCount > 0" #appEntries>
-              <EgNavBarModuleItem
-                v-for="item in appEntryItems"
-                :key="`app-entry-${item.order}-${item.icon}`"
-                app-entry
-                :label="item.label"
-                :show-reddot="item.showReddot"
-              >
-                <EgIcon :key="`app-entry-icon-${item.order}-${item.icon}`" :name="item.icon" size="md" fit />
-              </EgNavBarModuleItem>
-            </template>
-            <template #utilities>
-              <EgNavBarBottomIcon
-                v-for="(utility, index) in navBarDefaultBottomUtilities"
-                :key="`utility-${index}`"
-                :label="utility.label"
-              >
-                <EgIcon :name="utility.icon" size="sm" fit />
-                <template #focusIcon>
-                  <EgIcon :name="utility.focusIcon" size="sm" fit />
-                </template>
-              </EgNavBarBottomIcon>
-            </template>
-            <template #avatar>
-              <EgNavBarAvatar :initials="String(customize.avatarInitials)" />
-            </template>
-          </EgNavBar>
+          <NavBarPreviewNest v-if="isNavBarScenario" :customize="customize" />
           <EgNavBar v-else v-bind="cregisNavBarDeclarativeProps" />
         </div>
       </template>

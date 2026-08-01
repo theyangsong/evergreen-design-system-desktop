@@ -16,6 +16,7 @@ import ButtonLinkPreview from './ButtonLinkPreview.vue';
 import ButtonPaginationPreview from './ButtonPaginationPreview.vue';
 import ButtonComboPreview from './ButtonComboPreview.vue';
 import DividerPreview from './DividerPreview.vue';
+import AvatarPreview from './AvatarPreview.vue';
 import TagSystemPreview from './TagSystemPreview.vue';
 import TagStatusPreview from './TagStatusPreview.vue';
 import TagColorfulPreview from './TagColorfulPreview.vue';
@@ -83,6 +84,7 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'feedback-message',
   'feedback-reddot',
   'feedback-form-submission',
+  'avatar',
   'tool-bar',
   'paginer',
 ]);
@@ -103,6 +105,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'button-pagination', title: 'Pagination', component: ButtonPaginationPreview, usesComponentDocHeader: true },
   { slug: 'button-combo', title: 'Combo', component: ButtonComboPreview, usesComponentDocHeader: true },
   { slug: 'divider', title: 'Divider', component: DividerPreview, usesComponentDocHeader: true },
+  { slug: 'avatar', title: 'Avatar', component: AvatarPreview, usesComponentDocHeader: true },
   { slug: 'tag-system', title: 'System', component: TagSystemPreview, usesComponentDocHeader: true },
   { slug: 'tag-status', title: 'Status', component: TagStatusPreview, usesComponentDocHeader: true },
   { slug: 'tag-colorful', title: 'Colorful', component: TagColorfulPreview, usesComponentDocHeader: true },

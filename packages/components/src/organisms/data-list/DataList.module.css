@@ -257,11 +257,17 @@
 }
 
 .empty {
+  position: absolute;
+  top: var(--eds-data-list-header-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100%;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .emptyInner {
@@ -269,6 +275,7 @@
   flex-direction: column;
   gap: var(--spacing-2);
   align-items: center;
+  pointer-events: auto;
 }
 
 .emptyIcon {

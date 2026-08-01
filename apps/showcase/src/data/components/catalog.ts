@@ -19,8 +19,8 @@ export const componentCatalog: CatalogSection[] = [
       {
         name: 'Avatar',
         slug: 'avatar',
-        description: 'User avatar with image and fallback states.',
-        status: 'placeholder',
+        description: 'User avatar with initials or robot fallback.',
+        status: 'implemented',
       },
       {
         name: 'Divider',
