@@ -1,34 +1,128 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { EgDivider } from '../../atoms/divider';
+import { EgTooltip } from '../../molecules/tooltip';
+import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../../molecules/flotation';
+import type { TooltipAlign, TooltipPlacement } from '../../molecules/tooltip';
 import BatchBarActionItem from './BatchBarActionItem.vue';
 import styles from './BatchBar.module.css';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     selectedCount?: string | number;
     countSuffix?: string;
+    /** @deprecated 使用 labels */
     actionLabel?: string;
+    /** Text 操作项，1–20 项。 */
+    labels?: string[];
+    /** 与 labels 等长；为 true 时该项 Text 使用 --text-danger-primary。 */
+    labelDanger?: boolean[];
+    moreLabel?: string;
+    /** 超过该数量时折叠为 collapsedVisibleCount + More。 */
+    collapseThreshold?: number;
+    /** 折叠后可见的 Label 数量（Figma：3）。 */
+    collapsedVisibleCount?: number;
+    /** More 覆层菜单相对触发器的 placement。 */
+    morePlacement?: TooltipPlacement;
+    /** More 覆层交叉轴对齐；默认 start，长文案向右拓展。 */
+    moreAlign?: TooltipAlign;
+    /** 正在加载的 Label 全局 index；overflow 项加载时 More 按钮展示 spinner。 */
+    loadingLabelIndex?: number | null;
   }>(),
   {
     selectedCount: '0',
     countSuffix: 'Selectd',
     actionLabel: 'Label',
+    labels: undefined,
+    labelDanger: undefined,
+    moreLabel: 'More',
+    collapseThreshold: 4,
+    collapsedVisibleCount: 3,
+    morePlacement: 'top',
+    moreAlign: 'start',
+    loadingLabelIndex: null,
   },
 );
 
 const emit = defineEmits<{
   dismiss: [];
-  action: [];
+  'label-click': [label: string, index: number];
+  more: [];
 }>();
+
+const resolvedLabels = computed(() => {
+  if (props.labels?.length) {
+    return props.labels.slice(0, 20).map((label) => String(label));
+  }
+  return [String(props.actionLabel ?? 'Label')];
+});
+
+const shouldCollapse = computed(
+  () => resolvedLabels.value.length > props.collapseThreshold,
+);
+
+const visibleLabels = computed(() => {
+  if (!shouldCollapse.value) {
+    return resolvedLabels.value;
+  }
+  return resolvedLabels.value.slice(0, props.collapsedVisibleCount);
+});
+
+const overflowLabels = computed(() => {
+  if (!shouldCollapse.value) {
+    return [];
+  }
+  return resolvedLabels.value.slice(props.collapsedVisibleCount);
+});
+
+const showMore = computed(() => overflowLabels.value.length > 0);
+
+const moreLoading = computed(() => {
+  if (props.loadingLabelIndex == null) {
+    return false;
+  }
+  return props.loadingLabelIndex >= props.collapsedVisibleCount;
+});
+
+function isLabelLoading(index: number) {
+  return props.loadingLabelIndex === index;
+}
+
+function isLabelDanger(index: number) {
+  return Boolean(props.labelDanger?.[index]);
+}
+
+function onLabelClick(label: string, index: number) {
+  emit('label-click', label, index);
+}
+
+function onOverflowLabelClick(
+  label: string,
+  index: number,
+  close: () => void,
+) {
+  onLabelClick(label, index);
+  close();
+}
 </script>
 
 <template>
   <div class="eds-batch-bar" :class="styles.root">
-    <div :class="['effect-flotation-box', styles.glass]">
+    <EgTooltip
+      class="eds-batch-bar-glass"
+      :class="styles.glassShell"
+      panel-kind="flotation"
+      panel-radius="radius-full"
+      width-mode="adaptive"
+      height-mode="adaptive"
+      :scrollable="false"
+    >
       <slot name="leading">
         <BatchBarActionItem type="symbol" @click="emit('dismiss')" />
       </slot>
-      <EgDivider :class="styles.divider" type="module" direction="vertical" :hide="false" />
+
+      <EgDivider :class="styles.divider" type="page" direction="vertical" />
+
       <slot name="statistics">
         <BatchBarActionItem
           type="statistics"
@@ -36,10 +130,78 @@ const emit = defineEmits<{
           :count-suffix="countSuffix"
         />
       </slot>
-      <EgDivider :class="styles.divider" type="module" direction="vertical" :hide="false" />
-      <slot name="actions">
-        <BatchBarActionItem type="text" :label="actionLabel" @click="emit('action')" />
-      </slot>
-    </div>
+
+      <template v-if="$slots.actions">
+        <EgDivider :class="styles.divider" type="page" direction="vertical" />
+        <slot name="actions" />
+      </template>
+
+      <template v-else>
+        <template v-for="(label, index) in visibleLabels" :key="`${label}-${index}`">
+          <EgDivider :class="styles.divider" type="page" direction="vertical" />
+          <BatchBarActionItem
+            type="text"
+            :label="label"
+            :loading="isLabelLoading(index)"
+            :danger="isLabelDanger(index)"
+            @click="onLabelClick(label, index)"
+          />
+        </template>
+
+        <template v-if="showMore">
+          <EgDivider :class="styles.divider" type="page" direction="vertical" />
+          <EgFlotation
+            :class="styles.moreFlotation"
+            :placement="morePlacement"
+            :align="moreAlign"
+            :cross-axis-offset="0"
+            width-mode="adaptive"
+            height-mode="adaptive"
+            :show-add="false"
+            :show-menu-divider="false"
+            @open="emit('more')"
+          >
+            <template #trigger="{ expanded }">
+              <BatchBarActionItem
+                type="text"
+                :label="moreLabel"
+                :active="expanded && !moreLoading"
+                :loading="moreLoading"
+              />
+            </template>
+
+            <template #content="{ close }">
+              <slot name="more-menu" :labels="overflowLabels" :close="close">
+                <EgFlotationMenu
+                  :class="styles.moreMenu"
+                  panel-radius="radius-md"
+                  width-mode="adaptive"
+                  height-mode="adaptive"
+                  :scrollable="false"
+                  :show-add="false"
+                  :show-divider="false"
+                >
+                  <EgFlotationMenuItem
+                    v-for="(label, overflowIndex) in overflowLabels"
+                    :key="`${label}-${overflowIndex}`"
+                    box-type="text"
+                    :label="label"
+                    :show-tag="false"
+                    :danger="isLabelDanger(collapsedVisibleCount + overflowIndex)"
+                    @click="
+                      onOverflowLabelClick(
+                        label,
+                        collapsedVisibleCount + overflowIndex,
+                        close,
+                      )
+                    "
+                  />
+                </EgFlotationMenu>
+              </slot>
+            </template>
+          </EgFlotation>
+        </template>
+      </template>
+    </EgTooltip>
   </div>
 </template>

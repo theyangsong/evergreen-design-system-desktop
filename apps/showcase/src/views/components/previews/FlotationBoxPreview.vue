@@ -1,31 +1,81 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue';
-import { EgFlotationMenuItem } from '@eds/desktop-components';
+import { computed, reactive, watch } from 'vue';
+import { EgFlotationMenu, EgFlotationMenuItem } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
+  buildFlotationBoxKindPanelControls,
   buildFlotationBoxUsageSnippet,
-  flotationBoxCustomizeControls,
-  flotationBoxCustomizeDefaults,
+  buildFlotationPresetItems,
+  enforceFlotationSingleSelection,
   flotationBoxImportCode,
-  flotationBoxPropRows,
-  flotationBoxSlotRows,
+  flotationBoxKindCustomizeControls,
+  flotationBoxDocPropRows,
+  flotationBoxDocSlotRows,
+  flotationBoxPageCustomizeDefaults,
+  getFlotationBoxKindPanelTitle,
+  parseFlotationEditBoxIndex,
+  parseFlotationItemCount,
+  parseFlotationBoxSelectionMode,
+  flotationBoxItemKey,
+  flotationDefaultCryptoAsset,
 } from './flotationDocCustomize';
 
 const customize = reactive({
-  ...flotationBoxCustomizeDefaults,
-  boxType: flotationBoxCustomizeDefaults.boxType as 'text' | 'symbol-text' | 'image-text',
-  tagStatus: flotationBoxCustomizeDefaults.tagStatus as
-    | 'danger'
-    | 'warning'
-    | 'success'
-    | 'ready'
-    | 'invalid',
-  messageType: flotationBoxCustomizeDefaults.messageType as 'subtle' | 'brand' | 'danger',
+  ...flotationBoxPageCustomizeDefaults,
+  boxKind: flotationBoxPageCustomizeDefaults.boxKind as 'standard-menu' | 'standard-cascade-menu',
 });
 
+watch(
+  () => customize.itemCount,
+  () => {
+    customize.editBoxIndex = String(parseFlotationEditBoxIndex(customize));
+  },
+);
+
+watch(
+  () => customize.boxItemType,
+  (type) => {
+    if (type !== 'image-text') return;
+    const count = parseFlotationItemCount(customize);
+    for (let n = 1; n <= count; n += 1) {
+      customize[flotationBoxItemKey('SymbolIcon', n)] = flotationDefaultCryptoAsset;
+    }
+  },
+);
+
+watch(
+  () => customize.boxKind,
+  (kind) => {
+    if (kind !== 'standard-cascade-menu') return;
+    const editIndex = parseFlotationEditBoxIndex(customize);
+    customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
+  },
+);
+
+watch(
+  () => {
+    const count = parseFlotationItemCount(customize);
+    const keys = Array.from({ length: count }, (_, index) =>
+      Boolean(customize[flotationBoxItemKey('Checked', index + 1)]),
+    );
+    return [parseFlotationBoxSelectionMode(customize), ...keys] as const;
+  },
+  () => enforceFlotationSingleSelection(customize),
+);
+
 const usageSnippet = computed(() => buildFlotationBoxUsageSnippet(customize));
+
+const boxPanelTitle = computed(() => getFlotationBoxKindPanelTitle(customize.boxKind));
+
+const boxPanelControls = computed(() => buildFlotationBoxKindPanelControls(customize));
+
+const presetItems = computed(() => {
+  const count = parseFlotationItemCount(customize);
+  return buildFlotationPresetItems(count, customize);
+});
 </script>
 
 <template>
@@ -35,36 +85,58 @@ const usageSnippet = computed(() => buildFlotationBoxUsageSnippet(customize));
       anchor-id="flotation-box"
       title="Box"
       :show-doc-title="false"
-      component-tag="EgFlotationMenuItem"
+      component-tag="EgFlotationMenu"
       :import-code="flotationBoxImportCode"
-      :customize-controls="flotationBoxCustomizeControls"
-      :customize-defaults="{ ...flotationBoxCustomizeDefaults }"
+      :customize-controls="flotationBoxKindCustomizeControls"
+      :customize-defaults="{ ...flotationBoxPageCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
-      :prop-rows="flotationBoxPropRows"
-      :slot-rows="flotationBoxSlotRows"
+      :prop-rows="flotationBoxDocPropRows"
+      :slot-rows="flotationBoxDocSlotRows"
       props-section-id="flotation-box-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <div :style="{ width: '100%', maxWidth: 'var(--scale-50)' }">
+        <div
+          class="desktopTokens"
+          :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
+        >
+          <EgFlotationMenu
+            :show-add="Boolean(customize.showAdd)"
+            :add-label="String(customize.addLabel)"
+          >
             <EgFlotationMenuItem
-              :box-type="customize.boxType"
-              :label="String(customize.label)"
-              :disabled="Boolean(customize.disabled)"
-              :show-checkbox="Boolean(customize.showCheckbox)"
-              :checked="Boolean(customize.checked)"
-              :show-tag="Boolean(customize.showTag)"
-              :tag-text="String(customize.tagText)"
-              :tag-status="customize.tagStatus"
-              :show-reddot="Boolean(customize.showReddot)"
-              :show-cascader="Boolean(customize.showCascader)"
-              :show-message="Boolean(customize.showMessage)"
-              :message-text="String(customize.messageText)"
-              :message-type="customize.messageType"
-              :symbol-icon="String(customize.symbolIcon)"
-              @update:checked="customize.checked = $event"
+              v-for="(item, index) in presetItems"
+              :key="`${item.label}-${index}`"
+              :box-type="item.boxType ?? 'text'"
+              :label="item.label"
+              :disabled="item.disabled"
+              :focused="item.focused"
+              :show-checkbox="item.showCheckbox"
+              :checked="item.checked"
+              :show-tag="Boolean(item.showTag)"
+              :tag-text="item.tag ?? 'Tag'"
+              :tag-status="item.tagStatus ?? 'danger'"
+              :show-reddot="item.showReddot"
+              :show-cascader="item.showCascader"
+              :show-message="item.showMessage"
+              :message-text="item.messageText ?? '0'"
+              :message-type="item.messageType ?? 'subtle'"
+              :symbol-icon="item.symbolIcon ?? 'eds-add'"
             />
-          </div>
+          </EgFlotationMenu>
+        </div>
+      </template>
+
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            :title="boxPanelTitle"
+            nested
+            embedded
+            sequential
+            :row-columns="5"
+            :controls="boxPanelControls"
+          />
         </div>
       </template>
     </ComponentDocLayout>

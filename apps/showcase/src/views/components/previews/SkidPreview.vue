@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 import { EgSkid } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
-import organismStyles from './OrganismPreview.module.css';
 import {
   ORGANISM_IMPORT,
+  buildSkidUsageSnippet,
+  skidActionCustomizeControls,
   skidCustomizeControls,
   skidCustomizeDefaults,
   skidPropRows,
   skidSlotRows,
 } from './organismTemplateDocData';
 
-const customize = reactive({ ...skidCustomizeDefaults });
-
-const skidActionCustomize = reactive({
-  confirmLabel: 'Confirm',
+const customize = reactive({
+  ...skidCustomizeDefaults,
+  tone: skidCustomizeDefaults.tone as 'brand' | 'decor' | 'danger',
 });
+
+const usageSnippet = computed(() => buildSkidUsageSnippet(customize));
 </script>
 
 <template>
@@ -33,35 +35,30 @@ const skidActionCustomize = reactive({
       :customize-defaults="skidCustomizeDefaults"
       :prop-rows="skidPropRows"
       :slot-rows="skidSlotRows"
+      :usage-snippet-override="usageSnippet"
       props-section-id="skid-props"
+      tall-preview
     >
       <template #preview>
-        <div class="desktopTokens" :class="[docStyles.subPreviewWidth, organismStyles.previewOrganismPanelHost]">
+        <div class="desktopTokens" :class="docStyles.previewEffectPanelHost">
           <EgSkid
             :title="String(customize.title)"
             :show-button="Boolean(customize.showButton)"
-            :split="Boolean(customize.split)"
-            :confirm-label="String(skidActionCustomize.confirmLabel)"
-          >
-            <div
-              :style="{
-                minHeight: 'var(--scale-20)',
-                margin: 'var(--spacing-4)',
-                background: 'var(--material-card-shallow)',
-                borderRadius: 'var(--radius-sm)',
-              }"
-            />
-          </EgSkid>
+            :action-tone="customize.tone"
+            :confirm-label="String(customize.confirmLabel)"
+          />
         </div>
       </template>
 
-      <CustomizePanel
-        v-if="customize.showButton"
-        v-model="skidActionCustomize"
-        nested
-        title="EgComboActionSkid"
-        :controls="[{ kind: 'text', key: 'confirmLabel', label: '确认 confirm' }]"
-      />
+      <template #customize-after>
+        <CustomizePanel
+          v-if="customize.showButton"
+          v-model="customize"
+          title="Action"
+          nested
+          :controls="skidActionCustomizeControls"
+        />
+      </template>
     </ComponentDocLayout>
   </div>
 </template>

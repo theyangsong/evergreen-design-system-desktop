@@ -4,13 +4,13 @@
  *
  * Usage:
  *   import { initLiquidGlass, attachLiquidGlass } from '@eds/desktop-tokens/liquid-glass';
- *   initLiquidGlass(); // auto-bind .effect-flotation-box__glass, .effect-popup-box__glass
+ *   initLiquidGlass(); // optional: pass selector for custom glass surfaces
  *   attachLiquidGlass(element);
  */
 
-const GLASS_BOX_SELECTOR = '.effect-flotation-box__glass, .effect-popup-box__glass';
-const DEFAULT_GLASS_BG_PREFIX = '--effect-glass-bg';
-const GLASS_BOX_LIQUID_PREFIX = '--effect-glass-box-liquid';
+const GLASS_BOX_SELECTOR = '[data-liquid-glass-box]';
+const DEFAULT_GLASS_BG_PREFIX = '--eds-glass-bg';
+const GLASS_BOX_LIQUID_PREFIX = '--eds-glass-box-liquid';
 
 function smoothStep(edge0, edge1, value) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));

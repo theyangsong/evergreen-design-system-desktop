@@ -1,33 +1,47 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import {
-  EgIcon,
+  EgContainer,
   EgLayout,
   EgModuleMenu,
-  EgModuleMenuItem,
   EgNavBar,
-  EgNavBarCorporation,
-  EgNavBarModuleItem,
-  EgPaginer,
   EgSkid,
-  EgToolBar,
-  EgIconButtonPro,
+  EgTooltip,
 } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
-import organismStyles from './OrganismPreview.module.css';
 import {
   ORGANISM_IMPORT,
+  buildLayoutUsageSnippet,
   layoutCustomizeControls,
   layoutCustomizeDefaults,
-  layoutPropRows,
-  layoutSlotRows,
+  layoutPropRowsForType,
+  layoutSlotRowsForType,
 } from './organismTemplateDocData';
 
 const customize = reactive({
   ...layoutCustomizeDefaults,
   type: layoutCustomizeDefaults.type as 'empty' | 'navigation' | 'module-menu',
+  pageBg: layoutCustomizeDefaults.pageBg as 'none' | 'right' | 'center',
 });
+
+watch(
+  () => customize.type,
+  (type) => {
+    if (type === 'empty') customize.showSkid = false;
+  },
+);
+
+const usageSnippet = computed(() => buildLayoutUsageSnippet(customize));
+
+const docComponentTag = computed(() =>
+  customize.type === 'empty' ? 'EgContainer' : 'EgLayout',
+);
+
+const docPropRows = computed(() => layoutPropRowsForType(customize.type));
+
+const docSlotRows = computed(() => layoutSlotRowsForType(customize.type));
 </script>
 
 <template>
@@ -36,62 +50,40 @@ const customize = reactive({
       v-model:customize-state="customize"
       title="Layout"
       :show-doc-title="false"
-      component-tag="EgLayout"
+      :component-tag="docComponentTag"
       :import-code="ORGANISM_IMPORT"
       :customize-controls="layoutCustomizeControls"
       :customize-defaults="layoutCustomizeDefaults"
-      :prop-rows="layoutPropRows"
-      :slot-rows="layoutSlotRows"
+      :prop-rows="docPropRows"
+      :slot-rows="docSlotRows"
+      :usage-snippet-override="usageSnippet"
       props-section-id="layout-props"
+      tall-preview
     >
       <template #preview>
-        <div class="desktopTokens" :class="organismStyles.previewOrganismLayoutHost">
-          <EgLayout
-            :type="customize.type"
-            :show-toolbar="Boolean(customize.showToolbar)"
-            :show-paginer="Boolean(customize.showPaginer)"
-            :show-skid="Boolean(customize.showSkid)"
-          >
-            <template v-if="customize.type !== 'empty'" #nav>
-              <EgNavBar>
-                <template #corporation>
-                  <EgNavBarCorporation label="G" />
-                </template>
-                <EgNavBarModuleItem label="Label">
-                  <EgIcon name="eds-add" size="md" />
-                </EgNavBarModuleItem>
-              </EgNavBar>
-            </template>
-            <template v-if="customize.type === 'module-menu'" #moduleMenu>
-              <EgModuleMenu title="Module">
-                <EgModuleMenuItem label="Label">
-                  <EgIcon name="eds-add" size="sm" />
-                </EgModuleMenuItem>
-              </EgModuleMenu>
-            </template>
-            <template v-if="customize.showToolbar" #toolbar>
-              <EgToolBar title="Title">
-                <template #functional>
-                  <EgIconButtonPro label="Label">
-                    <EgIcon name="eds-add" size="sm" />
-                  </EgIconButtonPro>
-                </template>
-              </EgToolBar>
-            </template>
-            <div
-              :style="{
-                flex: '1',
-                minHeight: 'var(--scale-20)',
-                background: 'var(--material-card-shallow)',
-              }"
+        <div
+          class="desktopTokens"
+          :class="[docStyles.previewEffectPanelHost, docStyles.previewEffectPanelHostTall]"
+        >
+          <EgTooltip panel-kind="container">
+            <EgContainer
+              v-if="customize.type === 'empty'"
+              :page-bg="customize.pageBg"
             />
-            <template v-if="customize.showPaginer" #paginer>
-              <EgPaginer data-volume="1–20 / 100" />
-            </template>
-            <template v-if="customize.showSkid" #skid>
-              <EgSkid title="Skid" />
-            </template>
-          </EgLayout>
+            <EgContainer v-else>
+              <EgLayout :type="customize.type" :show-skid="Boolean(customize.showSkid)">
+                <template v-if="customize.type !== 'empty'" #nav>
+                  <EgNavBar />
+                </template>
+                <template v-if="customize.type === 'module-menu'" #moduleMenu>
+                  <EgModuleMenu />
+                </template>
+                <template v-if="customize.showSkid" #skid>
+                  <EgSkid />
+                </template>
+              </EgLayout>
+            </EgContainer>
+          </EgTooltip>
         </div>
       </template>
     </ComponentDocLayout>

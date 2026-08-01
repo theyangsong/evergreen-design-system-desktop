@@ -5,7 +5,6 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
-import tooltipStyles from './TooltipPreview.module.css';
 import {
   buildFlotationBoxPanelControls,
   buildFlotationMenuPanelControls,
@@ -15,13 +14,21 @@ import {
   flotationImportCode,
   flotationPropRows,
   flotationSlotRows,
-  flotationTriggerPanelControls,
+  flotationTriggerKindCustomizeControls,
+  flotationTriggerOverviewControls,
+  parseFlotationCrossAxisOffset,
   parseFlotationEditBoxIndex,
   parseFlotationItemCount,
+  parseFlotationMaxHeight,
+  parseFlotationBoxSelectionMode,
+  enforceFlotationSingleSelection,
+  flotationBoxItemKey,
+  flotationDefaultCryptoAsset,
 } from './flotationDocCustomize';
 
 const customize = reactive({
   ...flotationCustomizeDefaults,
+  triggerKind: flotationCustomizeDefaults.triggerKind as 'standard-dropdown',
   placement: flotationCustomizeDefaults.placement as 'top' | 'bottom' | 'left' | 'right',
   triggerStyle: flotationCustomizeDefaults.triggerStyle as 'subtle' | 'outline' | 'text',
   triggerSize: flotationCustomizeDefaults.triggerSize as 'lg' | 'md' | 'sm' | 'xs',
@@ -44,6 +51,28 @@ watch(
   },
 );
 
+watch(
+  () => customize.boxItemType,
+  (type) => {
+    if (type !== 'image-text') return;
+    const count = parseFlotationItemCount(customize);
+    for (let n = 1; n <= count; n += 1) {
+      customize[flotationBoxItemKey('SymbolIcon', n)] = flotationDefaultCryptoAsset;
+    }
+  },
+);
+
+watch(
+  () => {
+    const count = parseFlotationItemCount(customize);
+    const keys = Array.from({ length: count }, (_, index) =>
+      Boolean(customize[flotationBoxItemKey('Checked', index + 1)]),
+    );
+    return [parseFlotationBoxSelectionMode(customize), ...keys] as const;
+  },
+  () => enforceFlotationSingleSelection(customize),
+);
+
 const usageSnippet = computed(() => buildFlotationUsageSnippet(customize));
 
 const menuPanelControls = computed(() => buildFlotationMenuPanelControls(customize));
@@ -64,6 +93,13 @@ const panelHeight = computed(() => {
   if (customize.heightMode !== 'fixed') return undefined;
   return Number.parseInt(String(customize.height), 10) || 306;
 });
+
+const panelMaxHeight = computed(() => {
+  if (customize.heightMode !== 'adaptive') return undefined;
+  return parseFlotationMaxHeight(customize);
+});
+
+const panelCrossAxisOffset = computed(() => parseFlotationCrossAxisOffset(customize));
 </script>
 
 <template>
@@ -71,13 +107,12 @@ const panelHeight = computed(() => {
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="flotation"
-      title="Flotation"
+      title="Combo"
       :show-doc-title="false"
       component-tag="EgFlotation"
       :import-code="flotationImportCode"
-      :customize-controls="[]"
+      :customize-controls="flotationTriggerKindCustomizeControls"
       :customize-defaults="{ ...flotationCustomizeDefaults }"
-      :show-customize="true"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationPropRows"
       :slot-rows="flotationSlotRows"
@@ -86,10 +121,11 @@ const panelHeight = computed(() => {
       <template #preview>
         <div
           class="desktopTokens"
-          :class="[docStyles.subPreviewWidth, tooltipStyles.previewHost, tooltipStyles.anchoredScene]"
+          :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
         >
           <EgFlotation
             :placement="customize.placement"
+            :cross-axis-offset="panelCrossAxisOffset"
             :trigger-label="String(customize.triggerLabel)"
             :trigger-style="customize.triggerStyle"
             :trigger-size="customize.triggerSize"
@@ -109,33 +145,40 @@ const panelHeight = computed(() => {
             :align="customize.align"
             :height-mode="customize.heightMode"
             :height="panelHeight"
+            :max-height="panelMaxHeight"
             :items="presetItems"
           />
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          title="触发器 Trigger"
-          nested
-          sequential
-          :controls="flotationTriggerPanelControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="菜单 Menu"
-          nested
-          sequential
-          :controls="menuPanelControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="盒子 Box"
-          nested
-          sequential
-          :controls="boxPanelControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            title="标准下拉框"
+            nested
+            embedded
+            sequential
+            :controls="flotationTriggerOverviewControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="菜单 Menu"
+            nested
+            embedded
+            sequential
+            :controls="menuPanelControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="盒子 Box"
+            nested
+            embedded
+            sequential
+            :row-columns="5"
+            :controls="boxPanelControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

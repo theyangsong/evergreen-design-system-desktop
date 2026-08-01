@@ -18,7 +18,7 @@ Every rounded corner in this project uses **Figma/iOS squircle** at **60%** smoo
 ## CSS rules
 
 - Put `border-radius` on **the element that is visually rounded** (the painted surface), not only on a wrapper with `overflow: hidden`.
-- Prefer radius tokens over `--scale-*` unless matching an existing effect spec (e.g. `effect-flotation-box` uses `var(--scale-3)`).
+- Prefer radius tokens over `--scale-*` unless matching an existing effect spec (e.g. `effect-flotation-box` uses `var(--radius-md)`).
 
 ```css
 /* ❌ BAD — radius on wrapper; img won't get squircle */
@@ -34,7 +34,7 @@ Every rounded corner in this project uses **Figma/iOS squircle** at **60%** smoo
 
 ## Effect boxes
 
-- Apply smoothing only on the **root** `.effect-flotation-box` / `.effect-popup-box` (handled by runtime; internal `__fill`, `__glass`, etc. are skipped).
+- Apply smoothing on elements with `border-radius` except `.effect-container-box` / `.effect-flotation-box` / `.effect-popup-box` (clip-path would clip their `box-shadow`).
 - Do not duplicate `clip-path` on effect sub-layers.
 
 ## Dynamic UI (Teleport / v-if)

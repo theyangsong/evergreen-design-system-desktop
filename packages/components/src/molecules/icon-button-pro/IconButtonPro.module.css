@@ -3,8 +3,10 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0;
-  width: var(--scale-11);
+  width: max-content;
+  min-width: var(--scale-12);
   border: none;
   padding: 0;
   background: none;
@@ -24,43 +26,86 @@
 }
 
 /*
- * Whole-control hover (including label) should drive nested Simple container.
+ * Nested EgIconButton is visual-only (as=span); outer .root owns hit target + interaction.
+ * pointer-events: none so :hover/:active on .root always drives Simple container chrome.
+ */
+.iconSlot :global(.eds-icon-button) {
+  pointer-events: none;
+}
+
+/*
+ * Whole-control hover (including label) drives nested Simple container.
  * Same Desktop stroke tokens as EgIconButton.
  */
-.root:hover:not(:disabled) :global(.eds-icon-button),
-.root:active:not(:disabled) :global(.eds-icon-button),
-.root:focus-visible:not(:disabled) :global(.eds-icon-button) {
+.root:hover:not(:disabled) .iconSlot :global(.eds-icon-button),
+.root:active:not(:disabled) .iconSlot :global(.eds-icon-button),
+.root:focus-visible:not(:disabled) .iconSlot :global(.eds-icon-button) {
   background-color: var(--event-hover);
 }
 
-.root:hover:not(:disabled) :global(.eds-icon-button path),
-.root:hover:not(:disabled) :global(.eds-icon-button line),
-.root:focus-visible:not(:disabled) :global(.eds-icon-button path),
-.root:focus-visible:not(:disabled) :global(.eds-icon-button line) {
-  stroke: var(--stroke-base-primary);
+.root:hover:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon),
+.root:focus-visible:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
+  color: var(--text-base-primary);
 }
 
-.root:active:not(:disabled) :global(.eds-icon-button path),
-.root:active:not(:disabled) :global(.eds-icon-button line) {
-  stroke: var(--stroke-base-secondary);
+.root:active:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
+  color: var(--text-base-secondary);
 }
 
-.root:disabled :global(.eds-icon-button path),
-.root:disabled :global(.eds-icon-button line) {
-  stroke: var(--stroke-base-quaternary);
+.root:disabled .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
+  color: var(--text-base-quaternary);
 }
 
-.label {
-  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
-  display: block;
-  width: 100%;
+/* Bar 11px：sizer 1× 撑布局，paint 2× + scale(0.5) 渲染（同 NavBar .moduleLabel） */
+.labelWrap {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  overflow: hidden;
+  max-width: 100%;
   margin-top: var(--spacing-05);
-  margin-inline: auto;
   color: var(--text-base-secondary);
   text-align: center;
 }
 
-.root:disabled .label {
+.labelSizer {
+  display: block;
+  visibility: hidden;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.labelPaint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 200%;
+  padding: 0;
+  margin: 0;
+  font-family: var(--eds-family-sans);
+  font-size: calc(var(--eds-bar-size) * 2);
+  font-weight: var(--eds-bar-weight);
+  line-height: calc(var(--eds-bar-line-height) * 2);
+  transform: scale(0.5);
+  transform-origin: top left;
+  color: inherit;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  pointer-events: none;
+}
+
+.root:disabled .labelWrap {
   color: var(--text-base-quaternary);
 }
 

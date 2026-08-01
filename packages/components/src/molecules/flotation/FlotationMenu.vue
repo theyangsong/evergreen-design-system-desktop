@@ -3,20 +3,25 @@ import { EgDivider } from '../../atoms/divider';
 import { EgIcon } from '../../atoms/icons';
 import EgTooltip, {
   type TooltipHeightMode,
-  type TooltipPanelKind,
   type TooltipWidthMode,
 } from '../tooltip/Tooltip.vue';
+import type { TooltipPanelKind, TooltipPanelRadiusToken } from '../tooltip/tooltipPanelRadius';
 import styles from './Flotation.module.css';
 
 withDefaults(
   defineProps<{
     /** Figma Menu：浮层外壳由 EgTooltip 提供（flotation box）。 */
     panelKind?: TooltipPanelKind;
+    /** 透传 EgTooltip；仅 Radius token（--radius-*）。 */
+    panelRadius?: TooltipPanelRadiusToken;
     widthMode?: TooltipWidthMode;
     width?: number;
+    maxWidth?: number;
     heightMode?: TooltipHeightMode;
     height?: number;
     maxHeight?: number;
+    /** false：随内容增高，不滚动、不裁剪。 */
+    scrollable?: boolean;
     showDivider?: boolean;
     showAdd?: boolean;
     addLabel?: string;
@@ -28,6 +33,7 @@ withDefaults(
     heightMode: 'adaptive',
     height: 306,
     maxHeight: undefined,
+    scrollable: true,
     showDivider: true,
     showAdd: true,
     addLabel: 'Add',
@@ -43,11 +49,14 @@ const emit = defineEmits<{
   <EgTooltip
     class="eds-flotation-menu"
     :panel-kind="panelKind"
+    :panel-radius="panelRadius"
     :width-mode="widthMode"
     :width="width"
+    :max-width="maxWidth"
     :height-mode="heightMode"
     :height="height"
     :max-height="maxHeight"
+    :scrollable="scrollable"
   >
     <div :class="styles.menuBody">
       <div :class="styles.menuList">

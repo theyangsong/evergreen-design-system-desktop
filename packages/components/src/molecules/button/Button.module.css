@@ -10,10 +10,7 @@
   font-weight: var(--eds-body-medium-strong-weight);
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--eds-interaction-transition);
 }
 
 .button:disabled {
@@ -273,6 +270,21 @@
 
 .sameWhite.text:active:not(:disabled) {
   color: var(--text-same-white-secondary);
+}
+
+/* Text 展开态（Figma Active，同 Flotation triggerExpanded） */
+
+.brand.text.active:not(:disabled),
+.danger.text.active:not(:disabled),
+.decor.text.active:not(:disabled),
+.subtle.text.active:not(:disabled),
+.sameWhite.text.active:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.subtle.text.active:not(:disabled) {
+  color: var(--text-base-secondary);
 }
 
 /* ── Disabled (all tones / variants) ── */

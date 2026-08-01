@@ -24,17 +24,6 @@
   min-height: 0;
 }
 
-.previewOrganismWideHost {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-  max-width: 100%;
-  min-height: var(--scale-30);
-  overflow-x: auto;
-  box-sizing: border-box;
-}
-
 .previewOrganismLayoutHost {
   display: flex;
   align-items: stretch;

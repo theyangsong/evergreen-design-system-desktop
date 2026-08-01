@@ -21,6 +21,8 @@ export type DocCustomizeBooleanControl = {
   label: string;
   row?: number;
   visibleWhen?: (state: Record<string, unknown>) => boolean;
+  /** 勾选为 true 时，将对应 key 置为 false（如角标 / 红点互斥）。 */
+  exclusiveKey?: string;
 };
 
 export type DocCustomizeTextControl = {

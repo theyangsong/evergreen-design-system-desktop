@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
+import { EgCrypto, type CryptoName } from '../../atoms/crypto';
 import { EgIcon } from '../../atoms/icons';
 import { EgCheckbox } from '../toggle';
 import { EgMessage, EgReddot, type MessageType } from '../feedback';
@@ -23,6 +24,8 @@ const props = withDefaults(
     focused?: boolean;
     showCheckbox?: boolean;
     checked?: boolean;
+    /** 文案使用 --text-danger-primary（Batch Bar 危险 Label 等）。 */
+    danger?: boolean;
     showTag?: boolean;
     tagText?: string;
     /** 嵌套 EgTag family=status size=sm */
@@ -41,6 +44,7 @@ const props = withDefaults(
     focused: false,
     showCheckbox: false,
     checked: false,
+    danger: false,
     showTag: true,
     tagText: 'Tag',
     tagStatus: 'danger',
@@ -67,9 +71,9 @@ const showLeading = computed(
     props.boxType === 'image-text',
 );
 
-const leadingIcon = computed(() =>
-  props.boxType === 'image-text' ? 'eds-coin-btc' : props.symbolIcon,
-);
+const leadingAsset = computed(() => props.symbolIcon);
+
+const leadingCryptoName = computed(() => leadingAsset.value as CryptoName);
 
 const itemClass = computed(() => [
   styles.boxRoot,
@@ -86,7 +90,7 @@ function onClick(event: MouseEvent) {
 <template>
   <button
     type="button"
-    class="eds-flotation-box"
+    class="eds-flotation-menu-item"
     :class="itemClass"
     :disabled="disabled"
     :aria-pressed="focused || undefined"
@@ -108,12 +112,18 @@ function onClick(event: MouseEvent) {
 
     <span v-if="showLeading" :class="styles.boxLeading">
       <slot name="leading">
-        <EgIcon :name="leadingIcon" size="sm" fit />
+        <EgCrypto
+          v-if="boxType === 'image-text'"
+          :name="leadingCryptoName"
+          size="sm"
+          fit
+        />
+        <EgIcon v-else :name="leadingAsset" size="sm" fit />
       </slot>
     </span>
 
     <span :class="styles.boxMain">
-      <span :class="styles.boxLabel">
+      <span :class="[styles.boxLabel, danger && styles.boxLabelDanger]">
         <slot>{{ label }}</slot>
       </span>
       <span v-if="showTag || slots.tag" :class="styles.boxTag">

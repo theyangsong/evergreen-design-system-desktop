@@ -17,11 +17,20 @@ const customize = reactive({
   ...segmentedControlCustomizeDefaults,
   size: segmentedControlCustomizeDefaults.size as 'lg' | 'md' | 'sm',
   shape: segmentedControlCustomizeDefaults.shape as 'circle' | 'square',
+  itemWidthMode: segmentedControlCustomizeDefaults.itemWidthMode as 'adaptive' | 'fixed',
 });
 
 const selectedIndex = ref(0);
 const labels = computed(() => resolveTabLabels(customize.labels, customize.count));
 const usageSnippet = computed(() => buildSegmentedControlUsageSnippet(customize));
+
+const isFixedItemWidth = computed(() => customize.itemWidthMode === 'fixed');
+
+const panelWidth = computed(() => {
+  if (!isFixedItemWidth.value) return undefined;
+  const width = Number.parseInt(String(customize.width), 10);
+  return Number.isFinite(width) && width > 0 ? `${width}px` : '100%';
+});
 
 watch(
   labels,
@@ -50,12 +59,20 @@ watch(
     >
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgSegmentedControl
-            v-model="selectedIndex"
-            :size="customize.size"
-            :shape="customize.shape"
-            :labels="labels"
-          />
+          <div :style="isFixedItemWidth && panelWidth ? { width: panelWidth } : undefined">
+            <EgSegmentedControl
+              v-model="selectedIndex"
+              :size="customize.size"
+              :shape="customize.shape"
+              :item-width-mode="customize.itemWidthMode"
+              :width="
+                isFixedItemWidth && panelWidth && panelWidth.endsWith('px')
+                  ? Number.parseInt(panelWidth, 10)
+                  : undefined
+              "
+              :labels="labels"
+            />
+          </div>
         </div>
       </template>
     </ComponentDocLayout>

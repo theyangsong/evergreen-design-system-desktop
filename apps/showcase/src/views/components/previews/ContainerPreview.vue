@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { EgContainer } from '@eds/desktop-components';
+import { EgContainer, EgTooltip } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
-import organismStyles from './OrganismPreview.module.css';
 import {
   ORGANISM_IMPORT,
   containerCustomizeControls,
@@ -30,18 +29,19 @@ const customize = reactive({
       :customize-defaults="containerCustomizeDefaults"
       :prop-rows="containerPropRows"
       props-section-id="container-props"
+      tall-preview
     >
       <template #preview>
-        <div class="desktopTokens" :class="organismStyles.previewOrganismWideHost">
-          <EgContainer :page-bg="customize.pageBg">
-            <div
-              :style="{
-                minHeight: 'var(--scale-30)',
-                background: 'var(--material-card-shallow)',
-                borderRadius: 'var(--radius-sm)',
-              }"
+        <div
+          class="desktopTokens"
+          :class="[docStyles.previewEffectPanelHost, docStyles.previewEffectPanelHostTall]"
+        >
+          <EgTooltip panel-kind="container">
+            <EgContainer
+              v-if="customize.pageBg !== 'none'"
+              :page-bg="customize.pageBg"
             />
-          </EgContainer>
+          </EgTooltip>
         </div>
       </template>
     </ComponentDocLayout>

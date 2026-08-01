@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { EgDivider } from '../../atoms/divider';
 import styles from './ModuleMenu.module.css';
+import '../../styles/frostedMenuChrome.css';
 
 withDefaults(
   defineProps<{
@@ -19,7 +20,7 @@ withDefaults(
 </script>
 
 <template>
-  <div :class="styles.titleWrap">
+  <div :class="['eds-frosted-menu-chrome', styles.titleWrap]">
     <div :class="styles.titleRaw">
       <p :class="styles.titleText">
         <slot>{{ title }}</slot>

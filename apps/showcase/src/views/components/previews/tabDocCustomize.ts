@@ -1,4 +1,11 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
+import {
+  countSelectOptions,
+  inputSizeRows,
+  propLabelRows,
+  showcaseTabShapeLabels,
+  widthModeAdaptiveFixedRows,
+} from '@/data/showcasePropLabels';
 
 export const segmentedControlImportCode = `import { EgSegmentedControl } from '@eds/desktop-components';`;
 export const tabsImportCode = `import { EgTabs } from '@eds/desktop-components';`;
@@ -8,6 +15,18 @@ export const segmentedControlPropRows: DocPropRow[] = [
   { name: 'size', type: "'lg' | 'md' | 'sm'", defaultValue: "'md'", description: '尺寸。' },
   { name: 'shape', type: "'circle' | 'square'", defaultValue: "'circle'", description: '圆角 / 方角容器。' },
   { name: 'labels', type: 'string[]', defaultValue: "['Tab','Tab','Tab']", description: '分段标签文案。' },
+  {
+    name: 'itemWidthMode',
+    type: "'adaptive' | 'fixed'",
+    defaultValue: "'adaptive'",
+    description: 'Item 宽度：adaptive=内容 hug；fixed=父级定宽后均分。',
+  },
+  {
+    name: 'width',
+    type: 'number',
+    defaultValue: 'undefined',
+    description: 'itemWidthMode=fixed 时可选容器宽度（px）；未传则 100% 跟随父级。',
+  },
 ];
 
 export const tabsPropRows: DocPropRow[] = [
@@ -15,17 +34,7 @@ export const tabsPropRows: DocPropRow[] = [
   { name: 'labels', type: 'string[]', defaultValue: "['Tab','Tab','Tab','Tab','Tab']", description: 'Tab 文案列表。' },
 ];
 
-const countOptions = [
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-  { value: '5', label: '5' },
-  { value: '6', label: '6' },
-  { value: '7', label: '7' },
-  { value: '8', label: '8' },
-  { value: '9', label: '9' },
-  { value: '10', label: '10' },
-];
+const countOptions = countSelectOptions(10, 2);
 
 /** Parse space-separated labels; pad/trim to `count`. */
 export function resolveTabLabels(labelsRaw: unknown, countRaw: unknown, fallback = 'Tab'): string[] {
@@ -44,6 +53,8 @@ export function resolveTabLabels(labelsRaw: unknown, countRaw: unknown, fallback
 export const segmentedControlCustomizeDefaults = {
   size: 'md',
   shape: 'circle',
+  itemWidthMode: 'adaptive' as 'adaptive' | 'fixed',
+  width: '222',
   count: '3',
   labels: 'Tab Tab Tab',
 };
@@ -52,32 +63,41 @@ export const segmentedControlCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'size',
-    label: '尺寸 size',
-    options: [
-      { value: 'lg', label: 'Lg' },
-      { value: 'md', label: 'Md' },
-      { value: 'sm', label: 'Sm' },
-    ],
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
     key: 'shape',
-    label: '类型 shape',
-    options: [
-      { value: 'circle', label: 'Circle' },
-      { value: 'square', label: 'Square' },
-    ],
+    label: '形状',
+    options: propLabelRows(['circle', 'square'] as const, showcaseTabShapeLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
+  },
+  {
+    kind: 'select',
+    key: 'itemWidthMode',
+    label: '项宽模式',
+    options: widthModeAdaptiveFixedRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'text',
+    key: 'width',
+    label: '容器宽度',
+    placeholder: 'px，如 222',
+    visibleWhen: (state) => String(state.itemWidthMode) === 'fixed',
   },
   {
     kind: 'select',
     key: 'count',
-    label: '数量 count',
+    label: '数量',
     options: countOptions,
   },
   {
     kind: 'text',
     key: 'labels',
-    label: '名称 labels',
+    label: '标签名',
     placeholder: '用空格分隔，如 Tab Home Settings',
   },
 ];
@@ -91,13 +111,13 @@ export const tabsCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'count',
-    label: '数量 count',
+    label: '数量',
     options: countOptions,
   },
   {
     kind: 'text',
     key: 'labels',
-    label: '名称 labels',
+    label: '标签名',
     placeholder: '用空格分隔，如 Overview Assets History',
   },
 ];
@@ -111,6 +131,13 @@ export function buildSegmentedControlUsageSnippet(state: Record<string, unknown>
   const parts = [`v-model="selected"`];
   if (state.size !== 'md') parts.push(`size="${String(state.size)}"`);
   if (state.shape !== 'circle') parts.push(`shape="${String(state.shape)}"`);
+  if (state.itemWidthMode === 'fixed') {
+    parts.push('item-width-mode="fixed"');
+    const width = Number.parseInt(String(state.width ?? ''), 10);
+    if (Number.isFinite(width) && width > 0) {
+      parts.push(`:width="${width}"`);
+    }
+  }
   parts.push(`:labels="${formatLabelsLiteral(labels)}"`);
   return `<EgSegmentedControl\n  ${parts.join('\n  ')}\n/>`;
 }

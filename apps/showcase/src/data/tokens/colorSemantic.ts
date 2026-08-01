@@ -6,7 +6,9 @@
  * text-match/success/warning/danger-* → status-* + text-hide; stroke-color-*-active/table-hover removed.
  */
 export function colorSemanticGroupKey(name: string): string {
-  return name.startsWith('data-table-') ? 'data-table' : name.split('-')[0];
+  if (name.startsWith('data-table-')) return 'data-table';
+  if (name.startsWith('eds-')) return 'eds';
+  return name.split('-')[0];
 }
 
 export const colorSemanticGroupOrder = [
@@ -17,7 +19,7 @@ export const colorSemanticGroupOrder = [
   'text',
   'material',
   'data-table',
-  'effect',
+  'eds',
 ] as const;
 
 export const colorSemanticGroupLabels: Record<string, string> = {
@@ -28,7 +30,7 @@ export const colorSemanticGroupLabels: Record<string, string> = {
   text: 'Text',
   material: 'Material',
   'data-table': 'Data Table',
-  effect: 'Effect',
+  eds: 'EDS Effect',
 };
 
 /** Figma Color System → Box variable order. */
@@ -137,16 +139,17 @@ export const dataTableColorTokenOrder = [
 
 /** Figma Color System → Effect variable order. */
 export const effectColorTokenOrder = [
-  'effect-vulvar-shadow',
-  'effect-vulvar-shadow-subtle',
-  'effect-vulvar-shadow-glow',
-  'effect-inner-shadow',
-  'effect-inner-shadow-glow',
-  'effect-popup-background',
-  'effect-popup-box',
-  'effect-flotation-box',
-  'effect-mask',
-  'effect-prompt',
+  'eds-vulvar-shadow',
+  'eds-vulvar-shadow-subtle',
+  'eds-shadow-shallow',
+  'eds-vulvar-shadow-glow',
+  'eds-inner-shadow',
+  'eds-inner-shadow-glow',
+  'eds-popup-background',
+  'eds-popup-box',
+  'eds-flotation-box',
+  'eds-mask',
+  'eds-prompt',
 ] as const;
 
 /** Figma Color System → Stroke variable order. */
@@ -182,7 +185,7 @@ const colorTokenOrderByGroup: Record<string, readonly string[]> = {
   text: textColorTokenOrder,
   material: materialColorTokenOrder,
   'data-table': dataTableColorTokenOrder,
-  effect: effectColorTokenOrder,
+  eds: effectColorTokenOrder,
 };
 
 export function sortColorSemanticItems<T extends { name: string }>(

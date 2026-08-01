@@ -46,7 +46,13 @@ const COLOR_SEMANTIC_GROUP_ORDER = [
   { prefix: 'text', comment: 'Text（文本色）' },
   { prefix: 'material', comment: 'Material（材质 / 填充）' },
   { prefix: 'data-table', comment: 'Data Table（表格）' },
-  { prefix: 'effect', comment: 'Effect（特效色）' },
+  { prefix: 'eds-vulvar', comment: 'EDS（特效色 — vulvar shadow）' },
+  { prefix: 'eds-shadow', comment: 'EDS（特效色 — shadow color）' },
+  { prefix: 'eds-inner', comment: 'EDS（特效色 — inner shadow）' },
+  { prefix: 'eds-popup', comment: 'EDS（特效色 — popup）' },
+  { prefix: 'eds-flotation', comment: 'EDS（特效色 — flotation）' },
+  { prefix: 'eds-mask', comment: 'EDS（特效色 — mask）' },
+  { prefix: 'eds-prompt', comment: 'EDS（特效色 — prompt）' },
 ];
 
 function groupColorSemanticTokens(tokens) {
@@ -274,11 +280,7 @@ function writeBarSubpixelCssFile(destination, spec, headerLines = []) {
 }
 
 function formatEffectLayers(layers) {
-  if (layers.length === 1) {
-    return layers[0];
-  }
-
-  return `\n    ${layers.join(',\n    ')}`;
+  return layers.join(', ');
 }
 
 function appendEffectGroupTokens(lines, groups) {
@@ -345,7 +347,7 @@ function appendLiquidGlassTokens(lines, liquidGlassSpec) {
 
   const profiles = liquidGlassSpec.profiles ?? {
     glassBg: {
-      cssPrefix: 'effect-glass-bg',
+      cssPrefix: 'eds-glass-bg',
       backdrop: liquidGlassSpec.backdrop,
       shader: liquidGlassSpec.shader,
       surface: liquidGlassSpec.surface,
@@ -438,7 +440,7 @@ function writeEffectReadyCssFile(destination, headerLines = []) {
     ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
     ' */',
     '',
-    '.effect-flotation-box__glass[data-liquid-glass-ready], .effect-popup-box__glass[data-liquid-glass-ready] {',
+    '[data-liquid-glass-ready] {',
     '  /* backdrop-filter 由 initLiquidGlass() 按元素尺寸注入 SVG filter url */',
     '}',
     '',

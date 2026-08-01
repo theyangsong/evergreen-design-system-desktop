@@ -207,13 +207,13 @@ const effectSemanticRows = computed(() =>
         </div>
       </section>
 
-      <section id="effect-base" :class="shared.section">
-        <h2 :class="shared.sectionTitle">Effect Base</h2>
+      <section id="eds-base" :class="shared.section">
+        <h2 :class="shared.sectionTitle">EDS Base</h2>
         <TokenParamRows :rows="effectBaseRows" />
       </section>
 
-      <section id="effect-semantic" :class="shared.section">
-        <h2 :class="shared.sectionTitle">Effect Semantic</h2>
+      <section id="eds-semantic" :class="shared.section">
+        <h2 :class="shared.sectionTitle">EDS Semantic</h2>
         <TokenParamRows :rows="effectSemanticRows" />
       </section>
     </div>

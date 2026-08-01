@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue';
 import { EgIcon, EgIconButtonPro } from '@eds/desktop-components';
-import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
@@ -10,6 +9,7 @@ import {
   iconButtonProCustomizeControls,
   iconButtonProCustomizeDefaults,
   iconButtonProImportCode,
+  iconButtonProNestedRowColumns,
 } from './buttonDocCustomize';
 import { iconButtonProPropRows, iconButtonProSlotRows } from './buttonSubPreviewData';
 
@@ -30,6 +30,8 @@ const iconButtonProUsageSnippet = computed(() =>
       :import-code="iconButtonProImportCode"
       :customize-controls="iconButtonProCustomizeControls"
       :customize-defaults="iconButtonProCustomizeDefaults"
+      :customize-sequential="true"
+      :customize-row-columns="iconButtonProNestedRowColumns"
       :usage-snippet-override="iconButtonProUsageSnippet"
       :prop-rows="iconButtonProPropRows"
       :slot-rows="iconButtonProSlotRows"
@@ -44,7 +46,7 @@ const iconButtonProUsageSnippet = computed(() =>
             :show-reddot="Boolean(iconButtonProCustomize.showReddot)"
             :disabled="Boolean(iconButtonProCustomize.disabled)"
           >
-            <EgIcon :name="showcaseDefaultIconName" fit />
+            <EgIcon :name="String(iconButtonProCustomize.symbol)" fit />
           </EgIconButtonPro>
         </div>
       </template>

@@ -36,10 +36,16 @@ export const iconButtonPropRows: DocPropRow[] = [
 
 export const iconButtonSlotRows: DocPropRow[] = [
   {
+    name: 'symbol',
+    type: 'slot',
+    defaultValue: '-',
+    description: 'Symbol 插槽；默认 slot 与之等价。推荐 <EgIcon name="eds-add" fit />。',
+  },
+  {
     name: 'default',
     type: 'slot',
     defaultValue: '-',
-    description: '图标 SVG 或组件。',
+    description: 'Symbol 插槽别名（与 #symbol 等价）。',
   },
 ];
 
@@ -81,7 +87,7 @@ export const iconButtonProSlotRows: DocPropRow[] = [
     name: 'default',
     type: 'slot',
     defaultValue: '-',
-    description: `传给内部 EgIconButton（size=sm）的图标，推荐 <EgIcon name="${showcaseDefaultIconName}" fit />。`,
+    description: `传给内部 EgIconButton（size=sm）的 Symbol，推荐 <EgIcon name="${showcaseDefaultIconName}" fit />。`,
   },
 ];
 

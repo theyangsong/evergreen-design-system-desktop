@@ -29,6 +29,7 @@ const customize = reactive({
       :customize-defaults="popupCustomizeDefaults"
       :prop-rows="popupPropRows"
       props-section-id="popup-props"
+      tall-preview
     >
       <template #preview>
         <div class="desktopTokens" :class="organismStyles.previewOrganismPopupHost">

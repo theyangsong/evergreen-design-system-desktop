@@ -1,9 +1,10 @@
 import type { Component } from 'vue';
 import IconPreview from './IconPreview.vue';
+import CryptoPreview from './CryptoPreview.vue';
 import FlotationPreview from './FlotationPreview.vue';
 import FlotationTriggerPreview from './FlotationTriggerPreview.vue';
 import FlotationBoxPreview from './FlotationBoxPreview.vue';
-import TooltipPreview from './TooltipPreview.vue';
+import TooltipPanelKindPreview from './TooltipPanelKindPreview.vue';
 import InputInputPreview from './InputInputPreview.vue';
 import InputTextareaPreview from './InputTextareaPreview.vue';
 import InputSearchPreview from './InputSearchPreview.vue';
@@ -48,6 +49,47 @@ export type ComponentPreviewEntry = {
   /** Component doc layout: no molecule lead; hide doc h2 when it matches page title. */
   usesComponentDocHeader?: boolean;
 };
+
+/** Showcase 文档页：预览区高度 280px（见 --showcase-doc-preview-height-compact）。 */
+export const compactComponentPreviewSlugs = new Set<string>([
+  'input-input',
+  'input-textarea',
+  'input-search',
+  'input-combo',
+  'button-text',
+  'button-icon',
+  'button-icon-pro',
+  'button-link',
+  'button-pagination',
+  'button-combo',
+  'tooltip-container',
+  'tooltip-flotation',
+  'tooltip-popup',
+  'tooltip-subtle',
+  'tooltip-molde',
+  'flotation-trigger',
+  'flotation',
+  'tag-system',
+  'tag-status',
+  'tag-colorful',
+  'toggle-checkbox',
+  'toggle-radio',
+  'toggle-decide',
+  'toggle-switch',
+  'tab-segmented-control',
+  'tab-tabs',
+  'feedback-end-feedback-card',
+  'feedback-toast',
+  'feedback-message',
+  'feedback-reddot',
+  'feedback-form-submission',
+  'tool-bar',
+  'paginer',
+]);
+
+export function usesCompactComponentPreview(slug: string): boolean {
+  return compactComponentPreviewSlugs.has(slug);
+}
 
 export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'input-input', title: 'Input', component: InputInputPreview, usesComponentDocHeader: true },
@@ -102,8 +144,20 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'popup', title: 'Popup', component: PopupPreview, usesComponentDocHeader: true },
   { slug: 'skid', title: 'Skid', component: SkidPreview, usesComponentDocHeader: true },
   { slug: 'icons', title: 'Icon', component: IconPreview },
-  { slug: 'tooltip', title: 'Tooltip', component: TooltipPreview, usesComponentDocHeader: true },
-  { slug: 'flotation', title: 'Flotation', component: FlotationPreview, usesComponentDocHeader: true },
+  { slug: 'crypto', title: 'Crypto', component: CryptoPreview },
+  ...([
+    { slug: 'tooltip-container', title: 'Container Box' },
+    { slug: 'tooltip-flotation', title: 'Flotation Box' },
+    { slug: 'tooltip-popup', title: 'Popup Box' },
+    { slug: 'tooltip-subtle', title: 'Subtle Card' },
+    { slug: 'tooltip-molde', title: 'Molde Level' },
+  ] as const).map(({ slug, title }) => ({
+    slug,
+    title,
+    component: TooltipPanelKindPreview,
+    usesComponentDocHeader: true,
+  })),
+  { slug: 'flotation', title: 'Combo', component: FlotationPreview, usesComponentDocHeader: true },
   {
     slug: 'flotation-trigger',
     title: 'Trigger',

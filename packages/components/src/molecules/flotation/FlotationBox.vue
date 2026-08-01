@@ -41,7 +41,7 @@ const showMessage = computed(
 <template>
   <button
     type="button"
-    class="eds-flotation-box"
+    class="eds-flotation-menu-item"
     :class="[styles.menuItem, focused && styles.menuItemFocused, disabled && styles.menuItemDisabled]"
     :disabled="disabled"
     @click="emit('click', $event)"

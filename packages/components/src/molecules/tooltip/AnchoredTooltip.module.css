@@ -11,6 +11,7 @@
 .triggerClick {
   cursor: pointer;
   outline: none;
+  transition: var(--eds-interaction-transition);
 }
 
 .triggerClick:focus-visible {

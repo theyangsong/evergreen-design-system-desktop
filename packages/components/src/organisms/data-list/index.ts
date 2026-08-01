@@ -5,4 +5,13 @@ export type {
   DataListColumnAlign,
   DataListSelectAllMode,
   DataListSortOrder,
+  DataListBatchAction,
+  DataListRowAction,
+  DataListPrimaryAction,
 } from './types';
+export {
+  DATA_LIST_BREAKPOINT_WIDE,
+  DATA_LIST_FLEX_RESERVE_PX,
+  getVisibleColumnSlotIndices,
+} from './useResponsiveColumns';
+export { DATA_LIST_VIRTUAL_THRESHOLD } from './useVirtualRows';

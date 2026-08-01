@@ -1,24 +1,14 @@
-.previewHost {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: var(--showcase-doc-preview-height);
-  padding: var(--spacing-8);
-  box-sizing: border-box;
-  overflow: visible;
-}
-
-.anchoredScene {
-  background: linear-gradient(
-    90deg,
-    rgb(9 135 160) 0%,
-    rgb(128 90 213) 100%
-  );
-}
-
 .panelScene {
   background: transparent;
+}
+
+.moldeScene {
+  padding: var(--spacing-4);
+  background: var(--box-page);
+}
+
+.kindSection {
+  gap: var(--spacing-3);
 }
 
 .slotDemo {

@@ -48,6 +48,15 @@
       ]
     },
     {
+      "comment": "顶边距（Padding Top）— 相对容器高度的百分比；用于 height / flex 占位，不可用于 padding-top（CSS 按宽度算 %）",
+      "tokens": [
+        { "name": "padding-top-xs", "value": "6%" },
+        { "name": "padding-top-sm", "value": "14%" },
+        { "name": "padding-top-md", "value": "22%" },
+        { "name": "padding-top-lg", "value": "30%" }
+      ]
+    },
+    {
       "comment": "平滑圆角（Corner Smoothing）— Figma/iOS squircle，0–1 对应 0%–100%",
       "tokens": [
         { "name": "corner-smoothing", "value": "0.6", "comment": "60% — iOS 风格平滑圆角" }

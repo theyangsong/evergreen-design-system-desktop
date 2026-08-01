@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { EgIconButton } from '../icon-button';
+import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import styles from './IconButtonPro.module.css';
 
 const props = withDefaults(
@@ -19,6 +21,11 @@ const props = withDefaults(
     type: 'button',
   },
 );
+
+const formattedBadge = computed(() => formatGroupedNumber(props.badge));
+
+const showBadgeIndicator = computed(() => props.showBadge);
+const showReddotIndicator = computed(() => props.showReddot && !props.showBadge);
 </script>
 
 <template>
@@ -39,11 +46,14 @@ const props = withDefaults(
       >
         <slot />
       </EgIconButton>
-      <span v-if="showBadge" :class="styles.badge" aria-hidden="true">
-        <span :class="styles.badgeText">{{ badge }}</span>
+      <span v-if="showBadgeIndicator" :class="styles.badge" aria-hidden="true">
+        <span :class="styles.badgeText">{{ formattedBadge }}</span>
       </span>
-      <span v-if="showReddot" :class="styles.reddot" aria-hidden="true" />
+      <span v-if="showReddotIndicator" :class="styles.reddot" aria-hidden="true" />
     </span>
-    <span :class="styles.label">{{ label }}</span>
+    <span :class="styles.labelWrap">
+      <span :class="styles.labelPaint" aria-hidden="true">{{ label }}</span>
+      <span :class="styles.labelSizer">{{ label }}</span>
+    </span>
   </button>
 </template>

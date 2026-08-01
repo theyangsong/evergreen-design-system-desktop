@@ -6,7 +6,7 @@ const iconSvgModules = import.meta.glob('./*.svg', {
   eager: true,
 }) as Record<string, string>;
 
-const appEntrySvgModules = import.meta.glob('../avatar/eds-application-*.svg', {
+const appEntrySvgModules = import.meta.glob('../avatar/eds-*.svg', {
   query: '?raw',
   import: 'default',
   eager: true,

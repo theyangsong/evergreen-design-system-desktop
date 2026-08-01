@@ -7,7 +7,6 @@ import {
   EgNavBarBottomIcon,
   EgNavBarCorporation,
   EgNavBarModuleItem,
-  getProcessedIcon,
   navBarDefaultBottomUtilities,
 } from '@eds/desktop-components';
 import {
@@ -80,8 +79,25 @@ function iconAt(
   const key = `${prefix}${order}` as keyof typeof customize;
   const value = customize[key];
   const name = value != null ? String(value).trim() : '';
-  if (name && getProcessedIcon(name)) return name;
-  return showcaseDefaultIconName;
+  return name || showcaseDefaultIconName;
+}
+
+function trackModuleCustomize(count: number) {
+  for (let index = 1; index <= count; index += 1) {
+    void customize[`moduleLabel${index}`];
+    void customize[`moduleIcon${index}`];
+    void customize[`moduleFocusIcon${index}`];
+    void customize[`moduleReddot${index}`];
+  }
+}
+
+function trackAppEntryCustomize(count: number) {
+  for (let index = 1; index <= count; index += 1) {
+    void customize[`appEntryLabel${index}`];
+    void customize[`appEntryIcon${index}`];
+    void customize[`appEntryFocusIcon${index}`];
+    void customize[`appEntryReddot${index}`];
+  }
 }
 
 function reddotAt(prefix: 'moduleReddot' | 'appEntryReddot', order: number): boolean {
@@ -89,25 +105,27 @@ function reddotAt(prefix: 'moduleReddot' | 'appEntryReddot', order: number): boo
   return Boolean(customize[key]);
 }
 
-const moduleItems = computed(() =>
-  Array.from({ length: moduleCount.value }, (_, index) => ({
+const moduleItems = computed(() => {
+  trackModuleCustomize(moduleCount.value);
+  return Array.from({ length: moduleCount.value }, (_, index) => ({
     order: index + 1,
     label: labelAt('moduleLabel', index + 1),
     icon: iconAt('moduleIcon', index + 1),
     focusIcon: iconAt('moduleFocusIcon', index + 1),
     showReddot: reddotAt('moduleReddot', index + 1),
-  })),
-);
+  }));
+});
 
-const appEntryItems = computed(() =>
-  Array.from({ length: appEntryCount.value }, (_, index) => ({
+const appEntryItems = computed(() => {
+  trackAppEntryCustomize(appEntryCount.value);
+  return Array.from({ length: appEntryCount.value }, (_, index) => ({
     order: index + 1,
     label: labelAt('appEntryLabel', index + 1),
     icon: iconAt('appEntryIcon', index + 1),
     focusIcon: iconAt('appEntryFocusIcon', index + 1),
     showReddot: reddotAt('appEntryReddot', index + 1),
-  })),
-);
+  }));
+});
 </script>
 
 <template>
@@ -138,24 +156,29 @@ const appEntryItems = computed(() =>
             </template>
             <EgNavBarModuleItem
               v-for="item in moduleItems"
-              :key="`module-${item.order}`"
+              :key="`module-${item.order}-${item.icon}-${item.focusIcon}`"
               :label="item.label"
               :show-reddot="item.showReddot"
             >
-              <EgIcon :name="item.icon" size="md" fit />
-              <template #focusIcon>
-                <EgIcon :name="item.focusIcon" size="md" fit />
+              <EgIcon :key="`module-icon-${item.order}-${item.icon}`" :name="item.icon" size="md" fit />
+              <template v-if="item.focusIcon !== item.icon" #focusIcon>
+                <EgIcon
+                  :key="`module-focus-icon-${item.order}-${item.focusIcon}`"
+                  :name="item.focusIcon"
+                  size="md"
+                  fit
+                />
               </template>
             </EgNavBarModuleItem>
             <template v-if="appEntryCount > 0" #appEntries>
               <EgNavBarModuleItem
                 v-for="item in appEntryItems"
-                :key="`app-entry-${item.order}`"
+                :key="`app-entry-${item.order}-${item.icon}`"
                 app-entry
                 :label="item.label"
                 :show-reddot="item.showReddot"
               >
-                <EgIcon :name="item.icon" size="md" fit />
+                <EgIcon :key="`app-entry-icon-${item.order}-${item.icon}`" :name="item.icon" size="md" fit />
               </EgNavBarModuleItem>
             </template>
             <template #utilities>

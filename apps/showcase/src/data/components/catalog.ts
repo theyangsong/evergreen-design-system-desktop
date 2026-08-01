@@ -14,7 +14,7 @@ export const componentCatalog: CatalogSection[] = [
         name: 'Crypto',
         slug: 'crypto',
         description: 'Cryptocurrency icons and asset marks.',
-        status: 'placeholder',
+        status: 'implemented',
       },
       {
         name: 'Avatar',
@@ -64,6 +64,13 @@ export const componentCatalog: CatalogSection[] = [
         slug: 'tooltip',
         description: '点击打开的磨砂浮层面板；支持自适应/固定宽度，高度可配置。',
         status: 'implemented',
+        children: [
+          { id: 'tooltip-container', label: 'Container Box', standalonePage: true },
+          { id: 'tooltip-flotation', label: 'Flotation Box', standalonePage: true },
+          { id: 'tooltip-popup', label: 'Popup Box', standalonePage: true },
+          { id: 'tooltip-subtle', label: 'Subtle Card', standalonePage: true },
+          { id: 'tooltip-molde', label: 'Molde Level', standalonePage: true },
+        ],
       },
       {
         name: 'Flotation',
@@ -72,9 +79,9 @@ export const componentCatalog: CatalogSection[] = [
           '浮层下拉：#trigger / #content 插槽；预置 Trigger（Style/Size）与 Box（Type），Menu 嵌套 EgTooltip。',
         status: 'implemented',
         children: [
-          { id: 'flotation-overview', label: 'Overview', standalonePage: true, pageSlug: 'flotation' },
           { id: 'flotation-trigger', label: 'Trigger', standalonePage: true },
           { id: 'flotation-box', label: 'Box', standalonePage: true },
+          { id: 'flotation-overview', label: 'Combo', standalonePage: true, pageSlug: 'flotation' },
         ],
       },
       {

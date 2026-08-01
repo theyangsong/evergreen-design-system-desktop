@@ -70,10 +70,14 @@ export default defineConfig({
     exclude: ['@eds/desktop-components'],
   },
   server: {
+    host: true,
     port: 5177,
     strictPort: true,
     fs: {
       allow: [resolve(__dirname), resolve(__dirname, '../../..')],
+    },
+    watch: {
+      ignored: ['**/node_modules/**', '!**/packages/components/**'],
     },
   },
 });

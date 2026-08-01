@@ -28,6 +28,14 @@
   /* Component doc live preview (Showcase shell) */
   --showcase-doc-preview-height: 400px;
   --showcase-doc-preview-height-organism: 960px;
+  --showcase-doc-preview-height-compact: 280px;
   --showcase-doc-preview-bg: #E8F0FC;
   --showcase-doc-preview-bg-organism: var(--showcase-doc-preview-bg);
+  /** Data List 文档预览壳高度（Showcase previewShell，与 Page 区 800/720 无关）。 */
+  --showcase-data-list-preview-height: 1024px;
+  /** Data List 文档页右侧 Page 区高度（Figma Layout 800 / min 720）。 */
+  --showcase-data-list-page-height-fixed: 800px;
+  --showcase-data-list-page-height-min: 720px;
+  /** Compact 文档预览 sticky 时盖住页头渐变与下方滚动内容（PageHeader z-index: 2）。 */
+  --showcase-sticky-preview-z-index: 10;
 }

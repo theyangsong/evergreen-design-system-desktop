@@ -34,7 +34,11 @@ const emit = defineEmits<{
       direction === 'left' ? styles.pageRootAlignStart : styles.pageRootAlignEnd,
     ]"
   >
-    <div v-if="divider" :class="styles.divider" role="separator" />
+    <div
+      :class="[styles.divider, !divider && styles.dividerHidden]"
+      role="separator"
+      :aria-hidden="!divider || undefined"
+    />
     <div
       :class="[
         styles.pageActions,

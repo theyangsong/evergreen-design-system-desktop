@@ -1,0 +1,23 @@
+.eventHover :global(.eds-icon-button) {
+  background-color: var(--event-hover);
+}
+
+.eventHover :global(.eds-icon-button .symbol) {
+  color: var(--text-base-primary);
+}
+
+.eventActive :global(.eds-icon-button) {
+  background-color: var(--event-hover);
+}
+
+.eventActive :global(.eds-icon-button .symbol) {
+  color: var(--text-base-secondary);
+}
+
+.eventFocus :global(.eds-icon-button) {
+  background-color: var(--event-focus);
+}
+
+.eventFocus :global(.eds-icon-button .symbol) {
+  color: var(--text-base-secondary);
+}

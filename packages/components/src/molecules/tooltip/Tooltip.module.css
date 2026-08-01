@@ -3,17 +3,8 @@
   flex-shrink: 0;
 }
 
-.widthAdaptive {
-  width: max-content;
-}
-
 .widthFixed {
   /* width from inline style when widthMode is fixed */
-}
-
-.heightAdaptive {
-  height: auto;
-  min-height: 0;
 }
 
 .heightFixed {

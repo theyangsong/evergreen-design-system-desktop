@@ -27,7 +27,7 @@ alwaysApply: false
 **原则**
 
 1. **先判断用途（语义角色）**，再选 token；查 `packages/tokens/spec/scale/semantic.json`、`packages/tokens/dist/css/scale/semantic.css`、`packages/tokens/dist/css/typography/semantic.css`（或 Figma 同名角色）。
-2. **`--scale-*` 是尺度基数**（间距网格）；**圆角、间距、描边、图标、模糊、层级** 各有语义层，默认 **不要** 在组件里直接写 `--scale-3` 当圆角或当间距，除非现有 effect / spec 已明确绑定（effect 内层仍引用 scale 时以 spec 与 `corner-smoothing.mdc` 为准）。
+2. **`--scale-*` 是尺度基数**（间距网格）；**圆角、间距、描边、顶边距、图标、模糊、层级** 各有语义层，默认 **不要** 在组件里直接写 `--scale-3` 当圆角或当间距，除非现有 effect / spec 已明确绑定（effect 内层仍引用 scale 时以 spec 与 `corner-smoothing.mdc` 为准）。
 3. 映射后使用 **`var(--语义-token)`**；禁止 `12px`、`1px`、`13px`、`font-weight: 500` 等硬编码，除非上文「先询问是否硬编码」已获批。
 4. 同一 px 在不同语义下 **变量不同**（例如 12px 可能是圆角 `--radius-md`，也可能是图标 `--icon-sm` 或间距 `--spacing-3`）——**以用途为准，不以数字为准**。
 
@@ -38,6 +38,7 @@ alwaysApply: false
 | 圆角 12 | 圆角 Radius | `var(--radius-md)`（12px） |
 | 描边 1 / 1px 边框 | 描边 Stroke | `var(--stroke-sm)` |
 | 间距 12 | 布局 Spacing | `var(--spacing-3)` |
+| 顶边距 xs/sm/md/lg | 顶边距 Padding Top | `var(--padding-top-xs)` … `var(--padding-top-lg)`（6% / 14% / 22% / 30% 容器**高度**）；用 `height` / flex 占位，**禁止** `padding-top` |
 | 文本 13、常规 | Body Small | `--eds-body-small-size` / `-weight` / `-line-height` |
 | 文本 13、中黑 / Medium | Body Small Strong | `--eds-body-small-strong-size` + `-weight` + `-line-height` |
 
@@ -71,6 +72,101 @@ line-height: var(--eds-body-small-strong-line-height);
 ```
 
 **无法一一对应时**：spec / dist 中找不到与语义匹配的 token → 按第 1 节 **先问维护者**，不得默认 `--scale-n` 或裸 px。
+
+### 1.2 禁止组件内私自定义 CSS 变量（须用设计系统已有 token / 类）
+
+**作用域**：`packages/components/**` 的 `.module.css` 与组件模板中的 `class` / `style`（Showcase 壳层见 §5，同样禁止私造 Desktop token 名）。
+
+**原则**
+
+1. **不得定义** spec / `packages/tokens/dist` 中 **不存在** 的 `--*` 变量名（例如 `--tooltip-panel-radius`、`--menu-inner-gap`）。设计系统未发布的名字 **不是** token。
+2. **不得**用组件局部 alias「转存」官方 token（`--foo: var(--radius-md)` 再 `border-radius: var(--foo)`）；应 **直接** 写 `var(--radius-md)`、`var(--spacing-1)` 等。
+3. **不得**用手拼 primitive 或颜色 token 替代已有 **组合 token / utility 类**（例如用 `0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow)` 代替 `var(--eds-shadow-light)`；圆角用 `--scale-3` 代替 `--radius-md`）。
+4. 若 Figma / `spec/effect` 已提供 **utility 类**（如 `.eds-shadow-light-stack`、`.effect-flotation-box`），组件 **优先复用**，不在 `.module.css` 里重复实现同一阴影 / 玻璃 / 分层结构。
+5. 若所需 **语义 token 或 utility 类在 spec 与 dist 均不存在**，按 §1 **先向维护者确认**（是否新增 token、是否允许临时值、硬编码范围），**不得**私自发明变量名或暂用错误语义的 `--scale-*` / `--size-*`。
+
+**禁止 / 推荐示例**
+
+```css
+/* ❌ 私造 DS 未定义的变量 + 圆角绑 scale */
+.panelRoot {
+  --tooltip-panel-radius: var(--scale-3);
+  --tooltip-panel-shadow: 0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow);
+  border-radius: var(--tooltip-panel-radius);
+}
+
+/* ❌ 手拼 shadow，忽略已有的 --eds-shadow-light */
+box-shadow: 0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow);
+
+/* ✅ 直接消费语义 token；阴影用官方 stack 类或 --eds-shadow-light */
+.panelRoot {
+  border-radius: var(--radius-md);
+}
+/* 模板：class="eds-shadow-light-stack" */
+.panel {
+  padding: var(--spacing-1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--eds-shadow-light); /* 仅当未用 stack 类且单层 shadow 足够时 */
+}
+```
+
+**排查清单**（改 `.module.css` 时逐项核对）
+
+| 检查项 | 正确做法 |
+|--------|----------|
+| 文件内 `--*` 自定义名 | 仅允许 spec/dist 已列出的 token；否则删除 alias，直接用官方名 |
+| `border-radius` | `var(--radius-xs\|sm\|md\|lg\|full)`，不用 `--scale-n` |
+| `padding` / `gap` / `margin` | `var(--spacing-n)`，不用 `--scale-n`（除非 effect spec 内层已绑定且文档允许） |
+| `padding-top` 语义（相对容器高度 %） | `height: var(--padding-top-xs\|sm\|md\|lg)` 或 flex/grid 占位；ancestor 须有明确高度；**禁止** `padding-top: …%`（CSS 按宽度算） |
+| `border-width` | `var(--stroke-xs\|sm\|…)` |
+| `box-shadow` | `var(--eds-shadow-light\|…)` 或 `.eds-shadow-*-stack`，不手拼 scale + 颜色 |
+| 颜色 | `var(--material-*\|text-*\|stroke-*)`，不抄 hex |
+
+### 1.3 数字展示：千分位分隔（通用规则）
+
+**作用域**：`packages/components/**` 中所有 **面向用户展示的数字**（数量、统计、页码、Badge 等）；Showcase 预览中通过 Desktop 组件间接消费，**不得在壳层手写另一套格式化逻辑**。
+
+**原则**
+
+1. **统一工具**：使用 `@eds/desktop-components` 导出的 **`formatGroupedNumber(value)`**（`packages/components/src/utils/formatGroupedNumber.ts`），基于 **`Intl.NumberFormat`** 按 locale 添加千分位；非数字字符串 **原样返回**，不在输入框编辑态强行格式化。
+2. **展示层格式化**：prop / 数据层可仍为原始字符串或 number；**在组件模板或 computed 展示前**调用 `formatGroupedNumber`，不要把带逗号的字符串再当数值解析回传。
+3. **整数字面量**：无小数部分的值格式化为整数（如 `1000` → `1,000`）；含小数则保留小数并分组（如 `1234.5` → `1,234.5`）。
+4. **等宽数字**：会随数值变化产生宽度动画或对齐需求的区域（Paginer 数量、BatchBar 统计数字等），CSS 配合 **`font-variant-numeric: tabular-nums`**。
+5. **新增组件**：任何新增的数字展示 UI **默认接入** `formatGroupedNumber`，不得在各处手写 `toLocaleString` 或正则插逗号。
+
+**已接入参考**
+
+| 组件 | 字段 |
+|------|------|
+| `EgPaginerDataVolume` | Data Volume 数量 |
+| `EgPaginerStatistics` | 统计数值 |
+| `EgBatchBarActionItem` | Statistics 主数字 |
+| `EgPaginationItem` | `kind="number"` 的页码 label |
+| `EgIconButtonPro` | Badge |
+| `EgSegmentedControl` | 数值型 label（如每页 1000 条） |
+
+**推荐 / 禁止**
+
+```typescript
+import { formatGroupedNumber } from '@eds/desktop-components';
+
+// ✅ 展示层
+const formattedCount = computed(() => formatGroupedNumber(props.count));
+
+// ❌ 组件内各自实现
+count.toLocaleString();
+String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+```
+
+```vue
+<!-- ✅ -->
+<span>{{ formatGroupedNumber(count) }}</span>
+
+<!-- ❌ 裸输出大数 -->
+<span>{{ count }}</span>
+```
+
+**不适用**：表单 **输入中** 的数值、非数字文案 label、Design token 取值本身（token 名不是 UI 数字）。
 
 ## 2. 维度命名规则（关联变量类）
 
@@ -143,7 +239,7 @@ line-height: var(--eds-body-small-strong-line-height);
 
 **例外**：`apps/showcase/src/motion/tokens.css` 为 Showcase **壳层动效** 时长/缓动（`--eds-motion-*`），不是 Desktop 组件 API；新壳层动效优先加在此文件，勿扩散到 `packages/components`。
 
-**交叉引用**：DOM 与 CSS 结构见 `showcase-token-scope.mdc`；Desktop 数字→语义映射见 §1.1。
+**交叉引用**：DOM 与 CSS 结构见 `showcase-token-scope.mdc`；Desktop 数字→语义映射见 §1.1；数字展示千分位见 §1.3。
 
 ## 6. Desktop 组件：嵌套滚动边界（滚到顶/底不晃动）
 
@@ -233,6 +329,8 @@ function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
 
 ## 8. 变更记录
 
+- 2026-08-01：§1.3 — 数字展示统一千分位：`formatGroupedNumber`（`@eds/desktop-components`）；展示层格式化 + `tabular-nums`；禁止各处手写 `toLocaleString` / 正则插逗号。
+- 2026-07-31：§1.2 — 禁止组件内私自定义 CSS 变量；须直接消费 spec/dist token 或 eds utility 类；缺失时先问维护者（EgTooltip / TooltipMenu 修正为 `--radius-md`、`eds-shadow-light-stack` 等）。
 - 2026-07-30：§7 — Organism Showcase 场景化（DS 本体 vs 业务薄组件；Nav Bar + Cregis 参考实现）。
 - 2026-07-30：§6 — Desktop 嵌套滚动边界（`overscroll-behavior: none` + wheel 拦截 + scrollTop 钳制）；参考 Nav Bar `.moduleRegion`。
 

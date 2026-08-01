@@ -1,4 +1,5 @@
 import './styles/global.css';
+import './styles/interactionTransitions.css';
 import { initEdsDesktopRuntime } from './setup/initEdsDesktopRuntime';
 
 initEdsDesktopRuntime();
@@ -24,3 +25,5 @@ export {
   initCornerSmoothing,
   rescanCornerSmoothing,
 } from './setup/initEdsDesktopRuntime';
+
+export { formatGroupedNumber } from './utils';

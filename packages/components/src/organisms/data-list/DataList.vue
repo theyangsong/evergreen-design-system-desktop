@@ -2,6 +2,8 @@
 import {
   computed,
   defineComponent,
+  inject,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -11,11 +13,25 @@ import {
   type VNode,
 } from 'vue';
 import { EgIcon } from '../../atoms/icons';
+import { EgToast } from '../../molecules/feedback';
 import { EgBatchBar } from '../batch-bar';
 import DataListHeaderCell from './DataListHeaderCell.vue';
 import DataListColumn from './DataListColumn.vue';
 import styles from './DataList.module.css';
-import type { DataListItem, DataListSelectAllMode } from './types';
+import type {
+  DataListBatchAction,
+  DataListItem,
+  DataListPrimaryAction,
+  DataListRowAction,
+  DataListSelectAllMode,
+} from './types';
+import {
+  getVisibleColumnSlotIndices,
+  resolveColumnMinWidthPx,
+  DATA_LIST_FLEX_RESERVE_PX,
+} from './useResponsiveColumns';
+import { useVirtualRows } from './useVirtualRows';
+import { SKID_AFFECTING_MAIN_KEY } from '../../shared/skidContext';
 
 const RenderVNodes = defineComponent({
   name: 'EgDataListRenderVNodes',
@@ -29,6 +45,16 @@ const RenderVNodes = defineComponent({
 
 defineOptions({ name: 'EgDataList' });
 
+const LOADING_BAR_HEIGHT = 28;
+const LOADING_DONE_VISIBLE_MS = 1500;
+const LOADING_TRANSITION_MS = 300;
+const SELECT_COLUMN_WIDTH = 48;
+const SELECT_COLUMN_ANIM_MS = 300;
+const SELECT_CONTENT_SLIDE_ENTER_PX = 16;
+const SELECT_CONTENT_SLIDE_EXIT_PX = 32;
+const RESIZE_DEBOUNCE_MS = 100;
+const BATCH_TOAST_VISIBLE_MS = 3000;
+
 const props = withDefaults(
   defineProps<{
     maxHeight?: string;
@@ -37,7 +63,17 @@ const props = withDefaults(
     columnHeight?: number;
     loading?: boolean;
     initing?: boolean;
+    selectMode?: boolean;
     dataList?: DataListItem[];
+    emptyText?: string;
+    skidOpen?: boolean;
+    batchActions?: DataListBatchAction[];
+    onBatchAction?: (
+      key: string,
+      rows: Array<DataListItem & { _index: number }>,
+    ) => void | Promise<void>;
+    primaryAction?: DataListPrimaryAction;
+    moreActions?: DataListRowAction[];
   }>(),
   {
     headerHeight: 32,
@@ -45,26 +81,95 @@ const props = withDefaults(
     loading: false,
     initing: false,
     dataList: () => [],
+    emptyText: 'No data',
+    skidOpen: false,
+    batchActions: () => [],
+    moreActions: () => [],
   },
 );
 
 const emit = defineEmits<{
   'row-click': [row: DataListItem];
+  'update:select-mode': [enabled: boolean];
   'update:selected-list': [rows: Array<DataListItem & { _index: number }>];
   'selected-change': [rows: Array<DataListItem & { _index: number }>];
+  'update:pagination-locked': [locked: boolean];
+  'batch-action': [key: string, rows: Array<DataListItem & { _index: number }>];
+  'batch-error': [message: string];
+  'primary-action': [row: DataListItem, rowIndex: number];
+  'more-action': [key: string, row: DataListItem, rowIndex: number];
 }>();
 
 const slots = useSlots() as {
   default?: () => VNode[];
   operation?: () => VNode[];
 };
+
+const layoutSkidAffecting = inject(SKID_AFFECTING_MAIN_KEY, null);
+const effectiveSkidOpen = computed(() => layoutSkidAffecting?.value ?? props.skidOpen);
+
 const tableWrapperRef = ref<HTMLElement | null>(null);
 const tableContentRef = ref<HTMLElement | null>(null);
 const headerCellRefs = ref<Array<{ resetSort?: () => void } | null>>([]);
 const size = ref({ width: 0, height: 0 });
+const clientViewportWidth = ref(
+  typeof document !== 'undefined' ? document.documentElement.clientWidth : 0,
+);
 const tableKey = ref(0);
 const selectMode = ref(false);
+const selectColumnInDom = ref(false);
+const selectOffsetPx = ref(0);
+const selectAnimating = ref(false);
+const dataColumnWidthsFullPx = ref<number[]>([]);
 const selectedList = ref<Array<DataListItem & { _index: number }>>([]);
+const scrollTop = ref(0);
+const batchLoadingKey = ref<string | null>(null);
+const batchToastText = ref('');
+const batchToastType = ref<'result' | 'danger'>('danger');
+const showBatchToast = ref(false);
+let batchToastTimer: ReturnType<typeof setTimeout> | undefined;
+let resizeDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+watch(
+  () => props.selectMode,
+  (enabled) => {
+    if (enabled === undefined || enabled === selectMode.value) return;
+    selectMode.value = enabled;
+    if (!enabled) {
+      selectedList.value = [];
+    }
+  },
+  { immediate: true },
+);
+
+watch(selectMode, async (enabled) => {
+  emit('update:pagination-locked', enabled);
+  syncColumnWidthSnapshots();
+  if (enabled) {
+    selectColumnInDom.value = true;
+    selectOffsetPx.value = 0;
+    await nextTick();
+    animateSelectOffset(SELECT_COLUMN_WIDTH);
+    return;
+  }
+
+  animateSelectOffset(0, () => {
+    selectColumnInDom.value = false;
+  });
+}, { flush: 'post' });
+
+const selectContentOpacity = computed(() => {
+  if (!selectColumnInDom.value) return 0;
+  return Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH));
+});
+
+const selectContentTranslateX = computed(() => {
+  const progress = Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH));
+  const slideDistance = selectMode.value
+    ? SELECT_CONTENT_SLIDE_ENTER_PX * (1 - progress)
+    : SELECT_CONTENT_SLIDE_EXIT_PX * (1 - progress);
+  return `${-slideDistance}px`;
+});
 
 const headerHeightCss = computed(() => `${props.headerHeight}px`);
 
@@ -94,39 +199,146 @@ watch(
 );
 
 const showLoadingBar = ref(false);
+const loadingBarExpanded = ref(false);
+const loadingBarLeaving = ref(false);
 const loadingDoneIcon = ref(false);
 let loadingTimer: ReturnType<typeof setTimeout> | undefined;
+let loadingLeaveTimer: ReturnType<typeof setTimeout> | undefined;
+
+function clearLoadingLeaveTimer() {
+  if (loadingLeaveTimer !== undefined) {
+    clearTimeout(loadingLeaveTimer);
+    loadingLeaveTimer = undefined;
+  }
+}
+
+function finishLoadingBarLeave() {
+  clearLoadingLeaveTimer();
+  showLoadingBar.value = false;
+  loadingBarExpanded.value = false;
+  loadingBarLeaving.value = false;
+  loadingDoneIcon.value = false;
+}
+
+function startLoadingBarLeave() {
+  clearLoadingLeaveTimer();
+  loadingBarLeaving.value = true;
+  loadingBarExpanded.value = false;
+  loadingLeaveTimer = window.setTimeout(finishLoadingBarLeave, LOADING_TRANSITION_MS);
+}
+
 watch(
   () => props.loading,
-  (value) => {
+  async (value, wasLoading) => {
     if (value) {
       if (loadingTimer !== undefined) clearTimeout(loadingTimer);
+      clearLoadingLeaveTimer();
       tableContentRef.value?.scrollTo({ top: 0, behavior: 'instant' });
       loadingDoneIcon.value = false;
+      loadingBarLeaving.value = false;
       showLoadingBar.value = true;
-    } else {
-      tableContentRef.value?.scrollTo({ top: 0, behavior: 'instant' });
-      loadingDoneIcon.value = true;
-      loadingTimer = window.setTimeout(() => {
-        showLoadingBar.value = false;
-      }, 500);
+      loadingBarExpanded.value = false;
+      await nextTick();
+      loadingBarExpanded.value = true;
+      return;
     }
+
+    if (!wasLoading) return;
+
+    tableContentRef.value?.scrollTo({ top: 0, behavior: 'instant' });
+    loadingDoneIcon.value = true;
+    loadingTimer = window.setTimeout(() => {
+      loadingTimer = undefined;
+      startLoadingBarLeave();
+    }, LOADING_DONE_VISIBLE_MS);
   },
   { immediate: true },
 );
 
-const blankRows = computed(() => {
-  const available = size.value.height - props.headerHeight - 8;
-  const fit = Math.floor(available / props.columnHeight);
-  const extra = fit - props.dataList.length > 0 ? fit - props.dataList.length : 0;
-  return Array.from({ length: extra }).fill({});
+const loadingBarHeight = computed(() => (showLoadingBar.value ? LOADING_BAR_HEIGHT : 0));
+
+const ROW_GAP_PX = 1;
+
+const listBodyLayout = computed(() => {
+  const available = Math.max(0, size.value.height - props.headerHeight);
+  const dataCount = props.dataList.length;
+  const loadingH = loadingBarHeight.value;
+  const dataH = dataCount * props.columnHeight;
+  const rowGaps =
+    dataCount > 0
+      ? (loadingH > 0 ? dataCount + 1 : dataCount) * ROW_GAP_PX
+      : 0;
+  let contentHeight = loadingH + dataH + rowGaps;
+  let overflows = available > 0 && contentHeight > available;
+
+  let blankCount = 0;
+  if (!overflows && dataCount > 0 && available > contentHeight) {
+    let slack = available - contentHeight;
+    while (slack >= props.columnHeight + ROW_GAP_PX) {
+      blankCount += 1;
+      contentHeight += props.columnHeight + ROW_GAP_PX;
+      slack -= props.columnHeight + ROW_GAP_PX;
+    }
+  }
+
+  return { available, contentHeight, overflows, blankCount };
 });
 
-const loadingStyle = computed(() => ({
+const loadingRowStyle = computed(() => ({
   width: `${size.value.width}px`,
-  height: showLoadingBar.value ? '28px' : '0px',
-  opacity: showLoadingBar.value ? 1 : 0,
 }));
+
+const isScrollLocked = computed(() => props.loading);
+
+const rowHeightRef = computed(() => props.columnHeight);
+const rowCountRef = computed(() => props.dataList.length);
+const viewportHeightRef = computed(() =>
+  Math.max(0, size.value.height - props.headerHeight),
+);
+
+const virtualRows = useVirtualRows({
+  rowCount: rowCountRef,
+  rowHeight: rowHeightRef,
+  scrollTop,
+  viewportHeight: viewportHeightRef,
+});
+
+const renderedRowIndices = computed(() => virtualRows.visibleRowIndices.value);
+
+const showVirtualTopSpacer = computed(
+  () => virtualRows.enabled.value && virtualRows.topSpacerPx.value > 0,
+);
+
+const showVirtualBottomSpacer = computed(
+  () => virtualRows.enabled.value && virtualRows.bottomSpacerPx.value > 0,
+);
+
+const virtualTopSpacerPx = computed(() => virtualRows.topSpacerPx.value);
+
+const virtualBottomSpacerPx = computed(() => virtualRows.bottomSpacerPx.value);
+
+const blankRowCount = computed(() =>
+  virtualRows.enabled.value ? 0 : listBodyLayout.value.blankCount,
+);
+
+const batchActionLabels = computed(() => props.batchActions.map((action) => action.label));
+
+const batchActionDanger = computed(() => props.batchActions.map((action) => Boolean(action.danger)));
+
+const batchLoadingLabelIndex = computed(() => {
+  const key = batchLoadingKey.value;
+  if (!key) return null;
+  const index = props.batchActions.findIndex((action) => action.key === key);
+  return index >= 0 ? index : null;
+});
+
+const useBuiltinBatchBar = computed(
+  () => props.batchActions.length > 0 && !slots.operation,
+);
+
+const needsVerticalScroll = computed(
+  () => virtualRows.enabled.value || listBodyLayout.value.overflows,
+);
 
 function readProp(propsBag: Record<string, unknown> | null | undefined, key: string, fallback?: unknown) {
   if (!propsBag) return fallback;
@@ -148,48 +360,234 @@ function columnVNodes(): VNode[] {
   );
 }
 
-function visibleColumnVNodes(): VNode[] {
-  return columnVNodes().filter((node) => {
-    const minTableWidth = readProp(node.props as Record<string, unknown>, 'minTableWidth');
-    return !minTableWidth || size.value.width >= Number(minTableWidth);
+const allColumnNodes = computed(() => columnVNodes());
+
+function buildColumnMetas() {
+  const nodes = allColumnNodes.value;
+  return nodes.map((node, slotIndex) => {
+    const p = (node.props || {}) as Record<string, unknown>;
+    const isLast = slotIndex === nodes.length - 1;
+    return {
+      slotIndex,
+      minWidthPx: resolveColumnMinWidthPx(readProp(p, 'minWidth') as string | undefined),
+      displayOrder: Number(readProp(p, 'displayOrder') ?? slotIndex + 1),
+      isAction: Boolean(readProp(p, 'isAction')) || isLast,
+    };
   });
 }
 
-const headerColumns = computed(() =>
-  visibleColumnVNodes().map((node) => {
-    const p = (node.props || {}) as Record<string, unknown>;
-    const children = node.children as
-      | { header?: (payload?: Record<string, unknown>) => unknown }
-      | null;
-    return {
-      label: (p.label as string) || '',
-      align: (p.align as 'left' | 'center' | 'right') || 'left',
-      sortable: Boolean(p.sortable),
-      width: p.width as string | undefined,
-      minTableWidth: readProp(p, 'minTableWidth') as number | undefined,
-      headerSlot: children?.header,
-      originalSortChangeHandler: p.onSortChange as ((order: string) => void) | undefined,
-    };
+const visibleSlotIndices = computed(() =>
+  getVisibleColumnSlotIndices(buildColumnMetas(), size.value.width, {
+    clientViewportWidth: clientViewportWidth.value,
+    skidOpen: effectiveSkidOpen.value,
+    selectOffsetPx: selectOffsetPx.value,
   }),
 );
 
-const bodyColumns = computed(() =>
-  visibleColumnVNodes().map((node) => {
-    const p = (node.props || {}) as Record<string, unknown>;
-    const children = node.children as
-      | { default?: (payload: { data: DataListItem }) => unknown }
-      | null;
-    return {
-      prop: (p.prop as string) || '',
-      align: (p.align as 'left' | 'center' | 'right') || 'left',
-      width: p.width as string | undefined,
-      widthPercent: readProp(p, 'widthPercent') as number | undefined,
-      minWidth: readProp(p, 'minWidth') as string | undefined,
-      minTableWidth: readProp(p, 'minTableWidth') as number | undefined,
-      slotDefault: children?.default,
-    };
-  }),
+const visibleColumnNodes = computed(() => {
+  const visible = new Set(visibleSlotIndices.value);
+  return allColumnNodes.value.filter((_, index) => visible.has(index));
+});
+
+function mapColumnConfig(node: VNode) {
+  const p = (node.props || {}) as Record<string, unknown>;
+  const children = node.children as
+    | {
+        header?: (payload?: Record<string, unknown>) => unknown;
+        default?: (payload: { data: DataListItem }) => unknown;
+      }
+    | null;
+  const slotIndex = allColumnNodes.value.indexOf(node);
+  const isLast = slotIndex === allColumnNodes.value.length - 1;
+  const isAction = Boolean(readProp(p, 'isAction')) || isLast;
+
+  return {
+    label: (p.label as string) || '',
+    align: (p.align as 'left' | 'center' | 'right') || 'left',
+    sortable: Boolean(p.sortable),
+    width: p.width as string | undefined,
+    widthPercent: readProp(p, 'widthPercent') as number | undefined,
+    minWidth: readProp(p, 'minWidth') as string | undefined,
+    minTableWidth: readProp(p, 'minTableWidth') as number | undefined,
+    displayOrder: Number(readProp(p, 'displayOrder') ?? slotIndex + 1),
+    isAction,
+    prop: (p.prop as string) || '',
+    headerSlot: children?.header,
+    slotDefault: children?.default,
+    originalSortChangeHandler: p.onSortChange as ((order: string) => void) | undefined,
+    primaryAction:
+      effectiveSkidOpen.value && isAction
+        ? undefined
+        : ((readProp(p, 'primaryAction') as DataListPrimaryAction | undefined) ??
+          (isAction ? props.primaryAction : undefined)),
+    moreActions:
+      effectiveSkidOpen.value && isAction
+        ? undefined
+        : ((readProp(p, 'moreActions') as DataListRowAction[] | undefined) ??
+          (isAction ? props.moreActions : undefined)),
+    hideActions: Boolean(effectiveSkidOpen.value && isAction),
+    showOverflowTooltip: readProp(p, 'showOverflowTooltip', true) !== false,
+  };
+}
+
+const headerColumns = computed(() => visibleColumnNodes.value.map((node) => mapColumnConfig(node)));
+
+const bodyColumns = computed(() => visibleColumnNodes.value.map((node) => mapColumnConfig(node)));
+
+function parsePx(value?: string): number {
+  if (!value) return 0;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Figma Apply_Data Table-Grids: trailing column shrink-0, leading columns flex equally with min-width. */
+function computeRestDataColumnWidthsPx(): number[] {
+  const cols = bodyColumns.value;
+  const containerWidth = size.value.width;
+  if (!containerWidth || cols.length === 0) return [];
+
+  const hasLegacyPercent = cols.some((col) => col.widthPercent && !col.width);
+  if (hasLegacyPercent) {
+    return cols.map((col) => {
+      if (col.width) return parsePx(col.width);
+      if (col.widthPercent) {
+        return Math.round((containerWidth * col.widthPercent) / 100);
+      }
+      return 0;
+    });
+  }
+
+  if (cols.length === 1) {
+    return [Math.max(0, containerWidth - DATA_LIST_FLEX_RESERVE_PX)];
+  }
+
+  const widths = new Array<number>(cols.length);
+  const lastIndex = cols.length - 1;
+  const lastCol = cols[lastIndex];
+  const trailingWidth = Math.round(parsePx(lastCol?.width) || parsePx(lastCol?.minWidth));
+  widths[lastIndex] = trailingWidth;
+
+  const flexCols = cols.slice(0, -1);
+  const flexMinWidths = flexCols.map((col) => parsePx(col.minWidth));
+  const minSum = flexMinWidths.reduce((sum, min) => sum + min, 0);
+  const flexSpace = Math.max(0, containerWidth - trailingWidth - DATA_LIST_FLEX_RESERVE_PX);
+  const extra = Math.max(0, flexSpace - minSum);
+  const extraPerCol = flexCols.length > 0 ? extra / flexCols.length : 0;
+
+  flexCols.forEach((_col, index) => {
+    widths[index] = Math.round(flexMinWidths[index] + extraPerCol);
+  });
+
+  const flexTotal = widths.slice(0, lastIndex).reduce((sum, width) => sum + width, 0);
+  const delta = flexSpace - flexTotal;
+  if (delta !== 0 && lastIndex > 0) {
+    widths[0] = Math.max(flexMinWidths[0] ?? 0, widths[0] + delta);
+  }
+
+  return widths;
+}
+
+function formatColWidthPx(width: number): string {
+  return `${Math.round(width * 100) / 100}px`;
+}
+
+/** 勾选列占用 selectOffset；仅 flex 列按比例收缩，尾列宽高与右缘位置不变。 */
+function computeDataColumnLayoutWidthsPx(selectOffset: number): number[] {
+  const cols = bodyColumns.value;
+  const containerWidth = size.value.width;
+  if (!containerWidth || cols.length === 0) return [];
+
+  const rest = dataColumnWidthsFullPx.value;
+  if (rest.length !== cols.length) {
+    syncColumnWidthSnapshots();
+  }
+
+  if (selectOffset <= 0) {
+    return [...rest];
+  }
+
+  const hasLegacyPercent = cols.some((col) => col.widthPercent && !col.width);
+  if (hasLegacyPercent) {
+    const tableWidth = Math.max(0, containerWidth - selectOffset);
+    return cols.map((col, index) => {
+      if (col.width) return parsePx(col.width);
+      if (col.widthPercent) {
+        return Math.round((tableWidth * col.widthPercent) / 100);
+      }
+      return rest[index] ?? 0;
+    });
+  }
+
+  if (cols.length === 1) {
+    return [Math.max(0, containerWidth - selectOffset - DATA_LIST_FLEX_RESERVE_PX)];
+  }
+
+  const lastIndex = cols.length - 1;
+  const trailingWidth = rest[lastIndex] ?? Math.round(
+    parsePx(cols[lastIndex]?.width) || parsePx(cols[lastIndex]?.minWidth),
+  );
+  const restFlexWidths = rest.slice(0, lastIndex);
+  const flexBudget = Math.max(
+    0,
+    containerWidth - selectOffset - trailingWidth - DATA_LIST_FLEX_RESERVE_PX,
+  );
+  const restFlexTotal = restFlexWidths.reduce((sum, width) => sum + width, 0);
+
+  if (restFlexTotal <= 0 || restFlexWidths.length === 0) {
+    return [...restFlexWidths, trailingWidth];
+  }
+
+  const flexWidths = restFlexWidths.map((restWidth, index) => {
+    const minWidth = parsePx(cols[index]?.minWidth);
+    return Math.max(minWidth, (restWidth / restFlexTotal) * flexBudget);
+  });
+
+  const flexSum = flexWidths.reduce((sum, width) => sum + width, 0);
+  const delta = flexBudget - flexSum;
+  if (Math.abs(delta) > 0.001) {
+    flexWidths[flexWidths.length - 1] += delta;
+  }
+
+  return [...flexWidths, trailingWidth];
+}
+
+function syncColumnWidthSnapshots() {
+  dataColumnWidthsFullPx.value = computeRestDataColumnWidthsPx();
+}
+
+const columnLayoutWidths = computed((): string[] => {
+  if (!size.value.width || bodyColumns.value.length === 0) return [];
+  if (dataColumnWidthsFullPx.value.length === 0) {
+    syncColumnWidthSnapshots();
+  }
+  return computeDataColumnLayoutWidthsPx(selectOffsetPx.value).map(formatColWidthPx);
+});
+
+const selectColumnWidthCss = computed(() => formatColWidthPx(selectOffsetPx.value));
+
+watch(
+  [() => size.value.width, () => bodyColumns.value.length, visibleSlotIndices],
+  () => {
+    if (!selectAnimating.value) {
+      syncColumnWidthSnapshots();
+    }
+  },
 );
+
+watch(
+  () => effectiveSkidOpen.value,
+  () => {
+    if (!selectAnimating.value) {
+      syncColumnWidthSnapshots();
+    }
+  },
+);
+
+function rowStyle() {
+  return {
+    height: `${props.columnHeight}px`,
+  };
+}
 
 function onSortChange(columnIndex: number, order: 'asc' | 'desc') {
   headerCellRefs.value.forEach((cell, index) => {
@@ -229,36 +627,133 @@ function onRowClick(row: DataListItem, index: number) {
   emit('row-click', row);
 }
 
+function setSelectMode(enabled: boolean) {
+  if (selectMode.value === enabled) return;
+  selectMode.value = enabled;
+  emit('update:select-mode', enabled);
+  if (!enabled) {
+    selectedList.value = [];
+    emit('update:selected-list', []);
+    emit('selected-change', []);
+  }
+}
+
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3;
+}
+
+let selectAnimFrame: number | undefined;
+
+function stopSelectAnim() {
+  if (selectAnimFrame !== undefined) {
+    cancelAnimationFrame(selectAnimFrame);
+    selectAnimFrame = undefined;
+  }
+  selectAnimating.value = false;
+}
+
+function animateSelectOffset(to: number, onComplete?: () => void) {
+  stopSelectAnim();
+  const from = selectOffsetPx.value;
+  if (from === to) {
+    onComplete?.();
+    return;
+  }
+
+  const reducedMotion =
+    typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reducedMotion) {
+    selectAnimating.value = false;
+    selectOffsetPx.value = to;
+    onComplete?.();
+    return;
+  }
+
+  selectAnimating.value = true;
+  const start = performance.now();
+
+  function tick(now: number) {
+    const progress = Math.min(1, (now - start) / SELECT_COLUMN_ANIM_MS);
+    selectOffsetPx.value = from + (to - from) * easeOutCubic(progress);
+    if (progress < 1) {
+      selectAnimFrame = requestAnimationFrame(tick);
+    } else {
+      selectOffsetPx.value = to;
+      selectAnimFrame = undefined;
+      selectAnimating.value = false;
+      onComplete?.();
+    }
+  }
+
+  selectAnimFrame = requestAnimationFrame(tick);
+}
+
 function openSelect() {
-  selectMode.value = true;
+  setSelectMode(true);
 }
 
 function closeSelect() {
-  selectMode.value = false;
-  selectedList.value = [];
-  emit('update:selected-list', []);
-  emit('selected-change', []);
+  setSelectMode(false);
 }
 
 defineExpose({ openSelect, closeSelect });
 
 let resizeObserver: ResizeObserver | null = null;
+let viewportResizeTimer: ReturnType<typeof setTimeout> | undefined;
+
+function syncClientViewportWidth() {
+  if (typeof document === 'undefined') return;
+  clientViewportWidth.value = document.documentElement.clientWidth;
+}
+
+function onViewportResize() {
+  if (viewportResizeTimer !== undefined) clearTimeout(viewportResizeTimer);
+  viewportResizeTimer = window.setTimeout(() => {
+    syncClientViewportWidth();
+    viewportResizeTimer = undefined;
+  }, RESIZE_DEBOUNCE_MS);
+}
+
 onMounted(() => {
+  syncClientViewportWidth();
+  window.addEventListener('resize', onViewportResize, { passive: true });
+
   if (!tableWrapperRef.value) return;
   resizeObserver = new ResizeObserver((entries) => {
-    const entry = entries[0];
-    size.value = {
-      width: entry.contentRect.width,
-      height: entry.contentRect.height,
-    };
+    if (resizeDebounceTimer !== undefined) clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = window.setTimeout(() => {
+      const entry = entries[0];
+      size.value = {
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      };
+      if (!selectAnimating.value) {
+        syncColumnWidthSnapshots();
+      }
+      resizeDebounceTimer = undefined;
+    }, RESIZE_DEBOUNCE_MS);
   });
   resizeObserver.observe(tableWrapperRef.value);
+  size.value = {
+    width: tableWrapperRef.value.clientWidth,
+    height: tableWrapperRef.value.clientHeight,
+  };
+  emit('update:pagination-locked', selectMode.value);
+  syncColumnWidthSnapshots();
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', onViewportResize);
+  if (viewportResizeTimer !== undefined) clearTimeout(viewportResizeTimer);
   resizeObserver?.disconnect();
+  stopSelectAnim();
   if (initingTimer !== undefined) clearTimeout(initingTimer);
   if (loadingTimer !== undefined) clearTimeout(loadingTimer);
+  if (batchToastTimer !== undefined) clearTimeout(batchToastTimer);
+  if (resizeDebounceTimer !== undefined) clearTimeout(resizeDebounceTimer);
+  clearLoadingLeaveTimer();
 });
 
 function setHeaderRef(el: Element | ComponentPublicInstance | null, index: number) {
@@ -284,10 +779,68 @@ function renderCellSlot(
 function isRowSelected(index: number) {
   return selectedList.value.some((row) => row._index === index);
 }
+
+function showBatchError(message: string) {
+  batchToastText.value = message;
+  batchToastType.value = 'danger';
+  showBatchToast.value = true;
+  if (batchToastTimer !== undefined) clearTimeout(batchToastTimer);
+  batchToastTimer = window.setTimeout(() => {
+    showBatchToast.value = false;
+    batchToastTimer = undefined;
+  }, BATCH_TOAST_VISIBLE_MS);
+  emit('batch-error', message);
+}
+
+async function onBatchLabelClick(_label: string, index: number) {
+  const action = props.batchActions[index];
+  if (!action || batchLoadingKey.value) return;
+
+  batchLoadingKey.value = action.key;
+  emit('batch-action', action.key, selectedList.value);
+
+  try {
+    if (props.onBatchAction) {
+      await props.onBatchAction(action.key, selectedList.value);
+    }
+    selectedList.value = [];
+    emit('update:selected-list', []);
+    emit('selected-change', []);
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message ? error.message : 'Batch action failed';
+    showBatchError(message);
+  } finally {
+    batchLoadingKey.value = null;
+  }
+}
+
+function onPrimaryAction(row: DataListItem, rowIndex: number) {
+  emit('primary-action', row, rowIndex);
+}
+
+function onMoreAction(key: string, row: DataListItem, rowIndex: number) {
+  emit('more-action', key, row, rowIndex);
+}
+
+function onTableScroll(event: Event) {
+  const target = event.target as HTMLElement;
+  scrollTop.value = target.scrollTop;
+}
 </script>
 
 <template>
-  <div ref="tableWrapperRef" class="eds-data-list" :class="styles.root">
+  <div
+    ref="tableWrapperRef"
+    class="eds-data-list"
+    :class="[styles.root, selectMode && styles.rootSelectMode]"
+    :style="{
+      '--eds-data-list-row-height': `${columnHeight}px`,
+      '--eds-data-list-header-height': headerHeightCss,
+      '--eds-data-list-select-content-opacity': String(selectContentOpacity),
+      '--eds-data-list-select-content-translate-x': selectContentTranslateX,
+    }"
+  >
     <div
       v-if="showIniting"
       :class="styles.initing"
@@ -299,24 +852,64 @@ function isRowSelected(index: number) {
       </div>
     </div>
 
-    <div v-if="selectMode" :class="styles.operationBar">
-      <EgBatchBar
-        :selected-count="selectedList.length"
-        count-suffix="selected"
-        @dismiss="closeSelect"
-      >
-        <template v-if="$slots.operation" #actions>
-          <slot name="operation" />
-        </template>
-      </EgBatchBar>
-    </div>
+    <Transition
+      :enter-active-class="styles.operationBarEnterActive"
+      :leave-active-class="styles.operationBarLeaveActive"
+      :enter-from-class="styles.operationBarEnterFrom"
+      :enter-to-class="styles.operationBarEnterTo"
+      :leave-from-class="styles.operationBarLeaveFrom"
+      :leave-to-class="styles.operationBarLeaveTo"
+    >
+      <div v-if="selectMode" :class="styles.operationBar">
+        <EgBatchBar
+          :selected-count="selectedList.length"
+          count-suffix="selected"
+          :labels="useBuiltinBatchBar ? batchActionLabels : undefined"
+          :label-danger="useBuiltinBatchBar ? batchActionDanger : undefined"
+          :loading-label-index="useBuiltinBatchBar ? batchLoadingLabelIndex : null"
+          @dismiss="closeSelect"
+          @label-click="onBatchLabelClick"
+        >
+          <template v-if="!useBuiltinBatchBar && $slots.operation" #actions>
+            <slot name="operation" />
+          </template>
+        </EgBatchBar>
+      </div>
+    </Transition>
 
-    <div ref="tableContentRef" :class="styles.tableContent">
+    <div
+      ref="tableContentRef"
+      :class="[
+        styles.tableContent,
+        needsVerticalScroll && !isScrollLocked && styles.tableContentScrollY,
+        isScrollLocked && styles.tableContentScrollLocked,
+      ]"
+      @scroll="onTableScroll"
+    >
+      <div
+        :class="styles.headerBackdrop"
+        :style="{
+          backgroundColor: headerBg || undefined,
+          ...(headerBg ? { backdropFilter: 'none' } : {}),
+        }"
+        aria-hidden="true"
+      />
       <table :key="tableKey" :class="styles.table">
+        <colgroup>
+          <col
+            v-if="selectColumnInDom"
+            :style="{ width: selectColumnWidthCss }"
+          />
+          <col
+            v-for="(width, index) in columnLayoutWidths"
+            :key="index"
+            :style="{ width }"
+          />
+        </colgroup>
         <thead :style="{ height: headerHeightCss }">
           <tr>
             <DataListHeaderCell
-              v-if="selectMode"
+              v-if="selectColumnInDom"
               type="select"
               :height="headerHeightCss"
               :bg="headerBg"
@@ -337,7 +930,6 @@ function isRowSelected(index: number) {
               :label="column.label"
               :align="column.align"
               :height="headerHeightCss"
-              :width="column.width"
               :sortable="column.sortable"
               :select-mode="selectMode"
               :bg="headerBg"
@@ -350,36 +942,58 @@ function isRowSelected(index: number) {
           </tr>
         </thead>
 
-        <tbody v-if="dataList.length > 0">
-          <tr :class="styles.loadingRow" :style="loadingStyle">
-            <td :colspan="bodyColumns.length">
-              <div :class="styles.loadingInner">
-                <EgIcon
-                  v-if="loadingDoneIcon"
-                  name="eds-tick"
-                  size="sm"
-                />
-                <EgIcon
-                  v-else
-                  :class="styles.loadingSpin"
-                  name="eds-load"
-                  size="sm"
-                />
+        <tbody
+          v-if="dataList.length > 0"
+          :class="[styles.body, showLoadingBar && styles.bodyLoading]"
+        >
+          <tr :class="styles.loadingRow" :style="loadingRowStyle">
+            <td :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)">
+              <div
+                :class="[
+                  styles.loadingSlot,
+                  loadingBarExpanded && styles.loadingSlotExpanded,
+                  loadingBarLeaving && styles.loadingSlotLeaving,
+                ]"
+              >
+                <div :class="styles.loadingInner">
+                  <div v-if="loadingDoneIcon" :class="styles.loadingDone">
+                    <EgIcon name="eds-tick" size="sm" :class="styles.loadingDoneIcon" />
+                    <span :class="styles.loadingDoneText">已刷新</span>
+                  </div>
+                  <EgIcon
+                    v-else-if="showLoadingBar"
+                    :class="styles.loadingSpin"
+                    name="eds-load"
+                    size="sm"
+                  />
+                </div>
               </div>
             </td>
           </tr>
 
           <tr
-            v-for="(row, rowIndex) in dataList"
+            v-if="showVirtualTopSpacer"
+            :class="styles.virtualSpacerRow"
+            aria-hidden="true"
+          >
+            <td
+              :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)"
+              :style="{ height: `${virtualTopSpacerPx}px` }"
+            />
+          </tr>
+
+          <tr
+            v-for="rowIndex in renderedRowIndices"
             :key="rowIndex"
-            @click="onRowClick(row, rowIndex)"
+            :style="rowStyle()"
+            @click="onRowClick(dataList[rowIndex], rowIndex)"
           >
             <DataListColumn
-              v-if="selectMode"
+              v-if="selectColumnInDom"
               type="select"
               :index="rowIndex"
               :column-height="columnHeight"
-              :data="row"
+              :data="dataList[rowIndex]"
               :selected="isRowSelected(rowIndex)"
               @select-change="toggleRowSelect"
             />
@@ -390,10 +1004,13 @@ function isRowSelected(index: number) {
               :column-height="columnHeight"
               :prop="column.prop"
               :align="column.align"
-              :width="column.width"
-              :width-percent="column.widthPercent"
-              :min-width="column.minWidth"
-              :data="row"
+              :data="dataList[rowIndex]"
+              :primary-action="column.primaryAction"
+              :more-actions="column.moreActions"
+              :hide-actions="column.hideActions"
+              :show-overflow-tooltip="column.showOverflowTooltip"
+              @primary-action="onPrimaryAction(dataList[rowIndex], rowIndex)"
+              @more-action="(key) => onMoreAction(key, dataList[rowIndex], rowIndex)"
             >
               <template v-if="column.slotDefault" #default="slotProps">
                 <RenderVNodes :nodes="renderCellSlot(column, slotProps)" />
@@ -401,25 +1018,41 @@ function isRowSelected(index: number) {
             </DataListColumn>
           </tr>
 
-          <tr v-for="(_blank, blankIndex) in blankRows" :key="`blank-${blankIndex}`">
-            <DataListColumn
-              v-for="(_column, colIndex) in bodyColumns"
-              :key="`blank-${blankIndex}-${colIndex}`"
-              :index="blankIndex"
-              :column-height="columnHeight"
-              blank
+          <tr
+            v-if="showVirtualBottomSpacer"
+            :class="styles.virtualSpacerRow"
+            aria-hidden="true"
+          >
+            <td
+              :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)"
+              :style="{ height: `${virtualBottomSpacerPx}px` }"
             />
+          </tr>
+
+          <tr
+            v-for="blankIndex in blankRowCount"
+            :key="`blank-${blankIndex}`"
+            :class="styles.blankRow"
+            :style="rowStyle()"
+            aria-hidden="true"
+          >
+            <td :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)" />
           </tr>
         </tbody>
       </table>
 
       <div v-if="!loading && dataList.length === 0" :class="styles.empty">
-        <div :class="styles.emptyInner">
-          <EgIcon :class="styles.emptyIcon" name="eds-information-lonely" size="lg" />
-          <div :class="styles.emptyText">no-data</div>
-        </div>
+        <slot name="empty">
+          <div :class="styles.emptyInner">
+            <EgIcon :class="styles.emptyIcon" name="eds-business-7" fit />
+            <div :class="styles.emptyText">{{ emptyText }}</div>
+          </div>
+        </slot>
       </div>
-      <div v-else :class="styles.spacer" />
+    </div>
+
+    <div v-if="showBatchToast" :class="styles.batchToastHost">
+      <EgToast :type="batchToastType" :text="batchToastText" />
     </div>
   </div>
 </template>

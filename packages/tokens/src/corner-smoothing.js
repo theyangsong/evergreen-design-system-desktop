@@ -94,6 +94,15 @@ function parseRadii(style) {
   };
 }
 
+function isEffectBoxRoot(element) {
+  return (
+    element.classList.contains('effect-container-box') ||
+    element.classList.contains('effect-flotation-box') ||
+    element.classList.contains('effect-popup-box') ||
+    element.classList.contains('effect-subtle-card')
+  );
+}
+
 function isEffectInternalLayer(element) {
   for (const className of element.classList) {
     if (EFFECT_LAYER_PATTERN.test(className)) {
@@ -126,6 +135,11 @@ function shouldSkipStatic(element) {
   }
 
   if (isEffectInternalLayer(element)) {
+    return true;
+  }
+
+  /* clip-path 会裁切 box-shadow；effect 场景类保留 border-radius，不做 squircle clip */
+  if (isEffectBoxRoot(element)) {
     return true;
   }
 

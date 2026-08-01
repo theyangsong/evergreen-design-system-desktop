@@ -1,4 +1,10 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
+import {
+  propLabelRows,
+  showcaseFeedbackMessageTypeLabels,
+  showcaseFeedbackToastTypeLabels,
+  showcaseFormSubmissionTypeLabels,
+} from '@/data/showcasePropLabels';
 
 export const endFeedbackCardImportCode = `import { EgEndFeedbackCard } from '@eds/desktop-components';`;
 export const toastImportCode = `import { EgToast } from '@eds/desktop-components';`;
@@ -49,7 +55,7 @@ export const formSubmissionPropRows: DocPropRow[] = [
 
 export const endFeedbackCardCustomizeDefaults = { text: 'I am Text' };
 export const endFeedbackCardCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'text', label: '文案 text' },
+  { kind: 'text', key: 'text', label: '文案' },
 ];
 
 export const toastCustomizeDefaults = { type: 'result', text: 'Connect to EDS' };
@@ -57,13 +63,13 @@ export const toastCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'result', label: 'Result' },
-      { value: 'danger', label: 'Danger' },
-    ],
+    label: '类型',
+    options: propLabelRows(['result', 'danger'] as const, showcaseFeedbackToastTypeLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
   },
-  { kind: 'text', key: 'text', label: '文案 text' },
+  { kind: 'text', key: 'text', label: '文案' },
 ];
 
 export const messageCustomizeDefaults = { type: 'subtle', text: '0' };
@@ -71,14 +77,12 @@ export const messageCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'subtle', label: 'Subtle' },
-      { value: 'brand', label: 'Brand' },
-      { value: 'danger', label: 'Danger' },
-    ],
+    label: '类型',
+    options: propLabelRows(['subtle', 'brand', 'danger'] as const, showcaseFeedbackMessageTypeLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
   },
-  { kind: 'text', key: 'text', label: '文案 text' },
+  { kind: 'text', key: 'text', label: '文案' },
 ];
 
 export const reddotCustomizeDefaults = {};
@@ -94,24 +98,22 @@ export const formSubmissionCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'notes', label: 'Notes' },
-      { value: 'danger', label: 'Danger' },
-      { value: 'success', label: 'Success' },
-    ],
+    label: '类型',
+    options: propLabelRows(['notes', 'danger', 'success'] as const, showcaseFormSubmissionTypeLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
   },
-  { kind: 'text', key: 'text', label: '文案 text' },
+  { kind: 'text', key: 'text', label: '文案' },
   {
     kind: 'text',
     key: 'linkLabel',
-    label: '链接 linkLabel',
+    label: '链接文案',
     visibleWhen: (s) => s.type === 'notes',
   },
   {
     kind: 'boolean',
     key: 'showLink',
-    label: '显示链接 showLink',
+    label: '显示链接',
     visibleWhen: (s) => s.type === 'notes',
   },
 ];

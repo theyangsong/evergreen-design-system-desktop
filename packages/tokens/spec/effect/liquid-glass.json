@@ -4,7 +4,7 @@
   "filterPrefix": "eds-liquid-glass",
   "profiles": {
     "glassBg": {
-      "cssPrefix": "effect-glass-bg",
+      "cssPrefix": "eds-glass-bg",
       "title": "Glass BG — Card / Button / Input",
       "backdrop": {
         "blur": "0.25px",
@@ -30,7 +30,7 @@
       }
     },
     "glassBox": {
-      "cssPrefix": "effect-glass-box-liquid",
+      "cssPrefix": "eds-glass-box-liquid",
       "title": "Glass Box — Flotation / Popup（Figma Glass 层）",
       "figma": {
         "lightAngle": 0,

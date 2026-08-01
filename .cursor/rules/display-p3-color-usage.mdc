@@ -17,6 +17,6 @@ The **display-p3 line is the value to use**. The hex line exists only for browse
 
 ## Rules
 
-- **Always consume colors via CSS variables** (`var(--eds-*)`, `var(--text-*)`, `var(--material-*)`, `var(--effect-*)`). Never copy hex from `spec/` or `dist/` into component CSS.
+- **Always consume colors via CSS variables** (`var(--eds-*)`, `var(--text-*)`, `var(--material-*)`, shadow/blur via `var(--eds-shadow-*)` / `var(--eds-blur-bg)`). Never copy hex from `spec/` or `dist/` into component CSS.
 - **Semantic / effect mixes** are built with `color-mix(in display-p3, var(--eds-*) …)` so alpha blends stay in the p3 pipeline.
 - **Do not override token variables with sRGB-only hex** in component or app styles.

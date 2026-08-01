@@ -1,193 +1,97 @@
 {
-  "$figma": "https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2931-5280",
-  "$description": "Effect System semantic classes — 组合应用（Figma 2931:5280）.",
+  "$description": "Effect System semantic classes — 场景化组合应用。类名 .effect-*；引用 base/color/scale 已有变量。",
   "groups": [
     {
       "comment": "组合应用（Composite Applications）",
       "styles": [
         {
-          "title": "Flotation Box（Menu）",
-          "className": "effect-flotation-box",
-          "composition": "layered",
+          "title": "Container Box（容器面板）",
+          "className": "effect-container-box",
           "properties": {
+            "box-sizing": "border-box",
             "display": "flex",
             "flex-direction": "column",
             "align-items": "flex-start",
-            "width": "max-content",
-            "padding": "var(--spacing-1)",
-            "border-radius": "var(--scale-3)"
-          },
-          "bgLayer": {
-            "suffix": "__bg",
-            "properties": {
-              "position": "absolute",
-              "inset": "0",
-              "z-index": "0",
-              "border-radius": "inherit",
-              "overflow": "visible",
-              "pointer-events": "none"
-            },
-            "layers": [
-              {
-                "suffix": "__fill",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-flotation-box)",
-                  "background-blend-mode": "normal, luminosity",
-                  "box-shadow": "var(--effect-shadow-light)"
-                }
-              },
-              {
-                "suffix": "__shadow-glow",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "box-shadow": "var(--effect-shadow-light-glow)",
-                  "mix-blend-mode": "plus-darker",
-                  "-webkit-mix-blend-mode": "plus-darker",
-                  "pointer-events": "none"
-                }
-              },
-              {
-                "suffix": "__glass",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "background": "var(--effect-glass-box-liquid-tint)",
-                  "backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
-                  "-webkit-backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
-                  "pointer-events": "none"
-                }
-              },
-              {
-                "suffix": "__glass-shadow",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "box-shadow": "var(--effect-glass-box)",
-                  "mix-blend-mode": "plus-lighter",
-                  "-webkit-mix-blend-mode": "plus-lighter",
-                  "pointer-events": "none"
-                }
-              }
-            ]
-          },
-          "contentLayer": {
-            "suffix": "__content",
-            "properties": {
-              "position": "relative",
-              "z-index": "1",
-              "display": "flex",
-              "flex-direction": "column",
-              "align-items": "flex-start",
-              "align-self": "stretch"
-            }
+            "width": "1280px",
+            "height": "800px",
+            "min-height": "800px",
+            "overflow": "visible",
+            "border-radius": "var(--radius-md)",
+            "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
+            "background": "var(--box-container)",
+            "box-shadow": "var(--eds-shadow-deep)",
+            "backdrop-filter": "var(--eds-blur-bg)",
+            "-webkit-backdrop-filter": "var(--eds-blur-bg)"
           },
           "notes": [
-            "Tooltip / Menu Flotation BG：__fill → __shadow-glow(Plus darker) → __glass → __glass-shadow(Plus lighter)",
-            "initLiquidGlass() 绑定 __glass"
+            "圆角 var(--radius-md) + 全局 --corner-smoothing 60% squircle",
+            "系统级容器默认画布 1280×800；同白 border 与 eds-shadow-deep 并存"
           ]
         },
         {
-          "title": "Popup Box",
-          "className": "effect-popup-box",
-          "composition": "layered",
+          "title": "Flotation Box（浮层面板）",
+          "className": "effect-flotation-box",
           "properties": {
+            "box-sizing": "border-box",
             "display": "flex",
             "flex-direction": "column",
             "align-items": "flex-start",
             "width": "max-content",
+            "overflow": "visible",
             "padding": "var(--spacing-1)",
-            "border-radius": "var(--scale-4)"
+            "border-radius": "var(--radius-md)",
+            "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
+            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--eds-flotation-box)",
+            "background-blend-mode": "normal, luminosity",
+            "box-shadow": "var(--eds-shadow-light)",
+            "backdrop-filter": "var(--eds-blur-bg)",
+            "-webkit-backdrop-filter": "var(--eds-blur-bg)"
           },
-          "bgLayer": {
-            "suffix": "__bg",
-            "properties": {
-              "position": "absolute",
-              "inset": "0",
-              "z-index": "0",
-              "border-radius": "inherit",
-              "overflow": "visible",
-              "pointer-events": "none"
-            },
-            "layers": [
-              {
-                "suffix": "__fill",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--effect-flotation-box)",
-                  "background-blend-mode": "normal, luminosity",
-                  "box-shadow": "var(--effect-shadow-light)"
-                }
-              },
-              {
-                "suffix": "__shadow-glow",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "box-shadow": "var(--effect-shadow-light-glow)",
-                  "mix-blend-mode": "plus-darker",
-                  "-webkit-mix-blend-mode": "plus-darker",
-                  "pointer-events": "none"
-                }
-              },
-              {
-                "suffix": "__glass",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "background": "var(--effect-glass-box-liquid-tint)",
-                  "backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
-                  "-webkit-backdrop-filter": "var(--effect-glass-box-liquid-fallback)",
-                  "pointer-events": "none"
-                }
-              },
-              {
-                "suffix": "__glass-shadow",
-                "properties": {
-                  "position": "absolute",
-                  "inset": "0",
-                  "border-radius": "inherit",
-                  "box-shadow": "var(--effect-glass-box)",
-                  "mix-blend-mode": "plus-lighter",
-                  "-webkit-mix-blend-mode": "plus-lighter",
-                  "pointer-events": "none"
-                }
-              }
-            ]
-          },
-          "contentLayer": {
-            "suffix": "__content",
-            "properties": {
-              "position": "relative",
-              "z-index": "1",
-              "display": "flex",
-              "flex-direction": "column",
-              "align-items": "flex-start",
-              "align-self": "stretch"
-            }
-          },
-          "notes": ["同 Menu 结构，圆角 scale-4", "initLiquidGlass() 绑定 __glass"]
+          "notes": [
+            "圆角 var(--radius-md) + 全局 --corner-smoothing 60% squircle",
+            "同白 border（material-same-white-quaternary）与 eds-shadow-light 并存"
+          ]
         },
         {
-          "title": "Subtle Card",
+          "title": "Popup Box（弹窗面板）",
+          "className": "effect-popup-box",
+          "properties": {
+            "box-sizing": "border-box",
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "width": "max-content",
+            "overflow": "visible",
+            "padding": "var(--spacing-1)",
+            "border-radius": "var(--radius-lg)",
+            "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
+            "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--eds-flotation)",
+            "background-blend-mode": "normal, luminosity",
+            "box-shadow": "var(--eds-shadow-light)",
+            "backdrop-filter": "var(--eds-blur-bg)",
+            "-webkit-backdrop-filter": "var(--eds-blur-bg)"
+          },
+          "notes": [
+            "圆角 var(--radius-lg) + 全局 --corner-smoothing 60% squircle",
+            "Popup 浮层一体场景"
+          ]
+        },
+        {
+          "title": "Subtle Card（页面面板）",
           "className": "effect-subtle-card",
           "properties": {
-            "border-radius": "var(--scale-3)",
-            "border": "var(--stroke-xs) solid var(--stroke-outline-subtle)",
+            "box-sizing": "border-box",
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "width": "100%",
+            "overflow": "visible",
+            "border-radius": "var(--radius-md)",
+            "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
             "background": "var(--box-page)",
-            "box-shadow": "var(--effect-shadow-subtle)"
+            "box-shadow": "var(--eds-shadow-subtle)"
           },
-          "notes": ["组成：Fill + Border + Shadow"]
+          "notes": ["组成：Fill + 同白 Border + Shadow；width 100% 铺满页面区域，非 max-content"]
         }
       ]
     },
@@ -195,10 +99,10 @@
       "comment": "Molde Card",
       "styles": [
         {
-          "title": "Molde Level",
+          "title": "Molde Level（模块层级）",
           "className": "effect-molde-level",
           "properties": {
-            "box-shadow": "var(--effect-shadow-molde)"
+            "box-shadow": "var(--eds-shadow-molde)"
           },
           "notes": ["组成：Shadow", "用于模块左弱阴影"]
         }

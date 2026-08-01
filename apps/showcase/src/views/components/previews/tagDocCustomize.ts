@@ -1,5 +1,13 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
+import {
+  inputSizeRows,
+  propLabelRows,
+  propLabelSelectOptions,
+  showcaseTagColorfulStyleLabels,
+  showcaseTagStatusLabels,
+  showcaseTagSystemTypeLabels,
+} from '@/data/showcasePropLabels';
 
 export const tagImportCode = `import { EgTag } from '@eds/desktop-components';`;
 
@@ -65,29 +73,52 @@ export const tagSystemCustomizeDefaults = {
   label: 'Tag',
 } as const;
 
+const tagColorfulStyleOptions = propLabelSelectOptions(
+  [
+    'apricot',
+    'khaki',
+    'grass',
+    'sage',
+    'cyan',
+    'ice-blue',
+    'periwinkle',
+    'lilac',
+    'orchid',
+    'mallow',
+    'rose',
+    'coral',
+    'mauve',
+    'moss',
+    'steel',
+    'grape',
+    'samewhite',
+    'lime',
+  ] as const,
+  showcaseTagColorfulStyleLabels,
+);
+
 export const tagSystemCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'size',
-    label: '尺寸 size',
-    options: [
-      { value: 'lg', label: 'Lg' },
-      { value: 'md', label: 'Md' },
-      { value: 'sm', label: 'Sm' },
-    ],
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
     key: 'systemType',
     label: '类型',
-    options: [
-      { value: 'subtle', label: 'Subtle' },
-      { value: 'solid-brand', label: 'Solid Brand' },
-      { value: 'solid-red', label: 'Solid Red' },
-      { value: 'gray', label: 'Gray' },
-      { value: 'stroke-subtle', label: 'Stroke Subtle' },
-      { value: 'stroke-solid', label: 'Stroke Solid' },
-    ],
+    options: propLabelRows(
+      [
+        'subtle',
+        'solid-brand',
+        'solid-red',
+        'gray',
+        'stroke-subtle',
+        'stroke-solid',
+      ] as const,
+      showcaseTagSystemTypeLabels,
+    ).map((row) => ({ value: row.key, label: row.label })),
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];
@@ -103,24 +134,17 @@ export const tagStatusCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'size',
-    label: '尺寸 size',
-    options: [
-      { value: 'lg', label: 'Lg' },
-      { value: 'md', label: 'Md' },
-      { value: 'sm', label: 'Sm' },
-    ],
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
     key: 'status',
-    label: '状态 status',
-    options: [
-      { value: 'danger', label: 'Danger' },
-      { value: 'warning', label: 'Warning' },
-      { value: 'success', label: 'Success' },
-      { value: 'ready', label: 'Ready' },
-      { value: 'invalid', label: 'Invalid' },
-    ],
+    label: '状态',
+    options: propLabelRows(
+      ['danger', 'warning', 'success', 'ready', 'invalid'] as const,
+      showcaseTagStatusLabels,
+    ).map((row) => ({ value: row.key, label: row.label })),
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];
@@ -136,37 +160,14 @@ export const tagColorfulCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'size',
-    label: '尺寸 size',
-    options: [
-      { value: 'lg', label: 'Lg' },
-      { value: 'md', label: 'Md' },
-      { value: 'sm', label: 'Sm' },
-    ],
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
     key: 'colorfulStyle',
-    label: 'Style',
-    options: [
-      { value: 'apricot', label: 'Apricot 杏色' },
-      { value: 'khaki', label: 'Khaki 浅卡其' },
-      { value: 'grass', label: 'Grass 草绿' },
-      { value: 'sage', label: 'Sage 鼠尾草' },
-      { value: 'cyan', label: 'Cyan 青色' },
-      { value: 'ice-blue', label: 'Ice Blue 冰蓝' },
-      { value: 'periwinkle', label: 'Periwinkle 长春花' },
-      { value: 'lilac', label: 'Lilac 丁香' },
-      { value: 'orchid', label: 'Orchid 兰花' },
-      { value: 'mallow', label: 'Mallow 锦葵' },
-      { value: 'rose', label: 'Rose 玫瑰' },
-      { value: 'coral', label: 'Coral 珊瑚' },
-      { value: 'mauve', label: 'Mauve 藕荷' },
-      { value: 'moss', label: 'Moss 苔藓' },
-      { value: 'steel', label: 'Steel 钢蓝' },
-      { value: 'grape', label: 'Grape 葡萄' },
-      { value: 'samewhite', label: 'Same White' },
-      { value: 'lime', label: 'Lime 青柠' },
-    ],
+    label: '样式',
+    options: tagColorfulStyleOptions,
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];

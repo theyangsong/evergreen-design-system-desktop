@@ -7,7 +7,7 @@
   min-width: var(--scale-30);
   padding: var(--spacing-8) var(--spacing-4);
   border-radius: var(--radius-md);
-  background: var(--effect-prompt);
+  background: var(--eds-prompt);
   color: var(--text-same-white-primary);
   font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-strong-size);

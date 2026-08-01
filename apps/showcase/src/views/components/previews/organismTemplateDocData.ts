@@ -1,4 +1,39 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
+import {
+  buildVueOpeningTag,
+  buildVueSelfClosingSnippet,
+} from '@/views/shared/componentDoc/buildUsageSnippet';
+import {
+  buttonToneRows,
+  countSelectOptions,
+  propLabelSelectOptions,
+  showcaseBatchBarActionTypeLabels,
+  showcaseComboPopupCountLabels,
+  showcaseLayoutTypeLabels,
+  showcaseModuleMenuAccessoryLabels,
+  showcaseModuleMenuTitleKindLabels,
+  showcaseNavBarScenarioLabels,
+  showcasePageBgLabels,
+  showcasePaginerDataVolumeLabels,
+  showcasePopupUsesLabels,
+  showcaseReminderTypeLabels,
+  showcaseYesNoLabels,
+  tokenLabel,
+  tokenOption,
+} from '@/data/showcasePropLabels';
+import {
+  buildIconButtonProSingleCustomizeControls,
+  buildIconButtonProZoneItemControls,
+  buildPaginerPaginationCustomizeControls,
+  iconButtonProSingleItemDefaults,
+  iconButtonProZoneItemDefaultsForRange,
+  paginerPaginationCustomizeDefaults,
+} from './buttonDocCustomize';
+import {
+  DATA_LIST_PREVIEW_COLUMN_COUNT,
+  dataListColumnSettingDefaults,
+  dataListColumnSettingLabel,
+} from './dataListPagePreviewData';
 
 export const ORGANISM_IMPORT = `import {
   EgNavBar,
@@ -35,14 +70,11 @@ export const navBarFigmaNode = '2085:772';
 const NAV_BAR_MODULE_COUNT_MAX = 20;
 const NAV_BAR_APP_ENTRY_COUNT_MAX = 20;
 
-const navBarModuleCountOptions = Array.from({ length: NAV_BAR_MODULE_COUNT_MAX }, (_, index) => {
-  const value = String(index + 1);
-  return { value, label: value };
-});
+const navBarModuleCountOptions = countSelectOptions(NAV_BAR_MODULE_COUNT_MAX);
 
 const navBarAppEntryCountOptions = Array.from({ length: NAV_BAR_APP_ENTRY_COUNT_MAX + 1 }, (_, index) => {
   const value = String(index);
-  return { value, label: value };
+  return { value, label: value === '0' ? tokenLabel('无', '0') : `${value} 个` };
 });
 
 function navBarModuleLabelDefaults(label = 'Label'): Record<string, string> {
@@ -97,10 +129,10 @@ function navBarAppEntryReddotDefaults(show = false): Record<string, boolean> {
 
 export type NavBarScenario = 'nav-bar' | 'cregis';
 
-export const navBarScenarioOptions = [
-  { value: 'nav-bar', label: 'Nav Bar' },
-  { value: 'cregis', label: 'Cregis' },
-];
+export const navBarScenarioOptions = propLabelSelectOptions(
+  ['nav-bar', 'cregis'] as const,
+  showcaseNavBarScenarioLabels,
+);
 
 export const cregisNavBarPropRows: OrganismPropRow[] = [
   {
@@ -186,19 +218,19 @@ export const navBarCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'text',
     key: 'corporationLabel',
-    label: '企业标识 corporation',
+    label: '企业标识',
     visibleWhen: (state) => state.scenario === 'nav-bar',
   },
   {
     kind: 'text',
     key: 'avatarInitials',
-    label: '头像缩写 avatar',
+    label: '头像缩写',
     visibleWhen: (state) => state.scenario === 'nav-bar',
   },
   {
     kind: 'boolean',
     key: 'showDivider',
-    label: '右侧分割线 divider',
+    label: '右侧分割线',
     visibleWhen: (state) => state.scenario === 'nav-bar',
   },
 ];
@@ -223,7 +255,7 @@ export const navBarModuleLabelCustomizeControls: DocCustomizeControl[] = Array.f
       {
         kind: 'text' as const,
         key: `moduleIcon${moduleIndex}`,
-        label: '默认 icon',
+        label: '默认图标',
         placeholder: 'eds-add',
         row: moduleIndex,
         visibleWhen,
@@ -231,7 +263,7 @@ export const navBarModuleLabelCustomizeControls: DocCustomizeControl[] = Array.f
       {
         kind: 'text' as const,
         key: `moduleFocusIcon${moduleIndex}`,
-        label: '聚焦 icon',
+        label: '聚焦图标',
         placeholder: 'eds-add',
         row: moduleIndex,
         visibleWhen,
@@ -239,7 +271,7 @@ export const navBarModuleLabelCustomizeControls: DocCustomizeControl[] = Array.f
       {
         kind: 'boolean' as const,
         key: `moduleReddot${moduleIndex}`,
-        label: '红点 reddot',
+        label: '红点',
         row: moduleIndex,
         visibleWhen,
       },
@@ -267,7 +299,7 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
       {
         kind: 'text' as const,
         key: `appEntryIcon${entryIndex}`,
-        label: '默认 icon',
+        label: '默认图标',
         placeholder: 'eds-add',
         row: entryIndex,
         visibleWhen,
@@ -275,7 +307,7 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
       {
         kind: 'text' as const,
         key: `appEntryFocusIcon${entryIndex}`,
-        label: '聚焦 icon',
+        label: '聚焦图标',
         placeholder: 'eds-add',
         row: entryIndex,
         visibleWhen,
@@ -283,7 +315,7 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
       {
         kind: 'boolean' as const,
         key: `appEntryReddot${entryIndex}`,
-        label: '红点 reddot',
+        label: '红点',
         row: entryIndex,
         visibleWhen,
       },
@@ -374,26 +406,17 @@ export const MODULE_MENU_MAX_ITEMS_PER_GROUP = 20;
 
 export const MODULE_MENU_MAX_SUB_ITEMS = 20;
 
-export const moduleMenuHasSubItemOptions = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '无' },
-];
+export const moduleMenuHasSubItemOptions = propLabelSelectOptions(['yes', 'no'] as const, showcaseYesNoLabels);
 
-export const moduleMenuItemCountOptions = Array.from({ length: MODULE_MENU_MAX_ITEMS_PER_GROUP }, (_, index) => {
-  const value = String(index + 1);
-  return { value, label: value };
-});
+export const moduleMenuItemCountOptions = countSelectOptions(MODULE_MENU_MAX_ITEMS_PER_GROUP);
 
-export const moduleMenuSubItemCountOptions = Array.from({ length: MODULE_MENU_MAX_SUB_ITEMS }, (_, index) => {
-  const value = String(index + 1);
-  return { value, label: value };
-});
+export const moduleMenuSubItemCountOptions = countSelectOptions(MODULE_MENU_MAX_SUB_ITEMS);
 
 export const moduleMenuTitlePresetOptions = [
-  { value: 'Module', label: 'Module' },
-  { value: 'Wallet', label: 'Wallet' },
-  { value: 'Settings', label: 'Settings' },
-  { value: 'Analytics', label: 'Analytics' },
+  { value: 'Module', label: tokenLabel('模块', 'Module') },
+  { value: 'Wallet', label: tokenLabel('钱包', 'Wallet') },
+  { value: 'Settings', label: tokenLabel('设置', 'Settings') },
+  { value: 'Analytics', label: tokenLabel('分析', 'Analytics') },
 ];
 
 export function moduleMenuGroupTitleKey(index: number): string {
@@ -433,11 +456,10 @@ export function moduleMenuGroupItemMessageTextKey(groupIndex: number, itemIndex:
   return `groupItemMessage_${groupIndex}_${itemIndex}`;
 }
 
-export const moduleMenuItemAccessoryOptions = [
-  { value: 'none', label: '无' },
-  { value: 'message', label: 'EgMessage' },
-  { value: 'reddot', label: 'EgReddot' },
-];
+export const moduleMenuItemAccessoryOptions = propLabelSelectOptions(
+  ['none', 'message', 'reddot'] as const,
+  showcaseModuleMenuAccessoryLabels,
+);
 
 export function moduleMenuGroupItemSubCountKey(groupIndex: number, itemIndex: number): string {
   return `groupItemSubCount_${groupIndex}_${itemIndex}`;
@@ -499,14 +521,11 @@ export function buildModuleMenuCustomizeDefaults(): Record<string, unknown> {
 
 export const moduleMenuCustomizeDefaults = buildModuleMenuCustomizeDefaults();
 
-export const moduleMenuGroupCountOptions = Array.from({ length: MODULE_MENU_MAX_GROUPS }, (_, index) => {
-  const value = String(index + 1);
-  return { value, label: value };
-});
+export const moduleMenuGroupCountOptions = countSelectOptions(MODULE_MENU_MAX_GROUPS);
 
 export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
   { kind: 'select', key: 'groupCount', label: '组数量', options: moduleMenuGroupCountOptions },
-  { kind: 'boolean', key: 'showEdgeDivider', label: '右侧 Module Divider' },
+  { kind: 'boolean', key: 'showEdgeDivider', label: '右侧分割线' },
 ];
 
 export const moduleMenuTitleCustomizeControls: DocCustomizeControl[] = [
@@ -514,10 +533,7 @@ export const moduleMenuTitleCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'moduleTitleKind',
     label: '输入方式',
-    options: [
-      { value: 'text', label: '文本' },
-      { value: 'preset', label: '下拉' },
-    ],
+    options: propLabelSelectOptions(['text', 'preset'] as const, showcaseModuleMenuTitleKindLabels),
     row: 0,
   },
   {
@@ -584,7 +600,7 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
     {
       kind: 'select',
       key: moduleMenuGroupItemCountKey(groupIndex),
-      label: 'Item 数量',
+      label: '条目数',
       options: moduleMenuItemCountOptions,
       row: 0,
       visibleWhen: groupVisible,
@@ -598,14 +614,14 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
       {
         kind: 'text',
         key: moduleMenuGroupItemLabelKey(groupIndex, itemIndex),
-        label: `Item${itemIndex}`,
+        label: `条目 ${itemIndex}`,
         row: itemRow,
         visibleWhen: itemVisible(itemIndex),
       },
       {
         kind: 'select',
         key: moduleMenuGroupItemHasSubKey(groupIndex, itemIndex),
-        label: '下属 Item',
+        label: '下级条目',
         options: moduleMenuHasSubItemOptions,
         row: itemRow,
         visibleWhen: itemVisible(itemIndex),
@@ -613,7 +629,7 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
       {
         kind: 'text',
         key: moduleMenuGroupItemIconKey(groupIndex, itemIndex),
-        label: 'Icon',
+        label: '图标',
         placeholder: 'eds-add',
         row: itemRow,
         visibleWhen: itemVisible(itemIndex),
@@ -629,7 +645,7 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
       {
         kind: 'text',
         key: moduleMenuGroupItemMessageTextKey(groupIndex, itemIndex),
-        label: 'Message',
+        label: '消息',
         row: itemRow,
         visibleWhen: (state) => {
           if (!itemVisible(itemIndex)(state)) return false;
@@ -641,7 +657,7 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
       {
         kind: 'select',
         key: moduleMenuGroupItemSubCountKey(groupIndex, itemIndex),
-        label: '二级 Item 数量',
+        label: '二级条目数',
         options: moduleMenuSubItemCountOptions,
         row: itemRow,
         visibleWhen: itemHasSubIs(itemIndex, true),
@@ -652,7 +668,7 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
       controls.push({
         kind: 'text',
         key: moduleMenuGroupItemSubLabelKey(groupIndex, itemIndex, subIndex),
-        label: `二级 ${subIndex} Label`,
+        label: `二级 ${subIndex} 文案`,
         row: itemRow * 100 + subIndex,
         visibleWhen: subItemVisible(itemIndex, subIndex),
       });
@@ -739,58 +755,238 @@ export const moduleMenuItemPropRows: OrganismPropRow[] = [
 
 export const toolBarFigmaNode = '2087:3918';
 
+const TOOL_BAR_ZONE_ITEM_COUNT_MAX = 10;
+
+const toolBarZoneCountOptions = countSelectOptions(TOOL_BAR_ZONE_ITEM_COUNT_MAX);
+
 export const toolBarCustomizeDefaults = {
   title: 'Title',
   showBack: false,
   showOperation: true,
   showDivider: false,
   showSection: false,
-  functionalLabel: 'Label',
+  functionalCount: '1',
+  sectionCount: '1',
+  ...iconButtonProZoneItemDefaultsForRange('functional', TOOL_BAR_ZONE_ITEM_COUNT_MAX),
+  ...iconButtonProZoneItemDefaultsForRange('section', TOOL_BAR_ZONE_ITEM_COUNT_MAX),
 };
 
 export const toolBarCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'title', label: '标题 title' },
-  { kind: 'boolean', key: 'showBack', label: '返回 back' },
-  { kind: 'boolean', key: 'showOperation', label: '操作区 operation' },
-  { kind: 'boolean', key: 'showDivider', label: '底部分割线 divider' },
-  { kind: 'boolean', key: 'showSection', label: '功能分区 section' },
-  { kind: 'text', key: 'functionalLabel', label: 'EgIconButtonPro 文案' },
+  { kind: 'text', key: 'title', label: '标题' },
+  { kind: 'boolean', key: 'showBack', label: '返回' },
+  { kind: 'boolean', key: 'showOperation', label: '操作区' },
+  { kind: 'boolean', key: 'showDivider', label: '底部分割线' },
+  { kind: 'boolean', key: 'showSection', label: '功能分区' },
 ];
+
+export const toolBarFunctionalCustomizeControls = buildIconButtonProZoneItemControls(
+  'functional',
+  'functionalCount',
+  toolBarZoneCountOptions,
+  TOOL_BAR_ZONE_ITEM_COUNT_MAX,
+);
+
+export const toolBarSectionCustomizeControls = buildIconButtonProZoneItemControls(
+  'section',
+  'sectionCount',
+  toolBarZoneCountOptions,
+  TOOL_BAR_ZONE_ITEM_COUNT_MAX,
+);
 
 export const toolBarPropRows: OrganismPropRow[] = [
   { name: 'title', type: 'string', defaultValue: "'Title'", description: 'ToolBar-Title Body Large Strong。' },
   { name: 'showBack', type: 'boolean', defaultValue: 'false', description: 'ToolBar-Title Back=Yes。' },
   { name: 'showOperation', type: 'boolean', defaultValue: 'true', description: 'Operation 开关：右侧操作 iCons。' },
   { name: 'showDivider', type: 'boolean', defaultValue: 'false', description: '滚动置顶时 Divider=Yes。' },
-  { name: 'showSection', type: 'boolean', defaultValue: 'false', description: 'Functional 内 Section 分区。' },
+  { name: 'showSection', type: 'boolean', defaultValue: 'false', description: 'Functional 内以竖向 EgDivider type=page 分区。' },
 ];
 
 export const toolBarSlotRows: OrganismPropRow[] = [
   { name: 'title', type: 'slot', defaultValue: '-', description: '标题区。' },
-  { name: 'functional', type: 'slot', defaultValue: 'EgIconButtonPro', description: '右侧功能图标组。' },
-  { name: 'section', type: 'slot', defaultValue: '-', description: 'Section=Yes 时分区内容。' },
+  { name: 'functional', type: 'slot', defaultValue: 'EgIconButtonPro', description: 'showSection 时左区功能图标组。' },
+  { name: 'section', type: 'slot', defaultValue: '-', description: '右区功能图标组；showSection 时在分割线右侧。' },
   { name: 'operation', type: 'slot', defaultValue: '-', description: 'Operation 区额外操作。' },
 ];
 
-export const paginerFigmaNode = '2092:8239';
+export const paginerFigmaNode = '2092:8240';
+
+const PAGINER_STATISTICS_COUNT_MAX = 5;
+
+const paginerStatisticsCountOptions = countSelectOptions(PAGINER_STATISTICS_COUNT_MAX);
+
+function paginerStatisticsItemDefaults(text = 'Title', number = '0'): Record<string, string> {
+  const entries: Record<string, string> = {};
+  for (let index = 1; index <= PAGINER_STATISTICS_COUNT_MAX; index += 1) {
+    entries[`stat${index}Text`] = text;
+    entries[`stat${index}Number`] = number;
+  }
+  return entries;
+}
 
 export const paginerCustomizeDefaults = {
+  dataVolume: 'few' as 'few' | 'many',
+  currentPage: '1',
   showScrollbar: false,
-  showStatistics: true,
-  dataVolume: '1–20 / 100',
+  showStatistics: false,
+  statisticsCollapse: false,
+  statisticsCount: '2',
+  scrollbarProgress: 0.35,
+  settingsLevelLabel: 'Items Per Page',
+  settingsJumpLabel: 'Go to Page',
+  settingsLevelLabels: '20,50,100',
+  ...paginerPaginationCustomizeDefaults(),
+  ...paginerStatisticsItemDefaults(),
 };
 
+export const paginerPaginationCustomizeControls =
+  buildPaginerPaginationCustomizeControls();
+
 export const paginerCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'boolean', key: 'showScrollbar', label: '滚动条 scrollbar' },
-  { kind: 'boolean', key: 'showStatistics', label: '统计 statistics' },
-  { kind: 'text', key: 'dataVolume', label: '数据量文案' },
+  {
+    kind: 'select',
+    key: 'dataVolume',
+    label: '数据量',
+    options: propLabelSelectOptions(['few', 'many'] as const, showcasePaginerDataVolumeLabels),
+  },
+  { kind: 'text', key: 'currentPage', label: '页码' },
+  { kind: 'boolean', key: 'showScrollbar', label: '滚动条' },
+  { kind: 'boolean', key: 'showStatistics', label: '统计区' },
+];
+
+export const paginerSettingsCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'settingsLevelLabel', label: '每页条数标题', row: 0 },
+  { kind: 'text', key: 'settingsJumpLabel', label: '跳转标题', row: 0 },
+  {
+    kind: 'text',
+    key: 'settingsLevelLabels',
+    label: '每页条数选项',
+    placeholder: '20,50,100',
+    row: 0,
+  },
+];
+
+export const paginerStatisticsCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'statisticsCount',
+    label: '数量',
+    options: paginerStatisticsCountOptions,
+  },
+  {
+    kind: 'boolean',
+    key: 'statisticsCollapse',
+    label: '统计折叠',
+  },
+  ...Array.from(
+  { length: PAGINER_STATISTICS_COUNT_MAX },
+  (_, index) => {
+    const itemIndex = index + 1;
+    const visibleWhen = (state: Record<string, unknown>) => {
+      const count = Number(state.statisticsCount);
+      return Number.isFinite(count) && count >= itemIndex;
+    };
+
+    return [
+      {
+        kind: 'text' as const,
+        key: `stat${itemIndex}Text`,
+        label: `统计 ${itemIndex} 标题`,
+        row: itemIndex,
+        visibleWhen,
+      },
+      {
+        kind: 'text' as const,
+        key: `stat${itemIndex}Number`,
+        label: `统计 ${itemIndex} 数值`,
+        row: itemIndex,
+        visibleWhen,
+      },
+    ];
+  },
+).flat(),
 ];
 
 export const paginerPropRows: OrganismPropRow[] = [
   { name: 'showScrollbar', type: 'boolean', defaultValue: 'false', description: 'Paginer-Scrollbar。' },
   { name: 'showStatistics', type: 'boolean', defaultValue: 'true', description: 'Statistics=Yes。' },
-  { name: 'dataVolume', type: 'string', defaultValue: "'1–20 / 100'", description: 'Paginer-Data Volume 文案。' },
-  { name: 'scrollbarProgress', type: 'number', defaultValue: '0.35', description: '预览用滚动条比例 0–1。' },
+  {
+    name: 'statisticsCollapse',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'Statistics 折叠为 eds-more-ios。',
+  },
+  { name: 'scrollbarProgress', type: 'number', defaultValue: '0.35', description: 'Scrollbar 指示条位置 0–1。' },
+  {
+    name: 'scrollbarSize',
+    type: "'few' | 'many'",
+    defaultValue: "'many'",
+    description: 'Scrollbar 指示条宽度。',
+  },
+  {
+    name: 'statisticsItems',
+    type: 'PaginerStatisticsItem[]',
+    defaultValue: '[{ text, number }×2]',
+    description: 'Paginer-Statistics 组合；可用 #statistics 插槽替换。',
+  },
+  { name: 'dataVolumeTotal', type: 'string', defaultValue: "'Total'", description: 'Data Volume Total 文案。' },
+  { name: 'dataVolumeCount', type: 'string', defaultValue: "'0'", description: 'Data Volume 数量。' },
+  { name: 'dataVolumeResults', type: 'string', defaultValue: "'Results'", description: 'Data Volume Results 文案。' },
+  { name: 'showDataVolumeDropdown', type: 'boolean', defaultValue: 'true', description: 'Data Volume 下拉。' },
+  {
+    name: 'statisticsCollapseLabel',
+    type: 'string',
+    defaultValue: "'Show statistics'",
+    description: 'Statistics 折叠触发器 aria-label。',
+  },
+  { name: 'settingsLevelLabel', type: 'string', defaultValue: "'Items Per Page'", description: '下拉设置 Level 标题。' },
+  { name: 'settingsJumpLabel', type: 'string', defaultValue: "'Go to Page'", description: '下拉设置 Jump 标题。' },
+  { name: 'settingsLevelLabels', type: 'string[]', defaultValue: "['20','50','100']", description: 'Level Segmented Control 选项。' },
+  { name: 'settingsJumpPlaceholder', type: 'string', defaultValue: "'Please Enter'", description: 'Jump 输入框占位符。' },
+  { name: 'settingsLevelIndex', type: 'number', defaultValue: '1', description: 'Level 选中索引（v-model）。' },
+  { name: 'settingsJumpValue', type: 'string', defaultValue: "''", description: 'Jump 输入值（v-model）。' },
+];
+
+export const paginerEventRows: OrganismPropRow[] = [
+  {
+    name: 'settings-level-select',
+    type: '(index: number, label: string) => void',
+    defaultValue: '-',
+    description: 'Data Volume 下拉 Level 选项变更。',
+  },
+  {
+    name: 'settings-jump',
+    type: '(value: string) => void',
+    defaultValue: '-',
+    description: 'Data Volume 下拉 Jump 确认跳转。',
+  },
+];
+
+export const paginerSlotRows: OrganismPropRow[] = [
+  {
+    name: 'default',
+    type: 'slot',
+    defaultValue: 'EgPaginationItem×5',
+    description: 'Pagination Raw：首/前/页码/后/末（Showcase「数据量/页码」为演示状态，非组件 prop）。',
+  },
+  {
+    name: 'dataVolume',
+    type: 'slot',
+    defaultValue: 'EgPaginerDataVolume',
+    description: 'Paginer-Data Volume；下拉触发 EgFlotation → #dropdown-content（默认 EgPaginerSettings）。',
+  },
+  {
+    name: 'dataVolume-dropdown-content',
+    type: 'slot',
+    defaultValue: 'EgPaginerSettings',
+    description: 'Data Volume 下拉浮层内容（Figma 2092:8003）。',
+  },
+  { name: 'statistics', type: 'slot', defaultValue: 'EgPaginerStatistics×2', description: 'Statistics 未折叠时。' },
+  {
+    name: 'statistics-collapse',
+    type: 'slot',
+    defaultValue: 'EgPaginerStatisticsCollapse',
+    description: 'Statistics 折叠时：EgFlotation + 统计浮层。',
+  },
 ];
 
 export const reminderFigmaNode = '2769:8358';
@@ -808,23 +1004,20 @@ export const reminderCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'info', label: 'Info' },
-      { value: 'echo', label: 'Echo' },
-    ],
+    label: '类型',
+    options: propLabelSelectOptions(['info', 'echo'] as const, showcaseReminderTypeLabels),
   },
-  { kind: 'text', key: 'title', label: '标题 title' },
-  { kind: 'text', key: 'secondaryText', label: '副文案 secondary' },
+  { kind: 'text', key: 'title', label: '标题' },
+  { kind: 'text', key: 'secondaryText', label: '副文案' },
   { kind: 'boolean', key: 'showSecondaryText', label: '显示副文案' },
-  { kind: 'text', key: 'confirmLabel', label: '确认按钮 confirm' },
+  { kind: 'text', key: 'confirmLabel', label: '确认文案' },
   {
     kind: 'select',
     key: 'actionCount',
-    label: 'Combo Action 数量',
+    label: '操作按钮数',
     options: [
-      { value: '1', label: '1' },
-      { value: '2', label: '2' },
+      { value: '2', label: showcaseComboPopupCountLabels['2'] },
+      { value: '1', label: showcaseComboPopupCountLabels['1'] },
     ],
   },
 ];
@@ -838,31 +1031,257 @@ export const reminderPropRows: OrganismPropRow[] = [
   { name: 'actionCount', type: '1 | 2', defaultValue: '1', description: '嵌套 Combo Action Popup Window 按钮数。' },
 ];
 
-export const batchBarFigmaNode = '2840:4361';
+export const batchBarFigmaNode = '2840:4360';
+export const batchBarActionItemFigmaNode = '2840:3358';
+
+const BATCH_BAR_LABEL_COUNT_MAX = 20;
+
+const batchBarLabelCountOptions = countSelectOptions(BATCH_BAR_LABEL_COUNT_MAX);
+
+function batchBarLabelItemDefaults(label = 'Label'): Record<string, string> {
+  const entries: Record<string, string> = {};
+  for (let index = 1; index <= BATCH_BAR_LABEL_COUNT_MAX; index += 1) {
+    entries[`label${index}`] = label;
+  }
+  return entries;
+}
+
+function batchBarLabelDangerDefaults(): Record<string, boolean> {
+  const entries: Record<string, boolean> = {};
+  for (let index = 1; index <= BATCH_BAR_LABEL_COUNT_MAX; index += 1) {
+    entries[`label${index}Danger`] = false;
+  }
+  return entries;
+}
+
+export function parseBatchBarLabelCount(state: Record<string, unknown>): number {
+  const parsed = Number.parseInt(String(state.labelCount ?? '1'), 10);
+  return Number.isFinite(parsed) ? Math.min(BATCH_BAR_LABEL_COUNT_MAX, Math.max(1, parsed)) : 1;
+}
+
+export function buildBatchBarLabels(state: Record<string, unknown>): string[] {
+  const count = parseBatchBarLabelCount(state);
+  return Array.from({ length: count }, (_, index) => {
+    const key = `label${index + 1}`;
+    return String(state[key] ?? 'Label');
+  });
+}
+
+export function buildBatchBarLabelDanger(state: Record<string, unknown>): boolean[] {
+  const count = parseBatchBarLabelCount(state);
+  return Array.from({ length: count }, (_, index) => {
+    const itemIndex = index + 1;
+    if (itemIndex !== count) {
+      return false;
+    }
+    return Boolean(state[`label${itemIndex}Danger`]);
+  });
+}
 
 export const batchBarCustomizeDefaults = {
   selectedCount: '0',
   countSuffix: 'Selectd',
-  actionLabel: 'Label',
+  labelCount: '4',
+  moreLabel: 'More',
+  ...batchBarLabelItemDefaults(),
+  ...batchBarLabelDangerDefaults(),
 };
 
 export const batchBarCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'selectedCount', label: '选中数 count' },
-  { kind: 'text', key: 'countSuffix', label: '统计后缀 suffix' },
-  { kind: 'text', key: 'actionLabel', label: '操作文案 action' },
+  { kind: 'text', key: 'selectedCount', label: '选中数', row: 0 },
+  { kind: 'text', key: 'countSuffix', label: '统计后缀', row: 0 },
+  {
+    kind: 'select',
+    key: 'labelCount',
+    label: '标签数',
+    row: 1,
+    options: batchBarLabelCountOptions,
+  },
+  { kind: 'text', key: 'moreLabel', label: '更多文案', row: 1 },
+];
+
+export function buildBatchBarLabelCustomizeControls(
+  state: Record<string, unknown>,
+): DocCustomizeControl[] {
+  const count = parseBatchBarLabelCount(state);
+  const controls: DocCustomizeControl[] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const itemIndex = index + 1;
+    controls.push({
+      kind: 'text',
+      key: `label${itemIndex}`,
+      label: `标签 ${itemIndex}`,
+      row: itemIndex,
+    });
+
+    if (itemIndex === count) {
+      controls.push({
+        kind: 'boolean',
+        key: `label${itemIndex}Danger`,
+        label: '危险',
+        row: itemIndex,
+      });
+    }
+  }
+
+  return controls;
+}
+
+export const batchBarActionCustomizeDefaults = {
+  actionType: 'text' as 'text' | 'symbol' | 'statistics',
+  actionLabel: 'Label',
+  actionCount: '0',
+  actionCountSuffix: 'Selectd',
+  actionDisabled: false,
+  actionActive: false,
+  actionLoading: false,
+};
+
+export const batchBarActionCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'actionType',
+    label: '类型',
+    row: 0,
+    options: propLabelSelectOptions(
+      ['text', 'symbol', 'statistics'] as const,
+      showcaseBatchBarActionTypeLabels,
+    ),
+  },
+  { kind: 'boolean', key: 'actionDisabled', label: '禁用 Disable', row: 0 },
+  {
+    kind: 'boolean',
+    key: 'actionActive',
+    label: '激活 Active',
+    row: 0,
+    visibleWhen: (s) => String(s.actionType ?? 'text') === 'text',
+  },
+  {
+    kind: 'boolean',
+    key: 'actionLoading',
+    label: '加载 Loading',
+    row: 0,
+    visibleWhen: (s) => String(s.actionType ?? 'text') === 'text',
+  },
+  {
+    kind: 'text',
+    key: 'actionLabel',
+    label: '文案',
+    row: 1,
+    visibleWhen: (s) => String(s.actionType ?? 'text') === 'text',
+  },
+  {
+    kind: 'text',
+    key: 'actionCount',
+    label: '统计数字',
+    row: 1,
+    visibleWhen: (s) => String(s.actionType ?? 'text') === 'statistics',
+  },
+  {
+    kind: 'text',
+    key: 'actionCountSuffix',
+    label: '统计后缀',
+    row: 1,
+    visibleWhen: (s) => String(s.actionType ?? 'text') === 'statistics',
+  },
 ];
 
 export const batchBarPropRows: OrganismPropRow[] = [
   { name: 'selectedCount', type: 'string | number', defaultValue: "'0'", description: 'Statistics 主数字。' },
   { name: 'countSuffix', type: 'string', defaultValue: "'Selectd'", description: 'Statistics 后缀文案。' },
-  { name: 'actionLabel', type: 'string', defaultValue: "'Label'", description: 'Text 操作项。' },
+  {
+    name: 'labels',
+    type: 'string[]',
+    defaultValue: "['Label']",
+    description: 'Text 操作项，1–20 项；超过 collapseThreshold 时折叠为前 collapsedVisibleCount 项 + More。',
+  },
+  {
+    name: 'labelDanger',
+    type: 'boolean[]',
+    defaultValue: '[]',
+    description: '与 labels 等长；为 true 时该项 Text 使用 --text-danger-primary（通常仅最后一项）。',
+  },
+  { name: 'moreLabel', type: 'string', defaultValue: "'More'", description: '折叠时的 More 文案。' },
+  { name: 'collapseThreshold', type: 'number', defaultValue: '4', description: 'Label 数超过该值时折叠（默认 4）。' },
+  {
+    name: 'collapsedVisibleCount',
+    type: 'number',
+    defaultValue: '3',
+    description: '折叠后胶囊内可见 Label 数；其余进 More 覆层（Figma 3557:14071）。',
+  },
+  {
+    name: 'morePlacement',
+    type: "'top' | 'bottom'",
+    defaultValue: "'top'",
+    description: 'More 覆层相对触发器的主轴方向。',
+  },
+  {
+    name: 'moreAlign',
+    type: "'start' | 'center' | 'end'",
+    defaultValue: "'start'",
+    description: 'More 覆层交叉轴对齐；默认 start，菜单左缘贴 More，长文案向右拓展。',
+  },
+  {
+    name: 'loadingLabelIndex',
+    type: 'number | null',
+    defaultValue: 'null',
+    description: '正在加载的 Label 全局 index；Text 项展示 eds-load 旋转图标，overflow 项时 More 按钮展示。',
+  },
+];
+
+export const batchBarEventRows: OrganismPropRow[] = [
+  { name: 'dismiss', type: '() => void', defaultValue: '-', description: 'Symbol 关闭。' },
+  {
+    name: 'label-click',
+    type: '(label: string, index: number) => void',
+    defaultValue: '-',
+    description: 'Text Label 点击。',
+  },
+  { name: 'more', type: '() => void', defaultValue: '-', description: 'More 覆层菜单打开时。' },
+];
+
+export const batchBarSlotRows: OrganismPropRow[] = [
+  { name: 'leading', type: 'slot', defaultValue: 'EgBatchBarActionItem Symbol', description: '左侧关闭区。' },
+  { name: 'statistics', type: 'slot', defaultValue: 'EgBatchBarActionItem Statistics', description: '选中统计区。' },
+  {
+    name: 'actions',
+    type: 'slot',
+    defaultValue: '-',
+    description: '自定义右侧操作区；提供时忽略 labels / More 折叠逻辑。',
+  },
+  {
+    name: 'more-menu',
+    type: 'slot',
+    defaultValue: 'EgFlotationMenu + EgFlotationMenuItem',
+    description: 'More 覆层内容（Figma Menu Box 3557:14071）；默认渲染 overflow labels。',
+  },
 ];
 
 export const batchBarActionPropRows: OrganismPropRow[] = [
-  { name: 'type', type: "'text' | 'symbol' | 'statistics'", defaultValue: "'text'", description: 'BatchBar Action Item 类型。' },
+  { name: 'type', type: "'text' | 'symbol' | 'statistics'", defaultValue: "'text'", description: 'BatchBar Action Item 类型（Figma 2840:3358）。' },
   { name: 'label', type: 'string', defaultValue: "'Label'", description: 'Type=Text。' },
   { name: 'count', type: 'string | number', defaultValue: "'0'", description: 'Type=Statistics。' },
   { name: 'countSuffix', type: 'string', defaultValue: "'Selectd'", description: 'Type=Statistics 后缀。' },
+  { name: 'disabled', type: 'boolean', defaultValue: 'false', description: 'Disable 态：文案/图标 --text-base-quaternary。' },
+  {
+    name: 'active',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'Text Active 态（--event-focus 底 + --text-base-secondary）；Hover / Focus 由 CSS 驱动。',
+  },
+  {
+    name: 'loading',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'Text Loading 态：eds-load 旋转图标（同 DataList loading）。',
+  },
+  {
+    name: 'danger',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'Text 危险态：--text-danger-primary。',
+  },
 ];
 
 export const containerFigmaNode = '2110:6736';
@@ -875,12 +1294,8 @@ export const containerCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'pageBg',
-    label: 'Page BG 位置',
-    options: [
-      { value: 'none', label: '无' },
-      { value: 'right', label: 'Right' },
-      { value: 'center', label: 'Center' },
-    ],
+    label: '背景位置',
+    options: propLabelSelectOptions(['none', 'right', 'center'] as const, showcasePageBgLabels),
   },
 ];
 
@@ -890,10 +1305,17 @@ export const containerPropRows: OrganismPropRow[] = [
 
 export const layoutFigmaNode = '2091:6707';
 
+const layoutTypeOf = (state: Record<string, unknown>) =>
+  String(state.type ?? layoutCustomizeDefaults.type);
+
+const isEmptyLayout = (state: Record<string, unknown>) =>
+  layoutTypeOf(state) === 'empty';
+
+const hasLayoutShell = (state: Record<string, unknown>) => !isEmptyLayout(state);
+
 export const layoutCustomizeDefaults = {
   type: 'navigation' as 'empty' | 'navigation' | 'module-menu',
-  showToolbar: true,
-  showPaginer: false,
+  pageBg: containerCustomizeDefaults.pageBg,
   showSkid: false,
 };
 
@@ -901,16 +1323,20 @@ export const layoutCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'empty', label: 'Empty' },
-      { value: 'navigation', label: 'Navigation' },
-      { value: 'module-menu', label: 'Module Menu' },
-    ],
+    label: '类型',
+    options: propLabelSelectOptions(
+      ['empty', 'navigation', 'module-menu'] as const,
+      showcaseLayoutTypeLabels,
+    ),
   },
-  { kind: 'boolean', key: 'showToolbar', label: 'Tool Bar' },
-  { kind: 'boolean', key: 'showPaginer', label: 'Paginer' },
-  { kind: 'boolean', key: 'showSkid', label: 'Skid' },
+  {
+    kind: 'select',
+    key: 'pageBg',
+    label: '背景位置',
+    options: propLabelSelectOptions(['none', 'right', 'center'] as const, showcasePageBgLabels),
+    visibleWhen: isEmptyLayout,
+  },
+  { kind: 'boolean', key: 'showSkid', label: '滑层', visibleWhen: hasLayoutShell },
 ];
 
 export const layoutPropRows: OrganismPropRow[] = [
@@ -929,6 +1355,76 @@ export const layoutSlotRows: OrganismPropRow[] = [
   { name: 'skid', type: 'slot', defaultValue: 'EgSkid', description: 'showSkid 右侧滑层。' },
 ];
 
+export function layoutPropRowsForType(type: string): OrganismPropRow[] {
+  if (type === 'empty') return containerPropRows;
+  return layoutPropRows;
+}
+
+export function layoutSlotRowsForType(type: string): OrganismPropRow[] {
+  if (type === 'empty') return [];
+
+  const rows: OrganismPropRow[] = [
+    layoutSlotRows[0],
+    ...(type === 'module-menu' ? [layoutSlotRows[1]] : []),
+    layoutSlotRows[3],
+    layoutSlotRows[5],
+  ];
+
+  return rows;
+}
+
+/** Desktop 无限嵌套：Container（底层）→ box-page 插槽 → Layout */
+export function buildLayoutUsageSnippet(
+  customize: Record<string, unknown>,
+): string {
+  const type = layoutTypeOf(customize);
+
+  if (type === 'empty') {
+    return buildVueSelfClosingSnippet(
+      'EgContainer',
+      { pageBg: customize.pageBg },
+      { defaults: { pageBg: layoutCustomizeDefaults.pageBg } },
+    );
+  }
+
+  const layoutOpen = buildVueOpeningTag(
+    'EgLayout',
+    {
+      type: customize.type,
+      showSkid: customize.showSkid,
+    },
+    { defaults: layoutCustomizeDefaults },
+  );
+
+  const lines: string[] = [layoutOpen];
+
+  if (type !== 'empty') {
+    lines.push('    <template #nav>');
+    lines.push('      <EgNavBar />');
+    lines.push('    </template>');
+  }
+
+  if (type === 'module-menu') {
+    lines.push('    <template #moduleMenu>');
+    lines.push('      <EgModuleMenu />');
+    lines.push('    </template>');
+  }
+
+  lines.push('    <!-- 主内容 -->');
+
+  if (customize.showSkid) {
+    lines.push('    <template #skid>');
+    lines.push('      <EgSkid />');
+    lines.push('    </template>');
+  }
+
+  lines.push('  </EgLayout>');
+
+  return ['<EgContainer>', '  <!-- 默认插槽：EgContainer 提供 --box-page 页面层 -->', ...lines, '</EgContainer>'].join(
+    '\n',
+  );
+}
+
 export const popupFigmaNode = '2170:3023';
 
 export const popupCustomizeDefaults = {
@@ -939,12 +1435,8 @@ export const popupCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'uses',
-    label: '用途 uses',
-    options: [
-      { value: 'detail', label: 'Detail' },
-      { value: 'reminder', label: 'Reminder' },
-      { value: 'verify', label: 'Verify' },
-    ],
+    label: '用途',
+    options: propLabelSelectOptions(['detail', 'reminder', 'verify'] as const, showcasePopupUsesLabels),
   },
 ];
 
@@ -952,61 +1444,283 @@ export const popupPropRows: OrganismPropRow[] = [
   { name: 'uses', type: "'detail' | 'reminder' | 'verify'", defaultValue: "'reminder'", description: 'Popup 用途（data-uses）。' },
 ];
 
-export const skidFigmaNode = '2260:3604';
+export const skidFigmaNode = '2260:3822';
 
 export const skidCustomizeDefaults = {
   title: 'Title',
   showButton: true,
-  split: false,
+  tone: 'decor',
   confirmLabel: 'Confirm',
 };
 
 export const skidCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'title', label: '标题 title' },
-  { kind: 'boolean', key: 'showButton', label: '底部按钮 button' },
-  { kind: 'boolean', key: 'split', label: '标题分割 split' },
-  { kind: 'text', key: 'confirmLabel', label: '确认 confirm' },
+  { kind: 'text', key: 'title', label: '标题' },
+  { kind: 'boolean', key: 'showButton', label: '底部操作' },
+];
+
+export const skidActionCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'tone',
+    label: '色调',
+    options: buttonToneRows
+      .filter((row) => ['brand', 'decor', 'danger'].includes(row.key))
+      .map((row) => ({ value: row.key, label: row.label })),
+  },
+  { kind: 'text', key: 'confirmLabel', label: '确认文案' },
 ];
 
 export const skidPropRows: OrganismPropRow[] = [
-  { name: 'title', type: 'string', defaultValue: "'Title'", description: 'Skid-Title 文案。' },
-  { name: 'showButton', type: 'boolean', defaultValue: 'true', description: 'Button=Yes 时 EgComboActionSkid。' },
-  { name: 'split', type: 'boolean', defaultValue: 'false', description: 'State=Scroll Split=Yes 标题下 Divider。' },
-  { name: 'confirmLabel', type: 'string', defaultValue: "'Confirm'", description: 'EgComboActionSkid 文案。' },
+  { name: 'title', type: 'string', defaultValue: "'Title'", description: 'Skid-Title 文案（必填）。' },
+  {
+    name: 'showButton',
+    type: 'boolean',
+    defaultValue: 'true',
+    description: '是否显示底部 Action 区；默认显示。',
+  },
+  {
+    name: 'actionTone',
+    type: "'brand' | 'decor' | 'danger'",
+    defaultValue: "'decor'",
+    description: 'showButton 时默认 EgComboActionSkid tone。',
+  },
+  {
+    name: 'confirmLabel',
+    type: 'string',
+    defaultValue: "'Confirm'",
+    description: 'showButton 时默认 EgComboActionSkid 确认文案。',
+  },
 ];
 
 export const skidSlotRows: OrganismPropRow[] = [
-  { name: 'title', type: 'slot', defaultValue: '-', description: '标题槽。' },
   { name: 'default', type: 'slot', defaultValue: '-', description: 'Skid 主体内容。' },
-  { name: 'actions', type: 'slot', defaultValue: 'EgComboActionSkid', description: '底部操作；默认 Combo Action Skid。' },
+  {
+    name: 'action',
+    type: 'slot',
+    defaultValue: 'EgComboActionSkid',
+    description: '底部 Action；默认 EgComboActionSkid。',
+  },
 ];
 
+export function buildSkidUsageSnippet(state: Record<string, unknown>): string {
+  const openTag = buildVueOpeningTag(
+    'EgSkid',
+    {
+      title: state.title,
+      showButton: state.showButton,
+      actionTone: state.showButton ? state.tone : undefined,
+      confirmLabel: state.showButton ? state.confirmLabel : undefined,
+    },
+    { defaults: skidCustomizeDefaults },
+  );
+
+  if (state.showButton) {
+    const comboSnippet = buildVueSelfClosingSnippet(
+      'EgComboActionSkid',
+      { tone: state.tone, confirmLabel: state.confirmLabel },
+      { defaults: { tone: skidCustomizeDefaults.tone, confirmLabel: skidCustomizeDefaults.confirmLabel } },
+    );
+    return `${openTag}>\n  <template #action>\n    ${comboSnippet}\n  </template>\n</EgSkid>`;
+  }
+
+  return `${openTag} />`;
+}
+
 export const dataListCustomizeDefaults = {
-  headerHeight: '32',
-  columnHeight: '66',
+  pageHeightMode: 'fixed' as 'fixed' | 'adaptive',
+  columnHeight: '66' as '66' | '48',
+  dataVolume: '103',
   loading: false,
   initing: false,
   empty: false,
   selectMode: false,
+  skidOpen: false,
+  showBatch: true,
+  showExport: true,
+  showBack: false,
+  showStatistics: false,
+  ...iconButtonProSingleItemDefaults('batch', {
+    label: 'Batch',
+    icon: 'eds-batch',
+  }),
+  ...iconButtonProSingleItemDefaults('filter', {
+    label: 'Filter',
+    icon: 'eds-filter',
+  }),
+  ...iconButtonProSingleItemDefaults('refresh', {
+    label: 'Refresh',
+    icon: 'eds-arrow-refresh',
+  }),
+  ...iconButtonProSingleItemDefaults('export', {
+    label: 'Export',
+    icon: 'eds-arrow-download',
+  }),
+  statisticsCount: '2',
+  statisticsCollapse: false,
+  toolbarCustomizeKey: 'batch',
+  ...paginerPaginationCustomizeDefaults('dataListPaginationKey'),
+  ...paginerStatisticsItemDefaults('Item', '0'),
+  ...dataListColumnSettingDefaults(),
 };
 
+export const dataListPaginationCustomizeControls = buildPaginerPaginationCustomizeControls(
+  'dataListPaginationKey',
+);
+
+/** Figma CE - Data List · frame DataList (3128:4483) 右侧 Page 区基准场景。 */
+export const dataListFigmaNode = '3128:4483';
+
+export const dataListPageHeightOptions = [
+  { value: 'fixed', label: '固定 800' },
+  { value: 'adaptive', label: '自适应（min 720）' },
+];
+
+export const dataListColumnHeightOptions = [
+  { value: '66', label: '66（Xl）' },
+  { value: '48', label: '48（Md）' },
+];
+
 export const dataListCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'headerHeight', label: '表头高 headerHeight' },
-  { kind: 'text', key: 'columnHeight', label: '行高 columnHeight' },
-  { kind: 'boolean', key: 'loading', label: '加载 loading' },
-  { kind: 'boolean', key: 'initing', label: '初始化 initing' },
-  { kind: 'boolean', key: 'empty', label: '空数据 empty' },
-  { kind: 'boolean', key: 'selectMode', label: '多选 selectMode' },
+  {
+    kind: 'select',
+    key: 'pageHeightMode',
+    label: '高度',
+    options: dataListPageHeightOptions,
+  },
+  {
+    kind: 'select',
+    key: 'columnHeight',
+    label: '行高',
+    options: dataListColumnHeightOptions,
+  },
+  { kind: 'text', key: 'dataVolume', label: '数据量' },
+  { kind: 'boolean', key: 'initing', label: '初始化' },
+  { kind: 'boolean', key: 'empty', label: '空数据' },
+  { kind: 'boolean', key: 'skidOpen', label: 'Skid 打开' },
+  { kind: 'boolean', key: 'showBatch', label: '批处理' },
+  { kind: 'boolean', key: 'showExport', label: '导出' },
+  { kind: 'boolean', key: 'showBack', label: '返回' },
+  { kind: 'boolean', key: 'showStatistics', label: '统计区' },
+];
+
+const DATA_LIST_TOOLBAR_BUTTON_KEYS = ['batch', 'filter', 'refresh', 'export'] as const;
+
+const dataListToolbarButtonOptions = [
+  { value: 'batch', label: '批处理' },
+  { value: 'filter', label: '筛选' },
+  { value: 'refresh', label: '刷新' },
+  { value: 'export', label: '导出' },
+];
+
+/** ToolBar 区批处理 / 筛选 / 刷新 / 导出共用一个 EgIconButtonPro 嵌套面板。 */
+export const dataListToolbarCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'toolbarCustomizeKey',
+    label: '按钮',
+    options: dataListToolbarButtonOptions,
+    row: 0,
+  },
+  ...DATA_LIST_TOOLBAR_BUTTON_KEYS.flatMap((prefix) =>
+    buildIconButtonProSingleCustomizeControls(prefix).map((control) => ({
+      ...control,
+      visibleWhen: (state: Record<string, unknown>) => {
+        if (String(state.toolbarCustomizeKey ?? 'batch') !== prefix) return false;
+        return control.visibleWhen ? control.visibleWhen(state) : true;
+      },
+    })),
+  ),
+];
+
+const dataListColumnAlignOptions = [
+  tokenOption('左', 'left'),
+  tokenOption('中', 'center'),
+  tokenOption('右', 'right'),
+];
+
+const dataListColumnDataSourceOptions = [
+  tokenOption('占位', 'placeholder'),
+  tokenOption('币种', 'currency'),
+];
+
+const dataListColumnSettingIndexOptions = Array.from(
+  { length: DATA_LIST_PREVIEW_COLUMN_COUNT },
+  (_, offset) => {
+    const index = offset + 1;
+    return { value: String(index), label: dataListColumnSettingLabel(index) };
+  },
+);
+
+export const dataListColumnSettingControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'columnSettingIndex',
+    label: '列',
+    options: dataListColumnSettingIndexOptions,
+    row: 0,
+  },
+  ...Array.from({ length: DATA_LIST_PREVIEW_COLUMN_COUNT }, (_, offset) => {
+    const index = offset + 1;
+    const visibleWhen = (state: Record<string, unknown>) =>
+      String(state.columnSettingIndex ?? '1') === String(index);
+
+    return [
+      {
+        kind: 'text' as const,
+        key: `columnMinWidth${index}`,
+        label: '最小宽度',
+        placeholder: '168px',
+        row: 1,
+        visibleWhen,
+      },
+      {
+        kind: 'select' as const,
+        key: `columnAlign${index}`,
+        label: '对齐方式',
+        options: dataListColumnAlignOptions,
+        row: 1,
+        visibleWhen,
+      },
+      {
+        kind: 'select' as const,
+        key: `columnDataSource${index}`,
+        label: '数据来源',
+        options: dataListColumnDataSourceOptions,
+        row: 1,
+        visibleWhen,
+      },
+      {
+        kind: 'boolean' as const,
+        key: `columnSortable${index}`,
+        label: '排序',
+        row: 1,
+        visibleWhen,
+      },
+    ];
+  }).flat(),
 ];
 
 export const dataListPropRows: OrganismPropRow[] = [
   { name: 'dataList', type: 'DataListItem[]', defaultValue: '[]', description: '行数据。' },
   { name: 'headerHeight', type: 'number', defaultValue: '32', description: '表头高度（px）。' },
-  { name: 'columnHeight', type: 'number', defaultValue: '66', description: '行高（px）。' },
+  { name: 'columnHeight', type: 'number', defaultValue: '66', description: '行高（px）：Xl=66，Md=48。' },
   { name: 'headerBg', type: 'string', defaultValue: '-', description: '表头背景；默认 --data-table-head。' },
   { name: 'maxHeight', type: 'string', defaultValue: '-', description: '最大高度（可选）。' },
   { name: 'loading', type: 'boolean', defaultValue: 'false', description: '顶部加载条。' },
   { name: 'initing', type: 'boolean', defaultValue: 'false', description: '全表初始化遮罩（延迟出现）。' },
+  { name: 'selectMode', type: 'boolean', defaultValue: 'false', description: '多选模式（v-model:select-mode）。' },
+  { name: 'emptyText', type: 'string', defaultValue: "'No data'", description: '空状态文案。' },
+  {
+    name: 'skidOpen',
+    type: 'boolean',
+    defaultValue: 'false',
+    description:
+      'Skid 抽屉打开时隐藏尾列与操作区；关闭时在 Skid 推动动效结束后再恢复（EgLayout + EgDataList）。',
+  },
+  { name: 'batchActions', type: 'DataListBatchAction[]', defaultValue: '[]', description: '批处理按钮；无 #operation 时内置 BatchBar。' },
+  { name: 'onBatchAction', type: '(key, rows) => Promise<void>', defaultValue: '-', description: '批处理回调；失败 throw 触发 Toast。' },
+  { name: 'primaryAction', type: 'DataListPrimaryAction', defaultValue: '-', description: '操作列主按钮。' },
+  { name: 'moreActions', type: 'DataListRowAction[]', defaultValue: '[]', description: '操作列更多菜单项。' },
 ];
 
 export const dataListColumnPropRows: OrganismPropRow[] = [
@@ -1014,8 +1728,10 @@ export const dataListColumnPropRows: OrganismPropRow[] = [
   { name: 'label', type: 'string', defaultValue: '-', description: '表头文案。' },
   { name: 'width', type: 'string', defaultValue: '-', description: '列宽（如 160px）。' },
   { name: 'widthPercent', type: 'number', defaultValue: '-', description: '列宽百分比。' },
-  { name: 'minWidth', type: 'string', defaultValue: '-', description: '最小列宽。' },
-  { name: 'minTableWidth', type: 'number', defaultValue: '-', description: '表格宽度不足时隐藏该列。' },
+  { name: 'minWidth', type: 'string', defaultValue: '-', description: '最小列宽（响应式计算）。' },
+  { name: 'displayOrder', type: 'number', defaultValue: '-', description: '展示优先级，越小越靠左。' },
+  { name: 'isAction', type: 'boolean', defaultValue: 'false', description: '操作列；默认最后一列。' },
+  { name: 'minTableWidth', type: 'number', defaultValue: '-', description: '（legacy）容器宽度门槛。' },
   { name: 'align', type: "'left' | 'center' | 'right'", defaultValue: "'left'", description: '对齐。' },
   { name: 'sortable', type: 'boolean', defaultValue: 'false', description: '表头排序菜单。' },
   { name: 'hidden', type: 'boolean', defaultValue: 'false', description: '隐藏列。' },
@@ -1024,6 +1740,7 @@ export const dataListColumnPropRows: OrganismPropRow[] = [
 
 export const dataListSlotRows: OrganismPropRow[] = [
   { name: 'default', type: 'slot', defaultValue: 'EgDataListColumn[]', description: '列定义（EgDataListColumn）。' },
-  { name: 'operation', type: 'slot', defaultValue: '-', description: '多选时 Batch Bar 操作区。' },
+  { name: 'operation', type: 'slot', defaultValue: '-', description: '多选时 Batch Bar 操作区（batchActions 为空时）。' },
+  { name: 'empty', type: 'slot', defaultValue: '-', description: '空状态自定义。' },
   { name: 'header', type: 'slot', defaultValue: '-', description: '列级表头自定义（EgDataListColumn #header）。' },
 ];

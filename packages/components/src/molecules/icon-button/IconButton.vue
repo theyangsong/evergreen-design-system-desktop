@@ -36,6 +36,7 @@ const props = withDefaults(
       styles.button,
       styles[props.shape],
       styles[props.size],
+      as === 'span' && styles.decor,
       disabled && styles.isDisabled,
     ]"
     :disabled="as === 'button' ? disabled : undefined"
@@ -44,8 +45,10 @@ const props = withDefaults(
     :aria-disabled="as === 'span' && disabled ? true : undefined"
     :aria-hidden="as === 'span' ? true : undefined"
   >
-    <span :class="styles.icon">
-      <slot />
+    <span :class="styles.symbol">
+      <slot name="symbol">
+        <slot />
+      </slot>
     </span>
   </component>
 </template>

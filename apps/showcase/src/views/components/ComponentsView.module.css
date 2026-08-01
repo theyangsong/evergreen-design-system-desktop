@@ -7,6 +7,9 @@
 
 .componentPage {
   gap: 0;
+  --showcase-sticky-chrome-top: calc(
+    var(--showcase-sticky-header-height, var(--showcase-page-header-offset)) + var(--spacing-4)
+  );
 }
 
 .componentPage > * + * {

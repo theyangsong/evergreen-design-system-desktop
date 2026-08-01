@@ -12,6 +12,11 @@ export const scaleSemanticGroups: ScaleSemanticGroup[] = [
     match: (name) =>
       ['stroke-xs', 'stroke-sm', 'stroke-md', 'stroke-lg', 'stroke-xl'].includes(name),
   },
+  {
+    title: 'Padding Top',
+    match: (name) =>
+      ['padding-top-xs', 'padding-top-sm', 'padding-top-md', 'padding-top-lg'].includes(name),
+  },
   { title: 'Corner Smoothing', match: (name) => name === 'corner-smoothing' },
   { title: 'Blur', match: (name) => name.startsWith('blur-') },
   { title: 'Depth', match: (name) => name.startsWith('depth-') },

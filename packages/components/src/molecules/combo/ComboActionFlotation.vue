@@ -30,7 +30,11 @@ const emit = defineEmits<{
 
 <template>
   <div :class="styles.flotationRoot">
-    <div v-if="divider" :class="styles.divider" role="separator" />
+    <div
+      :class="[styles.divider, !divider && styles.dividerHidden]"
+      role="separator"
+      :aria-hidden="!divider || undefined"
+    />
     <div :class="[styles.flotationBar, !clear && styles.flotationBarEnd]">
       <EgButton
         v-if="clear"

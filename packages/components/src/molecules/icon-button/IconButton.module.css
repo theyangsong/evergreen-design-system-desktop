@@ -6,13 +6,16 @@
   border: none;
   background-color: var(--material-hide);
   cursor: pointer;
-  transition: background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--eds-interaction-transition);
 }
 
 .button:hover:not(:disabled):not(.isDisabled),
-.button:active:not(:disabled):not(.isDisabled),
-.button:focus-visible:not(:disabled):not(.isDisabled) {
+.button:active:not(:disabled):not(.isDisabled) {
   background-color: var(--event-hover);
+}
+
+.button:focus-visible:not(:disabled):not(.isDisabled) {
+  background-color: var(--event-focus);
 }
 
 .button:disabled,
@@ -20,64 +23,71 @@
   cursor: not-allowed;
 }
 
-.icon {
+/* Visual-only when nested in EgIconButtonPro (as=span); parent drives hover/focus/active. */
+.decor {
+  pointer-events: none;
+  cursor: inherit;
+}
+
+.decor,
+.decor:hover,
+.decor:active,
+.decor:focus-visible {
+  background-color: var(--material-hide);
+}
+
+.decor .symbol {
+  color: var(--text-base-secondary);
+}
+
+.symbol {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  color: var(--text-base-secondary);
+  transition: var(--eds-interaction-transition);
 }
 
-.icon :global(svg) {
+.symbol :global(.eds-icon),
+.symbol :global(.eds-icon svg),
+.symbol :global(svg) {
   display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
 }
 
-.icon :global(svg) :global(path),
-.icon :global(svg) :global(line) {
-  fill: none;
-  stroke: var(--stroke-base-secondary);
-  stroke-width: var(--stroke-lg);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-  transition: stroke 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+.button:hover:not(:disabled):not(.isDisabled) .symbol {
+  color: var(--text-base-primary);
 }
 
-.button:hover:not(:disabled):not(.isDisabled) .icon :global(svg) :global(path),
-.button:hover:not(:disabled):not(.isDisabled) .icon :global(svg) :global(line),
-.button:focus-visible:not(:disabled):not(.isDisabled) .icon :global(svg) :global(path),
-.button:focus-visible:not(:disabled):not(.isDisabled) .icon :global(svg) :global(line) {
-  stroke: var(--stroke-base-primary);
+.button:focus-visible:not(:disabled):not(.isDisabled) .symbol {
+  color: var(--text-base-secondary);
 }
 
-.button:active:not(:disabled):not(.isDisabled) .icon :global(svg) :global(path),
-.button:active:not(:disabled):not(.isDisabled) .icon :global(svg) :global(line) {
-  stroke: var(--stroke-base-secondary);
+.button:active:not(:disabled):not(.isDisabled) .symbol {
+  color: var(--text-base-secondary);
 }
 
-.button:disabled .icon :global(svg) :global(path),
-.button:disabled .icon :global(svg) :global(line),
-.button.isDisabled .icon :global(svg) :global(path),
-.button.isDisabled .icon :global(svg) :global(line) {
-  stroke: var(--stroke-base-quaternary);
+.button:disabled .symbol,
+.button.isDisabled .symbol {
+  color: var(--text-base-quaternary);
 }
 
 /* ── Icon sizes (Figma symbol scale) ── */
 
-.lg .icon,
-.md .icon {
+.lg .symbol,
+.md .symbol {
   width: var(--icon-lg);
   height: var(--icon-lg);
 }
 
-.sm .icon {
+.sm .symbol {
   width: var(--icon-md);
   height: var(--icon-md);
 }
 
-.xs .icon {
+.xs .symbol {
   width: var(--icon-sm);
   height: var(--icon-sm);
 }

@@ -43,11 +43,23 @@ type AnchoredApi = {
   updatePosition: () => void;
 };
 
-/** 等于触发器宽度时，Menu 相对触发器左右（或上下）各扩 8px */
-const TRIGGER_EDGE_INSET = 8;
-/** 等于触发器：主轴间距 1；自定义/自适应宽度：主轴间距 8 */
-const OFFSET_TRIGGER_WIDTH = 1;
-const OFFSET_CUSTOM_WIDTH = 8;
+/** 主轴间距：--spacing-025；交叉轴偏移：--spacing-2 */
+const SPACING_MAIN_AXIS = '--spacing-025';
+const SPACING_EDGE_INSET = '--spacing-2';
+const FALLBACK_MAIN_AXIS_PX = 1;
+const FALLBACK_EDGE_INSET_PX = 8;
+
+function readCssTokenLength(el: HTMLElement, tokenName: string, fallback: number): number {
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:absolute;visibility:hidden;pointer-events:none;padding-top:var(' +
+    tokenName +
+    ')';
+  el.appendChild(probe);
+  const px = Number.parseFloat(getComputedStyle(probe).paddingTop);
+  el.removeChild(probe);
+  return Number.isFinite(px) && px > 0 ? px : fallback;
+}
 
 const props = withDefaults(
   defineProps<{
@@ -55,11 +67,8 @@ const props = withDefaults(
     /** 自定义/自适应宽度时的交叉轴对齐；等宽触发器时固定 start。 */
     align?: TooltipAlign;
     disabled?: boolean;
-    /**
-     * 与触发器主轴间距（px）。
-     * 未传时：widthMode=trigger → 1；fixed/adaptive → 8。
-     */
-    offset?: number;
+    /** 交叉轴偏移（px）；未传时 start=-spacing-2、end=+spacing-2、center=0。 */
+    crossAxisOffset?: number;
     widthMode?: FlotationWidthMode;
     width?: number;
     heightMode?: TooltipHeightMode;
@@ -80,6 +89,12 @@ const props = withDefaults(
     addLabel?: string;
     showMenuDivider?: boolean;
     items?: FlotationMenuItemPreset[];
+    /** 滚动容器滚动时关闭浮层（如 DataList 内嵌场景）。 */
+    closeOnScroll?: boolean;
+    /** 空间不足时翻转主轴 placement。 */
+    flip?: boolean;
+    /** 定位边界选择器（如 `.eds-data-list`）。 */
+    boundarySelector?: string;
   }>(),
   {
     placement: 'bottom',
@@ -105,6 +120,8 @@ const props = withDefaults(
     addLabel: 'Add',
     showMenuDivider: true,
     items: () => createDefaultFlotationPresetItems(),
+    closeOnScroll: false,
+    flip: false,
   },
 );
 
@@ -121,6 +138,8 @@ const menuOpen = ref(false);
 const selectedIndex = ref<number | null>(null);
 const anchoredRef = ref<AnchoredApi | null>(null);
 const triggerMatchWidth = ref<number | undefined>(undefined);
+const mainAxisGapPx = ref(FALLBACK_MAIN_AXIS_PX);
+const edgeInsetPx = ref(FALLBACK_EDGE_INSET_PX);
 let triggerResizeObserver: ResizeObserver | undefined;
 
 const usePresetContent = computed((): boolean => !slots.content);
@@ -149,7 +168,7 @@ const menuWidthMode = computed((): TooltipWidthMode =>
 );
 
 /**
- * trigger：面板宽 = 触发器宽 + 左右各 8（精确值，不 round）。
+ * trigger：面板宽 = 触发器宽 + 左右各 --spacing-2。
  * fixed：自定义 px；adaptive：随内容。
  */
 const menuWidth = computed(() => {
@@ -157,29 +176,44 @@ const menuWidth = computed(() => {
     if (triggerMatchWidth.value == null || triggerMatchWidth.value <= 0) {
       return undefined;
     }
-    return triggerMatchWidth.value + TRIGGER_EDGE_INSET * 2;
+    return triggerMatchWidth.value + edgeInsetPx.value * 2;
   }
   if (props.widthMode === 'fixed') return props.width;
   return undefined;
 });
 
-/** 等宽触发器时 start + crossAxisOffset=-8；自定义宽度用 align。 */
+/** 等宽触发器时 start；自定义宽度用 align。 */
 const menuAlign = computed((): TooltipAlign =>
   props.widthMode === 'trigger' ? 'start' : props.align,
 );
 
-/** 主轴间距：等宽 1；自定义/自适应 8（可被 offset prop 覆盖）。 */
-const menuOffset = computed(() => {
-  if (props.offset != null) return props.offset;
-  return props.widthMode === 'trigger' ? OFFSET_TRIGGER_WIDTH : OFFSET_CUSTOM_WIDTH;
-});
+/** 主轴间距固定为 --spacing-025。 */
+const menuOffset = computed(() => mainAxisGapPx.value);
 
 /**
- * 等宽触发器：交叉轴 -8，使宽=触发器+16 的 Menu 左右各偏出 8。
+ * 交叉轴 inset：start 向左扩 spacing-2；end 向右扩 spacing-2；center 不额外偏移。
+ * trigger 宽度模式固定 start，配合宽=触发器+2×inset 左右对称。
  */
-const menuCrossAxisOffset = computed(() =>
-  props.widthMode === 'trigger' ? -TRIGGER_EDGE_INSET : 0,
-);
+const menuCrossAxisOffset = computed(() => {
+  if (props.crossAxisOffset != null) {
+    return props.crossAxisOffset;
+  }
+  const align = menuAlign.value;
+  if (align === 'end') {
+    return edgeInsetPx.value;
+  }
+  if (align === 'center') {
+    return 0;
+  }
+  return -edgeInsetPx.value;
+});
+
+function resolveSpacingTokens() {
+  const el = anchoredRef.value?.getTriggerElement();
+  if (!el) return;
+  mainAxisGapPx.value = readCssTokenLength(el, SPACING_MAIN_AXIS, FALLBACK_MAIN_AXIS_PX);
+  edgeInsetPx.value = readCssTokenLength(el, SPACING_EDGE_INSET, FALLBACK_EDGE_INSET_PX);
+}
 
 function syncTriggerSize() {
   const width = anchoredRef.value?.getTriggerWidth();
@@ -208,6 +242,7 @@ function unbindTriggerResizeObserver() {
 }
 
 function scheduleMenuReposition() {
+  resolveSpacingTokens();
   nextTick(() => {
     anchoredRef.value?.updatePosition();
     requestAnimationFrame(() => {
@@ -219,12 +254,13 @@ function scheduleMenuReposition() {
 }
 
 onMounted(() => {
-  if (props.widthMode === 'trigger') {
-    nextTick(() => {
+  nextTick(() => {
+    resolveSpacingTokens();
+    if (props.widthMode === 'trigger') {
       syncTriggerSize();
       bindTriggerResizeObserver();
-    });
-  }
+    }
+  });
 });
 
 watch(
@@ -279,6 +315,15 @@ watch(
 );
 
 watch(
+  () => triggerMatchWidth.value,
+  async (width) => {
+    if (props.widthMode !== 'trigger' || width == null || width <= 0) return;
+    if (!menuOpen.value) return;
+    scheduleMenuReposition();
+  },
+);
+
+watch(
   () =>
     [
       menuWidth.value,
@@ -295,6 +340,7 @@ watch(
 
 async function onOpen() {
   menuOpen.value = true;
+  resolveSpacingTokens();
   syncTriggerSize();
   bindTriggerResizeObserver();
   await nextTick();
@@ -339,6 +385,9 @@ onBeforeUnmount(() => {
     :disabled="disabled"
     :offset="menuOffset"
     :cross-axis-offset="menuCrossAxisOffset"
+    :close-on-scroll="closeOnScroll"
+    :flip="flip"
+    :boundary-selector="boundarySelector"
     token-scope-class="desktopTokens"
     @open="onOpen"
     @close="onClose"
@@ -402,7 +451,10 @@ onBeforeUnmount(() => {
             :show-message="item.showMessage"
             :message-text="item.messageText ?? '0'"
             :message-type="item.messageType ?? 'subtle'"
-            :symbol-icon="item.symbolIcon ?? 'eds-add'"
+            :symbol-icon="
+              item.symbolIcon ??
+              (item.boxType === 'image-text' ? 'eds-aave-aave' : 'eds-add')
+            "
             @click="onItemClick(item, index, $event)"
           />
         </FlotationMenu>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { EgBatchBar } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
@@ -8,17 +8,44 @@ import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import {
   ORGANISM_IMPORT,
-  batchBarActionPropRows,
   batchBarCustomizeControls,
   batchBarCustomizeDefaults,
+  batchBarEventRows,
   batchBarPropRows,
+  batchBarSlotRows,
+  buildBatchBarLabelCustomizeControls,
+  buildBatchBarLabelDanger,
+  buildBatchBarLabels,
+  parseBatchBarLabelCount,
 } from './organismTemplateDocData';
 
 const customize = reactive({ ...batchBarCustomizeDefaults });
 
-const actionCustomize = reactive({
-  actionLabel: 'Label',
+const labelPanelControls = computed(() => buildBatchBarLabelCustomizeControls(customize));
+
+const previewLabels = computed(() => buildBatchBarLabels(customize));
+const previewLabelDanger = computed(() => {
+  const count = parseBatchBarLabelCount(customize);
+  void customize.labelCount;
+  if (count > 0) {
+    void customize[`label${count}Danger` as keyof typeof customize];
+  }
+  return buildBatchBarLabelDanger(customize);
 });
+
+const loadingLabelIndex = ref<number | null>(null);
+let loadingResetTimer: ReturnType<typeof setTimeout> | undefined;
+
+function onLabelClick(_label: string, index: number) {
+  if (loadingResetTimer) {
+    clearTimeout(loadingResetTimer);
+  }
+  loadingLabelIndex.value = index;
+  loadingResetTimer = setTimeout(() => {
+    loadingLabelIndex.value = null;
+    loadingResetTimer = undefined;
+  }, 2000);
+}
 </script>
 
 <template>
@@ -26,13 +53,15 @@ const actionCustomize = reactive({
     <ComponentDocLayout
       v-model:customize-state="customize"
       title="Batch Bar"
-      tall-preview
+      compact-preview
       :show-doc-title="false"
       component-tag="EgBatchBar"
       :import-code="ORGANISM_IMPORT"
       :customize-controls="batchBarCustomizeControls"
       :customize-defaults="batchBarCustomizeDefaults"
       :prop-rows="batchBarPropRows"
+      :event-rows="batchBarEventRows"
+      :slot-rows="batchBarSlotRows"
       props-section-id="batch-bar-props"
     >
       <template #preview>
@@ -40,17 +69,24 @@ const actionCustomize = reactive({
           <EgBatchBar
             :selected-count="customize.selectedCount"
             :count-suffix="String(customize.countSuffix)"
-            :action-label="String(actionCustomize.actionLabel)"
+            :labels="previewLabels"
+            :label-danger="previewLabelDanger"
+            :more-label="String(customize.moreLabel)"
+            :loading-label-index="loadingLabelIndex"
+            @label-click="onLabelClick"
           />
         </div>
       </template>
 
-      <CustomizePanel
-        v-model="actionCustomize"
-        nested
-        title="EgBatchBarActionItem"
-        :controls="[{ kind: 'text', key: 'actionLabel', label: 'Text 文案 label' }]"
-      />
+      <template #customize-after>
+        <CustomizePanel
+          v-model="customize"
+          nested
+          sequential
+          title="Label 项"
+          :controls="labelPanelControls"
+        />
+      </template>
     </ComponentDocLayout>
   </div>
 </template>

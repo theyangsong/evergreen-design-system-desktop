@@ -19,6 +19,8 @@ const props = withDefaults(
     size?: ButtonSize;
     disabled?: boolean;
     loading?: boolean;
+    /** 菜单展开等选中态（Figma Active）；背景 `--event-focus`。 */
+    active?: boolean;
     type?: 'button' | 'submit' | 'reset';
   }>(),
   {
@@ -27,6 +29,7 @@ const props = withDefaults(
     size: 'lg',
     disabled: false,
     loading: false,
+    active: false,
     type: 'button',
   },
 );
@@ -58,6 +61,7 @@ const isDisabled = computed(() => props.disabled || props.loading);
       styles[resolvedVariant],
       styles[props.size],
       loading && styles.loading,
+      active && styles.active,
     ]"
     :disabled="isDisabled"
     :type="type"

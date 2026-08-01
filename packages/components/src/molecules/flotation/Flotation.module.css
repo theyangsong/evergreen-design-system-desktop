@@ -39,6 +39,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
+  transition: var(--eds-interaction-transition);
 }
 
 .addRow:hover {
@@ -78,6 +79,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
+  transition: var(--eds-interaction-transition);
 }
 
 .triggerWidthAdaptive {
@@ -258,6 +260,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
+  transition: var(--eds-interaction-transition);
 }
 
 .boxRoot:hover:not(:disabled):not(.boxFocused) {
@@ -309,6 +312,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.boxLabelDanger {
+  color: var(--status-danger);
 }
 
 .boxTag {

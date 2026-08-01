@@ -1,0 +1,22 @@
+/**
+ * Desktop 组件交互态过渡（hover / focus / active / 离开）。
+ * 在 .desktopTokens 作用域内与 Desktop token 一并生效。
+ */
+:root {
+  --eds-interaction-duration: 0.3s;
+  --eds-interaction-easing: ease-in-out;
+  --eds-interaction-transition:
+    background-color var(--eds-interaction-duration) var(--eds-interaction-easing),
+    color var(--eds-interaction-duration) var(--eds-interaction-easing),
+    border-color var(--eds-interaction-duration) var(--eds-interaction-easing),
+    box-shadow var(--eds-interaction-duration) var(--eds-interaction-easing),
+    opacity var(--eds-interaction-duration) var(--eds-interaction-easing),
+    outline-color var(--eds-interaction-duration) var(--eds-interaction-easing),
+    outline-offset var(--eds-interaction-duration) var(--eds-interaction-easing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --eds-interaction-duration: 0s;
+  }
+}

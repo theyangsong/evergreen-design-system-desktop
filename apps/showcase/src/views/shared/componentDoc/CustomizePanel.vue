@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import shared from '@/views/shared/showcase.module.css';
+import CustomizeControlField from './CustomizeControlField.vue';
 import styles from './ComponentDocLayout.module.css';
 import {
   filterDocCustomizeControls,
@@ -16,9 +17,17 @@ const props = defineProps<{
   nested?: boolean;
   /** Single-column stack (e.g. Nav Bar module names top-to-bottom). */
   sequential?: boolean;
+  /** Fields per horizontal row when sequential + control.row groups (default 4). */
+  rowColumns?: number;
   /** Render inside a parent customize section (no outer section wrapper). */
   embedded?: boolean;
 }>();
+
+const rowColumns = computed(() => Math.max(1, props.rowColumns ?? 4));
+
+const sequentialRowsStyle = computed(() => ({
+  '--customize-row-columns': String(rowColumns.value),
+}));
 
 const state = defineModel<Record<string, unknown>>({ required: true });
 
@@ -56,21 +65,11 @@ function patchKey(key: string, value: unknown) {
   const current = state.value;
   if (!current || typeof current !== 'object') return;
   current[key] = value;
-}
 
-function onSelect(key: string, event: Event) {
-  const target = event.target as HTMLSelectElement;
-  patchKey(key, target.value);
-}
-
-function onBoolean(key: string, event: Event) {
-  const target = event.target as HTMLInputElement;
-  patchKey(key, target.checked);
-}
-
-function onText(key: string, event: Event) {
-  const target = event.target as HTMLInputElement;
-  patchKey(key, target.value);
+  if (value !== true) return;
+  const control = customizeControls.value.find((item) => item.key === key);
+  if (control?.kind !== 'boolean' || !control.exclusiveKey) return;
+  current[control.exclusiveKey] = false;
 }
 </script>
 
@@ -87,82 +86,33 @@ function onText(key: string, event: Event) {
     <div
       v-if="useSequentialRows && visibleControls.length"
       :class="styles.customizeGridSequentialRows"
+      :style="sequentialRowsStyle"
     >
       <div
         v-for="group in sequentialRowGroups"
         :key="group.controls.map((control) => control.key).join('-')"
         :class="styles.customizeRow"
       >
-        <label
+        <CustomizeControlField
           v-for="control in group.controls"
           :key="control.key"
-          :class="styles.customizeField"
-        >
-          <span :class="styles.customizeLabel">{{ control.label }}</span>
-          <select
-            v-if="control.kind === 'select'"
-            :class="styles.customizeControl"
-            :value="String(state[control.key] ?? '')"
-            @change="onSelect(control.key, $event)"
-          >
-            <option v-for="opt in control.options" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-          <input
-            v-else-if="control.kind === 'boolean'"
-            type="checkbox"
-            :class="styles.customizeCheckbox"
-            :checked="Boolean(state[control.key])"
-            @change="onBoolean(control.key, $event)"
-          />
-          <input
-            v-else
-            type="text"
-            :class="styles.customizeControl"
-            :placeholder="control.placeholder"
-            :value="String(state[control.key] ?? '')"
-            @input="onText(control.key, $event)"
-          />
-        </label>
+          :control="control"
+          :value="state[control.key]"
+          @update="patchKey(control.key, $event)"
+        />
       </div>
     </div>
     <div
       v-else-if="visibleControls.length"
       :class="sequential ? styles.customizeGridSequential : styles.customizeGrid"
     >
-      <label
+      <CustomizeControlField
         v-for="control in visibleControls"
         :key="control.key"
-        :class="styles.customizeField"
-      >
-        <span :class="styles.customizeLabel">{{ control.label }}</span>
-        <select
-          v-if="control.kind === 'select'"
-          :class="styles.customizeControl"
-          :value="String(state[control.key] ?? '')"
-          @change="onSelect(control.key, $event)"
-        >
-          <option v-for="opt in control.options" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
-        <input
-          v-else-if="control.kind === 'boolean'"
-          type="checkbox"
-          :class="styles.customizeCheckbox"
-          :checked="Boolean(state[control.key])"
-          @change="onBoolean(control.key, $event)"
-        />
-        <input
-          v-else
-          type="text"
-          :class="styles.customizeControl"
-          :placeholder="control.placeholder"
-          :value="String(state[control.key] ?? '')"
-          @input="onText(control.key, $event)"
-        />
-      </label>
+        :control="control"
+        :value="state[control.key]"
+        @update="patchKey(control.key, $event)"
+      />
     </div>
     <slot name="extra" />
   </component>

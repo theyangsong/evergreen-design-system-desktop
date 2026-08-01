@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useSlots } from 'vue';
+import { computed, inject, ref, useSlots, type ComputedRef } from 'vue';
 import { EgButton, EgSegmentedControl } from '@eds/desktop-components';
 import { rescanCornerSmoothing } from '@eds/desktop-components';
 import { buildComponentAiPrompt, buildVueSelfClosingSnippet } from './buildUsageSnippet';
@@ -27,8 +27,12 @@ const props = withDefaults(
     showProps?: boolean;
     /** Organism 等纵向组合：预览区 960px 并 stretch 内容。 */
     tallPreview?: boolean;
+    /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock）。 */
+    compactPreview?: boolean;
     /** 定制区按 control.row 分行排布（如 Module Menu 每组标题+顺序）。 */
     customizeSequential?: boolean;
+    /** sequential + row 布局时每行列数（如 EgIconButtonPro 嵌套 6 列）。 */
+    customizeRowColumns?: number;
     /** When false, parent supplies catalog group label (e.g. previewGroupLabel). */
     showDocTitle?: boolean;
   }>(),
@@ -39,6 +43,7 @@ const props = withDefaults(
     showProps: true,
     showDocTitle: true,
     tallPreview: false,
+    compactPreview: false,
     customizeSequential: false,
   },
 );
@@ -48,6 +53,14 @@ const emit = defineEmits<{
 }>();
 
 const slots = useSlots();
+
+const injectedCompactPreview = inject<ComputedRef<boolean>>('componentDocCompactPreview');
+
+const useCompactPreview = computed(
+  () => props.compactPreview || injectedCompactPreview?.value === true,
+);
+
+const useTallPreview = computed(() => props.tallPreview && !useCompactPreview.value);
 
 const customizeState = defineModel<Record<string, unknown>>('customizeState', {
   default: () => ({}),
@@ -142,13 +155,20 @@ async function copyAiPrompt() {
 </script>
 
 <template>
-  <article :id="anchorId" :class="[styles.docBlock, tallPreview && styles.docBlockTallPreview]">
+  <article
+    :id="anchorId"
+    :class="[
+      styles.docBlock,
+      useTallPreview && styles.docBlockTallPreview,
+      useCompactPreview && styles.docBlockCompactPreview,
+    ]"
+  >
     <header v-if="showDocTitle" :class="styles.docHeader">
       <h2 :class="styles.docTitle">{{ title }}</h2>
     </header>
 
     <div :class="styles.previewStage">
-      <div :class="[styles.previewShell, tallPreview && styles.previewShellTall]">
+      <div :class="[styles.previewShell, useTallPreview && styles.previewShellTall]">
         <div
           class="desktopTokens"
           :class="styles.previewShellToolbar"
@@ -179,7 +199,7 @@ async function copyAiPrompt() {
           </div>
         </div>
 
-        <div v-if="viewMode === 'preview'" :class="[styles.previewInner, tallPreview && styles.previewInnerTall]">
+        <div v-if="viewMode === 'preview'" :class="[styles.previewInner, useTallPreview && styles.previewInnerTall]">
           <slot name="preview" />
         </div>
         <div v-else :class="styles.codeInner">
@@ -193,6 +213,7 @@ async function copyAiPrompt() {
       v-model="customizeState"
       :controls="docCustomizeControls"
       :sequential="customizeSequential"
+      :row-columns="customizeRowColumns"
     >
       <template #extra>
         <slot name="customize-extra" />

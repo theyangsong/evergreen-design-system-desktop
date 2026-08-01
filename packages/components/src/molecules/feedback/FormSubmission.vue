@@ -48,7 +48,7 @@ const linkVisible = computed(() => props.type === 'notes' && props.showLink);
 <template>
   <div class="eds-form-submission" :class="styles.formSubmission">
     <span :class="[styles.formIcon, iconClass]">
-      <EgIcon :name="iconName" fit />
+      <EgIcon :name="iconName" fit fill-tone="primary" />
     </span>
     <span :class="textClass">{{ text }}</span>
     <EgLink v-if="linkVisible" tone="brand" size="sm" :href="href">

@@ -4,6 +4,7 @@ import { provideModuleMenuItemFocus } from './moduleMenuItemFocus';
 import { EgDivider } from '../../atoms/divider';
 import ModuleMenuTitle from './ModuleMenuTitle.vue';
 import styles from './ModuleMenu.module.css';
+import '../../styles/scrollAreaHiddenScrollbar.css';
 
 withDefaults(
   defineProps<{
@@ -18,7 +19,7 @@ withDefaults(
 
 provideModuleMenuItemFocus();
 
-const crumbRef = ref<HTMLElement | null>(null);
+const scrollRef = ref<HTMLElement | null>(null);
 const titleScrollDividerReserved = ref(false);
 const titleScrollDividerVisible = ref(false);
 
@@ -28,7 +29,7 @@ let resizeObserver: ResizeObserver | undefined;
 const observedElements = new Set<Element>();
 
 function updateTitleScrollDivider() {
-  const region = crumbRef.value;
+  const region = scrollRef.value;
 
   if (!region) {
     titleScrollDividerReserved.value = false;
@@ -56,13 +57,13 @@ function observeCrumbOverflow() {
     });
   }
 
-  const region = crumbRef.value;
+  const region = scrollRef.value;
   if (!region || observedElements.has(region)) return;
   resizeObserver.observe(region);
   observedElements.add(region);
 }
 
-function onCrumbScroll() {
+function onPanelScroll() {
   updateTitleScrollDivider();
 }
 
@@ -85,15 +86,21 @@ onBeforeUnmount(() => {
 <template>
   <aside class="eds-module-menu" :class="styles.root" aria-label="Module menu">
     <div :class="styles.body">
-      <ModuleMenuTitle
-        :title="title"
-        :scroll-divider-reserved="titleScrollDividerReserved"
-        :show-scroll-divider="titleScrollDividerVisible"
+      <div
+        ref="scrollRef"
+        :class="['eds-scroll-area-hidden-scrollbar', styles.scrollPanel]"
+        @scroll="onPanelScroll"
       >
-        <slot name="title">{{ title }}</slot>
-      </ModuleMenuTitle>
-      <div ref="crumbRef" :class="styles.crumb" @scroll="onCrumbScroll">
-        <slot />
+        <ModuleMenuTitle
+          :title="title"
+          :scroll-divider-reserved="titleScrollDividerReserved"
+          :show-scroll-divider="titleScrollDividerVisible"
+        >
+          <slot name="title">{{ title }}</slot>
+        </ModuleMenuTitle>
+        <div :class="styles.crumb">
+          <slot />
+        </div>
       </div>
     </div>
     <EgDivider

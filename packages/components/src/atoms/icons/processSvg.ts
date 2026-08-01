@@ -191,7 +191,7 @@ function detectShapePaint(raw: string): { hasStroke: boolean; hasFill: boolean }
 
 /** 区分 token 单色图标与彩色硬编码图标；token 图标仅替换配色，不改结构。 */
 export function processSvg(iconName: string, raw: string): ProcessedIcon {
-  if (/^eds-application-\d+$/.test(iconName)) {
+  if (/^eds-application-\d+$/.test(iconName) || /^eds-business-\d+$/.test(iconName)) {
     return processFixedSvg(iconName, raw);
   }
 

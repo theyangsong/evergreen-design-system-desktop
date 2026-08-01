@@ -1,0 +1,6 @@
+/** Skid Title / Action 固定栏 — box-page 88% + eds-blur-bg */
+.eds-frosted-page-chrome {
+  background: color-mix(in display-p3, var(--box-page) 88%, transparent);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
+}

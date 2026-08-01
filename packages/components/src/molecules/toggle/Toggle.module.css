@@ -8,7 +8,7 @@
   background: var(--material-card-deep);
   cursor: pointer;
   padding: var(--spacing-1);
-  transition: background-color 0.2s ease;
+  transition: var(--eds-interaction-transition);
 }
 
 .switch:disabled {

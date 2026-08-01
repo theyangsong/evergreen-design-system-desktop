@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { EgDivider } from '../../atoms/divider';
 import { EgButton } from '../button';
 import styles from './ComboAction.module.css';
 
@@ -24,7 +25,7 @@ const emit = defineEmits<{
 
 <template>
   <div :class="styles.skidRoot">
-    <div v-if="divider" :class="styles.divider" role="separator" />
+    <EgDivider :hide="!divider" />
     <div :class="styles.skidActions">
       <EgButton
         :class="styles.fullWidth"

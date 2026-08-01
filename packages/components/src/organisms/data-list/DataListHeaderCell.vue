@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { EgIcon } from '../../atoms/icons';
+import { EgIconButton } from '../../molecules/icon-button';
 import { EgCheckbox } from '../../molecules/toggle';
+import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../../molecules/flotation';
 import styles from './DataList.module.css';
 import type { DataListSelectAllMode, DataListSortOrder } from './types';
 
@@ -12,6 +14,8 @@ const props = withDefaults(
     type?: 'default' | 'select';
     align?: 'left' | 'center' | 'right';
     width?: string;
+    widthPercent?: number;
+    minWidth?: string;
     selectMode?: boolean;
     selectAllMode?: DataListSelectAllMode;
     bg?: string;
@@ -31,92 +35,46 @@ const emit = defineEmits<{
   'sort-change': [order: Exclude<DataListSortOrder, ''>];
 }>();
 
-const sortOpen = ref(false);
 const sortOrder = ref<DataListSortOrder>('');
-const triggerRef = ref<HTMLElement | null>(null);
-const popRef = ref<HTMLElement | null>(null);
-const popStyle = ref<Record<string, string>>({});
 
 const cellStyle = computed(() => ({
   height: typeof props.height === 'number' ? `${props.height}px` : props.height,
-  backgroundColor: props.bg || 'var(--data-table-head)',
-  backdropFilter: props.bg ? 'none' : 'saturate(120%) blur(var(--blur-shallow))',
-  ...(props.width ? { width: '1%' } : {}),
 }));
 
 const contentStyle = computed(() => ({
   justifyContent:
     props.align === 'left' ? 'flex-start' : props.align === 'center' ? 'center' : 'flex-end',
-  ...(props.width ? { width: props.width } : {}),
 }));
 
-const sortTriggerClass = computed(() => [
-  styles.sortTrigger,
-  props.selectMode && styles.sortTriggerDisabled,
-  sortOpen.value && styles.sortTriggerFocus,
-  sortOrder.value && styles.sortTriggerActive,
-]);
+const sortTriggerLabel = computed(() => {
+  const header = props.label?.trim();
+  return header ? `Sort ${header}` : 'Sort';
+});
 
 function onSelectAllClick() {
   emit('select-all-mode', props.selectAllMode);
 }
 
-function positionPopover() {
-  const el = triggerRef.value;
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  popStyle.value = {
-    position: 'fixed',
-    top: `${rect.bottom}px`,
-    left: `${rect.left - 6}px`,
-    zIndex: '1000',
-    maxHeight: '180px',
-  };
-}
-
-async function openSort() {
-  if (props.selectMode || sortOpen.value) return;
-  sortOpen.value = true;
-  await Promise.resolve();
-  positionPopover();
-}
-
-function chooseSort(order: 'asc' | 'desc') {
+function chooseSort(order: 'asc' | 'desc', close: () => void) {
   if (order !== sortOrder.value) {
     emit('sort-change', order);
   }
   sortOrder.value = order;
-  sortOpen.value = false;
+  close();
 }
 
 function resetSort() {
   sortOrder.value = '';
 }
 
-function onDocPointerDown(event: PointerEvent) {
-  if (!sortOpen.value) return;
-  const target = event.target as Node | null;
-  if (triggerRef.value?.contains(target) || popRef.value?.contains(target)) return;
-  sortOpen.value = false;
-}
-
-watch(sortOpen, (open) => {
-  if (open) {
-    document.addEventListener('pointerdown', onDocPointerDown, true);
-  } else {
-    document.removeEventListener('pointerdown', onDocPointerDown, true);
-  }
-});
-
 defineExpose({ resetSort });
-
-onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', onDocPointerDown, true);
-});
 </script>
 
 <template>
-  <th :class="styles.headerCell" :style="cellStyle">
+  <th
+    :class="[styles.headerCell, type === 'select' && styles.headerCellSelect]"
+    :style="cellStyle"
+  >
     <div v-if="type === 'select'" :class="styles.headerSelect">
       <EgCheckbox
         :model-value="selectAllMode === 'all'"
@@ -125,41 +83,69 @@ onBeforeUnmount(() => {
       />
     </div>
     <div v-else-if="type === 'default'" :class="styles.headerContent" :style="contentStyle">
-      <slot>
-        <div>{{ label }}</div>
-      </slot>
-      <div
-        v-if="sortable"
-        ref="triggerRef"
-        :class="sortTriggerClass"
-        @click.stop="openSort"
-      >
-        <EgIcon name="eds-arrow-down-mini-ios" size="sm" fit />
-      </div>
-      <Teleport to="body">
-        <div
-          v-show="sortOpen"
-          ref="popRef"
-          class="desktopTokens effect-flotation-box"
-          :class="styles.sortPopover"
-          :style="popStyle"
+      <div :class="styles.headerTitleGroup">
+        <slot>
+          <div>{{ label }}</div>
+        </slot>
+        <EgFlotation
+          v-if="sortable"
+          :class="styles.sortDropdown"
+          placement="bottom"
+          align="start"
+          :disabled="selectMode"
+          :show-add="false"
+          :show-menu-divider="false"
+          close-on-scroll
         >
-          <button
-            type="button"
-            :class="[styles.sortItem, sortOrder === 'asc' && styles.sortItemActive]"
-            @click="chooseSort('asc')"
-          >
-            升序
-          </button>
-          <button
-            type="button"
-            :class="[styles.sortItem, sortOrder === 'desc' && styles.sortItemActive]"
-            @click="chooseSort('desc')"
-          >
-            降序
-          </button>
-        </div>
-      </Teleport>
+          <template #trigger="{ expanded }">
+            <EgIconButton
+              shape="square"
+              size="xs"
+              :label="sortTriggerLabel"
+              :aria-expanded="expanded"
+              :disabled="selectMode"
+              :class="[
+                styles.sortTrigger,
+                expanded && styles.sortTriggerFocus,
+                selectMode && styles.sortTriggerDisabled,
+              ]"
+            >
+              <EgIcon
+                :name="expanded ? 'eds-arrow-up-mini-ios' : 'eds-arrow-down-mini-ios'"
+                fit
+              />
+            </EgIconButton>
+          </template>
+
+          <template #content="{ close }">
+            <EgFlotationMenu
+              :class="styles.sortMenu"
+              data-no-corner-smoothing
+              panel-radius="radius-md"
+              width-mode="adaptive"
+              height-mode="adaptive"
+              :scrollable="false"
+              :show-add="false"
+              :show-divider="false"
+            >
+              <EgFlotationMenuItem
+                box-type="text"
+                label="Ascending"
+                :show-tag="false"
+                :focused="sortOrder === 'asc'"
+                @click="chooseSort('asc', close)"
+              />
+              <EgFlotationMenuItem
+                box-type="text"
+                label="Descending"
+                :show-tag="false"
+                :focused="sortOrder === 'desc'"
+                @click="chooseSort('desc', close)"
+              />
+            </EgFlotationMenu>
+          </template>
+        </EgFlotation>
+      </div>
     </div>
   </th>
 </template>

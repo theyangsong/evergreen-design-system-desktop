@@ -1,5 +1,10 @@
 import type { DocCustomizeControl } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
+import {
+  propLabelRows,
+  showcaseDirectionLabels,
+  showcaseDividerTypeLabels,
+} from '@/data/showcasePropLabels';
 
 export const dividerCustomizeDefaults = {
   type: 'module',
@@ -11,23 +16,21 @@ export const dividerCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'type',
-    label: '类型 type',
-    options: [
-      { value: 'module', label: '模块 Module' },
-      { value: 'page', label: '页面 Page' },
-      { value: 'navigator', label: '导航 Navigator' },
-    ],
+    label: '类型',
+    options: propLabelRows(['module', 'page', 'navigator'] as const, showcaseDividerTypeLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
   },
   {
     kind: 'select',
     key: 'direction',
-    label: '方向 direction',
-    options: [
-      { value: 'horizontal', label: '水平 Horizontal' },
-      { value: 'vertical', label: '垂直 Vertical' },
-    ],
+    label: '方向',
+    options: propLabelRows(['horizontal', 'vertical'] as const, showcaseDirectionLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
   },
-  { kind: 'boolean', key: 'hide', label: '隐藏 hide' },
+  { kind: 'boolean', key: 'hide', label: '隐藏' },
 ];
 
 export function buildDividerUsageSnippet(state: Record<string, unknown>): string {

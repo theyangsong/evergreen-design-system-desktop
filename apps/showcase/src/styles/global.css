@@ -1,4 +1,5 @@
 @import '@eds/website-tokens';
+@import '@eds/website-components/style.css';
 @import './fonts.css';
 @import '../motion/tokens.css';
 

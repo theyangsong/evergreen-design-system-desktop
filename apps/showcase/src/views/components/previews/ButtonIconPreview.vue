@@ -10,12 +10,25 @@ import {
   iconButtonCustomizeDefaults,
   iconButtonImportCode,
 } from './buttonDocCustomize';
-import { iconButtonDocSymbolName } from './iconButtonDocPreview';
 import { iconButtonPropRows, iconButtonSlotRows } from './buttonSubPreviewData';
+import {
+  iconButtonEventHostClass,
+  isIconButtonInteractiveEvent,
+} from './iconButtonDocPreview';
 
 const iconButtonCustomize = reactive({ ...iconButtonCustomizeDefaults });
 
 const iconButtonUsageSnippet = computed(() => buildIconButtonUsageSnippet(iconButtonCustomize));
+
+const isInteractive = computed(() => isIconButtonInteractiveEvent(iconButtonCustomize.event));
+const eventHostClass = computed(() => iconButtonEventHostClass(iconButtonCustomize.event));
+
+const iconButtonProps = computed(() => ({
+  shape: iconButtonCustomize.shape as 'rectangular' | 'square' | 'round',
+  size: iconButtonCustomize.size as 'lg' | 'md' | 'sm' | 'xs',
+  label: String(iconButtonCustomize.label),
+  disabled: Boolean(iconButtonCustomize.disabled),
+}));
 </script>
 
 <template>
@@ -34,14 +47,15 @@ const iconButtonUsageSnippet = computed(() => buildIconButtonUsageSnippet(iconBu
       props-section-id="button-icon-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewButtonHost">
+        <div
+          class="desktopTokens"
+          :class="[docStyles.previewButtonHost, eventHostClass]"
+        >
           <EgIconButton
-            :shape="iconButtonCustomize.shape as 'rectangular' | 'square' | 'round'"
-            :size="iconButtonCustomize.size as 'lg' | 'md' | 'sm' | 'xs'"
-            :label="String(iconButtonCustomize.label)"
-            :disabled="Boolean(iconButtonCustomize.disabled)"
+            v-bind="iconButtonProps"
+            :tabindex="isInteractive ? undefined : -1"
           >
-            <EgIcon :name="iconButtonDocSymbolName" fit />
+            <EgIcon :name="iconButtonCustomize.symbol" fit />
           </EgIconButton>
         </div>
       </template>

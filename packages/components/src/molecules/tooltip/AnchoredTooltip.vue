@@ -7,7 +7,8 @@ import {
   useId,
   watch,
 } from 'vue';
-import EgTooltip, { type TooltipPanelKind, type TooltipWidthMode } from './Tooltip.vue';
+import EgTooltip, { type TooltipWidthMode } from './Tooltip.vue';
+import type { TooltipPanelKind, TooltipPanelRadiusToken } from './tooltipPanelRadius';
 import styles from './AnchoredTooltip.module.css';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -40,6 +41,8 @@ const props = withDefaults(
     closeDelay?: number;
     trigger?: TooltipTrigger;
     panelKind?: TooltipPanelKind;
+    /** 透传 EgTooltip；仅 Radius token（--radius-*）。 */
+    panelRadius?: TooltipPanelRadiusToken;
     widthMode?: TooltipWidthMode;
     width?: number;
     maxWidth?: number;
@@ -52,6 +55,14 @@ const props = withDefaults(
      * true（默认）：在浮层内再包一层 EgTooltip。
      */
     wrapTooltip?: boolean;
+    /** 任意滚动容器滚动时关闭（如 DataList 行内 More）；默认仍随 scroll 重定位。 */
+    closeOnScroll?: boolean;
+    /** 主轴空间不足时翻转 placement（bottom↔top、left↔right）。 */
+    flip?: boolean;
+    /** 定位边界；触发器向上查找最近匹配元素（如 `.eds-data-list`）。未匹配时回退 viewport。 */
+    boundarySelector?: string;
+    /** 边界内边距（px）。 */
+    boundaryMargin?: number;
   }>(),
   {
     placement: 'bottom',
@@ -69,6 +80,9 @@ const props = withDefaults(
     tokenScopeClass: 'desktopTokens',
     teleportTo: 'body',
     wrapTooltip: true,
+    closeOnScroll: false,
+    flip: false,
+    boundaryMargin: 8,
   },
 );
 
@@ -244,21 +258,63 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
-function updatePosition() {
-  const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
-  const floating = floatingRef.value;
-  if (!trigger || !floating) {
-    return;
+const OPPOSITE_PLACEMENT: Record<TooltipPlacement, TooltipPlacement> = {
+  top: 'bottom',
+  bottom: 'top',
+  left: 'right',
+  right: 'left',
+};
+
+type BoundaryRect = {
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+};
+
+function resolveBoundary(trigger: HTMLElement): BoundaryRect {
+  const margin = props.boundaryMargin ?? 8;
+
+  if (props.boundarySelector) {
+    const boundaryEl = trigger.closest(props.boundarySelector);
+    if (boundaryEl instanceof HTMLElement) {
+      const rect = boundaryEl.getBoundingClientRect();
+      let insetTop = 0;
+
+      if (boundaryEl.classList.contains('eds-data-list')) {
+        const headerPx = Number.parseFloat(
+          getComputedStyle(boundaryEl).getPropertyValue('--eds-data-list-header-height'),
+        );
+        if (Number.isFinite(headerPx) && headerPx > 0) {
+          insetTop = headerPx;
+        }
+      }
+
+      return {
+        top: rect.top + insetTop + margin,
+        left: rect.left + margin,
+        right: rect.right - margin,
+        bottom: rect.bottom - margin,
+      };
+    }
   }
 
-  const triggerRect = trigger.getBoundingClientRect();
-  const floatingRect = floating.getBoundingClientRect();
-  const gap = props.offset;
-  const align = props.align;
+  return {
+    top: margin,
+    left: margin,
+    right: window.innerWidth - margin,
+    bottom: window.innerHeight - margin,
+  };
+}
 
-  let top = 0;
-  let left = 0;
-
+function computeCoords(
+  placement: TooltipPlacement,
+  triggerRect: DOMRect,
+  floatingRect: DOMRect,
+  align: TooltipAlign,
+  gap: number,
+  cross: number,
+): { top: number; left: number } {
   const alignCrossAxis = (
     triggerStart: number,
     triggerSize: number,
@@ -273,43 +329,104 @@ function updatePosition() {
     return triggerStart;
   };
 
-  const cross = props.crossAxisOffset ?? 0;
-
-  switch (props.placement) {
+  switch (placement) {
     case 'top':
-      top = triggerRect.top - floatingRect.height - gap;
-      left =
-        alignCrossAxis(triggerRect.left, triggerRect.width, floatingRect.width) + cross;
-      break;
+      return {
+        top: triggerRect.top - floatingRect.height - gap,
+        left: alignCrossAxis(triggerRect.left, triggerRect.width, floatingRect.width) + cross,
+      };
     case 'bottom':
-      top = triggerRect.bottom + gap;
-      left =
-        alignCrossAxis(triggerRect.left, triggerRect.width, floatingRect.width) + cross;
-      break;
+      return {
+        top: triggerRect.bottom + gap,
+        left: alignCrossAxis(triggerRect.left, triggerRect.width, floatingRect.width) + cross,
+      };
     case 'left':
-      left = triggerRect.left - floatingRect.width - gap;
-      top =
-        alignCrossAxis(triggerRect.top, triggerRect.height, floatingRect.height) + cross;
-      break;
+      return {
+        left: triggerRect.left - floatingRect.width - gap,
+        top: alignCrossAxis(triggerRect.top, triggerRect.height, floatingRect.height) + cross,
+      };
     case 'right':
-      left = triggerRect.right + gap;
-      top =
-        alignCrossAxis(triggerRect.top, triggerRect.height, floatingRect.height) + cross;
-      break;
+      return {
+        left: triggerRect.right + gap,
+        top: alignCrossAxis(triggerRect.top, triggerRect.height, floatingRect.height) + cross,
+      };
     default:
-      break;
+      return { top: 0, left: 0 };
+  }
+}
+
+function mainAxisOverflow(
+  placement: TooltipPlacement,
+  top: number,
+  left: number,
+  floatingRect: DOMRect,
+  boundary: BoundaryRect,
+): number {
+  switch (placement) {
+    case 'bottom':
+      return top + floatingRect.height - boundary.bottom;
+    case 'top':
+      return boundary.top - top;
+    case 'left':
+      return boundary.left - left;
+    case 'right':
+      return left + floatingRect.width - boundary.right;
+    default:
+      return 0;
+  }
+}
+
+function clampToBoundary(
+  top: number,
+  left: number,
+  floatingRect: DOMRect,
+  boundary: BoundaryRect,
+): { top: number; left: number } {
+  const maxLeft = Math.max(boundary.left, boundary.right - floatingRect.width);
+  const maxTop = Math.max(boundary.top, boundary.bottom - floatingRect.height);
+  return {
+    left: Math.min(Math.max(left, boundary.left), maxLeft),
+    top: Math.min(Math.max(top, boundary.top), maxTop),
+  };
+}
+
+function updatePosition() {
+  const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
+  const floating = floatingRef.value;
+  if (!trigger || !floating) {
+    return;
   }
 
-  const margin = 8;
-  const maxLeft = window.innerWidth - floatingRect.width - margin;
-  const maxTop = window.innerHeight - floatingRect.height - margin;
-  left = Math.min(Math.max(margin, left), Math.max(margin, maxLeft));
-  top = Math.min(Math.max(margin, top), Math.max(margin, maxTop));
+  const triggerRect = trigger.getBoundingClientRect();
+  const floatingRect = floating.getBoundingClientRect();
+  const gap = props.offset;
+  const align = props.align;
+  const cross = props.crossAxisOffset ?? 0;
+  const boundary = resolveBoundary(trigger);
+
+  let placement = props.placement;
+  let coords = computeCoords(placement, triggerRect, floatingRect, align, gap, cross);
+
+  if (props.flip) {
+    const overflow = mainAxisOverflow(
+      placement,
+      coords.top,
+      coords.left,
+      floatingRect,
+      boundary,
+    );
+    if (overflow > 0) {
+      placement = OPPOSITE_PLACEMENT[placement];
+      coords = computeCoords(placement, triggerRect, floatingRect, align, gap, cross);
+    }
+  }
+
+  coords = clampToBoundary(coords.top, coords.left, floatingRect, boundary);
 
   // 不 round：等宽+左右 inset 8 时 round 会导致左右不对称
   floatingStyle.value = {
-    top: `${top}px`,
-    left: `${left}px`,
+    top: `${coords.top}px`,
+    left: `${coords.left}px`,
   };
   positioned.value = true;
 }
@@ -329,13 +446,24 @@ function unbindFloatingResizeObserver() {
   floatingResizeObserver = undefined;
 }
 
+function onScroll() {
+  if (!open.value) {
+    return;
+  }
+  if (props.closeOnScroll) {
+    closeNow();
+    return;
+  }
+  updatePosition();
+}
+
 function bindWindowListeners() {
-  window.addEventListener('scroll', updatePosition, true);
+  window.addEventListener('scroll', onScroll, true);
   window.addEventListener('resize', updatePosition);
 }
 
 function unbindWindowListeners() {
-  window.removeEventListener('scroll', updatePosition, true);
+  window.removeEventListener('scroll', onScroll, true);
   window.removeEventListener('resize', updatePosition);
 }
 
@@ -429,9 +557,11 @@ defineExpose({
           <EgTooltip
             v-if="wrapTooltip"
             :panel-kind="panelKind"
+            :panel-radius="panelRadius"
             :width-mode="widthMode"
             :width="width"
             :max-width="maxWidth"
+            height-mode="fixed"
             :height="height"
             :max-height="maxHeight"
           >

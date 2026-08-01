@@ -22,6 +22,7 @@
   width: 100%;
   border: var(--stroke-sm) solid var(--stroke-base-secondary);
   border-radius: var(--radius-full);
+  background-color: var(--box-page);
   opacity: 0;
   pointer-events: none;
   will-change: transform, height, opacity;

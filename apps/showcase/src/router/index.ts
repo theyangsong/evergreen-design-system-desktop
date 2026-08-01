@@ -86,6 +86,14 @@ export const router = createRouter({
                   'feedback-form-submission': 'feedback-form-submission',
                 };
 
+                const tooltipHashToPage: Record<string, string> = {
+                  'tooltip-container': 'tooltip-container',
+                  'tooltip-flotation': 'tooltip-flotation',
+                  'tooltip-popup': 'tooltip-popup',
+                  'tooltip-subtle': 'tooltip-subtle',
+                  'tooltip-molde': 'tooltip-molde',
+                };
+
                 if (slug === 'input') {
                   const anchorId = to.hash.startsWith('#') ? to.hash.slice(1) : '';
                   const target = anchorId && inputHashToPage[anchorId] ? inputHashToPage[anchorId] : 'input-input';
@@ -133,11 +141,17 @@ export const router = createRouter({
                   return { path: `/components/${target}` };
                 }
 
+                if (slug === 'tooltip') {
+                  const anchorId = to.hash.startsWith('#') ? to.hash.slice(1) : '';
+                  const target =
+                    anchorId && tooltipHashToPage[anchorId]
+                      ? tooltipHashToPage[anchorId]
+                      : 'tooltip-container';
+                  return { path: `/components/${target}` };
+                }
+
                 if (slug === 'menu-box') {
-                  return {
-                    name: 'component-detail',
-                    params: { slug: 'tooltip' },
-                  };
+                  return { path: '/components/tooltip-container' };
                 }
 
                 if (slug === 'combo') {

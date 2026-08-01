@@ -12,6 +12,7 @@ import {
   reminderCustomizeDefaults,
   reminderPropRows,
 } from './organismTemplateDocData';
+import { showcaseComboPopupCountLabels } from '@/data/showcasePropLabels';
 
 const customize = reactive({
   ...reminderCustomizeDefaults,
@@ -57,14 +58,14 @@ const popupActionCustomize = reactive({
         nested
         title="EgComboActionPopupWindow"
         :controls="[
-          { kind: 'text', key: 'confirmLabel', label: '确认 confirm' },
+          { kind: 'text', key: 'confirmLabel', label: '确认文案' },
           {
             kind: 'select',
             key: 'actionCount',
-            label: '按钮数 count',
+            label: '按钮数',
             options: [
-              { value: '1', label: '1' },
-              { value: '2', label: '2' },
+              { value: '2', label: showcaseComboPopupCountLabels['2'] },
+              { value: '1', label: showcaseComboPopupCountLabels['1'] },
             ],
           },
         ]"

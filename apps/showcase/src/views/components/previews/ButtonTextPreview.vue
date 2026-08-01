@@ -3,7 +3,6 @@ import { computed, reactive } from 'vue';
 import { EgButton, EgIcon } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
-import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import styles from './InputPreview.module.css';
 import buttonStyles from './ButtonPreview.module.css';
 import { buttonPropRows, buttonSlotRows } from './buttonPreviewData';
@@ -50,7 +49,11 @@ const previewHostClass = computed(() =>
             :loading="Boolean(buttonCustomize.loading)"
           >
             <template v-if="buttonCustomize.showIcon" #icon>
-              <EgIcon :name="showcaseDefaultIconName" size="md" fit />
+              <EgIcon
+                :name="String(buttonCustomize.iconName)"
+                size="md"
+                fit
+              />
             </template>
             {{ buttonCustomize.label }}
           </EgButton>

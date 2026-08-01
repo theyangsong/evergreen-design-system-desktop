@@ -8,7 +8,7 @@
   font-weight: var(--eds-body-medium-strong-weight);
   text-decoration: none;
   cursor: pointer;
-  transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--eds-interaction-transition);
 }
 
 .link[aria-disabled='true'] {

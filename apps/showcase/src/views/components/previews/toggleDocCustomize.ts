@@ -1,5 +1,13 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
+import {
+  inputSizeRows,
+  propLabelRows,
+  showcaseToggleCheckboxModeLabels,
+  showcaseToggleDecideModeLabels,
+  showcaseToggleRadioModeLabels,
+  showcaseToggleSwitchModeLabels,
+} from '@/data/showcasePropLabels';
 
 export const checkboxImportCode = `import { EgCheckbox } from '@eds/desktop-components';`;
 export const radioImportCode = `import { EgRadio } from '@eds/desktop-components';`;
@@ -46,12 +54,10 @@ export const checkboxCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'mode',
     label: '模式',
-    options: [
-      { value: 'checkbox', label: 'Checkbox' },
-      { value: 'unchecked-disable', label: 'UnChecked Disable' },
-      { value: 'checked-disable', label: 'Checked Disable' },
-      { value: 'indeterminate', label: 'Indeterminate' },
-    ],
+    options: propLabelRows(
+      ['checkbox', 'unchecked-disable', 'checked-disable', 'indeterminate'] as const,
+      showcaseToggleCheckboxModeLabels,
+    ).map((row) => ({ value: row.key, label: row.label })),
   },
 ];
 
@@ -65,10 +71,10 @@ export const radioCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'mode',
     label: '模式',
-    options: [
-      { value: 'radio', label: 'Radio' },
-      { value: 'disable', label: 'Disable' },
-    ],
+    options: propLabelRows(['radio', 'disable'] as const, showcaseToggleRadioModeLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
   },
 ];
 
@@ -82,10 +88,10 @@ export const decideCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'mode',
     label: '模式',
-    options: [
-      { value: 'decide', label: 'Decide' },
-      { value: 'disable', label: 'Disable' },
-    ],
+    options: propLabelRows(['decide', 'disable'] as const, showcaseToggleDecideModeLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
   },
 ];
 
@@ -96,20 +102,16 @@ export const switchCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'mode',
     label: '模式',
-    options: [
-      { value: 'switch', label: 'Switch' },
-      { value: 'disable', label: 'Disable' },
-    ],
+    options: propLabelRows(['switch', 'disable'] as const, showcaseToggleSwitchModeLabels).map((row) => ({
+      value: row.key,
+      label: row.label,
+    })),
   },
   {
     kind: 'select',
     key: 'size',
-    label: '尺寸 size',
-    options: [
-      { value: 'lg', label: 'Lg' },
-      { value: 'md', label: 'Md' },
-      { value: 'sm', label: 'Sm' },
-    ],
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
 ];
 

@@ -12,22 +12,42 @@
   padding: 0;
   background-color: var(--material-hide);
   cursor: pointer;
-  transition:
-    background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--eds-interaction-transition);
 }
 
 .number:hover:not(:disabled),
-.number:active:not(:disabled),
-.number:focus-visible:not(:disabled),
-.symbol:hover:not(:disabled),
-.symbol:active:not(:disabled),
-.symbol:focus-visible:not(:disabled) {
+.symbol:hover:not(:disabled) {
   background-color: var(--event-hover);
 }
 
 .item:disabled {
   cursor: not-allowed;
+}
+
+.nonInteractive {
+  cursor: default;
+  pointer-events: none;
+}
+
+.nonInteractive,
+.nonInteractive:hover,
+.nonInteractive:active,
+.nonInteractive:focus-visible {
+  background-color: var(--material-hide);
+}
+
+.nonInteractive .label,
+.nonInteractive:hover .label,
+.nonInteractive:active .label,
+.nonInteractive:focus-visible .label {
+  color: var(--text-base-secondary);
+}
+
+.nonInteractive .icon,
+.nonInteractive:hover .icon,
+.nonInteractive:active .icon,
+.nonInteractive:focus-visible .icon {
+  color: var(--stroke-base-secondary);
 }
 
 .label {
@@ -36,10 +56,10 @@
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
   color: var(--text-base-secondary);
+  transition: var(--eds-interaction-transition);
 }
 
-.item:hover:not(:disabled) .label,
-.item:focus-visible:not(:disabled) .label {
+.item:hover:not(:disabled) .label {
   color: var(--text-base-primary);
 }
 
@@ -52,11 +72,25 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  transition: var(--eds-interaction-transition);
 }
 
 .icon :global(svg) {
   width: 100%;
   height: 100%;
+}
+
+/* 聚焦 / 按下：即时切换，不做过渡动效（仅 hover 入场离场保留 transition） */
+.item:focus-visible:not(:disabled),
+.item:active:not(:disabled) {
+  transition: none;
+}
+
+.item:focus-visible:not(:disabled) .label,
+.item:active:not(:disabled) .label,
+.item:focus-visible:not(:disabled) .icon,
+.item:active:not(:disabled) .icon {
+  transition: none;
 }
 
 /* ── Number ── */
@@ -82,6 +116,22 @@
   color: var(--text-same-white-primary);
 }
 
+.number.decor.selected {
+  background-color: var(--material-decor-primary);
+}
+
+.number.decor.selected .label {
+  color: var(--text-face-primary);
+}
+
+.number.brand.selected {
+  background-color: var(--material-brand-primary);
+}
+
+.number.brand.selected .label {
+  color: var(--text-same-white-primary);
+}
+
 /* ── Symbol（Figma：16px eds-arrow-left-mini-ios，描边色 token）── */
 
 .symbol .icon {
@@ -90,8 +140,7 @@
   color: var(--stroke-base-secondary);
 }
 
-.symbol:hover:not(:disabled) .icon,
-.symbol:focus-visible:not(:disabled) .icon {
+.symbol:hover:not(:disabled) .icon {
   color: var(--stroke-base-primary);
 }
 
@@ -166,4 +215,11 @@
 .button.brand:active:not(:disabled),
 .button.brand:focus-visible:not(:disabled) {
   background-color: var(--material-brand-primary);
+}
+
+.button.decor:focus-visible:not(:disabled),
+.button.decor:active:not(:disabled),
+.button.brand:focus-visible:not(:disabled),
+.button.brand:active:not(:disabled) {
+  transition: none;
 }

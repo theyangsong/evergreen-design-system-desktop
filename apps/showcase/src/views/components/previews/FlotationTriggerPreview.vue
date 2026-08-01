@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue';
-import { EgFlotationTrigger } from '@eds/desktop-components';
+import { EgComboInputItem, EgFlotationTrigger, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
@@ -9,12 +10,15 @@ import {
   flotationTriggerCustomizeControls,
   flotationTriggerCustomizeDefaults,
   flotationTriggerImportCode,
+  flotationTriggerKindCustomizeControls,
   flotationTriggerPropRows,
   flotationTriggerSlotRows,
+  usesFlotationTriggerComboShell,
 } from './flotationDocCustomize';
 
 const customize = reactive({
   ...flotationTriggerCustomizeDefaults,
+  triggerKind: flotationTriggerCustomizeDefaults.triggerKind as 'standard-dropdown',
   triggerStyle: flotationTriggerCustomizeDefaults.triggerStyle as 'subtle' | 'outline' | 'text',
   widthMode: flotationTriggerCustomizeDefaults.widthMode as 'trigger' | 'adaptive' | 'fixed',
   size: flotationTriggerCustomizeDefaults.size as 'lg' | 'md' | 'sm' | 'xs',
@@ -25,6 +29,7 @@ const customize = reactive({
     | 'ready'
     | 'invalid',
   messageType: flotationTriggerCustomizeDefaults.messageType as 'subtle' | 'brand' | 'danger',
+  type: flotationTriggerCustomizeDefaults.type as 'notes' | 'danger' | 'success',
 });
 
 const usageSnippet = computed(() => buildFlotationTriggerUsageSnippet(customize));
@@ -39,6 +44,26 @@ const triggerFixedWidth = computed(() => {
   const parsed = Number.parseInt(String(customize.width ?? ''), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 });
+
+const triggerProps = computed(() => ({
+  triggerStyle: customize.triggerStyle,
+  size: customize.size,
+  widthMode: customize.widthMode,
+  width: triggerFixedWidth.value,
+  label: String(customize.label),
+  disabled: Boolean(customize.disabled),
+  showSymbol: Boolean(customize.showSymbol),
+  symbolIcon: String(customize.symbolIcon),
+  showTag: Boolean(customize.showTag),
+  tagText: String(customize.tagText),
+  tagStatus: customize.tagStatus,
+  showMessage: Boolean(customize.showMessage),
+  messageText: String(customize.messageText),
+  messageType: customize.messageType,
+  expanded: Boolean(customize.expanded),
+}));
+
+const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize));
 </script>
 
 <template>
@@ -50,7 +75,7 @@ const triggerFixedWidth = computed(() => {
       :show-doc-title="false"
       component-tag="EgFlotationTrigger"
       :import-code="flotationTriggerImportCode"
-      :customize-controls="flotationTriggerCustomizeControls"
+      :customize-controls="flotationTriggerKindCustomizeControls"
       :customize-defaults="{ ...flotationTriggerCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationTriggerPropRows"
@@ -60,24 +85,37 @@ const triggerFixedWidth = computed(() => {
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewInputHost">
           <div :style="previewHostStyle">
-            <EgFlotationTrigger
-              :trigger-style="customize.triggerStyle"
-              :size="customize.size"
-              :width-mode="customize.widthMode"
-              :width="triggerFixedWidth"
-              :label="String(customize.label)"
-              :disabled="Boolean(customize.disabled)"
-              :show-symbol="Boolean(customize.showSymbol)"
-              :symbol-icon="String(customize.symbolIcon)"
-              :show-tag="Boolean(customize.showTag)"
-              :tag-text="String(customize.tagText)"
-              :tag-status="customize.tagStatus"
-              :show-message="Boolean(customize.showMessage)"
-              :message-text="String(customize.messageText)"
-              :message-type="customize.messageType"
-              :expanded="Boolean(customize.expanded)"
-            />
+            <EgComboInputItem
+              v-if="usesComboShell"
+              :label="customize.showFieldLabel ? String(customize.fieldLabel) : ''"
+              :feedback="Boolean(customize.feedback)"
+            >
+              <EgFlotationTrigger v-bind="triggerProps" />
+              <template v-if="customize.feedback" #feedback>
+                <EgFormSubmission
+                  :type="customize.type"
+                  :text="String(customize.text)"
+                  :link-label="String(customize.linkLabel)"
+                  :show-link="Boolean(customize.showLink)"
+                />
+              </template>
+            </EgComboInputItem>
+            <EgFlotationTrigger v-else v-bind="triggerProps" />
           </div>
+        </div>
+      </template>
+
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            title="标准下拉框"
+            nested
+            embedded
+            sequential
+            :row-columns="5"
+            :controls="flotationTriggerCustomizeControls"
+          />
         </div>
       </template>
     </ComponentDocLayout>

@@ -1,18 +1,64 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
+import { buildVueOpeningTag } from '@/views/shared/componentDoc/buildUsageSnippet';
 import {
-  buildVueOpeningTag,
-  buildVueSelfClosingSnippet,
-} from '@/views/shared/componentDoc/buildUsageSnippet';
+  placementRows,
+  showcaseTooltipCustomizeFieldLabels,
+  showcaseTooltipPanelKindLabels,
+  showcaseTooltipPanelRadiusLabels,
+  triggerRows,
+  widthModeAdaptiveFixedRows,
+} from '@/data/showcasePropLabels';
+
+export const tooltipPanelRadiusOptions = [
+  { value: '', label: showcaseTooltipPanelRadiusLabels[''] },
+  { value: 'radius-0', label: showcaseTooltipPanelRadiusLabels['radius-0'] },
+  { value: 'radius-xs', label: showcaseTooltipPanelRadiusLabels['radius-xs'] },
+  { value: 'radius-sm', label: showcaseTooltipPanelRadiusLabels['radius-sm'] },
+  { value: 'radius-md', label: showcaseTooltipPanelRadiusLabels['radius-md'] },
+  { value: 'radius-lg', label: showcaseTooltipPanelRadiusLabels['radius-lg'] },
+  { value: 'radius-full', label: showcaseTooltipPanelRadiusLabels['radius-full'] },
+] as const;
 
 export const tooltipImportCode = `import {
-  EgTooltip,
   EgAnchoredTooltip,
   EgButton,
 } from '@eds/desktop-components';`;
 
+export const tooltipPanelKindOptions = [
+  { value: 'container', label: showcaseTooltipPanelKindLabels.container },
+  { value: 'flotation', label: showcaseTooltipPanelKindLabels.flotation },
+  { value: 'popup', label: showcaseTooltipPanelKindLabels.popup },
+  { value: 'subtle', label: showcaseTooltipPanelKindLabels.subtle },
+  { value: 'molde', label: showcaseTooltipPanelKindLabels.molde },
+] as const;
+
+export type TooltipPanelKindValue = (typeof tooltipPanelKindOptions)[number]['value'];
+
+export const tooltipPanelKindSections = [
+  { id: 'tooltip-container', label: 'Container Box', panelKind: 'container' },
+  { id: 'tooltip-flotation', label: 'Flotation Box', panelKind: 'flotation' },
+  { id: 'tooltip-popup', label: 'Popup Box', panelKind: 'popup' },
+  { id: 'tooltip-subtle', label: 'Subtle Card', panelKind: 'subtle' },
+  { id: 'tooltip-molde', label: 'Molde Level', panelKind: 'molde' },
+] as const satisfies ReadonlyArray<{
+  id: string;
+  label: string;
+  panelKind: TooltipPanelKindValue;
+}>;
+
+export type TooltipPanelKindSection = (typeof tooltipPanelKindSections)[number];
+
+export const tooltipPanelKindDefaultRadiusLabel: Record<TooltipPanelKindValue, string> = {
+  container: 'radius-md',
+  flotation: 'radius-md',
+  popup: 'radius-lg',
+  subtle: 'radius-md',
+  molde: '—',
+};
+
 export const tooltipCustomizeDefaults = {
-  previewMode: 'anchored',
   panelKind: 'flotation',
+  panelRadius: '',
   widthMode: 'fixed',
   width: '328',
   height: '380',
@@ -23,82 +69,98 @@ export const tooltipCustomizeDefaults = {
   triggerLabel: '点击我',
 } as const;
 
-const isAnchored = (state: Record<string, unknown>) =>
-  String(state.previewMode ?? 'anchored') === 'anchored';
-
 const isFixedWidth = (state: Record<string, unknown>) =>
   String(state.widthMode ?? 'fixed') === 'fixed';
+
+const L = showcaseTooltipCustomizeFieldLabels;
 
 export const tooltipCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
-    key: 'previewMode',
-    label: '预览形态',
-    options: [
-      { value: 'anchored', label: 'EgAnchoredTooltip' },
-      { value: 'panel', label: 'EgTooltip 面板' },
-    ],
-  },
-  {
-    kind: 'select',
-    key: 'panelKind',
-    label: 'panelKind',
-    options: [
-      { value: 'flotation', label: 'Flotation Box' },
-      { value: 'popup', label: 'Popup Box' },
-    ],
+    key: 'panelRadius',
+    label: L.panelRadius,
+    options: tooltipPanelRadiusOptions.map(({ value, label }) => ({ value, label })),
   },
   {
     kind: 'select',
     key: 'widthMode',
-    label: 'widthMode',
-    options: [
-      { value: 'adaptive', label: 'adaptive' },
-      { value: 'fixed', label: 'fixed' },
-    ],
+    label: L.widthMode,
+    options: widthModeAdaptiveFixedRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'text',
     key: 'width',
-    label: 'width (px)',
+    label: L.width,
     visibleWhen: isFixedWidth,
   },
-  { kind: 'text', key: 'height', label: 'height (px)' },
-  { kind: 'text', key: 'maxHeight', label: 'maxHeight (px)', placeholder: '可选' },
+  { kind: 'text', key: 'height', label: L.height },
+  { kind: 'text', key: 'maxHeight', label: L.maxHeight, placeholder: '可选' },
   {
     kind: 'select',
     key: 'placement',
-    label: 'placement',
-    options: [
-      { value: 'top', label: 'top' },
-      { value: 'bottom', label: 'bottom' },
-      { value: 'left', label: 'left' },
-      { value: 'right', label: 'right' },
-    ],
-    visibleWhen: isAnchored,
+    label: L.placement,
+    options: placementRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
     key: 'trigger',
-    label: 'trigger',
-    options: [
-      { value: 'click', label: 'click' },
-      { value: 'hover', label: 'hover' },
-    ],
-    visibleWhen: isAnchored,
+    label: L.trigger,
+    options: triggerRows.map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'boolean', key: 'disabled', label: 'disabled', visibleWhen: isAnchored },
-  { kind: 'text', key: 'triggerLabel', label: '触发器文案', visibleWhen: isAnchored },
+  { kind: 'boolean', key: 'disabled', label: L.disabled },
+  { kind: 'text', key: 'triggerLabel', label: L.triggerLabel },
 ];
 
-const CUSTOMIZE_ONLY_KEYS = new Set(['previewMode', 'triggerLabel']);
+const CUSTOMIZE_ONLY_KEYS = new Set(['triggerLabel']);
+
+function buildAnchoredTooltipUsageSnippet(
+  state: Record<string, unknown>,
+  panelKind: TooltipPanelKindValue,
+): string {
+  const anchoredProps: Record<string, unknown> = {
+    ...panelPropsFromState({ ...state, panelKind }),
+    placement: state.placement,
+    trigger: state.trigger,
+    disabled: state.disabled,
+  };
+
+  const openTag = buildVueOpeningTag('EgAnchoredTooltip', anchoredProps, {
+    defaults: {
+      placement: tooltipCustomizeDefaults.placement,
+      trigger: tooltipCustomizeDefaults.trigger,
+      panelKind,
+      widthMode: tooltipCustomizeDefaults.widthMode,
+      height: Number.parseInt(tooltipCustomizeDefaults.height, 10),
+      disabled: tooltipCustomizeDefaults.disabled,
+    },
+    omitKeys: [...CUSTOMIZE_ONLY_KEYS],
+  });
+
+  const label = String(state.triggerLabel ?? tooltipCustomizeDefaults.triggerLabel);
+  return `${openTag}
+  <EgButton variant="outline">${label}</EgButton>
+  <template #content />
+</EgAnchoredTooltip>`;
+}
+
+export function buildTooltipPanelSectionUsageSnippet(
+  panelKind: TooltipPanelKindValue,
+  state: Record<string, unknown>,
+): string {
+  return buildAnchoredTooltipUsageSnippet(state, panelKind);
+}
 
 function panelPropsFromState(state: Record<string, unknown>): Record<string, unknown> {
+  const panelKind = String(state.panelKind ?? tooltipCustomizeDefaults.panelKind);
   const props: Record<string, unknown> = {
     panelKind: state.panelKind,
     widthMode: state.widthMode,
-    height: Number.parseInt(String(state.height ?? ''), 10) || 380,
   };
+
+  if (panelKind !== 'container') {
+    props.heightMode = 'fixed';
+    props.height = Number.parseInt(String(state.height ?? ''), 10) || 380;
+  }
 
   if (isFixedWidth(state)) {
     const width = Number.parseInt(String(state.width ?? ''), 10);
@@ -111,56 +173,61 @@ function panelPropsFromState(state: Record<string, unknown>): Record<string, unk
     if (Number.isFinite(maxHeight)) props.maxHeight = maxHeight;
   }
 
+  const panelRadius = String(state.panelRadius ?? '').trim();
+  if (panelRadius !== '') {
+    props.panelRadius = panelRadius;
+  }
+
   return props;
 }
 
-export function buildTooltipUsageSnippet(state: Record<string, unknown>): string {
-  const panelProps = panelPropsFromState(state);
-
-  if (String(state.previewMode ?? 'anchored') === 'panel') {
-    return buildVueSelfClosingSnippet('EgTooltip', panelProps, {
-      defaults: {
-        panelKind: tooltipCustomizeDefaults.panelKind,
-        widthMode: tooltipCustomizeDefaults.widthMode,
-        height: Number.parseInt(tooltipCustomizeDefaults.height, 10),
-      },
-      omitKeys: [...CUSTOMIZE_ONLY_KEYS, 'placement', 'trigger', 'disabled'],
-    });
-  }
-
-  const anchoredProps: Record<string, unknown> = {
-    ...panelProps,
-    placement: state.placement,
-    trigger: state.trigger,
-    disabled: state.disabled,
+export function buildTooltipSectionCustomizeDefaults(
+  panelKind: TooltipPanelKindValue,
+): Record<string, unknown> {
+  return {
+    panelKind,
+    panelRadius: tooltipCustomizeDefaults.panelRadius,
+    widthMode: tooltipCustomizeDefaults.widthMode,
+    width: tooltipCustomizeDefaults.width,
+    height: tooltipCustomizeDefaults.height,
+    maxHeight: tooltipCustomizeDefaults.maxHeight,
+    placement: tooltipCustomizeDefaults.placement,
+    trigger: tooltipCustomizeDefaults.trigger,
+    disabled: tooltipCustomizeDefaults.disabled,
+    triggerLabel: tooltipCustomizeDefaults.triggerLabel,
   };
+}
 
-  const openTag = buildVueOpeningTag('EgAnchoredTooltip', anchoredProps, {
-    defaults: {
-      placement: tooltipCustomizeDefaults.placement,
-      trigger: tooltipCustomizeDefaults.trigger,
-      panelKind: tooltipCustomizeDefaults.panelKind,
-      widthMode: tooltipCustomizeDefaults.widthMode,
-      height: Number.parseInt(tooltipCustomizeDefaults.height, 10),
-      disabled: tooltipCustomizeDefaults.disabled,
-    },
-    omitKeys: [...CUSTOMIZE_ONLY_KEYS],
-  });
+export function buildTooltipUsageSnippet(state: Record<string, unknown>): string {
+  const panelKind = String(state.panelKind ?? tooltipCustomizeDefaults.panelKind) as TooltipPanelKindValue;
+  return buildAnchoredTooltipUsageSnippet(state, panelKind);
+}
 
-  const label = String(state.triggerLabel ?? tooltipCustomizeDefaults.triggerLabel);
-  return `${openTag}
-  <EgButton tone="sameWhite" size="lg">${label}</EgButton>
-  <template #content />
-</EgAnchoredTooltip>`;
+export function buildTooltipPanelKindPageUsageSnippet(
+  panelKind: TooltipPanelKindValue,
+  state: Record<string, unknown>,
+): string {
+  return buildAnchoredTooltipUsageSnippet({ ...state, panelKind }, panelKind);
+}
+
+export function findTooltipPanelKindSection(pageSlug: string): TooltipPanelKindSection | undefined {
+  return tooltipPanelKindSections.find((section) => section.id === pageSlug);
 }
 
 export const tooltipPropRows: DocPropRow[] = [
   {
     name: 'panelKind',
-    type: "'flotation' | 'popup'",
+    type: "'container' | 'flotation' | 'popup' | 'subtle' | 'molde'",
     defaultValue: "'flotation'",
     description:
-      'flotation：`--effect-flotation-box`；popup：`--effect-popup-box`。圆角 / 内边距 / 阴影等为设计 token，不可 prop 覆盖。',
+      'container → effect-container-box；flotation → effect-flotation-box；popup → effect-popup-box；subtle → effect-subtle-card；molde → effect-molde-level。',
+  },
+  {
+    name: 'panelRadius',
+    type: "'radius-0' | 'radius-xs' | 'radius-sm' | 'radius-md' | 'radius-lg' | 'radius-full'",
+    defaultValue: '按 panelKind（container/flotation/subtle → radius-md；popup → radius-lg；molde → 无）',
+    description:
+      '面板圆角，仅允许 Scale Radius token（--radius-*）。未传时使用各 panelKind 在 effect semantic 中的默认圆角。',
   },
   {
     name: 'widthMode',
@@ -181,10 +248,16 @@ export const tooltipPropRows: DocPropRow[] = [
     description: '可选最大宽度（px）。',
   },
   {
+    name: 'heightMode',
+    type: "'adaptive' | 'fixed'",
+    defaultValue: "'adaptive'",
+    description: 'adaptive：高度由 effect semantic 或内容决定；fixed：使用 height。',
+  },
+  {
     name: 'height',
     type: 'number',
-    defaultValue: '380',
-    description: '面板高度（px）。',
+    defaultValue: '—',
+    description: 'heightMode=fixed 时面板高度（px）。container 场景由 effect-container-box 提供，勿传。',
   },
   {
     name: 'maxHeight',
@@ -220,7 +293,7 @@ export const anchoredTooltipPropRows: DocPropRow[] = [
     description: '为 true 时不可打开。',
   },
   {
-    name: 'panelKind / widthMode / width / height / maxHeight',
+    name: 'panelKind / panelRadius / widthMode / width / height / maxHeight',
     type: '同 EgTooltip',
     defaultValue: '见 EgTooltip',
     description: '透传给内部 EgTooltip。',

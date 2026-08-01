@@ -1,24 +1,62 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 import { EgIcon, EgIconButtonPro, EgToolBar } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
-import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
-import organismStyles from './OrganismPreview.module.css';
+import {
+  readIconButtonProZoneItem,
+  iconButtonProNestedRowColumns,
+  type IconButtonProZoneKeyPrefix,
+} from './buttonDocCustomize';
 import {
   ORGANISM_IMPORT,
   toolBarCustomizeControls,
   toolBarCustomizeDefaults,
+  toolBarFunctionalCustomizeControls,
   toolBarPropRows,
+  toolBarSectionCustomizeControls,
   toolBarSlotRows,
 } from './organismTemplateDocData';
 
 const customize = reactive({ ...toolBarCustomizeDefaults });
 
-const iconProCustomize = reactive({
-  label: 'Label',
-  showReddot: false,
+function parseZoneCount(value: unknown, fallback = 1): number {
+  const count = Number(value);
+  if (!Number.isFinite(count)) return fallback;
+  return Math.min(10, Math.max(1, Math.round(count)));
+}
+
+function trackZoneCustomize(prefix: IconButtonProZoneKeyPrefix, count: number) {
+  void customize[`${prefix}Count` as keyof typeof customize];
+  for (let index = 1; index <= count; index += 1) {
+    void customize[`${prefix}Label${index}` as keyof typeof customize];
+    void customize[`${prefix}Icon${index}` as keyof typeof customize];
+    void customize[`${prefix}ShowBadge${index}` as keyof typeof customize];
+    void customize[`${prefix}Badge${index}` as keyof typeof customize];
+    void customize[`${prefix}ShowReddot${index}` as keyof typeof customize];
+    void customize[`${prefix}Disabled${index}` as keyof typeof customize];
+  }
+}
+
+const functionalCount = computed(() => parseZoneCount(customize.functionalCount));
+
+const sectionCount = computed(() => parseZoneCount(customize.sectionCount));
+
+const functionalItems = computed(() => {
+  trackZoneCustomize('functional', functionalCount.value);
+  return Array.from({ length: functionalCount.value }, (_, index) => ({
+    order: index + 1,
+    ...readIconButtonProZoneItem(customize, 'functional', index + 1),
+  }));
+});
+
+const sectionItems = computed(() => {
+  trackZoneCustomize('section', sectionCount.value);
+  return Array.from({ length: sectionCount.value }, (_, index) => ({
+    order: index + 1,
+    ...readIconButtonProZoneItem(customize, 'section', index + 1),
+  }));
 });
 </script>
 
@@ -27,7 +65,6 @@ const iconProCustomize = reactive({
     <ComponentDocLayout
       v-model:customize-state="customize"
       title="Tool Bar"
-      tall-preview
       :show-doc-title="false"
       component-tag="EgToolBar"
       :import-code="ORGANISM_IMPORT"
@@ -38,36 +75,87 @@ const iconProCustomize = reactive({
       props-section-id="tool-bar-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="organismStyles.previewOrganismWideHost">
-          <EgToolBar
-            :title="String(customize.title)"
-            :show-back="Boolean(customize.showBack)"
-            :show-operation="Boolean(customize.showOperation)"
-            :show-divider="Boolean(customize.showDivider)"
-            :show-section="Boolean(customize.showSection)"
-          >
-            <template #functional>
+        <EgToolBar
+          class="desktopTokens"
+          :title="String(customize.title)"
+          :show-back="Boolean(customize.showBack)"
+          :show-operation="Boolean(customize.showOperation)"
+          :show-divider="Boolean(customize.showDivider)"
+          :show-section="Boolean(customize.showSection)"
+        >
+          <template #functional>
+            <template v-if="customize.showSection">
               <EgIconButtonPro
-                :label="String(customize.functionalLabel)"
-                :show-reddot="Boolean(iconProCustomize.showReddot)"
+                v-for="item in functionalItems"
+                :key="`functional-${item.order}-${item.icon}-${item.label}-${item.badge}`"
+                :label="item.label"
+                :badge="item.badge"
+                :show-badge="item.showBadge"
+                :show-reddot="item.showReddot"
+                :disabled="item.disabled"
               >
-                <EgIcon name="eds-add" size="sm" />
+                <EgIcon :name="item.icon" size="sm" />
               </EgIconButtonPro>
             </template>
-          </EgToolBar>
-        </div>
+            <template v-else>
+              <EgIconButtonPro
+                v-for="item in sectionItems"
+                :key="`section-${item.order}-${item.icon}-${item.label}-${item.badge}`"
+                :label="item.label"
+                :badge="item.badge"
+                :show-badge="item.showBadge"
+                :show-reddot="item.showReddot"
+                :disabled="item.disabled"
+              >
+                <EgIcon :name="item.icon" size="sm" />
+              </EgIconButtonPro>
+            </template>
+          </template>
+          <template v-if="customize.showSection" #section>
+            <EgIconButtonPro
+              v-for="item in sectionItems"
+              :key="`section-split-${item.order}-${item.icon}-${item.label}-${item.badge}`"
+              :label="item.label"
+              :badge="item.badge"
+              :show-badge="item.showBadge"
+              :show-reddot="item.showReddot"
+              :disabled="item.disabled"
+            >
+              <EgIcon :name="item.icon" size="sm" />
+            </EgIconButtonPro>
+          </template>
+        </EgToolBar>
       </template>
 
-      <CustomizePanel
-        v-if="customize.showOperation"
-        v-model="iconProCustomize"
-        nested
-        title="EgIconButtonPro"
-        :controls="[
-          { kind: 'text', key: 'label', label: '文案 label' },
-          { kind: 'boolean', key: 'showReddot', label: '红点 showReddot' },
-        ]"
-      />
+      <template #customize-after>
+        <CustomizePanel
+          v-if="customize.showOperation && !customize.showSection"
+          v-model="customize"
+          nested
+          sequential
+          :row-columns="iconButtonProNestedRowColumns"
+          title="右区 EgIconButtonPro"
+          :controls="toolBarSectionCustomizeControls"
+        />
+        <template v-else-if="customize.showOperation && customize.showSection">
+          <CustomizePanel
+            v-model="customize"
+            nested
+            sequential
+            :row-columns="iconButtonProNestedRowColumns"
+            title="左区 EgIconButtonPro"
+            :controls="toolBarFunctionalCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            nested
+            sequential
+            :row-columns="iconButtonProNestedRowColumns"
+            title="右区 EgIconButtonPro"
+            :controls="toolBarSectionCustomizeControls"
+          />
+        </template>
+      </template>
     </ComponentDocLayout>
   </div>
 </template>
