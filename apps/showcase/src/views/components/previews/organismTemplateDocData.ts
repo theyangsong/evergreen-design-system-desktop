@@ -197,7 +197,7 @@ export const cregisNavBarPropRows: OrganismPropRow[] = [
 export const navBarCustomizeDefaults = {
   scenario: 'nav-bar' as NavBarScenario,
   showDivider: true,
-  navBarWidth: '210',
+  navBarWidth: '74',
   moduleCount: '4',
   appEntryCount: '2',
   ...navBarModuleLabelDefaults(),
@@ -364,7 +364,7 @@ export const navBarPropRows: OrganismPropRow[] = [
     name: 'wide',
     type: 'boolean',
     defaultValue: 'false',
-    description: 'false → 74px（scale-18 + scale-05）；true → 210px（scale-50 + scale-2-5）。Showcase 文档预览默认 true。',
+    description: 'false → 74px（scale-18 + scale-05）；true → 210px（scale-50 + scale-2-5）。Showcase 文档预览默认 false。',
   },
   { name: 'split', type: 'boolean', defaultValue: 'false', description: 'Corporation 与 Module 区之间 Page Divider。Figma Split。' },
   { name: 'showSystemButtons', type: 'boolean', defaultValue: 'true', description: '顶栏系统按钮（交通灯）。' },
