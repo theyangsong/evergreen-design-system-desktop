@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
+import { SCROLL_EDGE_EPSILON } from './scrollContainment';
 
 export function useNavScrollFade(scrollRef: Ref<HTMLElement | null>) {
   const fadeTop = ref(false);
@@ -15,10 +16,11 @@ export function useNavScrollFade(scrollRef: Ref<HTMLElement | null>) {
     }
 
     const { scrollTop, scrollHeight, clientHeight } = element;
-    const canScroll = scrollHeight > clientHeight + 1;
+    const canScroll = scrollHeight - clientHeight > SCROLL_EDGE_EPSILON;
 
-    fadeTop.value = canScroll && scrollTop > 1;
-    fadeBottom.value = canScroll && scrollTop + clientHeight < scrollHeight - 1;
+    fadeTop.value = canScroll && scrollTop > SCROLL_EDGE_EPSILON;
+    fadeBottom.value =
+      canScroll && scrollTop + clientHeight < scrollHeight - SCROLL_EDGE_EPSILON;
   }
 
   onMounted(() => {

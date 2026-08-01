@@ -1,8 +1,10 @@
 import { getProcessedIcon } from '@eds/desktop-components';
+import { moduleMenuBusinessTitles } from '@/presets/module-menu/businessModuleTitles';
 import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import {
   MODULE_MENU_MAX_GROUPS,
   MODULE_MENU_MAX_SUB_ITEMS,
+  isModuleMenuDsScenario,
   moduleMenuGroupItemAccessoryKey,
   moduleMenuGroupItemCountKey,
   moduleMenuGroupItemHasSubKey,
@@ -94,8 +96,10 @@ function groupItemSubCountAt(
 }
 
 export function resolveModuleMenuPreviewTitle(state: Record<string, unknown>): string {
-  if (state.moduleTitleKind === 'preset') {
-    return String(state.moduleTitlePreset ?? 'Module');
+  if (!isModuleMenuDsScenario(state)) {
+    const raw = String(state.moduleBusinessTitle ?? 'Wallet').trim();
+    if ((moduleMenuBusinessTitles as readonly string[]).includes(raw)) return raw;
+    return 'Wallet';
   }
   const text = String(state.moduleTitleText ?? '').trim();
   return text === '' ? 'Module' : text;

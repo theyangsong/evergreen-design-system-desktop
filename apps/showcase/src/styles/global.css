@@ -16,7 +16,12 @@ body,
   margin: 0;
 }
 
+html {
+  overscroll-behavior: none;
+}
+
 body {
+  overscroll-behavior: none;
   font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);

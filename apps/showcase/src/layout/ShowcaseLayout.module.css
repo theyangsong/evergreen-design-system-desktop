@@ -19,6 +19,7 @@
   border-right: var(--stroke-xs) solid var(--stroke-divider-page);
   background: var(--material-card-shallow);
   overflow-y: auto;
+  overscroll-behavior: none;
 }
 
 .sidebarBody {

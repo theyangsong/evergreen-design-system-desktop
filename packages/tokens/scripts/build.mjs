@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verifyColorSpecAgainstDist } from './verify-color-spec.mjs';
@@ -1053,7 +1053,49 @@ function buildScaleSystem() {
   );
 }
 
+function buildTypographyFonts() {
+  const srcFontsDir = join(rootDir, 'assets/fonts');
+  const distFontsDir = join(distDir, 'assets/fonts');
+  mkdirSync(distFontsDir, { recursive: true });
+
+  for (const fileName of readdirSync(srcFontsDir)) {
+    if (!fileName.endsWith('.ttf')) continue;
+    copyFileSync(join(srcFontsDir, fileName), join(distFontsDir, fileName));
+  }
+
+  const faces = [
+    { weight: 400, file: 'EDSText-Regular.ttf' },
+    { weight: 500, file: 'EDSText-Medium.ttf' },
+    { weight: 600, file: 'EDSText-SemiBold.ttf' },
+    { weight: 700, file: 'EDSText-Bold.ttf' },
+  ];
+
+  const lines = [
+    '/**',
+    ' * EDS Text — self-hosted UI font.',
+    ' * Import globally (@eds/desktop-tokens/fonts); do not scope under .desktopTokens.',
+    ' * Source: assets/fonts/EDSText-*.ttf',
+    ' */',
+    '',
+  ];
+
+  for (const face of faces) {
+    lines.push('@font-face {');
+    lines.push("  font-family: 'EDS Text';");
+    lines.push('  font-style: normal;');
+    lines.push(`  font-weight: ${face.weight};`);
+    lines.push('  font-display: swap;');
+    lines.push(`  src: url('../../assets/fonts/${face.file}') format('truetype');`);
+    lines.push('}');
+    lines.push('');
+  }
+
+  mkdirSync(join(cssDir, 'typography'), { recursive: true });
+  writeFileSync(join(cssDir, 'typography/fonts.css'), `${lines.join('\n')}\n`, 'utf-8');
+}
+
 function buildTypographySystem() {
+  buildTypographyFonts();
   const baseSpec = loadJson('typography/base.json');
   const semanticSpec = loadJson('typography/semantic.json');
   const globalSpec = loadJson('typography/global.json');

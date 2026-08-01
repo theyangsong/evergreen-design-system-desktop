@@ -18,6 +18,8 @@ import {
   MODULE_MENU_MAX_GROUPS,
   MODULE_MENU_MAX_SUB_ITEMS,
   buildModuleMenuCustomizeDefaults,
+  cregisModuleMenuPropRows,
+  isModuleMenuDsScenario,
   moduleMenuCustomizeControls,
   moduleMenuCustomizeDefaults,
   moduleMenuGroupCustomizeControlsList,
@@ -33,9 +35,29 @@ import {
   moduleMenuGroupTitleKey,
   moduleMenuPropRows,
   moduleMenuTitleCustomizeControls,
+  type ModuleMenuScenario,
 } from './organismTemplateDocData';
+import {
+  cregisModuleMenuUsageSnippet,
+  isModuleMenuBusinessScenario,
+  resolveModuleMenuBusinessGroups,
+  resolveModuleMenuBusinessTitle,
+  udunModuleMenuUsageSnippet,
+} from './moduleMenuPreviewCustomize';
 
 const customize = reactive({ ...moduleMenuCustomizeDefaults });
+
+const isDsScenario = computed(() => isModuleMenuDsScenario(customize));
+
+const docPropRows = computed(() =>
+  isDsScenario.value ? moduleMenuPropRows : cregisModuleMenuPropRows,
+);
+
+const docUsageSnippet = computed(() => {
+  if (customize.scenario === 'udun') return udunModuleMenuUsageSnippet;
+  if (customize.scenario === 'cregis') return cregisModuleMenuUsageSnippet;
+  return undefined;
+});
 
 const groupCountNum = computed(() => {
   const parsed = Number(customize.groupCount);
@@ -44,12 +66,16 @@ const groupCountNum = computed(() => {
 });
 
 const moduleMenuTitle = computed(() => {
-  if (customize.moduleTitleKind === 'preset') {
-    return String(customize.moduleTitlePreset ?? 'Module');
+  if (isModuleMenuBusinessScenario(customize.scenario)) {
+    return resolveModuleMenuBusinessTitle(customize);
   }
   const text = String(customize.moduleTitleText ?? '').trim();
   return text === '' ? 'Module' : text;
 });
+
+const businessGroups = computed(() =>
+  resolveModuleMenuBusinessGroups(String(customize.scenario) as ModuleMenuScenario),
+);
 
 function parseGroupSort(value: unknown, fallbackIndex: number): number {
   const parsed = Number.parseFloat(String(value ?? '').trim());
@@ -152,7 +178,6 @@ const previewGroups = computed((): PreviewGroup[] => {
     return left.index - right.index;
   });
 });
-
 </script>
 
 <template>
@@ -166,7 +191,8 @@ const previewGroups = computed((): PreviewGroup[] => {
       :import-code="ORGANISM_IMPORT"
       :customize-controls="moduleMenuCustomizeControls"
       :customize-defaults="buildModuleMenuCustomizeDefaults()"
-      :prop-rows="moduleMenuPropRows"
+      :usage-snippet-override="docUsageSnippet"
+      :prop-rows="docPropRows"
       props-section-id="module-menu-props"
     >
       <template #preview>
@@ -183,36 +209,55 @@ const previewGroups = computed((): PreviewGroup[] => {
             :wide="Boolean(customize.wide)"
             :show-edge-divider="Boolean(customize.showEdgeDivider)"
           >
-            <EgModuleMenuGroup
-              v-for="group in previewGroups"
-              :key="group.key"
-              :title="group.title"
-            >
-              <template v-for="(item, itemIndex) in group.items" :key="`${group.key}-item-${itemIndex}`">
+            <template v-if="isDsScenario">
+              <EgModuleMenuGroup
+                v-for="group in previewGroups"
+                :key="group.key"
+                :title="group.title"
+              >
+                <template v-for="(item, itemIndex) in group.items" :key="`${group.key}-item-${itemIndex}`">
+                  <EgModuleMenuItem
+                    :tier="item.tier"
+                    :label="item.label"
+                    :message="item.accessory === 'message' ? item.messageText : undefined"
+                    :show-reddot="item.accessory === 'reddot'"
+                  >
+                    <template #icon>
+                      <EgIcon :name="item.icon" size="sm" />
+                    </template>
+                    <template v-if="item.tier === 2">
+                      <EgModuleMenuItem
+                        v-for="(subLabel, subIndex) in item.subitems"
+                        :key="`${group.key}-item-${itemIndex}-sub-${subIndex}`"
+                        subitem
+                        :label="subLabel"
+                      >
+                        <template #icon>
+                          <EgIcon name="eds-add" size="sm" />
+                        </template>
+                      </EgModuleMenuItem>
+                    </template>
+                  </EgModuleMenuItem>
+                </template>
+              </EgModuleMenuGroup>
+            </template>
+            <template v-else>
+              <EgModuleMenuGroup
+                v-for="(group, groupIndex) in businessGroups"
+                :key="`business-group-${groupIndex}`"
+                :title="group.title"
+              >
                 <EgModuleMenuItem
-                  :tier="item.tier"
+                  v-for="(item, itemIndex) in group.items"
+                  :key="`business-group-${groupIndex}-item-${itemIndex}`"
                   :label="item.label"
-                  :message="item.accessory === 'message' ? item.messageText : undefined"
-                  :show-reddot="item.accessory === 'reddot'"
                 >
                   <template #icon>
                     <EgIcon :name="item.icon" size="sm" />
                   </template>
-                  <template v-if="item.tier === 2">
-                    <EgModuleMenuItem
-                      v-for="(subLabel, subIndex) in item.subitems"
-                      :key="`${group.key}-item-${itemIndex}-sub-${subIndex}`"
-                      subitem
-                      :label="subLabel"
-                    >
-                      <template #icon>
-                        <EgIcon name="eds-add" size="sm" />
-                      </template>
-                    </EgModuleMenuItem>
-                  </template>
                 </EgModuleMenuItem>
-              </template>
-            </EgModuleMenuGroup>
+              </EgModuleMenuGroup>
+            </template>
           </EgModuleMenu>
         </div>
       </template>
@@ -225,15 +270,17 @@ const previewGroups = computed((): PreviewGroup[] => {
           sequential
           :controls="moduleMenuTitleCustomizeControls"
         />
-        <CustomizePanel
-          v-for="groupIndex in groupCountNum"
-          :key="`group-panel-${groupIndex}`"
-          v-model="customize"
-          :title="`组${groupIndex}`"
-          nested
-          sequential
-          :controls="moduleMenuGroupCustomizeControlsList[groupIndex - 1]"
-        />
+        <template v-if="isDsScenario">
+          <CustomizePanel
+            v-for="groupIndex in groupCountNum"
+            :key="`group-panel-${groupIndex}`"
+            v-model="customize"
+            :title="`组${groupIndex}`"
+            nested
+            sequential
+            :controls="moduleMenuGroupCustomizeControlsList[groupIndex - 1]"
+          />
+        </template>
       </template>
     </ComponentDocLayout>
   </div>

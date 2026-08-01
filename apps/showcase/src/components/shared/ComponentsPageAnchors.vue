@@ -12,7 +12,6 @@ import {
 } from '@/data/components/navigation';
 import { useScrollSpy } from '@/composables/useScrollSpy';
 import { useNavScrollFade } from '@/composables/useNavScrollFade';
-import { usePreventScrollChaining } from '@/composables/usePreventScrollChaining';
 import styles from './ComponentsPageAnchors.module.css';
 
 const route = useRoute();
@@ -58,8 +57,6 @@ const indicatorMoveTransition = ref(true);
 let resizeObserver: ResizeObserver | undefined;
 
 const { fadeTop, fadeBottom, updateFade } = useNavScrollFade(scrollRef);
-
-usePreventScrollChaining(scrollRef);
 
 function setLinkRef(navId: string, element: Element | ComponentPublicInstance | null) {
   const node =

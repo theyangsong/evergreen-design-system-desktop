@@ -309,6 +309,12 @@ export const showcaseNavBarScenarioLabels = {
   cregis: tokenLabel('业务', 'cregis'),
 } as const;
 
+export const showcaseModuleMenuScenarioLabels = {
+  'module-menu': tokenLabel('组件', 'module-menu'),
+  cregis: tokenLabel('Cregis', 'cregis'),
+  udun: tokenLabel('UDun', 'udun'),
+} as const;
+
 export const showcaseIconButtonEventLabels = {
   full: tokenLabel('完整', 'full'),
   default: tokenLabel('默认', 'default'),

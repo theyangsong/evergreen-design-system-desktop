@@ -641,7 +641,12 @@
   pointer-events: none;
 }
 
-/* Bar 11px：2× + scale(0.5)（与 PersonAvatar 同思路）；外层 clip，sizer 用 token 字号撑高/换行 */
+/*
+ * Bar 11px 子像素：sizer 撑高 + paint 绘字。
+ * - paint：200% 宽 + 2× + scale(0.5) / origin top left（绘字）
+ * - sizer：100% 宽 + 2× + zoom(0.5)（与 paint 等效 66px/11px 换行；zoom 让布局高=视觉高）
+ * 禁止 sizer 用 200%+zoom（与 paint 换行不一致 → 单行容器裁掉第二行）或 sizer 直出 11px（Chrome 最小字号假换行）。
+ */
 .moduleLabel {
   position: relative;
   align-self: stretch;
@@ -652,7 +657,8 @@
   padding: 0;
   margin: 0;
   color: var(--text-base-secondary);
-  text-align: center;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .moduleLabelSizer {
@@ -662,11 +668,14 @@
   width: 100%;
   padding: 0;
   margin: 0;
-  font-size: var(--eds-bar-size);
+  font-family: var(--eds-family-sans);
+  font-size: calc(var(--eds-bar-size) * 2);
   font-weight: var(--eds-bar-weight);
-  line-height: var(--eds-bar-line-height);
+  line-height: calc(var(--eds-bar-line-height) * 2);
+  text-align: center;
   overflow-wrap: break-word;
   word-break: normal;
+  zoom: 0.5;
   pointer-events: none;
   user-select: none;
 }
@@ -679,6 +688,7 @@
   width: 200%;
   padding: 0;
   margin: 0;
+  font-family: var(--eds-family-sans);
   font-size: calc(var(--eds-bar-size) * 2);
   font-weight: var(--eds-bar-weight);
   line-height: calc(var(--eds-bar-line-height) * 2);
@@ -691,6 +701,14 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   pointer-events: none;
+}
+
+@supports not (zoom: 1) {
+  .moduleLabelSizer {
+    font-size: var(--eds-bar-size);
+    line-height: var(--eds-bar-line-height);
+    zoom: unset;
+  }
 }
 
 .moduleLabelActive {

@@ -1,4 +1,9 @@
 import { onBeforeUnmount, onMounted, watch, type Ref } from 'vue';
+import {
+  clampElementScroll,
+  getElementScrollMetrics,
+  shouldPreventWheelChain,
+} from './scrollContainment';
 
 export function usePreventScrollChaining(
   elementRef: Ref<HTMLElement | null | undefined>,
@@ -10,27 +15,25 @@ export function usePreventScrollChaining(
       return;
     }
 
-    const { scrollTop, scrollHeight, clientHeight } = element;
-    const deltaY = event.deltaY;
-    const canScroll = scrollHeight > clientHeight + 1;
+    const { scrollTop, maxScrollTop } = getElementScrollMetrics(element);
 
-    if (!canScroll) {
+    if (shouldPreventWheelChain(scrollTop, maxScrollTop, event.deltaY)) {
       event.preventDefault();
-      return;
     }
+  }
 
-    const atTop = scrollTop <= 0;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
-
-    if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
-      event.preventDefault();
+  function onScroll() {
+    if (element) {
+      clampElementScroll(element);
     }
   }
 
   function bind(nextElement: HTMLElement | null | undefined) {
     element?.removeEventListener('wheel', onWheel);
+    element?.removeEventListener('scroll', onScroll);
     element = nextElement ?? null;
     element?.addEventListener('wheel', onWheel, { passive: false });
+    element?.addEventListener('scroll', onScroll, { passive: true });
   }
 
   onMounted(() => {

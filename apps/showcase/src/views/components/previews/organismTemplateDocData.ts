@@ -11,7 +11,7 @@ import {
   showcaseComboPopupCountLabels,
   showcaseLayoutTypeLabels,
   showcaseModuleMenuAccessoryLabels,
-  showcaseModuleMenuTitleKindLabels,
+  showcaseModuleMenuScenarioLabels,
   showcaseNavBarScenarioLabels,
   showcasePageBgLabels,
   showcasePaginerDataVolumeLabels,
@@ -21,6 +21,7 @@ import {
   tokenLabel,
   tokenOption,
 } from '@/data/showcasePropLabels';
+import { moduleMenuBusinessTitles } from '@/presets/module-menu/businessModuleTitles';
 import {
   buildIconButtonProSingleCustomizeControls,
   buildIconButtonProZoneItemControls,
@@ -466,12 +467,21 @@ export const moduleMenuItemCountOptions = countSelectOptions(MODULE_MENU_MAX_ITE
 
 export const moduleMenuSubItemCountOptions = countSelectOptions(MODULE_MENU_MAX_SUB_ITEMS);
 
-export const moduleMenuTitlePresetOptions = [
-  { value: 'Module', label: tokenLabel('模块', 'Module') },
-  { value: 'Wallet', label: tokenLabel('钱包', 'Wallet') },
-  { value: 'Settings', label: tokenLabel('设置', 'Settings') },
-  { value: 'Analytics', label: tokenLabel('分析', 'Analytics') },
-];
+export type ModuleMenuScenario = 'module-menu' | 'cregis' | 'udun';
+
+export const moduleMenuScenarioOptions = propLabelSelectOptions(
+  ['module-menu', 'cregis', 'udun'] as const,
+  showcaseModuleMenuScenarioLabels,
+);
+
+export function isModuleMenuDsScenario(state: Record<string, unknown>): boolean {
+  return String(state.scenario ?? 'module-menu') === 'module-menu';
+}
+
+export const moduleMenuBusinessTitleOptions = moduleMenuBusinessTitles.map((title) => ({
+  value: title,
+  label: title,
+}));
 
 export function moduleMenuGroupTitleKey(index: number): string {
   return `groupTitle_${index}`;
@@ -544,12 +554,12 @@ function defaultGroupItemHasSub(groupIndex: number, itemIndex: number): string {
 
 export function buildModuleMenuCustomizeDefaults(): Record<string, unknown> {
   const defaults: Record<string, unknown> = {
+    scenario: 'module-menu' as ModuleMenuScenario,
     showEdgeDivider: true,
     wide: false,
     groupCount: '2',
-    moduleTitleKind: 'text',
     moduleTitleText: 'Module',
-    moduleTitlePreset: 'Module',
+    moduleBusinessTitle: 'Wallet',
   };
 
   for (let index = 0; index < MODULE_MENU_MAX_GROUPS; index += 1) {
@@ -579,33 +589,38 @@ export const moduleMenuCustomizeDefaults = buildModuleMenuCustomizeDefaults();
 export const moduleMenuGroupCountOptions = countSelectOptions(MODULE_MENU_MAX_GROUPS);
 
 export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'scenario',
+    label: '场景化',
+    options: moduleMenuScenarioOptions,
+  },
   { kind: 'boolean', key: 'wide', label: '280px 宽（默认 240px）' },
-  { kind: 'select', key: 'groupCount', label: '组数量', options: moduleMenuGroupCountOptions },
+  {
+    kind: 'select',
+    key: 'groupCount',
+    label: '组数量',
+    options: moduleMenuGroupCountOptions,
+    visibleWhen: isModuleMenuDsScenario,
+  },
   { kind: 'boolean', key: 'showEdgeDivider', label: '右侧分割线' },
 ];
 
 export const moduleMenuTitleCustomizeControls: DocCustomizeControl[] = [
   {
-    kind: 'select',
-    key: 'moduleTitleKind',
-    label: '输入方式',
-    options: propLabelSelectOptions(['text', 'preset'] as const, showcaseModuleMenuTitleKindLabels),
-    row: 0,
-  },
-  {
     kind: 'text',
     key: 'moduleTitleText',
     label: '标题文案',
     row: 0,
-    visibleWhen: (state) => state.moduleTitleKind === 'text',
+    visibleWhen: isModuleMenuDsScenario,
   },
   {
     kind: 'select',
-    key: 'moduleTitlePreset',
-    label: '标题选项',
-    options: moduleMenuTitlePresetOptions,
+    key: 'moduleBusinessTitle',
+    label: '模块',
+    options: moduleMenuBusinessTitleOptions,
     row: 0,
-    visibleWhen: (state) => state.moduleTitleKind === 'preset',
+    visibleWhen: (state) => !isModuleMenuDsScenario(state),
   },
 ];
 
@@ -754,6 +769,21 @@ export const moduleMenuPropRows: OrganismPropRow[] = [
       'Module Menu-Title 文案。内容溢出且向下滚动时，标题下自动显示 EgDivider type=module（不可 prop 定制，与 showEdgeDivider 无关）。',
   },
   { name: 'showEdgeDivider', type: 'boolean', defaultValue: 'true', description: '右侧竖向 EgDivider type=module。' },
+];
+
+export const cregisModuleMenuPropRows: OrganismPropRow[] = [
+  {
+    name: 'title',
+    type: 'string',
+    defaultValue: "'Wallet'",
+    description: '当前模块区标题（Wallet / Tasks / WaaS 等，与 Nav Bar 模块名一致）。',
+  },
+  {
+    name: 'default',
+    type: 'slot',
+    defaultValue: 'EgModuleMenuGroup[]',
+    description: '业务菜单组；配置见 presets/module-menu/cregisModuleMenuGroups.ts。',
+  },
 ];
 
 export const moduleMenuGroupPropRows: OrganismPropRow[] = [
