@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, useId, useSlots } from 'vue';
 import styles from './NavBar.module.css';
 import { useNavBarModuleFocus } from './navBarModuleFocus';
+import { useNavBarWide } from './navBarWide';
 
 withDefaults(
   defineProps<{
@@ -22,6 +23,7 @@ withDefaults(
 const slots = useSlots();
 const itemId = useId();
 const moduleFocus = useNavBarModuleFocus();
+const wide = useNavBarWide();
 
 const isFocused = computed(() => moduleFocus?.focusedId.value === itemId);
 
@@ -39,36 +41,64 @@ function onModuleButtonClick(event: MouseEvent) {
 </script>
 
 <template>
-  <div class="eds-nav-bar-module" :class="styles.moduleItem">
-    <div :class="styles.moduleIconHost">
-      <button
-        type="button"
-        :class="[styles.moduleIconButton, isFocused && styles.moduleIconButtonFocused]"
-        :aria-label="label"
-        :aria-current="active ? 'page' : undefined"
-        :aria-pressed="isFocused"
-        @click="onModuleButtonClick"
+  <div class="eds-nav-bar-module" :class="[styles.moduleItem, wide && styles.moduleItemWide]">
+    <button
+      v-if="wide"
+      type="button"
+      :class="[styles.moduleRowButton, isFocused && styles.moduleRowButtonFocused]"
+      :aria-label="label"
+      :aria-current="active ? 'page' : undefined"
+      :aria-pressed="isFocused"
+      @click="onModuleButtonClick"
+    >
+      <span
+        :class="[
+          styles.moduleRowIcon,
+          slots.focusIcon && !appEntry && styles.moduleIconGlyphWithFocus,
+          appEntry && styles.moduleIconGlyphAppEntry,
+        ]"
       >
-        <span
-          :class="[
-            styles.moduleIconGlyph,
-            slots.focusIcon && !appEntry && styles.moduleIconGlyphWithFocus,
-            appEntry && styles.moduleIconGlyphAppEntry,
-          ]"
-        >
-          <span :class="styles.moduleIconDefault">
-            <slot />
-          </span>
-          <span v-if="slots.focusIcon && !appEntry" :class="styles.moduleIconFocus">
-            <slot name="focusIcon" />
-          </span>
+        <span :class="styles.moduleIconDefault">
+          <slot />
         </span>
-      </button>
-      <span v-if="showReddot" :class="styles.moduleReddot" aria-hidden="true" />
-    </div>
-    <span :class="[styles.moduleLabel, active && styles.moduleLabelActive]">
-      <span :class="styles.moduleLabelPaint" aria-hidden="true">{{ label }}</span>
-      <span :class="styles.moduleLabelSizer">{{ label }}</span>
-    </span>
+        <span v-if="slots.focusIcon && !appEntry" :class="styles.moduleIconFocus">
+          <slot name="focusIcon" />
+        </span>
+      </span>
+      <span :class="[styles.moduleRowLabel, active && styles.moduleRowLabelActive]">{{ label }}</span>
+      <span v-if="showReddot" :class="styles.moduleRowReddot" aria-hidden="true" />
+    </button>
+    <template v-else>
+      <div :class="styles.moduleIconHost">
+        <button
+          type="button"
+          :class="[styles.moduleIconButton, isFocused && styles.moduleIconButtonFocused]"
+          :aria-label="label"
+          :aria-current="active ? 'page' : undefined"
+          :aria-pressed="isFocused"
+          @click="onModuleButtonClick"
+        >
+          <span
+            :class="[
+              styles.moduleIconGlyph,
+              slots.focusIcon && !appEntry && styles.moduleIconGlyphWithFocus,
+              appEntry && styles.moduleIconGlyphAppEntry,
+            ]"
+          >
+            <span :class="styles.moduleIconDefault">
+              <slot />
+            </span>
+            <span v-if="slots.focusIcon && !appEntry" :class="styles.moduleIconFocus">
+              <slot name="focusIcon" />
+            </span>
+          </span>
+        </button>
+        <span v-if="showReddot" :class="styles.moduleReddot" aria-hidden="true" />
+      </div>
+      <span :class="[styles.moduleLabel, active && styles.moduleLabelActive]">
+        <span :class="styles.moduleLabelPaint" aria-hidden="true">{{ label }}</span>
+        <span :class="styles.moduleLabelSizer">{{ label }}</span>
+      </span>
+    </template>
   </div>
 </template>

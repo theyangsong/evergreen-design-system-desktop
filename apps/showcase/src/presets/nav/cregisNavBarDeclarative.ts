@@ -1,6 +1,10 @@
 /** Cregis 场景：EgNavBar 声明式 props 默认值（与文档代码片段一致）。 */
 export const cregisNavBarDeclarativeProps = {
   moduleCount: 8,
+  appEntryCount: 2,
+  corporationTitle: 'Fat-Test',
+  corporationSubtitle: 'Basic',
+  avatarInitials: 'A',
   moduleLabel1: 'Wallet',
   moduleLabel2: 'Tasks',
   moduleLabel3: 'WaaS',
@@ -28,10 +32,18 @@ export const cregisNavBarDeclarativeProps = {
   appEntryLabel1: 'UniChain',
   appEntryIcon1: 'eds-application-22',
   appEntryFocusIcon1: 'eds-application-22',
+  appEntryLabel2: 'MetaMask',
+  appEntryIcon2: 'eds-application-5',
+  appEntryFocusIcon2: 'eds-application-5',
 } as const;
 
 export const cregisNavBarUsageSnippet = `<EgNavBar
+  wide
   module-count="8"
+  app-entry-count="2"
+  corporation-title="Fat-Test"
+  corporation-subtitle="Basic"
+  avatar-initials="A"
   module-label1="Wallet"
   module-label2="Tasks"
   module-label3="WaaS"
@@ -59,4 +71,7 @@ export const cregisNavBarUsageSnippet = `<EgNavBar
   app-entry-label1="UniChain"
   app-entry-icon1="eds-application-22"
   app-entry-focus-icon1="eds-application-22"
+  app-entry-label2="MetaMask"
+  app-entry-icon2="eds-application-5"
+  app-entry-focus-icon2="eds-application-5"
 />`;

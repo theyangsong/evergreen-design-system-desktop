@@ -170,9 +170,17 @@ const previewGroups = computed((): PreviewGroup[] => {
       props-section-id="module-menu-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="[docStyles.subPreviewWidth, organismStyles.previewOrganismPanelHost]">
+        <div
+          class="desktopTokens"
+          :class="[
+            docStyles.previewEffectPanelHost,
+            docStyles.previewEffectPanelHostTall,
+            organismStyles.previewOrganismPanelHost,
+          ]"
+        >
           <EgModuleMenu
             :title="moduleMenuTitle"
+            :wide="Boolean(customize.wide)"
             :show-edge-divider="Boolean(customize.showEdgeDivider)"
           >
             <EgModuleMenuGroup

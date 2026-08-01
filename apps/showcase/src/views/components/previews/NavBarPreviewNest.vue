@@ -34,9 +34,13 @@ const {
 </script>
 
 <template>
-  <EgNavBar :show-divider="showDivider">
+  <EgNavBar :show-divider="showDivider" :wide="String(customize.navBarWidth) === '210'">
     <template #corporation>
-      <EgNavBarCorporation :label="corporationLabel" />
+      <EgNavBarCorporation
+        :title="String(customize.corporationTitle ?? '')"
+        :subtitle="String(customize.corporationSubtitle ?? '')"
+        :label="corporationLabel"
+      />
     </template>
     <EgNavBarModuleItem
       v-for="item in moduleItems"

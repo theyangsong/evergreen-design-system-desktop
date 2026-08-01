@@ -13,7 +13,7 @@ withDefaults(
   {
     initials: 'N',
     label: 'User avatar',
-    colorIndex: 10,
+    colorIndex: 0,
   },
 );
 
@@ -45,7 +45,7 @@ function onAvatarClick(event: MouseEvent) {
     @click="onAvatarClick"
   >
     <span aria-hidden="true" :class="styles.avatarGraphic">
-      <EgAvatar :initials="initials" size="xl" :color-index="colorIndex" />
+      <EgAvatar :initials="initials" size="lg" :color-index="colorIndex" />
     </span>
   </button>
 </template>

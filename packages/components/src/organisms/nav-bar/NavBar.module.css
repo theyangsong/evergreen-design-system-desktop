@@ -18,6 +18,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-shrink: 0;
   width: var(--eds-nav-bar-width);
   min-width: var(--eds-nav-bar-width);
   max-width: var(--eds-nav-bar-width);
@@ -26,6 +27,333 @@
   overflow-x: clip;
   overflow-y: visible;
   font: inherit;
+}
+
+.rootWide {
+  --eds-nav-bar-width: calc(var(--scale-50) + var(--scale-2-5));
+  align-items: flex-start;
+}
+
+.rootWide .corporation {
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding-block: var(--spacing-3) var(--spacing-025);
+  padding-inline: var(--spacing-0);
+}
+
+.rootWide .systemButtons {
+  width: var(--scale-18);
+  padding-inline: calc(var(--scale-2) + var(--scale-025));
+  align-self: flex-start;
+}
+
+.corporationWideShell {
+  display: flex;
+  align-self: stretch;
+  width: 100%;
+  padding-inline: var(--spacing-2);
+  box-sizing: border-box;
+}
+
+.corporationWideButton {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  min-width: 0;
+  padding: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--material-hide);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  isolation: isolate;
+  box-sizing: border-box;
+}
+
+.corporationWideButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--event-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+}
+
+.corporationWideButton:hover:not(:disabled):not(.corporationWideButtonFocused)::before {
+  opacity: 1;
+}
+
+.corporationWideButtonFocused:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.corporationWideButtonFocused::before {
+  opacity: 0;
+  transition: none;
+}
+
+.corporationWideButton:focus {
+  outline: none;
+}
+
+.corporationMarkGraphic {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--scale-10);
+  height: var(--scale-10);
+  border-radius: var(--radius-sm);
+  background: var(--material-same-white-tertiary);
+  color: var(--text-base-primary);
+  font-size: var(--eds-title-size);
+  font-weight: var(--eds-title-weight);
+  line-height: var(--scale-10);
+  text-align: center;
+}
+
+.corporationWideButton .corporationMeta {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corporationWideButton::before {
+    transition: none;
+  }
+}
+
+.corporationMeta {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.corporationTitle {
+  width: 100%;
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-strong-size);
+  font-weight: var(--eds-body-medium-strong-weight);
+  line-height: var(--eds-body-medium-strong-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.corporationSubtitle {
+  width: 100%;
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-medium-strong-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-strong-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rootWide .moduleRegion {
+  align-items: flex-start;
+  padding-block: var(--spacing-2) var(--spacing-0);
+  padding-inline: var(--spacing-2);
+}
+
+.rootWide .moduleRegionContent {
+  align-items: stretch;
+}
+
+/* Module Combo (A modules → B page divider → C app entries), spacing-3 between each tier */
+.moduleCombo,
+.moduleGroup,
+.appEntryItems {
+  display: contents;
+}
+
+.rootWide .moduleCombo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  width: 100%;
+  gap: var(--spacing-3);
+}
+
+.rootWide .moduleGroup,
+.rootWide .appEntryItems {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: var(--spacing-025);
+}
+
+.rootWide .moduleRegionDivider {
+  align-self: stretch;
+  width: auto;
+  margin-inline: var(--spacing-3);
+}
+
+.rootWide .individuals {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-6) var(--spacing-4);
+}
+
+.rootWide .bottomIcons {
+  flex-direction: row;
+  gap: var(--spacing-1);
+  order: 2;
+}
+
+.rootWide .bottomIconHost {
+  width: var(--scale-9);
+  height: var(--scale-9);
+  min-width: var(--scale-9);
+  min-height: var(--scale-9);
+  padding: var(--spacing-2-5);
+}
+
+.rootWide .avatarHost {
+  order: 1;
+}
+
+.moduleItemWide {
+  max-width: none;
+  align-self: stretch;
+}
+
+.moduleRowButton {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--spacing-3);
+  width: 100%;
+  min-height: calc(var(--scale-9) + var(--scale-05));
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--material-hide);
+  color: var(--text-base-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  isolation: isolate;
+  box-sizing: border-box;
+}
+
+.moduleRowButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--event-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+}
+
+.moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)::before {
+  opacity: 1;
+}
+
+.moduleRowButtonFocused:not(:disabled) {
+  background-color: var(--event-focus);
+  outline: none;
+}
+
+.moduleRowButtonFocused::before {
+  opacity: 0;
+  transition: none;
+}
+
+.moduleRowIcon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  line-height: 0;
+}
+
+.moduleRowLabel {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  color: var(--text-base-primary);
+}
+
+.moduleRowLabelActive {
+  color: var(--text-base-primary);
+}
+
+.moduleRowButtonFocused:not(:disabled) .moduleRowLabel {
+  color: var(--text-base-primary);
+}
+
+.moduleRowReddot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: var(--scale-2);
+  height: var(--scale-2);
+  border-radius: var(--radius-md);
+  background-color: var(--status-danger);
+  pointer-events: none;
+}
+
+.moduleRowButtonFocused:not(:disabled) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
+  color: var(--material-brand-primary);
+}
+
+.moduleRowButton:not(.moduleRowButtonFocused) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
+  color: var(--stroke-base-secondary);
+  transition: color var(--eds-interaction-duration) var(--eds-interaction-easing);
+}
+
+.moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)
+  .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
+  color: var(--stroke-base-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moduleRowButton::before {
+    transition: none;
+  }
+
+  .moduleRowButton:not(.moduleRowButtonFocused) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
+    transition: none;
+  }
 }
 
 .split {
@@ -99,8 +427,10 @@
 }
 
 .moduleRegionDivider {
-  width: var(--scale-6);
   flex-shrink: 0;
+  align-self: stretch;
+  width: auto;
+  margin-inline: var(--spacing-3);
 }
 
 .individuals {
@@ -285,6 +615,14 @@
   overflow: visible;
 }
 
+.rootWide .moduleItem {
+  max-width: none;
+}
+
+.moduleRowIcon:not(.moduleIconGlyphAppEntry) :global(.eds-i-f) {
+  fill: currentColor;
+}
+
 .moduleIconHost {
   position: relative;
   display: inline-flex;
@@ -360,6 +698,7 @@
 }
 
 .moduleIconButton {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -370,11 +709,23 @@
   border-radius: var(--radius-sm);
   background: var(--material-hide);
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  isolation: isolate;
 }
 
-.moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused) {
-  background-color: var(--event-hover);
+.moduleIconButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--event-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+}
+
+.moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused)::before {
+  opacity: 1;
 }
 
 .moduleIconButtonFocused:not(:disabled) {
@@ -382,8 +733,24 @@
   outline: none;
 }
 
+.moduleIconButtonFocused::before {
+  opacity: 0;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moduleIconButton::before {
+    transition: none;
+  }
+
+  .moduleIconButton:not(.moduleIconButtonFocused) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
+    transition: none;
+  }
+}
+
 .moduleIconGlyph {
   position: relative;
+  z-index: 1;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -414,10 +781,21 @@
   display: inline-flex;
 }
 
+.moduleRowButtonFocused:not(:disabled) .moduleIconGlyphWithFocus .moduleIconDefault {
+  display: none;
+}
+
+.moduleRowButtonFocused:not(:disabled) .moduleIconGlyphWithFocus .moduleIconFocus {
+  display: inline-flex;
+}
+
 /* 模块 icon：仅通过 color 驱动 token 描边/填充配色；fixed / appEntry 不覆盖 */
 .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
   color: var(--stroke-base-secondary);
-  transition: var(--eds-interaction-transition);
+}
+
+.moduleIconButton:not(.moduleIconButtonFocused) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
+  transition: color var(--eds-interaction-duration) var(--eds-interaction-easing);
 }
 
 .moduleIconGlyph:not(.moduleIconGlyphAppEntry) :global(.eds-i-f) {
@@ -431,6 +809,7 @@
 
 .moduleIconButtonFocused:not(:disabled) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
   color: var(--material-brand-primary);
+  transition: none;
 }
 
 /* 应用入口：库内 icon 原样渲染，不参与 Nav Bar token 换色 */

@@ -107,6 +107,8 @@ function navBarAppEntryLabelDefaults(label = 'Label'): Record<string, string> {
   for (let index = 1; index <= NAV_BAR_APP_ENTRY_COUNT_MAX; index += 1) {
     entries[`appEntryLabel${index}`] = label;
   }
+  entries.appEntryLabel1 = 'UniChain';
+  entries.appEntryLabel2 = 'MetaMask';
   return entries;
 }
 
@@ -116,6 +118,10 @@ function navBarAppEntryIconDefaults(icon = 'eds-add'): Record<string, string> {
     entries[`appEntryIcon${index}`] = icon;
     entries[`appEntryFocusIcon${index}`] = icon;
   }
+  entries.appEntryIcon1 = 'eds-application-22';
+  entries.appEntryFocusIcon1 = 'eds-application-22';
+  entries.appEntryIcon2 = 'eds-application-5';
+  entries.appEntryFocusIcon2 = 'eds-application-5';
   return entries;
 }
 
@@ -133,6 +139,15 @@ export const navBarScenarioOptions = propLabelSelectOptions(
   ['nav-bar', 'cregis'] as const,
   showcaseNavBarScenarioLabels,
 );
+
+export const navBarWidthOptions = propLabelSelectOptions(['74', '210'] as const, {
+  '74': '74px（默认）',
+  '210': '210px',
+});
+
+export function isNavBarWideCustomize(state: Record<string, unknown>): boolean {
+  return String(state.navBarWidth ?? '74') === '210';
+}
 
 export const cregisNavBarPropRows: OrganismPropRow[] = [
   {
@@ -182,8 +197,9 @@ export const cregisNavBarPropRows: OrganismPropRow[] = [
 export const navBarCustomizeDefaults = {
   scenario: 'nav-bar' as NavBarScenario,
   showDivider: true,
+  navBarWidth: '210',
   moduleCount: '4',
-  appEntryCount: '1',
+  appEntryCount: '2',
   ...navBarModuleLabelDefaults(),
   ...navBarModuleIconDefaults(),
   ...navBarModuleReddotDefaults(),
@@ -191,6 +207,8 @@ export const navBarCustomizeDefaults = {
   ...navBarAppEntryIconDefaults(),
   ...navBarAppEntryReddotDefaults(),
   corporationLabel: 'G',
+  corporationTitle: 'Fat-Test',
+  corporationSubtitle: 'Basic',
   avatarInitials: 'N',
 };
 
@@ -200,6 +218,12 @@ export const navBarCustomizeControls: DocCustomizeControl[] = [
     key: 'scenario',
     label: '场景化',
     options: navBarScenarioOptions,
+  },
+  {
+    kind: 'select',
+    key: 'navBarWidth',
+    label: '宽度',
+    options: navBarWidthOptions,
   },
   {
     kind: 'select',
@@ -219,7 +243,19 @@ export const navBarCustomizeControls: DocCustomizeControl[] = [
     kind: 'text',
     key: 'corporationLabel',
     label: '企业标识',
-    visibleWhen: (state) => state.scenario === 'nav-bar',
+    visibleWhen: (state) => state.scenario === 'nav-bar' && !isNavBarWideCustomize(state),
+  },
+  {
+    kind: 'text',
+    key: 'corporationTitle',
+    label: '企业名称',
+    visibleWhen: (state) => state.scenario === 'nav-bar' && isNavBarWideCustomize(state),
+  },
+  {
+    kind: 'text',
+    key: 'corporationSubtitle',
+    label: '版本',
+    visibleWhen: (state) => state.scenario === 'nav-bar' && isNavBarWideCustomize(state),
   },
   {
     kind: 'text',
@@ -300,7 +336,7 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
         kind: 'text' as const,
         key: `appEntryIcon${entryIndex}`,
         label: '默认图标',
-        placeholder: 'eds-add',
+        placeholder: entryIndex === 1 ? 'eds-application-22' : entryIndex === 2 ? 'eds-application-5' : 'eds-add',
         row: entryIndex,
         visibleWhen,
       },
@@ -308,7 +344,7 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
         kind: 'text' as const,
         key: `appEntryFocusIcon${entryIndex}`,
         label: '聚焦图标',
-        placeholder: 'eds-add',
+        placeholder: entryIndex === 1 ? 'eds-application-22' : entryIndex === 2 ? 'eds-application-5' : 'eds-add',
         row: entryIndex,
         visibleWhen,
       },
@@ -324,6 +360,12 @@ export const navBarAppEntryLabelCustomizeControls: DocCustomizeControl[] = Array
 ).flat();
 
 export const navBarPropRows: OrganismPropRow[] = [
+  {
+    name: 'wide',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'false → 74px（scale-18 + scale-05）；true → 210px（scale-50 + scale-2-5）。Showcase 文档预览默认 true。',
+  },
   { name: 'split', type: 'boolean', defaultValue: 'false', description: 'Corporation 与 Module 区之间 Page Divider。Figma Split。' },
   { name: 'showSystemButtons', type: 'boolean', defaultValue: 'true', description: '顶栏系统按钮（交通灯）。' },
   {
@@ -354,7 +396,19 @@ export const navBarPropRows: OrganismPropRow[] = [
     name: 'corporationLabel',
     type: 'string',
     defaultValue: "'G'",
-    description: '声明式且无 #corporation slot 时的企业标识文案。',
+    description: '74px 模式下 Logo 内单字；210px 模式下取 corporationTitle 首字母。',
+  },
+  {
+    name: 'corporationTitle',
+    type: 'string',
+    defaultValue: '-',
+    description: 'wide 模式下企业名称（Body Medium Strong）；Logo 内字母取其首字。',
+  },
+  {
+    name: 'corporationSubtitle',
+    type: 'string',
+    defaultValue: '-',
+    description: 'wide 模式下版本文案（Footnote Strong / tertiary）。',
   },
   {
     name: 'avatarInitials',
@@ -491,6 +545,7 @@ function defaultGroupItemHasSub(groupIndex: number, itemIndex: number): string {
 export function buildModuleMenuCustomizeDefaults(): Record<string, unknown> {
   const defaults: Record<string, unknown> = {
     showEdgeDivider: true,
+    wide: false,
     groupCount: '2',
     moduleTitleKind: 'text',
     moduleTitleText: 'Module',
@@ -524,6 +579,7 @@ export const moduleMenuCustomizeDefaults = buildModuleMenuCustomizeDefaults();
 export const moduleMenuGroupCountOptions = countSelectOptions(MODULE_MENU_MAX_GROUPS);
 
 export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'boolean', key: 'wide', label: '280px 宽（默认 240px）' },
   { kind: 'select', key: 'groupCount', label: '组数量', options: moduleMenuGroupCountOptions },
   { kind: 'boolean', key: 'showEdgeDivider', label: '右侧分割线' },
 ];
@@ -684,6 +740,12 @@ export const moduleMenuGroupCustomizeControlsList = Array.from(
 );
 
 export const moduleMenuPropRows: OrganismPropRow[] = [
+  {
+    name: 'wide',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'false → 240px（scale-50 + scale-10）；true → 280px（scale-50 + scale-20）。',
+  },
   {
     name: 'title',
     type: 'string',

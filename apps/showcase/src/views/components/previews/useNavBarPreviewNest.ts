@@ -1,5 +1,6 @@
 import { computed, type ComputedRef } from 'vue';
-import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
+import { resolveNavBarPreviewIconName } from './navBarPreviewCustomize';
+import { navBarCustomizeDefaults } from './organismTemplateDocData';
 
 export type NavBarPreviewNestItem = {
   order: number;
@@ -15,8 +16,12 @@ function labelAt(
   order: number,
 ): string {
   const key = `${prefix}${order}`;
-  const value = customize[key];
-  return value != null && String(value).trim().length > 0 ? String(value).trim() : 'Label';
+  const raw = customize[key];
+  const fromState = raw != null ? String(raw).trim() : '';
+  if (fromState) return fromState;
+  const fromDefaults = (navBarCustomizeDefaults as Record<string, unknown>)[key];
+  if (typeof fromDefaults === 'string' && fromDefaults.trim()) return fromDefaults.trim();
+  return 'Label';
 }
 
 function iconAt(
@@ -24,10 +29,7 @@ function iconAt(
   prefix: 'moduleIcon' | 'moduleFocusIcon' | 'appEntryIcon' | 'appEntryFocusIcon',
   order: number,
 ): string {
-  const key = `${prefix}${order}`;
-  const value = customize[key];
-  const name = value != null ? String(value).trim() : '';
-  return name || showcaseDefaultIconName;
+  return resolveNavBarPreviewIconName(customize, prefix, order);
 }
 
 function reddotAt(

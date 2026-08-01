@@ -10,10 +10,13 @@ withDefaults(
   defineProps<{
     title?: string;
     showEdgeDivider?: boolean;
+    /** false → 240px（scale-50 + scale-10）；true → 280px（scale-50 + scale-20）。 */
+    wide?: boolean;
   }>(),
   {
     title: 'Module',
     showEdgeDivider: true,
+    wide: false,
   },
 );
 
@@ -84,7 +87,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <aside class="eds-module-menu" :class="styles.root" aria-label="Module menu">
+  <aside
+    class="eds-module-menu"
+    :class="[styles.root, wide && styles.rootWide]"
+    aria-label="Module menu"
+  >
     <div :class="styles.body">
       <div
         ref="scrollRef"

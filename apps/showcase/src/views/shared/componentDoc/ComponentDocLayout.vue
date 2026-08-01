@@ -25,7 +25,7 @@ const props = withDefaults(
     usageSnippetOverride?: string;
     showCustomize?: boolean;
     showProps?: boolean;
-    /** Organism 等纵向组合：预览区 960px 并 stretch 内容。 */
+    /** Organism 等纵向组合：previewShell 1024px，inner 组件画布 800px。 */
     tallPreview?: boolean;
     /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock）。 */
     compactPreview?: boolean;

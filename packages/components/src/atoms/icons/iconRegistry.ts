@@ -1,4 +1,7 @@
 import { processSvg, type IconFillTone, type IconKind, type ProcessedIcon } from './processSvg';
+import edsApplication5Raw from '../avatar/eds-application-5.svg?raw';
+import edsApplication21Raw from '../avatar/eds-application-21.svg?raw';
+import edsApplication22Raw from '../avatar/eds-application-22.svg?raw';
 
 const iconSvgModules = import.meta.glob('./*.svg', {
   query: '?raw',
@@ -14,8 +17,24 @@ const appEntrySvgModules = import.meta.glob('../avatar/eds-*.svg', {
 
 const svgModules: Record<string, string> = { ...iconSvgModules };
 
+/** 显式注册：新加入 avatar 的 eds-* 图标在 dev 下 glob 需重启才生效，静态 import 可立即 HMR。 */
+const EXPLICIT_AVATAR_ICONS: Record<string, string> = {
+  'eds-application-5': edsApplication5Raw,
+  'eds-application-21': edsApplication21Raw,
+  'eds-application-22': edsApplication22Raw,
+};
+
+for (const [name, raw] of Object.entries(EXPLICIT_AVATAR_ICONS)) {
+  svgModules[`./${name}.svg`] = raw;
+}
+
+function avatarIconBaseName(path: string): string {
+  const fileName = path.split('/').pop() ?? path;
+  return fileName.replace(/\.svg$/i, '');
+}
+
 for (const [path, raw] of Object.entries(appEntrySvgModules)) {
-  const base = path.replace(/^\.\.\/avatar\//, '').replace(/\.svg$/i, '');
+  const base = avatarIconBaseName(path);
   svgModules[`./${base}.svg`] = raw;
 }
 

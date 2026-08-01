@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { EgNavBar } from '@eds/desktop-components';
 import {
   cregisNavBarDeclarativeProps,
-  cregisNavBarUsageSnippet,
 } from '@/presets/nav/cregisNavBarDeclarative';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
@@ -12,6 +11,7 @@ import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import NavBarPreviewNest from './NavBarPreviewNest.vue';
+import { healNavBarCustomizeState } from './navBarPreviewCustomize';
 import {
   ORGANISM_IMPORT,
   cregisNavBarPropRows,
@@ -24,6 +24,12 @@ import {
 } from './organismTemplateDocData';
 
 const customize = reactive({ ...navBarCustomizeDefaults });
+healNavBarCustomizeState(customize);
+
+watch(
+  () => customize.appEntryCount,
+  () => healNavBarCustomizeState(customize),
+);
 
 const isNavBarScenario = computed(() => customize.scenario === 'nav-bar');
 
@@ -35,15 +41,34 @@ const docPropRows = computed(() => (isNavBarScenario.value ? navBarPropRows : cr
 
 const docSlotRows = computed(() => (isNavBarScenario.value ? navBarSlotRows : []));
 
+const isNavBarWide = computed(() => customize.navBarWidth === '210');
+
 const docUsageSnippet = computed(() => {
   if (!isNavBarScenario.value) {
-    return cregisNavBarUsageSnippet;
+    return buildVueSelfClosingSnippet(
+      'EgNavBar',
+      {
+        ...cregisNavBarDeclarativeProps,
+        wide: isNavBarWide.value,
+      },
+      {
+        defaults: { ...cregisNavBarDeclarativeProps, wide: false },
+        omitKeys: ['scenario', 'navBarWidth'],
+      },
+    );
   }
 
-  return buildVueSelfClosingSnippet('EgNavBar', customize, {
-    defaults: navBarCustomizeDefaults,
-    omitKeys: ['scenario'],
-  });
+  return buildVueSelfClosingSnippet(
+    'EgNavBar',
+    {
+      ...customize,
+      wide: isNavBarWide.value,
+    },
+    {
+      defaults: { ...navBarCustomizeDefaults, wide: false },
+      omitKeys: ['scenario', 'navBarWidth'],
+    },
+  );
 });
 </script>
 
@@ -62,15 +87,20 @@ const docUsageSnippet = computed(() => {
       :usage-snippet-override="docUsageSnippet"
       :prop-rows="docPropRows"
       :slot-rows="docSlotRows"
-      props-section-id="nav-bar-props"
-    >
+          props-section-id="nav-bar-props"
+          @reset-preview="healNavBarCustomizeState(customize)"
+        >
       <template #preview>
         <div
           class="desktopTokens"
-          :class="[docStyles.previewInputHost, organismStyles.previewOrganismNavHost]"
+          :class="[
+            docStyles.previewEffectPanelHost,
+            docStyles.previewEffectPanelHostTall,
+            organismStyles.previewOrganismNavHost,
+          ]"
         >
           <NavBarPreviewNest v-if="isNavBarScenario" :customize="customize" />
-          <EgNavBar v-else v-bind="cregisNavBarDeclarativeProps" />
+          <EgNavBar v-else :wide="isNavBarWide" v-bind="cregisNavBarDeclarativeProps" />
         </div>
       </template>
 

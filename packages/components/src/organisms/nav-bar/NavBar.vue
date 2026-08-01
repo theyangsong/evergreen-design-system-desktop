@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, useAttrs, useSlots } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, provide, ref, useAttrs, useSlots } from 'vue';
 import { EgIcon, getProcessedIcon } from '../../atoms/icons';
 import { EgDivider } from '../../atoms/divider';
 import NavBarAvatar from './NavBarAvatar.vue';
@@ -14,6 +14,7 @@ import {
   type NavBarDeclarativeProps,
 } from './navBarDeclarative';
 import { navBarDefaultBottomUtilities } from './navBarBottomUtilities';
+import { NAV_BAR_WIDE_KEY } from './navBarWide';
 import styles from './NavBar.module.css';
 
 defineOptions({
@@ -25,26 +26,38 @@ const props = withDefaults(
     split?: boolean;
     showSystemButtons?: boolean;
     showDivider?: boolean;
+    /** false → 74px（scale-18 + scale-05）；true → 210px（scale-50 + scale-2-5）。右侧分割线另计 1px。 */
+    wide?: boolean;
     moduleCount?: number;
     appEntryCount?: number;
     corporationLabel?: string;
+    corporationTitle?: string;
+    corporationSubtitle?: string;
     avatarInitials?: string;
   }>(),
   {
     split: false,
     showSystemButtons: true,
     showDivider: true,
+    wide: false,
   },
 );
 
 const attrs = useAttrs();
 const slots = useSlots();
 
+provide(
+  NAV_BAR_WIDE_KEY,
+  computed(() => props.wide),
+);
+
 const declarativeProps = computed((): NavBarDeclarativeProps => {
   const result: NavBarDeclarativeProps = {
     moduleCount: props.moduleCount,
     appEntryCount: props.appEntryCount,
     corporationLabel: props.corporationLabel,
+    corporationTitle: props.corporationTitle,
+    corporationSubtitle: props.corporationSubtitle,
     avatarInitials: props.avatarInitials,
   };
 
@@ -77,7 +90,9 @@ const useDeclarativeLayout = computed(
 
 function resolveIcon(name: string): string {
   const trimmed = name.trim();
-  if (trimmed && getProcessedIcon(trimmed)) return trimmed;
+  if (!trimmed) return 'eds-add';
+  if (getProcessedIcon(trimmed)) return trimmed;
+  if (/^eds-(application|business)-\d+$/.test(trimmed)) return trimmed;
   return 'eds-add';
 }
 
@@ -206,7 +221,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="eds-nav-bar-shell" :class="styles.shell">
-    <nav class="eds-nav-bar" :class="[styles.root, split && styles.split]" aria-label="Application navigation">
+    <nav
+      class="eds-nav-bar"
+      :class="[styles.root, split && styles.split, wide && styles.rootWide]"
+      aria-label="Application navigation"
+    >
       <NavBarModuleFocusProvider>
         <div :class="[styles.corporation, corporationChromeShadow && styles.corporationOverflow]">
           <NavBarSystemButtons v-if="showSystemButtons" />
@@ -214,6 +233,8 @@ onBeforeUnmount(() => {
           <NavBarCorporation
             v-else-if="useDeclarativeLayout"
             :label="String(declarativeProps.corporationLabel ?? 'G')"
+            :title="String(declarativeProps.corporationTitle ?? '')"
+            :subtitle="String(declarativeProps.corporationSubtitle ?? '')"
           />
         </div>
         <EgDivider
@@ -228,34 +249,42 @@ onBeforeUnmount(() => {
           @scroll="onModuleRegionScroll"
         >
           <div ref="moduleRegionContentRef" :class="styles.moduleRegionContent">
-            <slot v-if="hasDefaultSlot" />
-            <template v-else-if="declarativeModules.length > 0">
-              <NavBarModuleItem
-                v-for="(item, index) in declarativeModules"
-                :key="`declarative-module-${index}`"
-                :label="item.label"
-              >
-                <EgIcon :name="resolveIcon(item.icon)" size="md" fit />
-                <template #focusIcon>
-                  <EgIcon :name="resolveIcon(item.focusIcon)" size="md" fit />
+            <div :class="styles.moduleCombo">
+              <div :class="styles.moduleGroup">
+                <slot v-if="hasDefaultSlot" />
+                <template v-else-if="declarativeModules.length > 0">
+                  <NavBarModuleItem
+                    v-for="(item, index) in declarativeModules"
+                    :key="`declarative-module-${index}`"
+                    :label="item.label"
+                  >
+                    <EgIcon :name="resolveIcon(item.icon)" size="md" fit />
+                    <template #focusIcon>
+                      <EgIcon :name="resolveIcon(item.focusIcon)" size="md" fit />
+                    </template>
+                  </NavBarModuleItem>
                 </template>
-              </NavBarModuleItem>
-            </template>
-            <template v-if="slots.appEntries">
-              <EgDivider :class="styles.moduleRegionDivider" type="navigator" />
-              <slot name="appEntries" />
-            </template>
-            <template v-else-if="declarativeAppEntries.length > 0">
-              <EgDivider :class="styles.moduleRegionDivider" type="navigator" />
-              <NavBarModuleItem
-                v-for="(item, index) in declarativeAppEntries"
-                :key="`declarative-app-entry-${index}`"
-                app-entry
-                :label="item.label"
-              >
-                <EgIcon :name="resolveIcon(item.icon)" size="md" fit />
-              </NavBarModuleItem>
-            </template>
+              </div>
+              <template v-if="slots.appEntries">
+                <EgDivider :class="styles.moduleRegionDivider" type="page" />
+                <div :class="styles.appEntryItems">
+                  <slot name="appEntries" />
+                </div>
+              </template>
+              <template v-else-if="declarativeAppEntries.length > 0">
+                <EgDivider :class="styles.moduleRegionDivider" type="page" />
+                <div :class="styles.appEntryItems">
+                  <NavBarModuleItem
+                    v-for="(item, index) in declarativeAppEntries"
+                    :key="`declarative-app-entry-${index}`"
+                    app-entry
+                    :label="item.label"
+                  >
+                    <EgIcon :name="resolveIcon(item.icon)" size="md" fit />
+                  </NavBarModuleItem>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
         <div :class="[styles.individuals, individualsChromeShadow && styles.individualsOverflow]">

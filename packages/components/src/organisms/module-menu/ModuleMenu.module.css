@@ -1,15 +1,21 @@
 .root {
+  --eds-module-menu-width: calc(var(--scale-50) + var(--scale-10));
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  width: 100%;
-  min-width: calc(var(--scale-50) + var(--scale-10));
-  max-width: calc(var(--scale-50) + var(--scale-20));
+  flex-shrink: 0;
+  width: var(--eds-module-menu-width);
+  min-width: var(--eds-module-menu-width);
+  max-width: var(--eds-module-menu-width);
   min-height: var(--scale-30);
   height: 100%;
   background: var(--box-menu);
   overflow: hidden;
   font: inherit;
+}
+
+.rootWide {
+  --eds-module-menu-width: calc(var(--scale-50) + var(--scale-20));
 }
 
 .body {
