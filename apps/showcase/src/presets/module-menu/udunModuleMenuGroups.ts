@@ -1,33 +1,18 @@
+import type { UdunModuleMenuBusinessTitle } from './businessModuleTitles';
 import type { ModuleMenuPresetGroup } from './cregisModuleMenuGroups';
+import { moduleMenuComponentDefaultPresetGroups } from './moduleMenuComponentDefaultPreset';
 
-/** UDun Module Menu — 与 Cregis 同结构占位，后续可独立维护。 */
-export const udunModuleMenuGroups: ModuleMenuPresetGroup[] = [
-  {
-    title: 'Overview',
-    items: [
-      { label: 'Dashboard', icon: 'eds-wallet' },
-      { label: 'Analytics', icon: 'eds-bill' },
-    ],
-  },
-  {
-    title: 'Assets',
-    items: [
-      { label: 'Wallets', icon: 'eds-wallet' },
-      { label: 'Transactions', icon: 'eds-circulation' },
-    ],
-  },
-  {
-    title: 'Operations',
-    items: [
-      { label: 'Approvals', icon: 'eds-database-safety' },
-      { label: 'Reports', icon: 'eds-bill' },
-    ],
-  },
-  {
-    title: 'Settings',
-    items: [
-      { label: 'Team', icon: 'eds-categorization' },
-      { label: 'Integrations', icon: 'eds-app-ecology' },
-    ],
-  },
-];
+/** UDun Module Menu — 按 Nav Bar 模块标题索引；未列出的模块回退 `udunDefaultModuleMenuGroups`。 */
+export const udunModuleMenuByTitle: Partial<
+  Record<UdunModuleMenuBusinessTitle, ModuleMenuPresetGroup[]>
+> = {};
+
+/** 未配置模块回退：组件场景默认菜单（与 Cregis 共用同一套组件 defaults）。 */
+export const udunDefaultModuleMenuGroups = moduleMenuComponentDefaultPresetGroups;
+
+/** @deprecated 使用 getUdunModuleMenuGroups(title) */
+export const udunModuleMenuGroups = udunDefaultModuleMenuGroups;
+
+export function getUdunModuleMenuGroups(title: UdunModuleMenuBusinessTitle): ModuleMenuPresetGroup[] {
+  return udunModuleMenuByTitle[title] ?? udunDefaultModuleMenuGroups;
+}

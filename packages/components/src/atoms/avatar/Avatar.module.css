@@ -51,14 +51,27 @@
   justify-content: center;
   box-sizing: border-box;
   font-family: var(--eds-family-sans);
-  font-size: calc(var(--eds-bar-size) * 2);
-  font-weight: var(--eds-bar-weight);
+  font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
   transform: scale(0.5);
   transform-origin: center center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * 首字字号硬编码（2× + scale(0.5)）；不继承 --eds-bar-* 文本 token。
+ * sm/md → 16px（视觉 8px）；lg/xl → 24px（视觉 12px）。
+ */
+.sm .initialsLabel,
+.md .initialsLabel {
+  font-size: 16px;
+}
+
+.lg .initialsLabel,
+.xl .initialsLabel {
+  font-size: 24px;
 }
 
 .robotHost {

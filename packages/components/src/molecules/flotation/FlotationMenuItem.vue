@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue';
+import { computed, provide, useSlots } from 'vue';
 import { EgCrypto, type CryptoName } from '../../atoms/crypto';
 import { EgIcon } from '../../atoms/icons';
 import { EgCheckbox } from '../toggle';
 import { EgMessage, EgReddot, type MessageType } from '../feedback';
+import { MESSAGE_PARENT_FOCUSED_KEY } from '../feedback/messageFocusContext';
 import { EgTag, type TagStatus } from '../tag';
 import styles from './Flotation.module.css';
 
@@ -71,6 +72,15 @@ const showLeading = computed(
     props.boxType === 'image-text',
 );
 
+const showTrailing = computed(
+  () =>
+    props.showReddot ||
+    props.showCascader ||
+    props.showMessage ||
+    Boolean(slots.trailing) ||
+    Boolean(slots.message),
+);
+
 const leadingAsset = computed(() => props.symbolIcon);
 
 const leadingCryptoName = computed(() => leadingAsset.value as CryptoName);
@@ -80,6 +90,9 @@ const itemClass = computed(() => [
   props.focused && styles.boxFocused,
   props.disabled && styles.boxDisabled,
 ]);
+
+const isRowFocused = computed(() => props.focused);
+provide(MESSAGE_PARENT_FOCUSED_KEY, isRowFocused);
 
 function onClick(event: MouseEvent) {
   if (props.disabled) return;
@@ -122,7 +135,7 @@ function onClick(event: MouseEvent) {
       </slot>
     </span>
 
-    <span :class="styles.boxMain">
+    <span :class="[styles.boxMain, showTrailing && styles.boxMainGrow]">
       <span :class="[styles.boxLabel, danger && styles.boxLabelDanger]">
         <slot>{{ label }}</slot>
       </span>
@@ -133,7 +146,7 @@ function onClick(event: MouseEvent) {
       </span>
     </span>
 
-    <span :class="styles.boxTrailing">
+    <span v-if="showTrailing" :class="styles.boxTrailing">
       <slot name="trailing">
         <span v-if="showMessage || slots.message" :class="styles.boxMessage">
           <slot name="message">

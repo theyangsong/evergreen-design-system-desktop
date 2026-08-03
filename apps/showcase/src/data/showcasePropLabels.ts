@@ -152,6 +152,11 @@ export const showcaseFlotationTriggerStyleLabels = {
   text: tokenLabel('文字', 'text'),
 } as const;
 
+export const showcaseFlotationTriggerKindLabels = {
+  'standard-dropdown': '标准下拉框',
+  'module-menu': '模块菜单',
+} as const;
+
 export const showcaseFlotationBoxTypeLabels = {
   text: tokenLabel('文字', 'text'),
   'symbol-text': tokenLabel('图标+文字', 'symbol-text'),
@@ -195,6 +200,11 @@ export const showcaseFeedbackMessageTypeLabels = {
   subtle: tokenLabel('浅', 'subtle'),
   brand: tokenLabel('品牌', 'brand'),
   danger: tokenLabel('危险', 'danger'),
+} as const;
+
+export const showcaseMessageFocusBackgroundLabels = {
+  inherit: tokenLabel('继承原色', 'inherit'),
+  'same-white': tokenLabel('同白', 'same-white'),
 } as const;
 
 export const showcaseFormSubmissionTypeLabels = {
@@ -300,8 +310,8 @@ export const showcaseModuleMenuAccessoryLabels = {
 } as const;
 
 export const showcaseModuleMenuTitleKindLabels = {
-  text: tokenLabel('文本', 'text'),
-  preset: tokenLabel('预设', 'preset'),
+  text: '文本',
+  preset: '下拉框',
 } as const;
 
 export const showcaseNavBarScenarioLabels = {
@@ -310,9 +320,9 @@ export const showcaseNavBarScenarioLabels = {
 } as const;
 
 export const showcaseModuleMenuScenarioLabels = {
-  'module-menu': tokenLabel('组件', 'module-menu'),
-  cregis: tokenLabel('Cregis', 'cregis'),
-  udun: tokenLabel('UDun', 'udun'),
+  'module-menu': '组件',
+  cregis: 'Cregis',
+  udun: 'UDun',
 } as const;
 
 export const showcaseIconButtonEventLabels = {

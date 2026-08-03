@@ -1,19 +1,60 @@
 .menuBody {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  /* spacing-025 = 1px；Website :root 无此 token，缺 .desktopTokens 时回退 1px */
-  gap: var(--spacing-025, 1px);
+  gap: var(--spacing-1);
   width: 100%;
   min-width: 0;
+  min-height: 0;
   box-sizing: border-box;
 }
 
 .menuList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-025, 1px);
+  gap: var(--spacing-025);
   width: 100%;
   min-width: 0;
+}
+
+.menuListScrollable {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.menuListScrollable::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 列表末 4px 占位：视觉间距在滚动区内，避免 footer gap 滚动时露出空白。 */
+.menuListScrollEnd {
+  flex-shrink: 0;
+  width: 100%;
+  height: var(--spacing-1);
+  margin-top: calc(-1 * var(--spacing-025));
+}
+
+.menuFooter {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.menuBodySticky {
+  overflow: hidden;
+  gap: 0;
 }
 
 .menuDivider {
@@ -25,6 +66,7 @@
 
 .addRow {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: var(--spacing-2);
   width: 100%;
@@ -53,11 +95,31 @@
   justify-content: center;
   width: var(--icon-md);
   height: var(--icon-md);
-  color: var(--stroke-base-secondary);
+  color: var(--stroke-color-brand);
 }
 
 .addIcon :global(.eds-i-f) {
   fill: currentColor;
+}
+
+/* EgFlotationMenu：面板不滚动，列表区滚动，Add + 分割线固定底栏。 */
+:global(.eds-flotation-menu.desktopTokens) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+:global(.eds-flotation-menu.desktopTokens) :global(.eds-tooltip-panel) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* sticky footer：圆角与玻璃底在外壳 padding 层；panel 仅矩形裁剪列表，不裁 padding、不染色。 */
+:global(.eds-flotation-menu--sticky-footer.desktopTokens) :global(.eds-tooltip-panel) {
+  border-radius: 0;
+  overflow: hidden;
 }
 
 /* ── Trigger（Figma 2059:3679）— #trigger 插槽预置 ── */
@@ -163,6 +225,26 @@
 .triggerStyleText.triggerExpanded:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
+}
+
+.triggerModuleMenuTitle {
+  gap: var(--spacing-1);
+  padding: var(--spacing-1-5) var(--spacing-2);
+  font-size: var(--eds-body-large-strong-size);
+  font-weight: var(--eds-body-large-strong-weight);
+  line-height: var(--eds-body-large-strong-line-height);
+}
+
+.triggerModuleMenuTitle .triggerArrow {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.triggerReddot {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .triggerSymbol {
@@ -299,11 +381,15 @@
 
 .boxMain {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   align-items: center;
   gap: var(--spacing-1);
   min-width: 0;
   overflow: hidden;
+}
+
+.boxMainGrow {
+  flex: 1 1 auto;
 }
 
 .boxLabel {

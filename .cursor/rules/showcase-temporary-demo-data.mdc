@@ -1,0 +1,40 @@
+---
+description: Showcase「生成数据」仅临时演示，刷新恢复默认 customize defaults
+alwaysApply: true
+---
+
+# Showcase 临时演示数据
+
+当用户说 **「生成数据」**（或同类意图：生成预览数据、造演示数据、填充 showcase 示例）时：
+
+## 必须
+
+1. **只生成临时数据**，不写入页面的永久 `*CustomizeDefaults` / `*PageCustomizeDefaults`。
+2. 临时数据单独导出，命名如 `*DemoCustomizeState`、`*PreviewDemoState`，或仅在当前会话内 `Object.assign` 到 reactive state。
+3. 永久 defaults 保持文档页初始配置（如 8 行 Label、默认 maxHeight 等）；浏览器 **刷新** 或 Showcase **「刷新」** 按钮必须恢复这些 defaults。
+4. 优先只改 `apps/showcase/**`；除非用户明确要求，**不要改** `packages/components/**`。
+
+## 禁止
+
+- 把演示用行数、文案、宽度、标签、红点等写进 `flotationBoxPageCustomizeDefaults` 等默认导出。
+- 用 localStorage / sessionStorage 持久化演示数据（刷新应回到 defaults）。
+
+## 参考模式（Flotation Box）
+
+```typescript
+// 永久默认 — 刷新 / 「刷新」恢复此对象
+export const flotationBoxPageCustomizeDefaults = {
+  itemCount: '8',
+  maxHeight: '306',
+  ...createFlotationBoxItemDefaults(),
+};
+
+// 临时演示 — 仅会话内手动合并，勿替换 defaults
+export const flotationBoxPageDemoCustomizeState = {
+  itemCount: '9',
+  maxHeight: '540',
+  ...createFlotationBoxPageDemoItemDefaults(),
+};
+```
+
+Preview 组件初始化：`reactive({ ...flotationBoxPageCustomizeDefaults })`；`ComponentDocLayout` 的 `:customize-defaults` 指向同一永久 defaults。

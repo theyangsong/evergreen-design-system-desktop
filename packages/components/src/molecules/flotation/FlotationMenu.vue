@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { EgDivider } from '../../atoms/divider';
 import { EgIcon } from '../../atoms/icons';
 import EgTooltip, {
@@ -8,7 +9,7 @@ import EgTooltip, {
 import type { TooltipPanelKind, TooltipPanelRadiusToken } from '../tooltip/tooltipPanelRadius';
 import styles from './Flotation.module.css';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** Figma Menu：浮层外壳由 EgTooltip 提供（flotation box）。 */
     panelKind?: TooltipPanelKind;
@@ -43,11 +44,14 @@ withDefaults(
 const emit = defineEmits<{
   add: [event: MouseEvent];
 }>();
+
+/** Add 行 + 分割线在底部固定；仅列表区滚动。 */
+const useStickyFooter = computed(() => props.showAdd);
 </script>
 
 <template>
   <EgTooltip
-    class="eds-flotation-menu"
+    :class="['eds-flotation-menu', useStickyFooter && 'eds-flotation-menu--sticky-footer']"
     :panel-kind="panelKind"
     :panel-radius="panelRadius"
     :width-mode="widthMode"
@@ -56,27 +60,33 @@ const emit = defineEmits<{
     :height-mode="heightMode"
     :height="height"
     :max-height="maxHeight"
-    :scrollable="scrollable"
+    :scrollable="!useStickyFooter && scrollable"
   >
-    <div :class="styles.menuBody">
-      <div :class="styles.menuList">
+    <div :class="[styles.menuBody, useStickyFooter && scrollable && styles.menuBodySticky]">
+      <div :class="[styles.menuList, useStickyFooter && scrollable && styles.menuListScrollable]">
         <slot />
+        <div
+          v-if="useStickyFooter && scrollable"
+          :class="styles.menuListScrollEnd"
+          aria-hidden="true"
+        />
       </div>
-      <div v-if="showDivider && showAdd" :class="styles.menuDivider">
-        <EgDivider type="page" direction="horizontal" />
+      <div v-if="showAdd" :class="styles.menuFooter">
+        <div v-if="showDivider" :class="styles.menuDivider">
+          <EgDivider type="page" direction="horizontal" />
+        </div>
+        <button
+          type="button"
+          class="eds-flotation-menu-add"
+          :class="styles.addRow"
+          @click="emit('add', $event)"
+        >
+          <span :class="styles.addIcon" aria-hidden="true">
+            <EgIcon name="eds-add" size="sm" />
+          </span>
+          {{ addLabel }}
+        </button>
       </div>
-      <button
-        v-if="showAdd"
-        type="button"
-        class="eds-flotation-menu-add"
-        :class="styles.addRow"
-        @click="emit('add', $event)"
-      >
-        <span :class="styles.addIcon" aria-hidden="true">
-          <EgIcon name="eds-add" size="sm" />
-        </span>
-        {{ addLabel }}
-      </button>
     </div>
   </EgTooltip>
 </template>

@@ -32,7 +32,10 @@ const customize = reactive({
     >
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgMessage :type="customize.type" :text="String(customize.text)" />
+          <EgMessage
+            :type="customize.type"
+            :text="String(customize.text)"
+          />
         </div>
       </template>
     </ComponentDocLayout>

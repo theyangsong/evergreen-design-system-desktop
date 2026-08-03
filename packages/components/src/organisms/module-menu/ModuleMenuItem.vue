@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, useId, useSlots, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, provide, useId, useSlots, watch } from 'vue';
 import { EgIcon } from '../../atoms/icons';
-import { EgMessage, EgReddot, type MessageType } from '../../molecules/feedback';
+import {
+  EgMessage,
+  EgReddot,
+  type MessageFocusBackground,
+  type MessageType,
+} from '../../molecules/feedback';
+import { MESSAGE_PARENT_FOCUSED_KEY } from '../../molecules/feedback/messageFocusContext';
 import { useModuleMenuItemFocus } from './moduleMenuItemFocus';
 import styles from './ModuleMenu.module.css';
 
@@ -24,6 +30,7 @@ const props = withDefaults(
     trailingIcon?: string;
     message?: string;
     messageType?: MessageType;
+    messageFocusBackground?: MessageFocusBackground;
     showReddot?: boolean;
   }>(),
   {
@@ -36,6 +43,7 @@ const props = withDefaults(
     trailingIcon: undefined,
     message: undefined,
     messageType: 'subtle',
+    messageFocusBackground: 'inherit',
     showReddot: false,
   },
 );
@@ -82,6 +90,8 @@ const isFocused = computed(() => {
   return props.focused || props.active;
 });
 
+provide(MESSAGE_PARENT_FOCUSED_KEY, isFocused);
+
 const branchTrailingIcon = computed((): string | undefined => {
   if (!hasSubitems.value) return undefined;
   if (props.trailingIcon) return props.trailingIcon;
@@ -90,12 +100,20 @@ const branchTrailingIcon = computed((): string | undefined => {
 
 const showAccessoryMessage = computed(() => Boolean(props.message?.trim()));
 
+function accessorySlotHasContent(): boolean {
+  if (!slots.accessory) return false;
+  return slots.accessory().length > 0;
+}
+
 const showAccessoryReddot = computed(
-  () => props.showReddot && !props.message?.trim() && !slots.accessory,
+  () => props.showReddot && !props.message?.trim() && !accessorySlotHasContent(),
 );
 
 const hasAccessory = computed(
-  () => Boolean(slots.accessory) || showAccessoryMessage.value || showAccessoryReddot.value,
+  () =>
+    accessorySlotHasContent() ||
+    showAccessoryMessage.value ||
+    showAccessoryReddot.value,
 );
 
 const itemClass = computed(() => [
@@ -148,6 +166,7 @@ function onItemClick(event: MouseEvent) {
             v-if="showAccessoryMessage"
             :text="String(message)"
             :type="messageType"
+            :focus-background="messageFocusBackground"
           />
           <EgReddot v-else-if="showAccessoryReddot" />
         </slot>
@@ -175,7 +194,12 @@ function onItemClick(event: MouseEvent) {
     </span>
     <span v-if="hasAccessory" :class="styles.itemAccessory">
       <slot name="accessory">
-        <EgMessage v-if="showAccessoryMessage" :text="String(message)" :type="messageType" />
+        <EgMessage
+          v-if="showAccessoryMessage"
+          :text="String(message)"
+          :type="messageType"
+          :focus-background="messageFocusBackground"
+        />
         <EgReddot v-else-if="showAccessoryReddot" />
       </slot>
     </span>

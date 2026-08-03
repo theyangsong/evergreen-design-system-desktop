@@ -135,7 +135,7 @@ const emit = defineEmits<{
 
 const slots = useSlots();
 const menuOpen = ref(false);
-const selectedIndex = ref<number | null>(null);
+const selectedIndex = ref<number | null>(0);
 const anchoredRef = ref<AnchoredApi | null>(null);
 const triggerMatchWidth = ref<number | undefined>(undefined);
 const mainAxisGapPx = ref(FALLBACK_MAIN_AXIS_PX);
@@ -150,6 +150,11 @@ const selectedItem = computed(() => {
   if (selectedIndex.value === null) return null;
   return resolvedItems.value[selectedIndex.value] ?? null;
 });
+
+/** 任一 Box Item 带红点时，模块菜单标题触发器须同步显示红点。 */
+const hasAnyItemReddot = computed(() =>
+  resolvedItems.value.some((item) => Boolean(item.showReddot)),
+);
 
 const displayLabel = computed(() => selectedItem.value?.label ?? props.triggerLabel);
 const displayTagText = computed(() => selectedItem.value?.tag ?? props.tagText);
@@ -254,6 +259,7 @@ function scheduleMenuReposition() {
 }
 
 onMounted(() => {
+  syncSelectedIndex();
   nextTick(() => {
     resolveSpacingTokens();
     if (props.widthMode === 'trigger') {
@@ -278,18 +284,22 @@ watch(
   },
 );
 
-watch(
-  () => props.items,
-  () => {
-    if (
-      selectedIndex.value !== null &&
-      selectedIndex.value >= resolvedItems.value.length
-    ) {
+function syncSelectedIndex() {
+  const len = resolvedItems.value.length;
+  if (len === 0) {
+    if (selectedIndex.value !== null) {
       selectedIndex.value = null;
       emit('update:selectedIndex', null);
     }
-  },
-);
+    return;
+  }
+  if (selectedIndex.value === null || selectedIndex.value >= len) {
+    selectedIndex.value = 0;
+    emit('update:selectedIndex', 0);
+  }
+}
+
+watch(() => props.items, syncSelectedIndex);
 
 watch(
   () =>
@@ -397,6 +407,7 @@ onBeforeUnmount(() => {
       :expanded="menuOpen"
       :selected-item="selectedItem"
       :selected-index="selectedIndex"
+      :has-any-item-reddot="hasAnyItemReddot"
     >
       <FlotationTrigger
         :label="displayLabel"

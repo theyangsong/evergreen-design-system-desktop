@@ -31,6 +31,15 @@
   min-height: 0;
 }
 
+.previewOrganismPanelHostTitleOnly {
+  align-items: flex-start;
+}
+
+.previewOrganismPanelHostTitleOnly :deep(.eds-module-menu) {
+  height: auto;
+  min-height: 0;
+}
+
 .previewOrganismLayoutHost {
   display: flex;
   align-items: stretch;

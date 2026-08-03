@@ -107,16 +107,61 @@
 
 .message {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   min-width: var(--icon-md);
-  padding: var(--spacing-025) var(--spacing-1);
+  padding: var(--spacing-025) var(--spacing-1-5);
   border-radius: var(--radius-full);
-  text-align: center;
+  overflow: hidden;
+  vertical-align: middle;
+  /* 嵌套在 button / 菜单行内时，Bar 字号与 type 色由本组件自持，不随父级 font-size / color 缩放或覆盖 */
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
 }
 
-.messageText {
-  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
+/*
+ * Bar 11px / line-height 14px / weight 500（Figma Bar）。
+ * sizer 撑宽；paint 2×+scale(0.5) 绘字，避免 Chrome 最小字号与布局撑宽。
+ */
+.messageTextWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.messageSizer {
+  visibility: hidden;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+.messagePaint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: calc(var(--eds-bar-size) * 2);
+  font-weight: inherit;
+  line-height: calc(var(--eds-bar-line-height) * 2);
+  white-space: nowrap;
+  color: inherit;
+  transform: scale(0.5);
+  transform-origin: center center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  pointer-events: none;
 }
 
 .messageSubtle {
@@ -125,13 +170,21 @@
 }
 
 .messageBrand {
-  background: var(--material-brand-quaternary);
-  color: var(--text-brand-primary);
+  background: var(--material-brand-primary);
+  color: var(--text-same-white-primary);
 }
 
 .messageDanger {
-  background: var(--status-danger-weaken);
-  color: var(--status-danger);
+  background: var(--status-danger);
+  color: var(--status-disable-same-white, var(--text-same-white-primary));
+}
+
+.messageFocused {
+  color: var(--text-same-black-primary);
+}
+
+.messageFocusBgSameWhite.messageFocused {
+  background: var(--material-same-white-primary);
 }
 
 .reddot {

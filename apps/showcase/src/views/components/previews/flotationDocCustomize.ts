@@ -16,6 +16,7 @@ import {
   showcaseFlotationBoxTypeLabels,
   showcaseFlotationBoxKindLabels,
   showcaseFlotationBoxSelectionModeLabels,
+  showcaseFlotationTriggerKindLabels,
   showcaseFormSubmissionTypeLabels,
   showcaseInputCustomizeFieldLabels,
   showcaseMessageTypeLabels,
@@ -183,6 +184,81 @@ export function parseFlotationMaxHeight(
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+export function parseFlotationMenuWidth(
+  state: Record<string, unknown>,
+): number | undefined {
+  const raw = String(state.width ?? '').trim();
+  if (raw === '') return undefined;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function parseFlotationMenuMaxWidth(
+  state: Record<string, unknown>,
+): number | undefined {
+  const raw = String(state.maxWidth ?? '').trim();
+  if (raw === '') return undefined;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+/** Box / Module Menu 标题浮层演示项（支付类文案，10 条）。 */
+const flotationBoxPageDemoPaymentLabels = [
+  'Aurora Merchant',
+  'Borealis Acquire',
+  'Cascade Disburse',
+  'Delta Escrow',
+  'Ember Exchange',
+  'Flint Ledger',
+  'Granite Invoice',
+  'Harbor Transit',
+  'Ivory Vault',
+  'Jasper Capture',
+] as const;
+
+const flotationBoxPageDemoEnabledRows = new Set([1, 2, 3, 5, 7, 8, 9, 10]);
+const flotationBoxPageDemoReddotRows = new Set([3, 4, 5, 7]);
+
+function createFlotationBoxPageDemoItemDefaults(): Record<string, string | boolean> {
+  const out = createFlotationBoxItemDefaults();
+  const count = flotationBoxPageDemoPaymentLabels.length;
+
+  for (let n = 1; n <= count; n += 1) {
+    const enabled = flotationBoxPageDemoEnabledRows.has(n);
+    out[flotationBoxItemKey('Label', n)] =
+      flotationBoxPageDemoPaymentLabels[n - 1] ?? `Label ${n}`;
+    out[flotationBoxItemKey('ShowTag', n)] = true;
+    out[flotationBoxItemKey('TagText', n)] = enabled ? 'Enable' : 'Disabled';
+    out[flotationBoxItemKey('TagStatus', n)] = enabled ? 'success' : 'danger';
+    out[flotationBoxItemKey('ShowReddot', n)] = flotationBoxPageDemoReddotRows.has(n);
+  }
+
+  return out;
+}
+
+/** 临时演示 customize 快照；仅会话内手动合并，勿写入 page defaults。 */
+export const flotationBoxPageDemoCustomizeState = {
+  boxKind: 'standard-menu',
+  boxItemType: 'text',
+  boxSelectionMode: 'single',
+  itemCount: '10',
+  maxHeight: '540',
+  widthMode: 'fixed',
+  width: '240',
+  maxWidth: '480',
+  editBoxIndex: '1',
+  showAdd: true,
+  addLabel: 'Add',
+  ...createFlotationBoxPageDemoItemDefaults(),
+} as const;
+
+/** Module Menu 标题 EgFlotation Menu 演示快照（默认宽 288）。 */
+export const moduleMenuTitleFlotationDemoState = {
+  ...flotationBoxPageDemoCustomizeState,
+  width: '288',
+  addLabel: 'Create Project',
+} as const;
+
 export const flotationCustomizeDefaults = {
   triggerKind: 'standard-dropdown',
   placement: 'bottom',
@@ -191,6 +267,7 @@ export const flotationCustomizeDefaults = {
   triggerStyle: 'subtle',
   triggerSize: 'lg',
   disabled: false,
+  showReddot: false,
   showSymbol: false,
   symbolIcon: 'eds-coin-btc',
   showTag: false,
@@ -276,6 +353,13 @@ export const flotationTriggerOverviewDropdownControls: DocCustomizeControl[] = [
     options: [...flotationMessageTypeOptions],
     visibleWhen: (s) => Boolean(s.showMessage),
   },
+];
+
+/** 纵览页 EgFlotation — 模块菜单标题触发器 */
+export const flotationTriggerOverviewModuleMenuControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'triggerLabel', label: '文案', row: 0 },
+  { kind: 'boolean', key: 'showReddot', label: '显示红点', row: 0 },
+  { kind: 'boolean', key: 'disabled', label: '禁用', row: 0 },
 ];
 
 /** @deprecated 使用 flotationTriggerOverviewBodyControls + flotationTriggerOverviewDropdownControls */
@@ -469,6 +553,13 @@ export function buildFlotationBoxPanelControls(
       row: 0,
     },
     {
+      kind: 'text',
+      key: 'maxHeight',
+      label: '最大高度',
+      placeholder: 'px',
+      row: 0,
+    },
+    {
       kind: 'select',
       key: 'boxSelectionMode',
       label: '选择模式',
@@ -546,6 +637,26 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
     props.crossAxisOffset = crossAxisOffset;
   }
 
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    for (const key of [
+      'triggerLabel',
+      'triggerStyle',
+      'triggerSize',
+      'showSymbol',
+      'symbolIcon',
+      'showTag',
+      'tagText',
+      'tagStatus',
+      'showMessage',
+      'messageText',
+      'messageType',
+      'width',
+    ] as const) {
+      delete props[key];
+    }
+    props.widthMode = 'trigger';
+  }
+
   const openTag = buildVueOpeningTag('EgFlotation', props, {
     defaults: {
       placement: flotationCustomizeDefaults.placement,
@@ -567,8 +678,13 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
       heightMode: flotationCustomizeDefaults.heightMode,
       height: Number.parseInt(flotationCustomizeDefaults.height, 10),
     },
-    omitKeys: ['itemCount', 'editBoxIndex'],
+    omitKeys: ['itemCount', 'editBoxIndex', ...(isFlotationTriggerModuleMenuKind(state) ? ['triggerLabel', 'triggerStyle', 'triggerSize', 'showSymbol', 'symbolIcon', 'showTag', 'tagText', 'tagStatus', 'showMessage', 'messageText', 'messageType'] : [])],
   });
+
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    return [openTag, buildFlotationComboTriggerSlotSnippet(state), '</EgFlotation>'].join('\n');
+  }
+
   return `${openTag}\n  <!-- #trigger / #content 可替换预置 EgFlotationTrigger / EgFlotationMenu -->\n</EgFlotation>`;
 }
 
@@ -682,8 +798,260 @@ export function buildFlotationPresetItems(
 
 /* ── Trigger 小类 ── */
 
+export type FlotationTriggerKind = 'standard-dropdown' | 'module-menu';
+
+export function isFlotationTriggerModuleMenuKind(state: Record<string, unknown>): boolean {
+  return String(state.triggerKind ?? 'standard-dropdown') === 'module-menu';
+}
+
+type FlotationComboTriggerSlot = {
+  expanded?: boolean;
+  selectedItem?: {
+    label?: string;
+    showTag?: boolean;
+    tag?: string;
+    tagStatus?: string;
+  } | null;
+  /** EgFlotation #trigger 插槽：任一 Box Item 是否带红点。 */
+  hasAnyItemReddot?: boolean;
+};
+
+/** EgFlotation #trigger 插槽：标准下拉框 / 模块菜单标题。 */
+export function resolveFlotationComboTriggerProps(
+  state: Record<string, unknown>,
+  slot: FlotationComboTriggerSlot = {},
+): Record<string, unknown> {
+  const selectedItem = slot.selectedItem ?? null;
+
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    return {
+      moduleMenuTitle: true,
+      triggerStyle: 'text',
+      widthMode: 'trigger',
+      label:
+        selectedItem?.label ??
+        String(
+          state.triggerLabel ?? state.label ?? flotationTriggerModuleMenuDefaults.label,
+        ),
+      showReddot:
+        slot.hasAnyItemReddot !== undefined
+          ? Boolean(slot.hasAnyItemReddot)
+          : Boolean(state.showReddot),
+      disabled: Boolean(state.disabled),
+      ...(slot.expanded !== undefined ? { expanded: slot.expanded } : {}),
+    };
+  }
+
+  return {
+    triggerStyle: state.triggerStyle ?? 'subtle',
+    size: state.triggerSize ?? 'lg',
+    widthMode: 'adaptive',
+    label: selectedItem?.label ?? String(state.triggerLabel ?? 'Trigger'),
+    disabled: Boolean(state.disabled),
+    showSymbol: Boolean(state.showSymbol),
+    symbolIcon: String(state.symbolIcon ?? 'eds-coin-btc'),
+    showTag: selectedItem ? Boolean(selectedItem.showTag) : Boolean(state.showTag),
+    tagText: selectedItem?.tag ?? String(state.tagText ?? 'Tag'),
+    tagStatus: selectedItem?.tagStatus ?? state.tagStatus ?? 'danger',
+    showMessage: Boolean(state.showMessage),
+    messageText: String(state.messageText ?? '0'),
+    messageType: state.messageType ?? 'brand',
+    ...(slot.expanded !== undefined ? { expanded: slot.expanded } : {}),
+  };
+}
+
+export function buildFlotationComboTriggerSlotSnippet(
+  state: Record<string, unknown>,
+  indent = '  ',
+): string {
+  const triggerSlotBindings = isFlotationTriggerModuleMenuKind(state)
+    ? '{ expanded, selectedItem, hasAnyItemReddot }'
+    : '{ expanded, selectedItem }';
+  const triggerSlotIndent = `${indent}  `;
+
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    const labelDefault = String(
+      state.triggerLabel ?? state.label ?? flotationTriggerModuleMenuDefaults.label,
+    )
+      .trim()
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    return [
+      `${indent}<template #trigger="${triggerSlotBindings}">`,
+      `${triggerSlotIndent}<EgFlotationTrigger`,
+      `${triggerSlotIndent}  module-menu-title`,
+      `${triggerSlotIndent}  trigger-style="text"`,
+      `${triggerSlotIndent}  width-mode="trigger"`,
+      `${triggerSlotIndent}  :label="selectedItem?.label ?? '${labelDefault}'"`,
+      `${triggerSlotIndent}  :show-reddot="hasAnyItemReddot"`,
+      `${triggerSlotIndent}  :expanded="expanded"`,
+      `${triggerSlotIndent}/>`,
+      `${indent}</template>`,
+    ].join('\n');
+  }
+
+  const triggerInner = buildVueSelfClosingSnippet(
+    'EgFlotationTrigger',
+    resolveFlotationComboTriggerProps(state),
+    {
+      defaults: {
+        triggerStyle: flotationCustomizeDefaults.triggerStyle,
+        size: flotationCustomizeDefaults.triggerSize,
+        label: flotationCustomizeDefaults.triggerLabel,
+      },
+      omitKeys: ['expanded'],
+    },
+  );
+  const triggerWithExpanded =
+    triggerInner === '<EgFlotationTrigger />'
+      ? `${triggerSlotIndent}<EgFlotationTrigger :expanded="expanded" />`
+      : triggerInner
+          .replace(/^<EgFlotationTrigger/, `${triggerSlotIndent}<EgFlotationTrigger`)
+          .replace(/\n\/>$/, '\n      :expanded="expanded"\n    />');
+
+  return [
+    `${indent}<template #trigger="${triggerSlotBindings}">`,
+    triggerWithExpanded,
+    `${indent}</template>`,
+  ].join('\n');
+}
+
+/** 为 Combo 合并 triggerKind（标准下拉框 / 模块菜单等预置触发器）。 */
+export function withFlotationComboTriggerKind(
+  state: Record<string, unknown>,
+  triggerKind: FlotationTriggerKind,
+): Record<string, unknown> {
+  return { ...state, triggerKind };
+}
+
+export type FlotationComboEgFlotationProps = {
+  placement: 'top' | 'bottom' | 'left' | 'right';
+  align?: 'start' | 'end' | 'center';
+  widthMode: 'trigger' | 'fixed' | 'adaptive';
+  width?: number;
+  heightMode: 'adaptive' | 'fixed';
+  height?: number;
+  maxHeight?: number;
+  closeOnScroll: boolean;
+  showAdd: boolean;
+  addLabel: string;
+  crossAxisOffset?: number;
+};
+
+/**
+ * Menu 层：从 customize 记录解析 EgFlotation props（不含 items / #trigger）。
+ * 各嵌套场景传入不同的 menuState（Menu 配置 + Box 行数据源）。
+ */
+export function resolveFlotationComboEgFlotationProps(
+  menuState: Record<string, unknown>,
+  options: {
+    closeOnScroll?: boolean;
+    placement?: 'top' | 'bottom' | 'left' | 'right';
+    align?: 'start' | 'end' | 'center';
+  } = {},
+): FlotationComboEgFlotationProps {
+  const widthMode = String(menuState.widthMode ?? 'fixed') as FlotationComboEgFlotationProps['widthMode'];
+  const heightMode = String(menuState.heightMode ?? 'adaptive') as 'adaptive' | 'fixed';
+  const props: FlotationComboEgFlotationProps = {
+    placement: options.placement ?? 'bottom',
+    widthMode,
+    heightMode,
+    closeOnScroll: options.closeOnScroll ?? false,
+    showAdd: Boolean(menuState.showAdd),
+    addLabel: String(menuState.addLabel ?? 'Add'),
+  };
+
+  if (options.align != null) {
+    props.align = options.align;
+  }
+  if (widthMode === 'fixed') {
+    const width = parseFlotationMenuWidth(menuState);
+    if (width != null) props.width = width;
+  }
+  if (heightMode === 'fixed') {
+    const height = Number.parseInt(String(menuState.height ?? ''), 10);
+    if (Number.isFinite(height) && height > 0) props.height = height;
+  } else {
+    const maxHeight = parseFlotationMaxHeight(menuState);
+    if (maxHeight != null) props.maxHeight = maxHeight;
+  }
+  const crossAxisOffset = parseFlotationCrossAxisOffset(menuState);
+  if (crossAxisOffset != null) props.crossAxisOffset = crossAxisOffset;
+
+  return props;
+}
+
+/**
+ * 嵌套 EgFlotation Combo 用法片段：EgFlotation + #trigger 插槽 + items。
+ * triggerState 须含 triggerKind；menuState 仅驱动 Menu/Box 配置与 items 数据源。
+ */
+export function buildFlotationComboNestedSnippet(
+  triggerState: Record<string, unknown>,
+  menuState: Record<string, unknown>,
+  options: {
+    indent?: string;
+    itemsExpression?: string;
+    wrapTemplate?: 'title' | 'none';
+    closeOnScroll?: boolean;
+    placement?: 'top' | 'bottom' | 'left' | 'right';
+    align?: 'start' | 'end' | 'center';
+  } = {},
+): string {
+  const indent = options.indent ?? '';
+  const itemsExpression = options.itemsExpression ?? 'titleMenuItems';
+  const egProps = resolveFlotationComboEgFlotationProps(menuState, {
+    closeOnScroll: options.closeOnScroll ?? true,
+    placement: options.placement ?? 'bottom',
+    align: options.align ?? 'start',
+  });
+
+  const openTagBase = buildVueOpeningTag('EgFlotation', egProps, {
+    defaults: {
+      placement: 'bottom',
+      align: 'start',
+      widthMode: 'fixed',
+      heightMode: 'adaptive',
+      closeOnScroll: true,
+      showAdd: true,
+      addLabel: 'Add',
+    },
+  });
+  const openTag = openTagBase.endsWith('>')
+    ? `${openTagBase.slice(0, -1)}\n  :items="${itemsExpression}">`
+    : openTagBase;
+
+  const flotationBody = [
+    `${indent}  ${openTag}`,
+    buildFlotationComboTriggerSlotSnippet(triggerState, `${indent}  `),
+    `${indent}  </EgFlotation>`,
+  ].join('\n');
+
+  if (options.wrapTemplate === 'title') {
+    return [`${indent}<template #title>`, flotationBody, `${indent}</template>`].join('\n');
+  }
+
+  return [
+    `${indent}${openTag}`,
+    buildFlotationComboTriggerSlotSnippet(triggerState, `${indent}  `),
+    `${indent}</EgFlotation>`,
+  ].join('\n');
+}
+
+export const flotationTriggerKindOptions = propLabelRows(
+  ['standard-dropdown', 'module-menu'] as const,
+  showcaseFlotationTriggerKindLabels,
+).map((row) => ({ value: row.key, label: row.label }));
+
+export const flotationTriggerModuleMenuDefaults = {
+  label: 'Doris Studio',
+  showReddot: true,
+  disabled: false,
+  expanded: false,
+} as const;
+
 export const flotationTriggerCustomizeDefaults = {
-  triggerKind: 'standard-dropdown',
+  triggerKind: 'standard-dropdown' as FlotationTriggerKind,
   showFieldLabel: false,
   fieldLabel: 'Label',
   feedback: false,
@@ -694,6 +1062,8 @@ export const flotationTriggerCustomizeDefaults = {
   width: '280',
   label: 'Trigger',
   disabled: false,
+  showReddot: false,
+  expanded: false,
   showSymbol: false,
   symbolIcon: 'eds-coin-btc',
   showTag: false,
@@ -702,16 +1072,15 @@ export const flotationTriggerCustomizeDefaults = {
   showMessage: false,
   messageText: '0',
   messageType: 'brand',
-  expanded: false,
 } as const;
 
-/** Showcase：触发器类型（当前仅标准下拉框） */
+/** Showcase：触发器类型 */
 export const flotationTriggerKindCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'triggerKind',
     label: '触发器',
-    options: [{ value: 'standard-dropdown', label: '标准下拉框' }],
+    options: flotationTriggerKindOptions,
   },
 ];
 
@@ -854,6 +1223,14 @@ export const flotationTriggerDropdownCustomizeControls: DocCustomizeControl[] = 
   { kind: 'boolean', key: 'expanded', label: '展开态', row: 7 },
 ];
 
+/** 模块菜单 · Figma TriggerComboModuleTitle（2090:2655） */
+export const flotationTriggerModuleMenuCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'label', label: '文案', row: 0 },
+  { kind: 'boolean', key: 'showReddot', label: '显示红点', row: 0 },
+  { kind: 'boolean', key: 'disabled', label: '禁用', row: 0 },
+  { kind: 'boolean', key: 'expanded', label: '展开态', row: 0 },
+];
+
 export const flotationTriggerCustomizeControls: DocCustomizeControl[] = [
   ...flotationTriggerShellCustomizeControls,
   ...flotationTriggerBodyCustomizeControls,
@@ -889,6 +1266,30 @@ export function usesFlotationTriggerComboShell(state: Record<string, unknown>): 
 }
 
 export function buildFlotationTriggerInnerSnippet(state: Record<string, unknown>): string {
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    return buildVueSelfClosingSnippet(
+      'EgFlotationTrigger',
+      {
+        moduleMenuTitle: true,
+        triggerStyle: 'text',
+        widthMode: 'trigger',
+        label: state.label,
+        showReddot: state.showReddot,
+        disabled: state.disabled,
+        expanded: state.expanded,
+      },
+      {
+        defaults: {
+          moduleMenuTitle: true,
+          triggerStyle: 'text',
+          widthMode: 'trigger',
+          ...flotationTriggerModuleMenuDefaults,
+        },
+        omitKeys: ['triggerKind', ...flotationTriggerShellKeys],
+      },
+    );
+  }
+
   const widthMode = String(state.widthMode ?? 'adaptive');
   const props: Record<string, unknown> = { ...state };
   for (const key of flotationTriggerShellKeys) {
@@ -965,6 +1366,13 @@ export const flotationTriggerPropRows: DocPropRow[] = [
     description: '文案、禁用、展开箭头方向。展开态（expanded）背景为 --event-focus；关闭后恢复默认。',
   },
   {
+    name: 'moduleMenuTitle / showReddot',
+    type: 'boolean / boolean',
+    defaultValue: 'false / false',
+    description:
+      'Figma TriggerComboModuleTitle（2090:2655）。Module Menu 标题区 text 触发器：Body Large Strong + spacing-1-5/spacing-2 内边距；可选 EgReddot。',
+  },
+  {
     name: 'showSymbol / symbolIcon / showTag / tagText / tagStatus / showMessage / messageType',
     type: 'boolean / string / … / TagStatus / boolean / MessageType',
     defaultValue: 'false / eds-coin-btc / false / Tag / danger / false / brand',
@@ -978,6 +1386,7 @@ export const flotationTriggerSlotRows: DocPropRow[] = [
   { name: 'symbol', type: '—', defaultValue: '—', description: '左侧币种 / 头像。' },
   { name: 'tag', type: '—', defaultValue: '—', description: 'EgTag Status sm。' },
   { name: 'message', type: '—', defaultValue: '—', description: '右侧 Message。' },
+  { name: 'reddot', type: '—', defaultValue: '—', description: 'Module Menu 标题旁 EgReddot。' },
   { name: 'arrow', type: '—', defaultValue: '—', description: '下拉箭头。' },
 ];
 
@@ -1018,6 +1427,7 @@ export const flotationBoxPageCustomizeDefaults = {
   boxItemType: 'text',
   boxSelectionMode: 'single',
   itemCount: '8',
+  maxHeight: '306',
   editBoxIndex: '1',
   showAdd: true,
   addLabel: 'Add',
@@ -1026,20 +1436,41 @@ export const flotationBoxPageCustomizeDefaults = {
 
 export function buildFlotationBoxUsageSnippet(state: Record<string, unknown>): string {
   const count = parseFlotationItemCount(state);
-  const openTag = buildVueOpeningTag(
-    'EgFlotationMenu',
-    {
-      showAdd: state.showAdd,
-      addLabel: state.addLabel,
+  const menuProps: Record<string, unknown> = {
+    showAdd: state.showAdd,
+    addLabel: state.addLabel,
+  };
+  const maxHeight = parseFlotationMaxHeight(state);
+  if (maxHeight != null) {
+    menuProps.heightMode = 'adaptive';
+    menuProps.maxHeight = maxHeight;
+  }
+  const width = parseFlotationMenuWidth(state);
+  const maxWidth = parseFlotationMenuMaxWidth(state);
+  if (width != null) {
+    menuProps.widthMode = 'fixed';
+    menuProps.width = width;
+  }
+  if (maxWidth != null) {
+    menuProps.maxWidth = maxWidth;
+  }
+  const openTag = buildVueOpeningTag('EgFlotationMenu', menuProps, {
+    defaults: {
+      showAdd: flotationBoxPageCustomizeDefaults.showAdd,
+      addLabel: flotationBoxPageCustomizeDefaults.addLabel,
     },
-    {
-      defaults: {
-        showAdd: flotationBoxPageCustomizeDefaults.showAdd,
-        addLabel: flotationBoxPageCustomizeDefaults.addLabel,
-      },
-      omitKeys: ['boxKind', 'boxItemType', 'boxSelectionMode', 'itemCount', 'editBoxIndex'],
-    },
-  );
+    omitKeys: [
+      'boxKind',
+      'boxItemType',
+      'boxSelectionMode',
+      'itemCount',
+      'editBoxIndex',
+      'maxHeight',
+      'widthMode',
+      'width',
+      'maxWidth',
+    ],
+  });
   return `${openTag}
   <!-- EgFlotationMenuItem × ${count}；行配置见定制 -->
 </EgFlotationMenu>`;

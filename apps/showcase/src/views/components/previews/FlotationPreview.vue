@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
-import { EgFlotation } from '@eds/desktop-components';
+import { EgFlotation, EgFlotationTrigger } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
@@ -15,7 +15,10 @@ import {
   flotationPropRows,
   flotationSlotRows,
   flotationTriggerKindCustomizeControls,
+  flotationTriggerModuleMenuDefaults,
   flotationTriggerOverviewControls,
+  flotationTriggerOverviewModuleMenuControls,
+  isFlotationTriggerModuleMenuKind,
   parseFlotationCrossAxisOffset,
   parseFlotationEditBoxIndex,
   parseFlotationItemCount,
@@ -24,11 +27,12 @@ import {
   enforceFlotationSingleSelection,
   flotationBoxItemKey,
   flotationDefaultCryptoAsset,
+  resolveFlotationComboTriggerProps,
 } from './flotationDocCustomize';
 
 const customize = reactive({
   ...flotationCustomizeDefaults,
-  triggerKind: flotationCustomizeDefaults.triggerKind as 'standard-dropdown',
+  triggerKind: flotationCustomizeDefaults.triggerKind as 'standard-dropdown' | 'module-menu',
   placement: flotationCustomizeDefaults.placement as 'top' | 'bottom' | 'left' | 'right',
   triggerStyle: flotationCustomizeDefaults.triggerStyle as 'subtle' | 'outline' | 'text',
   triggerSize: flotationCustomizeDefaults.triggerSize as 'lg' | 'md' | 'sm' | 'xs',
@@ -43,6 +47,25 @@ const customize = reactive({
     | 'invalid',
   messageType: flotationCustomizeDefaults.messageType as 'subtle' | 'brand' | 'danger',
 });
+
+watch(
+  () => customize.triggerKind,
+  (kind, prev) => {
+    if (kind === 'module-menu') {
+      customize.triggerLabel = String(flotationTriggerModuleMenuDefaults.label);
+      customize.showReddot = Boolean(flotationTriggerModuleMenuDefaults.showReddot);
+      customize.triggerStyle = 'text';
+      customize.widthMode = 'trigger';
+      return;
+    }
+    if (prev === 'module-menu') {
+      customize.triggerLabel = String(flotationCustomizeDefaults.triggerLabel);
+      customize.showReddot = Boolean(flotationCustomizeDefaults.showReddot);
+      customize.triggerStyle = flotationCustomizeDefaults.triggerStyle;
+      customize.widthMode = flotationCustomizeDefaults.widthMode;
+    }
+  },
+);
 
 watch(
   () => customize.itemCount,
@@ -100,6 +123,24 @@ const panelMaxHeight = computed(() => {
 });
 
 const panelCrossAxisOffset = computed(() => parseFlotationCrossAxisOffset(customize));
+
+const isModuleMenuKind = computed(() => isFlotationTriggerModuleMenuKind(customize));
+
+const triggerKindPanelTitle = computed(() =>
+  isModuleMenuKind.value ? '模块菜单' : '标准下拉框',
+);
+
+const triggerKindPanelControls = computed(() =>
+  isModuleMenuKind.value
+    ? flotationTriggerOverviewModuleMenuControls
+    : flotationTriggerOverviewControls,
+);
+
+const triggerKindRowColumns = computed(() => (isModuleMenuKind.value ? 3 : undefined));
+
+const previewHostClass = computed(() =>
+  isModuleMenuKind.value ? undefined : docStyles.subPreviewWidth,
+);
 </script>
 
 <template>
@@ -121,23 +162,12 @@ const panelCrossAxisOffset = computed(() => parseFlotationCrossAxisOffset(custom
       <template #preview>
         <div
           class="desktopTokens"
-          :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
+          :class="[previewHostClass, docStyles.previewEffectPanelHost]"
         >
           <EgFlotation
             :placement="customize.placement"
             :cross-axis-offset="panelCrossAxisOffset"
-            :trigger-label="String(customize.triggerLabel)"
-            :trigger-style="customize.triggerStyle"
-            :trigger-size="customize.triggerSize"
             :disabled="Boolean(customize.disabled)"
-            :show-symbol="Boolean(customize.showSymbol)"
-            :symbol-icon="String(customize.symbolIcon)"
-            :show-tag="Boolean(customize.showTag)"
-            :tag-text="String(customize.tagText)"
-            :tag-status="customize.tagStatus"
-            :show-message="Boolean(customize.showMessage)"
-            :message-text="String(customize.messageText)"
-            :message-type="customize.messageType"
             :show-add="Boolean(customize.showAdd)"
             :add-label="String(customize.addLabel)"
             :width-mode="customize.widthMode"
@@ -147,7 +177,13 @@ const panelCrossAxisOffset = computed(() => parseFlotationCrossAxisOffset(custom
             :height="panelHeight"
             :max-height="panelMaxHeight"
             :items="presetItems"
-          />
+          >
+            <template #trigger="{ expanded, selectedItem, hasAnyItemReddot }">
+              <EgFlotationTrigger
+                v-bind="resolveFlotationComboTriggerProps(customize, { expanded, selectedItem, hasAnyItemReddot })"
+              />
+            </template>
+          </EgFlotation>
         </div>
       </template>
 
@@ -155,11 +191,12 @@ const panelCrossAxisOffset = computed(() => parseFlotationCrossAxisOffset(custom
         <div :class="docStyles.customizeExtraStack">
           <CustomizePanel
             v-model="customize"
-            title="标准下拉框"
+            :title="triggerKindPanelTitle"
             nested
             embedded
             sequential
-            :controls="flotationTriggerOverviewControls"
+            :row-columns="triggerKindRowColumns"
+            :controls="triggerKindPanelControls"
           />
           <CustomizePanel
             v-model="customize"

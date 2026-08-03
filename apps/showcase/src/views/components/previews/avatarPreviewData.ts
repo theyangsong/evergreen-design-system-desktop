@@ -19,7 +19,8 @@ export const avatarPropRows: DocPropRow[] = [
     name: 'size',
     type: "'sm' | 'md' | 'lg' | 'xl'",
     defaultValue: "'lg'",
-    description: '尺寸，对应 token --avatar-sm/md/lg/xl（16 / 24 / 36 / 40px）。',
+    description:
+      '尺寸，对应 token --avatar-sm/md/lg/xl（16 / 24 / 36 / 40px）。initials 首字：sm/md 视觉 8px，lg/xl 视觉 12px，字重 700（硬编码）。',
   },
   {
     name: 'variant',

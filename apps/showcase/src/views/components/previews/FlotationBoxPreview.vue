@@ -18,6 +18,9 @@ import {
   getFlotationBoxKindPanelTitle,
   parseFlotationEditBoxIndex,
   parseFlotationItemCount,
+  parseFlotationMaxHeight,
+  parseFlotationMenuWidth,
+  parseFlotationMenuMaxWidth,
   parseFlotationBoxSelectionMode,
   flotationBoxItemKey,
   flotationDefaultCryptoAsset,
@@ -76,6 +79,12 @@ const presetItems = computed(() => {
   const count = parseFlotationItemCount(customize);
   return buildFlotationPresetItems(count, customize);
 });
+
+const menuMaxHeight = computed(() => parseFlotationMaxHeight(customize));
+const menuWidth = computed(() => parseFlotationMenuWidth(customize));
+const menuMaxWidth = computed(() => parseFlotationMenuMaxWidth(customize));
+
+const menuWidthMode = computed(() => (menuWidth.value != null ? 'fixed' : 'adaptive'));
 </script>
 
 <template>
@@ -100,6 +109,11 @@ const presetItems = computed(() => {
           :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
         >
           <EgFlotationMenu
+            :width-mode="menuWidthMode"
+            :width="menuWidth"
+            :max-width="menuMaxWidth"
+            height-mode="adaptive"
+            :max-height="menuMaxHeight"
             :show-add="Boolean(customize.showAdd)"
             :add-label="String(customize.addLabel)"
           >

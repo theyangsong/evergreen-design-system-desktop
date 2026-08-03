@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
 import { EgIcon } from '../../atoms/icons';
-import { EgMessage, type MessageType } from '../feedback';
+import { EgMessage, EgReddot, type MessageType } from '../feedback';
 import { EgTag, type TagStatus } from '../tag';
 import styles from './Flotation.module.css';
 
@@ -38,6 +38,10 @@ const props = withDefaults(
     messageType?: MessageType;
     /** 展开态：箭头朝上 */
     expanded?: boolean;
+    /** Figma TriggerComboModuleTitle（2090:2655）— Module Menu 标题区 text 触发器。 */
+    moduleMenuTitle?: boolean;
+    /** Module Menu 标题旁 EgReddot。 */
+    showReddot?: boolean;
   }>(),
   {
     triggerStyle: 'subtle',
@@ -55,6 +59,8 @@ const props = withDefaults(
     messageText: '0',
     messageType: 'brand',
     expanded: false,
+    moduleMenuTitle: false,
+    showReddot: false,
   },
 );
 
@@ -63,7 +69,9 @@ const slots = useSlots();
 const rootClass = computed(() => [
   styles.triggerRoot,
   styles[`triggerStyle${capitalize(props.triggerStyle)}`],
-  styles[`triggerSize${capitalize(props.size)}`],
+  props.moduleMenuTitle
+    ? styles.triggerModuleMenuTitle
+    : styles[`triggerSize${capitalize(props.size)}`],
   props.widthMode === 'trigger'
     ? styles.triggerWidthTrigger
     : props.widthMode === 'fixed'
@@ -72,14 +80,17 @@ const rootClass = computed(() => [
   props.expanded && styles.triggerExpanded,
 ]);
 
+const iconSize = computed(() => {
+  if (props.moduleMenuTitle) return 'sm';
+  return props.size === 'xs' || props.size === 'sm' ? 'sm' : 'md';
+});
+
 const rootStyle = computed(() => {
   if (props.widthMode !== 'fixed' || props.width == null || props.width <= 0) {
     return undefined;
   }
   return { width: `${props.width}px` };
 });
-
-const iconSize = computed(() => (props.size === 'xs' || props.size === 'sm' ? 'sm' : 'md'));
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -112,6 +123,12 @@ function capitalize(value: string): string {
           </slot>
         </span>
       </span>
+    </span>
+
+    <span v-if="showReddot || slots.reddot" :class="styles.triggerReddot">
+      <slot name="reddot">
+        <EgReddot />
+      </slot>
     </span>
 
     <span v-if="showMessage || slots.message" :class="styles.triggerMessage">

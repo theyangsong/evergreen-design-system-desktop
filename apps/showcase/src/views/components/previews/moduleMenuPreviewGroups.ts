@@ -1,5 +1,4 @@
 import { getProcessedIcon } from '@eds/desktop-components';
-import { moduleMenuBusinessTitles } from '@/presets/module-menu/businessModuleTitles';
 import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import {
   MODULE_MENU_MAX_GROUPS,
@@ -11,19 +10,29 @@ import {
   moduleMenuGroupItemIconKey,
   moduleMenuGroupItemLabelKey,
   moduleMenuGroupItemMessageTextKey,
+  moduleMenuGroupItemMessageTypeKey,
+  moduleMenuGroupItemMessageFocusBackgroundKey,
   moduleMenuGroupItemSubCountKey,
+  moduleMenuGroupItemSubIconKey,
   moduleMenuGroupItemSubLabelKey,
   moduleMenuGroupSortKey,
   moduleMenuGroupTitleKey,
 } from './organismTemplateDocData';
 
+export type ModuleMenuPreviewSubItem = {
+  label: string;
+  icon: string;
+};
+
 export type ModuleMenuPreviewItem = {
   tier: 1 | 2;
   label: string;
   icon: string;
-  subitems: string[];
+  subitems: ModuleMenuPreviewSubItem[];
   accessory: 'none' | 'message' | 'reddot';
   messageText: string;
+  messageType: 'subtle' | 'brand' | 'danger';
+  messageFocusBackground: 'inherit' | 'same-white';
 };
 
 export type ModuleMenuPreviewGroup = {
@@ -85,6 +94,18 @@ function iconAt(state: Record<string, unknown>, groupIndex: number, itemIndex: n
   return showcaseDefaultIconName;
 }
 
+function subIconAt(
+  state: Record<string, unknown>,
+  groupIndex: number,
+  itemIndex: number,
+  subIndex: number,
+): string {
+  const key = moduleMenuGroupItemSubIconKey(groupIndex, itemIndex, subIndex);
+  const name = String(state[key] ?? '').trim();
+  if (name && getProcessedIcon(name)) return name;
+  return showcaseDefaultIconName;
+}
+
 function groupItemSubCountAt(
   state: Record<string, unknown>,
   groupIndex: number,
@@ -96,13 +117,26 @@ function groupItemSubCountAt(
 }
 
 export function resolveModuleMenuPreviewTitle(state: Record<string, unknown>): string {
-  if (!isModuleMenuDsScenario(state)) {
-    const raw = String(state.moduleBusinessTitle ?? 'Wallet').trim();
-    if ((moduleMenuBusinessTitles as readonly string[]).includes(raw)) return raw;
-    return 'Wallet';
+  if (String(state.moduleTitleKind ?? 'preset') === 'text') {
+    const text = String(state.moduleTitleText ?? '').trim();
+    return text === '' ? 'Module' : text;
   }
-  const text = String(state.moduleTitleText ?? '').trim();
-  return text === '' ? 'Module' : text;
+  const label = String(state.triggerLabel ?? state.label ?? '').trim();
+  return label === '' ? 'Doris Studio' : label;
+}
+
+export function resolveModuleMenuTitleTriggerProps(
+  state: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    moduleMenuTitle: true,
+    triggerStyle: 'text',
+    widthMode: 'trigger',
+    label: resolveModuleMenuPreviewTitle(state),
+    showReddot: Boolean(state.showReddot),
+    disabled: Boolean(state.disabled),
+    expanded: Boolean(state.expanded),
+  };
 }
 
 export function buildModuleMenuPreviewGroups(
@@ -118,24 +152,47 @@ export function buildModuleMenuPreviewGroups(
       const subCount = tier === 2 ? groupItemSubCountAt(state, index, itemIndex) : 0;
       const subitems =
         tier === 2
-          ? Array.from({ length: subCount }, (_, subOffset) =>
-              labelAt(
-                state,
-                moduleMenuGroupItemSubLabelKey(index, itemIndex, subOffset + 1),
-              ),
-            )
+          ? Array.from({ length: subCount }, (_, subOffset) => {
+              const subIndex = subOffset + 1;
+              return {
+                label: labelAt(
+                  state,
+                  moduleMenuGroupItemSubLabelKey(index, itemIndex, subIndex),
+                ),
+                icon: subIconAt(state, index, itemIndex, subIndex),
+              };
+            })
           : [];
 
       const accessoryRaw = String(
         state[moduleMenuGroupItemAccessoryKey(index, itemIndex)] ?? 'none',
       );
-      const accessory =
+      const accessory: ModuleMenuPreviewItem['accessory'] =
         accessoryRaw === 'message' || accessoryRaw === 'reddot' ? accessoryRaw : 'none';
       const messageText = String(
         state[moduleMenuGroupItemMessageTextKey(index, itemIndex)] ?? '0',
       );
+      const messageTypeRaw = String(
+        state[moduleMenuGroupItemMessageTypeKey(index, itemIndex)] ?? 'subtle',
+      );
+      const messageType: ModuleMenuPreviewItem['messageType'] =
+        messageTypeRaw === 'brand' || messageTypeRaw === 'danger' ? messageTypeRaw : 'subtle';
+      const messageFocusBackgroundRaw = String(
+        state[moduleMenuGroupItemMessageFocusBackgroundKey(index, itemIndex)] ?? 'inherit',
+      );
+      const messageFocusBackground: ModuleMenuPreviewItem['messageFocusBackground'] =
+        messageFocusBackgroundRaw === 'same-white' ? 'same-white' : 'inherit';
 
-      return { tier, label, icon: iconAt(state, index, itemIndex), subitems, accessory, messageText };
+      return {
+        tier,
+        label,
+        icon: iconAt(state, index, itemIndex),
+        subitems,
+        accessory,
+        messageText,
+        messageType,
+        messageFocusBackground,
+      };
     });
 
     return {

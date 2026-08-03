@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, useSlots } from 'vue';
 import { provideModuleMenuItemFocus } from './moduleMenuItemFocus';
 import { EgDivider } from '../../atoms/divider';
 import ModuleMenuTitle from './ModuleMenuTitle.vue';
@@ -9,16 +9,22 @@ import '../../styles/scrollAreaHiddenScrollbar.css';
 withDefaults(
   defineProps<{
     title?: string;
+    /** text → 纯文案；trigger → #title 插槽嵌 EgFlotationTrigger trigger-style="text"。 */
+    titleMode?: 'text' | 'trigger';
     showEdgeDivider?: boolean;
     /** false → 240px（scale-50 + scale-10）；true → 280px（scale-50 + scale-20）。 */
     wide?: boolean;
   }>(),
   {
     title: 'Module',
+    titleMode: 'text',
     showEdgeDivider: true,
     wide: false,
   },
 );
+
+const slots = useSlots();
+const hasMenuBody = computed(() => Boolean(slots.default));
 
 provideModuleMenuItemFocus();
 
@@ -89,7 +95,7 @@ onBeforeUnmount(() => {
 <template>
   <aside
     class="eds-module-menu"
-    :class="[styles.root, wide && styles.rootWide]"
+    :class="[styles.root, wide && styles.rootWide, !hasMenuBody && styles.rootTitleOnly]"
     aria-label="Module menu"
   >
     <div :class="styles.body">
@@ -100,12 +106,13 @@ onBeforeUnmount(() => {
       >
         <ModuleMenuTitle
           :title="title"
+          :title-mode="titleMode"
           :scroll-divider-reserved="titleScrollDividerReserved"
           :show-scroll-divider="titleScrollDividerVisible"
         >
           <slot name="title">{{ title }}</slot>
         </ModuleMenuTitle>
-        <div :class="styles.crumb">
+        <div v-if="hasMenuBody" :class="styles.crumb">
           <slot />
         </div>
       </div>

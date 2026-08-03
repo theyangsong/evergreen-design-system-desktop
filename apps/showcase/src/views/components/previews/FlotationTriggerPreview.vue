@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { EgComboInputItem, EgFlotationTrigger, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
@@ -11,14 +11,18 @@ import {
   flotationTriggerCustomizeDefaults,
   flotationTriggerImportCode,
   flotationTriggerKindCustomizeControls,
+  flotationTriggerModuleMenuCustomizeControls,
+  flotationTriggerModuleMenuDefaults,
   flotationTriggerPropRows,
   flotationTriggerSlotRows,
+  isFlotationTriggerModuleMenuKind,
   usesFlotationTriggerComboShell,
+  type FlotationTriggerKind,
 } from './flotationDocCustomize';
 
 const customize = reactive({
   ...flotationTriggerCustomizeDefaults,
-  triggerKind: flotationTriggerCustomizeDefaults.triggerKind as 'standard-dropdown',
+  triggerKind: flotationTriggerCustomizeDefaults.triggerKind as FlotationTriggerKind,
   triggerStyle: flotationTriggerCustomizeDefaults.triggerStyle as 'subtle' | 'outline' | 'text',
   widthMode: flotationTriggerCustomizeDefaults.widthMode as 'trigger' | 'adaptive' | 'fixed',
   size: flotationTriggerCustomizeDefaults.size as 'lg' | 'md' | 'sm' | 'xs',
@@ -32,11 +36,36 @@ const customize = reactive({
   type: flotationTriggerCustomizeDefaults.type as 'notes' | 'danger' | 'success',
 });
 
+watch(
+  () => customize.triggerKind,
+  (kind) => {
+    if (kind !== 'module-menu') return;
+    customize.label = String(flotationTriggerModuleMenuDefaults.label);
+    customize.showReddot = Boolean(flotationTriggerModuleMenuDefaults.showReddot);
+    customize.triggerStyle = 'text';
+    customize.widthMode = 'trigger';
+  },
+);
+
+const isModuleMenuKind = computed(() => isFlotationTriggerModuleMenuKind(customize));
+
+const triggerKindPanelTitle = computed(() =>
+  isModuleMenuKind.value ? '模块菜单' : '标准下拉框',
+);
+
+const triggerKindPanelControls = computed(() =>
+  isModuleMenuKind.value
+    ? flotationTriggerModuleMenuCustomizeControls
+    : flotationTriggerCustomizeControls,
+);
+
+const triggerKindRowColumns = computed(() => (isModuleMenuKind.value ? 4 : 5));
+
 const usageSnippet = computed(() => buildFlotationTriggerUsageSnippet(customize));
 
 const previewHostStyle = computed(() => ({
   width: '100%',
-  maxWidth: 'var(--scale-50)',
+  maxWidth: isModuleMenuKind.value ? 'none' : 'var(--scale-50)',
 }));
 
 const triggerFixedWidth = computed(() => {
@@ -45,23 +74,37 @@ const triggerFixedWidth = computed(() => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 });
 
-const triggerProps = computed(() => ({
-  triggerStyle: customize.triggerStyle,
-  size: customize.size,
-  widthMode: customize.widthMode,
-  width: triggerFixedWidth.value,
-  label: String(customize.label),
-  disabled: Boolean(customize.disabled),
-  showSymbol: Boolean(customize.showSymbol),
-  symbolIcon: String(customize.symbolIcon),
-  showTag: Boolean(customize.showTag),
-  tagText: String(customize.tagText),
-  tagStatus: customize.tagStatus,
-  showMessage: Boolean(customize.showMessage),
-  messageText: String(customize.messageText),
-  messageType: customize.messageType,
-  expanded: Boolean(customize.expanded),
-}));
+const triggerProps = computed(() => {
+  if (isModuleMenuKind.value) {
+    return {
+      moduleMenuTitle: true,
+      triggerStyle: 'text' as const,
+      widthMode: 'trigger' as const,
+      label: String(customize.label),
+      showReddot: Boolean(customize.showReddot),
+      disabled: Boolean(customize.disabled),
+      expanded: Boolean(customize.expanded),
+    };
+  }
+
+  return {
+    triggerStyle: customize.triggerStyle,
+    size: customize.size,
+    widthMode: customize.widthMode,
+    width: triggerFixedWidth.value,
+    label: String(customize.label),
+    disabled: Boolean(customize.disabled),
+    showSymbol: Boolean(customize.showSymbol),
+    symbolIcon: String(customize.symbolIcon),
+    showTag: Boolean(customize.showTag),
+    tagText: String(customize.tagText),
+    tagStatus: customize.tagStatus,
+    showMessage: Boolean(customize.showMessage),
+    messageText: String(customize.messageText),
+    messageType: customize.messageType,
+    expanded: Boolean(customize.expanded),
+  };
+});
 
 const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize));
 </script>
@@ -109,12 +152,12 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
         <div :class="docStyles.customizeExtraStack">
           <CustomizePanel
             v-model="customize"
-            title="标准下拉框"
+            :title="triggerKindPanelTitle"
             nested
             embedded
             sequential
-            :row-columns="5"
-            :controls="flotationTriggerCustomizeControls"
+            :row-columns="triggerKindRowColumns"
+            :controls="triggerKindPanelControls"
           />
         </div>
       </template>

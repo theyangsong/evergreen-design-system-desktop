@@ -18,6 +18,17 @@
   --eds-module-menu-width: calc(var(--scale-50) + var(--scale-20));
 }
 
+/** 无 default slot（仅 #title，如 WaaS 项目切换）— 不撑满父级高度、不保留空白 crumb 区。 */
+.rootTitleOnly {
+  height: auto;
+  min-height: 0;
+}
+
+.rootTitleOnly .scrollPanel {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
 .body {
   display: flex;
   flex: 1 1 auto;
@@ -45,20 +56,27 @@
   justify-content: flex-start;
   min-height: var(--scale-15);
   max-height: var(--scale-15);
-  padding: var(--spacing-0) var(--spacing-4);
+  padding: var(--spacing-0) var(--spacing-2);
   box-sizing: border-box;
 }
 
 .titleText {
   flex: 0 1 auto;
   min-width: 0;
-  margin: 0;
+  margin: 0 0 0 var(--spacing-2);
   color: var(--text-base-primary);
   font-size: var(--eds-body-large-strong-size);
   font-weight: var(--eds-body-large-strong-weight);
   line-height: var(--eds-body-large-strong-line-height);
   text-align: left;
   word-break: break-word;
+}
+
+.titleTrigger {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
 }
 
 .titleScrollDivider {
@@ -206,15 +224,14 @@
   justify-content: flex-start;
   gap: var(--spacing-1);
   min-width: 0;
-  overflow: hidden;
 }
 
 .itemLabel {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .itemTrailing {

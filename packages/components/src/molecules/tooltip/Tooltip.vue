@@ -79,15 +79,31 @@ const shellStyle = computed((): CSSProperties => {
 
   if (props.widthMode === 'fixed' && props.width != null) {
     const widthPx = `${props.width}px`;
-    style.width = widthPx;
-    style.minWidth = widthPx;
-    if (props.maxWidth == null) {
-      style.maxWidth = widthPx;
+    const canGrow =
+      props.maxWidth != null && props.maxWidth > props.width;
+
+    if (canGrow) {
+      style.minWidth = widthPx;
+      style.width = 'max-content';
+      style.maxWidth = `${props.maxWidth}px`;
+    } else {
+      style.width = widthPx;
+      style.minWidth = widthPx;
+      if (props.maxWidth == null) {
+        style.maxWidth = widthPx;
+      }
     }
   }
 
   if (props.maxWidth != null) {
-    style.maxWidth = `${props.maxWidth}px`;
+    const widthGrows =
+      props.widthMode === 'fixed' &&
+      props.width != null &&
+      props.maxWidth > props.width;
+
+    if (!widthGrows) {
+      style.maxWidth = `${props.maxWidth}px`;
+    }
   }
 
   const radiusToken = resolvedPanelRadius.value;

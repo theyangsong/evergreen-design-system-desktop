@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue';
 import {
+  EgAvatar,
+  EgFlotation,
+  EgFlotationTrigger,
   EgIcon,
   EgModuleMenu,
   EgModuleMenuGroup,
@@ -14,11 +17,21 @@ import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
 import {
+  buildFlotationPresetItems,
+  flotationTriggerModuleMenuDefaults,
+  parseFlotationItemCount,
+  resolveFlotationComboEgFlotationProps,
+  resolveFlotationComboTriggerProps,
+  withFlotationComboTriggerKind,
+} from './flotationDocCustomize';
+import {
   ORGANISM_IMPORT,
   MODULE_MENU_MAX_GROUPS,
   MODULE_MENU_MAX_SUB_ITEMS,
   buildModuleMenuCustomizeDefaults,
   cregisModuleMenuPropRows,
+  udunModuleMenuPropRows,
+  buildModuleMenuBusinessTitleCustomizeControls,
   isModuleMenuDsScenario,
   moduleMenuCustomizeControls,
   moduleMenuCustomizeDefaults,
@@ -28,35 +41,105 @@ import {
   moduleMenuGroupItemIconKey,
   moduleMenuGroupItemAccessoryKey,
   moduleMenuGroupItemMessageTextKey,
+  moduleMenuGroupItemMessageTypeKey,
+  moduleMenuGroupItemMessageFocusBackgroundKey,
   moduleMenuGroupItemLabelKey,
   moduleMenuGroupItemSubCountKey,
+  moduleMenuGroupItemSubIconKey,
   moduleMenuGroupItemSubLabelKey,
   moduleMenuGroupSortKey,
   moduleMenuGroupTitleKey,
   moduleMenuPropRows,
   moduleMenuTitleCustomizeControls,
+  isModuleMenuTitlePresetKind,
   type ModuleMenuScenario,
 } from './organismTemplateDocData';
+import type { ModuleMenuBusinessScenario } from '@/presets/module-menu/businessModuleTitles';
 import {
-  cregisModuleMenuUsageSnippet,
+  buildModuleMenuBusinessUsageSnippet,
+  buildModuleMenuComponentUsageSnippet,
   isModuleMenuBusinessScenario,
+  moduleMenuBusinessTitleUsesFlotationTrigger,
   resolveModuleMenuBusinessGroups,
   resolveModuleMenuBusinessTitle,
-  udunModuleMenuUsageSnippet,
+  resolveModuleMenuBusinessFlotationTitle,
+  resolveModuleMenuTitleFlotationMenuState,
+  resolveModuleMenuTitleFlotationTriggerState,
 } from './moduleMenuPreviewCustomize';
+import { resolveModuleMenuPreviewTitle } from './moduleMenuPreviewGroups';
 
 const customize = reactive({ ...moduleMenuCustomizeDefaults });
 
-const isDsScenario = computed(() => isModuleMenuDsScenario(customize));
+const businessModuleTitle = computed(() => resolveModuleMenuBusinessTitle(customize));
 
-const docPropRows = computed(() =>
-  isDsScenario.value ? moduleMenuPropRows : cregisModuleMenuPropRows,
+const moduleMenuTitleFlotationMenuState = resolveModuleMenuTitleFlotationMenuState();
+
+const moduleMenuTitleMenuItems = computed(() =>
+  buildFlotationPresetItems(
+    parseFlotationItemCount(moduleMenuTitleFlotationMenuState),
+    moduleMenuTitleFlotationMenuState,
+  ),
 );
 
+const moduleMenuTitleEgFlotationProps = computed(() =>
+  resolveFlotationComboEgFlotationProps(moduleMenuTitleFlotationMenuState, {
+    closeOnScroll: true,
+    placement: 'bottom',
+    align: 'start',
+  }),
+);
+
+const isDsScenario = computed(() => isModuleMenuDsScenario(customize));
+
+const isBusinessScenario = computed(() => isModuleMenuBusinessScenario(customize.scenario));
+
+const businessModuleUsesFlotationTitle = computed(
+  () =>
+    isModuleMenuBusinessScenario(customize.scenario) &&
+    moduleMenuBusinessTitleUsesFlotationTrigger(customize),
+);
+
+const moduleMenuTitleFlotationTriggerState = computed(() => {
+  if (businessModuleUsesFlotationTitle.value) {
+    return withFlotationComboTriggerKind(
+      {
+        triggerLabel: resolveModuleMenuBusinessFlotationTitle(customize),
+      },
+      'module-menu',
+    );
+  }
+  return resolveModuleMenuTitleFlotationTriggerState(customize);
+});
+
+const moduleMenuTitleUsesTrigger = computed(() => {
+  if (businessModuleUsesFlotationTitle.value) return true;
+  if (isModuleMenuBusinessScenario(customize.scenario)) {
+    return false;
+  }
+  return isModuleMenuTitlePresetKind(customize);
+});
+
+const businessScenario = computed((): ModuleMenuBusinessScenario =>
+  String(customize.scenario) === 'udun' ? 'udun' : 'cregis',
+);
+
+const moduleMenuBusinessTitleControls = computed(() =>
+  buildModuleMenuBusinessTitleCustomizeControls(businessScenario.value),
+);
+
+const docPropRows = computed(() => {
+  if (isDsScenario.value) return moduleMenuPropRows;
+  return businessScenario.value === 'udun' ? udunModuleMenuPropRows : cregisModuleMenuPropRows;
+});
+
 const docUsageSnippet = computed(() => {
-  if (customize.scenario === 'udun') return udunModuleMenuUsageSnippet;
-  if (customize.scenario === 'cregis') return cregisModuleMenuUsageSnippet;
-  return undefined;
+  void customize.scenario;
+  void customize.moduleBusinessTitle;
+
+  if (isModuleMenuBusinessScenario(String(customize.scenario ?? 'module-menu'))) {
+    return buildModuleMenuBusinessUsageSnippet(customize);
+  }
+  return buildModuleMenuComponentUsageSnippet(customize);
 });
 
 const groupCountNum = computed(() => {
@@ -67,14 +150,31 @@ const groupCountNum = computed(() => {
 
 const moduleMenuTitle = computed(() => {
   if (isModuleMenuBusinessScenario(customize.scenario)) {
+    if (businessModuleUsesFlotationTitle.value) {
+      return resolveModuleMenuBusinessFlotationTitle(customize);
+    }
     return resolveModuleMenuBusinessTitle(customize);
   }
-  const text = String(customize.moduleTitleText ?? '').trim();
-  return text === '' ? 'Module' : text;
+  return resolveModuleMenuPreviewTitle(customize);
+});
+
+const moduleTitleRowColumns = computed(() =>
+  isModuleMenuTitlePresetKind(customize) ? 4 : 2,
+);
+
+const docImportCode = computed(() => {
+  if (!moduleMenuTitleUsesTrigger.value) return ORGANISM_IMPORT;
+  return ORGANISM_IMPORT.replace(
+    'EgModuleMenu,',
+    'EgFlotation,\n  EgFlotationTrigger,\n  EgModuleMenu,',
+  );
 });
 
 const businessGroups = computed(() =>
-  resolveModuleMenuBusinessGroups(String(customize.scenario) as ModuleMenuScenario),
+  resolveModuleMenuBusinessGroups(
+    String(customize.scenario) as ModuleMenuScenario,
+    businessModuleTitle.value,
+  ),
 );
 
 function parseGroupSort(value: unknown, fallbackIndex: number): number {
@@ -114,19 +214,33 @@ function iconAt(groupIndex: number, itemIndex: number): string {
   return showcaseDefaultIconName;
 }
 
+function subIconAt(groupIndex: number, itemIndex: number, subIndex: number): string {
+  const key = moduleMenuGroupItemSubIconKey(groupIndex, itemIndex, subIndex);
+  const name = String(customize[key] ?? '').trim();
+  if (name && getProcessedIcon(name)) return name;
+  return showcaseDefaultIconName;
+}
+
 function groupItemSubCountAt(groupIndex: number, itemIndex: number): number {
   const parsed = Number(customize[moduleMenuGroupItemSubCountKey(groupIndex, itemIndex)]);
   if (!Number.isFinite(parsed)) return 1;
   return Math.min(MODULE_MENU_MAX_SUB_ITEMS, Math.max(1, Math.floor(parsed)));
 }
 
+type PreviewSubItem = {
+  label: string;
+  icon: string;
+};
+
 type PreviewItem = {
   tier: 1 | 2;
   label: string;
   icon: string;
-  subitems: string[];
+  subitems: PreviewSubItem[];
   accessory: 'none' | 'message' | 'reddot';
   messageText: string;
+  messageType: 'subtle' | 'brand' | 'danger';
+  messageFocusBackground: 'inherit' | 'same-white';
 };
 
 type PreviewGroup = {
@@ -147,21 +261,44 @@ const previewGroups = computed((): PreviewGroup[] => {
       const subCount = tier === 2 ? groupItemSubCountAt(index, itemIndex) : 0;
       const subitems =
         tier === 2
-          ? Array.from({ length: subCount }, (_, subOffset) =>
-              labelAt(moduleMenuGroupItemSubLabelKey(index, itemIndex, subOffset + 1)),
-            )
+          ? Array.from({ length: subCount }, (_, subOffset) => {
+              const subIndex = subOffset + 1;
+              return {
+                label: labelAt(moduleMenuGroupItemSubLabelKey(index, itemIndex, subIndex)),
+                icon: subIconAt(index, itemIndex, subIndex),
+              };
+            })
           : [];
 
       const accessoryRaw = String(
         customize[moduleMenuGroupItemAccessoryKey(index, itemIndex)] ?? 'none',
       );
-      const accessory =
+      const accessory: PreviewItem['accessory'] =
         accessoryRaw === 'message' || accessoryRaw === 'reddot' ? accessoryRaw : 'none';
       const messageText = String(
         customize[moduleMenuGroupItemMessageTextKey(index, itemIndex)] ?? '0',
       );
+      const messageTypeRaw = String(
+        customize[moduleMenuGroupItemMessageTypeKey(index, itemIndex)] ?? 'subtle',
+      );
+      const messageType: PreviewItem['messageType'] =
+        messageTypeRaw === 'brand' || messageTypeRaw === 'danger' ? messageTypeRaw : 'subtle';
+      const messageFocusBackgroundRaw = String(
+        customize[moduleMenuGroupItemMessageFocusBackgroundKey(index, itemIndex)] ?? 'inherit',
+      );
+      const messageFocusBackground: PreviewItem['messageFocusBackground'] =
+        messageFocusBackgroundRaw === 'same-white' ? 'same-white' : 'inherit';
 
-      return { tier, label, icon: iconAt(index, itemIndex), subitems, accessory, messageText };
+      return {
+        tier,
+        label,
+        icon: iconAt(index, itemIndex),
+        subitems,
+        accessory,
+        messageText,
+        messageType,
+        messageFocusBackground,
+      };
     });
 
     return {
@@ -188,7 +325,7 @@ const previewGroups = computed((): PreviewGroup[] => {
       tall-preview
       :show-doc-title="false"
       component-tag="EgModuleMenu"
-      :import-code="ORGANISM_IMPORT"
+      :import-code="docImportCode"
       :customize-controls="moduleMenuCustomizeControls"
       :customize-defaults="buildModuleMenuCustomizeDefaults()"
       :usage-snippet-override="docUsageSnippet"
@@ -205,10 +342,30 @@ const previewGroups = computed((): PreviewGroup[] => {
           ]"
         >
           <EgModuleMenu
+            :key="`${customize.scenario}-${businessModuleTitle}`"
             :title="moduleMenuTitle"
+            :title-mode="moduleMenuTitleUsesTrigger ? 'trigger' : 'text'"
             :wide="Boolean(customize.wide)"
             :show-edge-divider="Boolean(customize.showEdgeDivider)"
           >
+            <template v-if="moduleMenuTitleUsesTrigger" #title>
+              <EgFlotation
+                v-bind="moduleMenuTitleEgFlotationProps"
+                :items="moduleMenuTitleMenuItems"
+              >
+                <template #trigger="{ expanded, selectedItem, hasAnyItemReddot }">
+                  <EgFlotationTrigger
+                    v-bind="
+                      resolveFlotationComboTriggerProps(moduleMenuTitleFlotationTriggerState, {
+                        expanded,
+                        selectedItem,
+                        hasAnyItemReddot,
+                      })
+                    "
+                  />
+                </template>
+              </EgFlotation>
+            </template>
             <template v-if="isDsScenario">
               <EgModuleMenuGroup
                 v-for="group in previewGroups"
@@ -220,6 +377,8 @@ const previewGroups = computed((): PreviewGroup[] => {
                     :tier="item.tier"
                     :label="item.label"
                     :message="item.accessory === 'message' ? item.messageText : undefined"
+                    :message-type="item.messageType"
+                    :message-focus-background="item.messageFocusBackground"
                     :show-reddot="item.accessory === 'reddot'"
                   >
                     <template #icon>
@@ -227,13 +386,13 @@ const previewGroups = computed((): PreviewGroup[] => {
                     </template>
                     <template v-if="item.tier === 2">
                       <EgModuleMenuItem
-                        v-for="(subLabel, subIndex) in item.subitems"
+                        v-for="(subItem, subIndex) in item.subitems"
                         :key="`${group.key}-item-${itemIndex}-sub-${subIndex}`"
                         subitem
-                        :label="subLabel"
+                        :label="subItem.label"
                       >
                         <template #icon>
-                          <EgIcon name="eds-add" size="sm" />
+                          <EgIcon :name="subItem.icon" size="sm" />
                         </template>
                       </EgModuleMenuItem>
                     </template>
@@ -241,21 +400,47 @@ const previewGroups = computed((): PreviewGroup[] => {
                 </template>
               </EgModuleMenuGroup>
             </template>
-            <template v-else>
+            <template v-else-if="businessGroups.length > 0">
               <EgModuleMenuGroup
                 v-for="(group, groupIndex) in businessGroups"
                 :key="`business-group-${groupIndex}`"
                 :title="group.title"
               >
-                <EgModuleMenuItem
+                <template
                   v-for="(item, itemIndex) in group.items"
                   :key="`business-group-${groupIndex}-item-${itemIndex}`"
-                  :label="item.label"
                 >
-                  <template #icon>
-                    <EgIcon :name="item.icon" size="sm" />
-                  </template>
-                </EgModuleMenuItem>
+                  <EgModuleMenuItem
+                    :tier="item.tier ?? 1"
+                    :label="item.label"
+                    :message="item.message?.trim() || undefined"
+                    :message-type="item.messageType ?? 'subtle'"
+                    :message-focus-background="item.focusBackground ?? 'inherit'"
+                    :show-reddot="Boolean(item.showReddot)"
+                  >
+                    <template #icon>
+                      <EgAvatar
+                        v-if="item.avatar"
+                        :name="item.avatar.name"
+                        :size="item.avatar.size ?? 'sm'"
+                        :color-index="item.avatar.colorIndex"
+                      />
+                      <EgIcon v-else :name="item.icon" size="sm" />
+                    </template>
+                    <template v-if="(item.tier ?? 1) === 2 && item.subitems?.length">
+                      <EgModuleMenuItem
+                        v-for="(subItem, subIndex) in item.subitems"
+                        :key="`business-group-${groupIndex}-item-${itemIndex}-sub-${subIndex}`"
+                        subitem
+                        :label="subItem.label"
+                      >
+                        <template #icon>
+                          <EgIcon :name="subItem.icon" size="sm" />
+                        </template>
+                      </EgModuleMenuItem>
+                    </template>
+                  </EgModuleMenuItem>
+                </template>
               </EgModuleMenuGroup>
             </template>
           </EgModuleMenu>
@@ -264,11 +449,21 @@ const previewGroups = computed((): PreviewGroup[] => {
 
       <template #customize-after>
         <CustomizePanel
+          v-if="isDsScenario"
           v-model="customize"
           title="模块标题"
           nested
           sequential
+          :row-columns="moduleTitleRowColumns"
           :controls="moduleMenuTitleCustomizeControls"
+        />
+        <CustomizePanel
+          v-else-if="isBusinessScenario"
+          v-model="customize"
+          title="模块标题"
+          nested
+          sequential
+          :controls="moduleMenuBusinessTitleControls"
         />
         <template v-if="isDsScenario">
           <CustomizePanel

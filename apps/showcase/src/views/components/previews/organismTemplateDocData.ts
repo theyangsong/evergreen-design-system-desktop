@@ -12,6 +12,9 @@ import {
   showcaseLayoutTypeLabels,
   showcaseModuleMenuAccessoryLabels,
   showcaseModuleMenuScenarioLabels,
+  showcaseModuleMenuTitleKindLabels,
+  showcaseFeedbackMessageTypeLabels,
+  showcaseMessageFocusBackgroundLabels,
   showcaseNavBarScenarioLabels,
   showcasePageBgLabels,
   showcasePaginerDataVolumeLabels,
@@ -21,7 +24,15 @@ import {
   tokenLabel,
   tokenOption,
 } from '@/data/showcasePropLabels';
-import { moduleMenuBusinessTitles } from '@/presets/module-menu/businessModuleTitles';
+import {
+  DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
+  buildModuleMenuBusinessTitleOptions,
+  type ModuleMenuBusinessScenario,
+} from '@/presets/module-menu/businessModuleTitles';
+import {
+  flotationTriggerModuleMenuDefaults,
+  flotationTriggerOverviewModuleMenuControls,
+} from './flotationDocCustomize';
 import {
   buildIconButtonProSingleCustomizeControls,
   buildIconButtonProZoneItemControls,
@@ -54,6 +65,8 @@ export const ORGANISM_IMPORT = `import {
   EgDataList,
   EgDataListColumn,
   EgReminder,
+  EgMessage,
+  EgReddot,
   EgBatchBar,
   EgBatchBarActionItem,
   EgContainer,
@@ -61,6 +74,7 @@ export const ORGANISM_IMPORT = `import {
   EgPopup,
   EgSkid,
   EgIcon,
+  EgAvatar,
   EgComboActionPopupWindow,
 } from '@eds/desktop-components';`;
 
@@ -474,14 +488,40 @@ export const moduleMenuScenarioOptions = propLabelSelectOptions(
   showcaseModuleMenuScenarioLabels,
 );
 
+export const moduleMenuTitleKindOptions = propLabelSelectOptions(
+  ['text', 'preset'] as const,
+  showcaseModuleMenuTitleKindLabels,
+);
+
+function isModuleMenuTitleTextKind(state: Record<string, unknown>): boolean {
+  return String(state.moduleTitleKind ?? 'preset') === 'text';
+}
+
+function isModuleMenuTitlePresetKind(state: Record<string, unknown>): boolean {
+  return String(state.moduleTitleKind ?? 'preset') === 'preset';
+}
+
+export { isModuleMenuTitleTextKind, isModuleMenuTitlePresetKind };
+
 export function isModuleMenuDsScenario(state: Record<string, unknown>): boolean {
   return String(state.scenario ?? 'module-menu') === 'module-menu';
 }
 
-export const moduleMenuBusinessTitleOptions = moduleMenuBusinessTitles.map((title) => ({
-  value: title,
-  label: title,
-}));
+export const moduleMenuBusinessTitleOptions = buildModuleMenuBusinessTitleOptions('cregis');
+
+export function buildModuleMenuBusinessTitleCustomizeControls(
+  scenario: ModuleMenuBusinessScenario,
+): DocCustomizeControl[] {
+  return [
+    {
+      kind: 'select',
+      key: 'moduleBusinessTitle',
+      label: '模块',
+      options: buildModuleMenuBusinessTitleOptions(scenario),
+      row: 0,
+    },
+  ];
+}
 
 export function moduleMenuGroupTitleKey(index: number): string {
   return `groupTitle_${index}`;
@@ -520,9 +560,30 @@ export function moduleMenuGroupItemMessageTextKey(groupIndex: number, itemIndex:
   return `groupItemMessage_${groupIndex}_${itemIndex}`;
 }
 
+export function moduleMenuGroupItemMessageTypeKey(groupIndex: number, itemIndex: number): string {
+  return `groupItemMessageType_${groupIndex}_${itemIndex}`;
+}
+
+export function moduleMenuGroupItemMessageFocusBackgroundKey(
+  groupIndex: number,
+  itemIndex: number,
+): string {
+  return `groupItemMessageFocusBg_${groupIndex}_${itemIndex}`;
+}
+
 export const moduleMenuItemAccessoryOptions = propLabelSelectOptions(
   ['none', 'message', 'reddot'] as const,
   showcaseModuleMenuAccessoryLabels,
+);
+
+export const moduleMenuMessageTypeOptions = propLabelSelectOptions(
+  ['subtle', 'brand', 'danger'] as const,
+  showcaseFeedbackMessageTypeLabels,
+);
+
+export const moduleMenuMessageFocusBackgroundOptions = propLabelSelectOptions(
+  ['inherit', 'same-white'] as const,
+  showcaseMessageFocusBackgroundLabels,
 );
 
 export function moduleMenuGroupItemSubCountKey(groupIndex: number, itemIndex: number): string {
@@ -535,6 +596,14 @@ export function moduleMenuGroupItemSubLabelKey(
   subIndex: number,
 ): string {
   return `groupItemSubLabel_${groupIndex}_${itemIndex}_${subIndex}`;
+}
+
+export function moduleMenuGroupItemSubIconKey(
+  groupIndex: number,
+  itemIndex: number,
+  subIndex: number,
+): string {
+  return `groupItemSubIcon_${groupIndex}_${itemIndex}_${subIndex}`;
 }
 
 function defaultGroupTitle(index: number): string {
@@ -557,9 +626,12 @@ export function buildModuleMenuCustomizeDefaults(): Record<string, unknown> {
     scenario: 'module-menu' as ModuleMenuScenario,
     showEdgeDivider: true,
     wide: false,
-    groupCount: '2',
+    groupCount: '3',
+    moduleTitleKind: 'text',
     moduleTitleText: 'Module',
-    moduleBusinessTitle: 'Wallet',
+    moduleBusinessTitle: DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
+    triggerLabel: flotationTriggerModuleMenuDefaults.label,
+    ...flotationTriggerModuleMenuDefaults,
   };
 
   for (let index = 0; index < MODULE_MENU_MAX_GROUPS; index += 1) {
@@ -573,10 +645,13 @@ export function buildModuleMenuCustomizeDefaults(): Record<string, unknown> {
       defaults[moduleMenuGroupItemIconKey(index, itemIndex)] = '';
       defaults[moduleMenuGroupItemAccessoryKey(index, itemIndex)] = 'none';
       defaults[moduleMenuGroupItemMessageTextKey(index, itemIndex)] = '0';
+      defaults[moduleMenuGroupItemMessageTypeKey(index, itemIndex)] = 'subtle';
+      defaults[moduleMenuGroupItemMessageFocusBackgroundKey(index, itemIndex)] = 'inherit';
       defaults[moduleMenuGroupItemSubCountKey(index, itemIndex)] = '2';
 
       for (let subIndex = 1; subIndex <= MODULE_MENU_MAX_SUB_ITEMS; subIndex += 1) {
         defaults[moduleMenuGroupItemSubLabelKey(index, itemIndex, subIndex)] = 'Label';
+        defaults[moduleMenuGroupItemSubIconKey(index, itemIndex, subIndex)] = '';
       }
     }
   }
@@ -595,7 +670,7 @@ export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
     label: '场景化',
     options: moduleMenuScenarioOptions,
   },
-  { kind: 'boolean', key: 'wide', label: '280px 宽（默认 240px）' },
+  { kind: 'boolean', key: 'wide', label: 'NavBar展开' },
   {
     kind: 'select',
     key: 'groupCount',
@@ -606,23 +681,37 @@ export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
   { kind: 'boolean', key: 'showEdgeDivider', label: '右侧分割线' },
 ];
 
+const moduleMenuTitleTriggerCustomizeControls: DocCustomizeControl[] =
+  flotationTriggerOverviewModuleMenuControls.map((control) => ({
+    ...control,
+    row: 1,
+    visibleWhen: (state: Record<string, unknown>) => {
+      if (!isModuleMenuTitlePresetKind(state)) return false;
+      return control.visibleWhen ? control.visibleWhen(state) : true;
+    },
+  }));
+
 export const moduleMenuTitleCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'moduleTitleKind',
+    label: '类型',
+    options: moduleMenuTitleKindOptions,
+    row: 0,
+  },
   {
     kind: 'text',
     key: 'moduleTitleText',
-    label: '标题文案',
-    row: 0,
-    visibleWhen: isModuleMenuDsScenario,
+    label: '文案',
+    row: 1,
+    visibleWhen: isModuleMenuTitleTextKind,
   },
-  {
-    kind: 'select',
-    key: 'moduleBusinessTitle',
-    label: '模块',
-    options: moduleMenuBusinessTitleOptions,
-    row: 0,
-    visibleWhen: (state) => !isModuleMenuDsScenario(state),
-  },
+  ...moduleMenuTitleTriggerCustomizeControls,
 ];
+
+/** 场景化 Cregis / UDun：切换业务模块菜单（各场景模块列表独立，见 businessModuleTitles.ts）。 */
+export const moduleMenuBusinessTitleCustomizeControls =
+  buildModuleMenuBusinessTitleCustomizeControls('cregis');
 
 export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCustomizeControl[] {
   const groupNumber = groupIndex + 1;
@@ -714,9 +803,35 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
         visibleWhen: itemVisible(itemIndex),
       },
       {
+        kind: 'select',
+        key: moduleMenuGroupItemMessageTypeKey(groupIndex, itemIndex),
+        label: 'Message 类型',
+        options: moduleMenuMessageTypeOptions,
+        row: itemRow,
+        visibleWhen: (state) => {
+          if (!itemVisible(itemIndex)(state)) return false;
+          return (
+            state[moduleMenuGroupItemAccessoryKey(groupIndex, itemIndex)] === 'message'
+          );
+        },
+      },
+      {
+        kind: 'select',
+        key: moduleMenuGroupItemMessageFocusBackgroundKey(groupIndex, itemIndex),
+        label: '聚焦背景',
+        options: moduleMenuMessageFocusBackgroundOptions,
+        row: itemRow,
+        visibleWhen: (state) => {
+          if (!itemVisible(itemIndex)(state)) return false;
+          return (
+            state[moduleMenuGroupItemAccessoryKey(groupIndex, itemIndex)] === 'message'
+          );
+        },
+      },
+      {
         kind: 'text',
         key: moduleMenuGroupItemMessageTextKey(groupIndex, itemIndex),
-        label: '消息',
+        label: 'Message 文案',
         row: itemRow,
         visibleWhen: (state) => {
           if (!itemVisible(itemIndex)(state)) return false;
@@ -736,13 +851,24 @@ export function buildModuleMenuGroupCustomizeControls(groupIndex: number): DocCu
     );
 
     for (let subIndex = 1; subIndex <= MODULE_MENU_MAX_SUB_ITEMS; subIndex += 1) {
-      controls.push({
-        kind: 'text',
-        key: moduleMenuGroupItemSubLabelKey(groupIndex, itemIndex, subIndex),
-        label: `二级 ${subIndex} 文案`,
-        row: itemRow * 100 + subIndex,
-        visibleWhen: subItemVisible(itemIndex, subIndex),
-      });
+      const subRow = itemRow * 100 + subIndex;
+      controls.push(
+        {
+          kind: 'text',
+          key: moduleMenuGroupItemSubLabelKey(groupIndex, itemIndex, subIndex),
+          label: `二级 ${subIndex} 文案`,
+          row: subRow,
+          visibleWhen: subItemVisible(itemIndex, subIndex),
+        },
+        {
+          kind: 'text',
+          key: moduleMenuGroupItemSubIconKey(groupIndex, itemIndex, subIndex),
+          label: '图标',
+          placeholder: 'eds-add',
+          row: subRow,
+          visibleWhen: subItemVisible(itemIndex, subIndex),
+        },
+      );
     }
   }
 
@@ -762,11 +888,17 @@ export const moduleMenuPropRows: OrganismPropRow[] = [
     description: 'false → 240px（scale-50 + scale-10）；true → 280px（scale-50 + scale-20）。',
   },
   {
+    name: 'titleMode',
+    type: "'text' | 'trigger'",
+    defaultValue: "'text'",
+    description: 'text → 纯文案标题；trigger → #title 插槽嵌 EgFlotationTrigger trigger-style="text"。',
+  },
+  {
     name: 'title',
     type: 'string',
     defaultValue: "'Module'",
     description:
-      'Module Menu-Title 文案。内容溢出且向下滚动时，标题下自动显示 EgDivider type=module（不可 prop 定制，与 showEdgeDivider 无关）。',
+      'Module Menu-Title 文案。titleMode=trigger 时作为 EgFlotationTrigger label 回退；内容溢出且向下滚动时，标题下自动显示 EgDivider type=module（不可 prop 定制，与 showEdgeDivider 无关）。',
   },
   { name: 'showEdgeDivider', type: 'boolean', defaultValue: 'true', description: '右侧竖向 EgDivider type=module。' },
 ];
@@ -776,13 +908,32 @@ export const cregisModuleMenuPropRows: OrganismPropRow[] = [
     name: 'title',
     type: 'string',
     defaultValue: "'Wallet'",
-    description: '当前模块区标题（Wallet / Tasks / WaaS 等，与 Nav Bar 模块名一致）。',
+    description:
+      '当前模块区标题（Wallet / Tasks / WaaS 等，与 Cregis Nav Bar 模块名一致；见 cregisModuleMenuBusinessTitles）。',
   },
   {
     name: 'default',
     type: 'slot',
     defaultValue: 'EgModuleMenuGroup[]',
-    description: '业务菜单组；配置见 presets/module-menu/cregisModuleMenuGroups.ts。',
+    description:
+      '业务菜单组；按模块标题配置见 presets/module-menu/cregisModuleMenuGroups.ts（cregisModuleMenuByTitle）。',
+  },
+];
+
+export const udunModuleMenuPropRows: OrganismPropRow[] = [
+  {
+    name: 'title',
+    type: 'string',
+    defaultValue: "'Wallet'",
+    description:
+      '当前模块区标题（Wallet / Approval / Developer 等，与 UDun Nav Bar 模块名一致；见 udunModuleMenuBusinessTitles）。',
+  },
+  {
+    name: 'default',
+    type: 'slot',
+    defaultValue: 'EgModuleMenuGroup[]',
+    description:
+      '业务菜单组；按模块标题配置见 presets/module-menu/udunModuleMenuGroups.ts（udunModuleMenuByTitle）。',
   },
 ];
 
@@ -815,10 +966,27 @@ export const moduleMenuItemPropRows: OrganismPropRow[] = [
     name: 'message',
     type: 'string',
     defaultValue: '-',
-    description: '右侧 EgMessage；与 showReddot 互斥。',
+    description: '右侧 EgMessage 文案（便捷 prop）；Showcase 推荐 #accessory 嵌套 EgMessage。',
   },
-  { name: 'messageType', type: 'MessageType', defaultValue: "'subtle'", description: 'EgMessage type。' },
+  {
+    name: 'messageType',
+    type: 'MessageType',
+    defaultValue: "'subtle'",
+    description: 'EgMessage type（配合 message prop）；#accessory 嵌套时写在 EgMessage 上。',
+  },
+  {
+    name: 'messageFocusBackground',
+    type: "'inherit' | 'same-white'",
+    defaultValue: "'inherit'",
+    description: 'EgMessage 聚焦背景（配合 message prop）。',
+  },
   { name: 'showReddot', type: 'boolean', defaultValue: 'false', description: '右侧 EgReddot；与 message 互斥。' },
+  {
+    name: 'accessory',
+    type: 'slot',
+    defaultValue: '-',
+    description: '右侧配件区；嵌套 EgMessage 或 EgReddot（与 message / showReddot prop 互斥）。',
+  },
   {
     name: 'active',
     type: 'boolean',

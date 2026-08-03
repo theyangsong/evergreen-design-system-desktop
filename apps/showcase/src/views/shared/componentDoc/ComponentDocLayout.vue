@@ -93,7 +93,9 @@ function trackedCustomizeState(): Record<string, unknown> {
 }
 
 const usageSnippet = computed(() => {
-  if (props.usageSnippetOverride) return props.usageSnippetOverride;
+  if (props.usageSnippetOverride != null && props.usageSnippetOverride !== '') {
+    return props.usageSnippetOverride;
+  }
   const state = trackedCustomizeState();
   return buildVueSelfClosingSnippet(props.componentTag, state, {
     vModel: props.vModelKey,

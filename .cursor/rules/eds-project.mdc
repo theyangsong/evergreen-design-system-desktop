@@ -315,9 +315,108 @@ function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
 **组合式场景约定**（Nav Bar 本体）
 
 - 仍通过 slots + 子组件（`EgNavBarModuleItem` 等）拼装；Showcase 定制面板驱动预览。
+- **交互动效（已定稿）**：模块行 / 应用入口 / 底部 icon / 企业 / 头像 — **仅 hover 有过渡**（`color`、`background` 等 `var(--eds-interaction-transition)` 或等价 duration/easing）；**focus / 选中（`*Focused`）态瞬时切换**，对应规则显式 `transition: none` 或不绑 transition。勿为 focus 加回过渡。
 - **Icon 尺寸（勿混淆 EgIcon `size` prop 与语义 token）**：
   - 模块 / 应用入口 glyph 容器：`var(--icon-lg)`（`.moduleIconGlyph`）；`EgIcon` 用 **`size="md"`**（`md` → `--icon-lg`），勿用 `size="lg"`（`lg` → `--icon-xl`）。
   - 底部工具 icon 容器：`var(--icon-md)`；`EgIcon` 用 **`size="sm"`**。
+- **模块 Label（Bar 11px）**：Nav 根 `overflow-x: clip`，用 **`.moduleLabel` 外层 clip + `.moduleLabelPaint`（2×+scale，origin top left，宽 200%）+ `.moduleLabelSizer`（隐藏、直出 `--eds-bar-*` 撑换行/高度）**；详见 §1.1 Bar 小节。
+
+**EgMessage 嵌套（Module Menu / Flotation）**
+
+- **消费方**：`EgModuleMenuItem`（`message` props 或 `#accessory` 嵌套 `EgMessage`）、`EgFlotationMenuItem`（`showMessage` / `#message`）、`EgFlotationTrigger`（仅展示计数，**无**行聚焦同步）。
+- **行聚焦**：父级 `provide(MESSAGE_PARENT_FOCUSED_KEY)`；`EgMessage` 通过 inject 同步 `focused`；显式 `:focused="false"` 可覆盖。
+- **聚焦背景**：`focusBackground: 'inherit' | 'same-white'`（Module Menu 便捷 prop：`message-focus-background`）；Signing 等 danger 计数在 item 聚焦时用 `same-white` → 白底黑字。
+- **布局**：Message 用 sizer/paint（2×+scale(0.5)）绘 Bar 11px，**不**用 `barTextSubpixel` composes；根节点 `flex-shrink: 0`，嵌套在 button / 菜单行内不受父级 `font-size` / `color` 污染。
+- **Showcase**：Message 独立页只定制 `type` / `text`；`focusBackground` 在 Props 表说明，用于 Module Menu / `#accessory` 场景。
+
+**Flotation Combo（通用下拉浮层架构）**
+
+- **原则**：凡「点击展开浮层菜单 / 下拉选择」交互，**统一**使用 `EgFlotation` Combo；**禁止**手搓 `EgAnchoredTooltip` + 菜单 DOM、或在 Showcase / 业务侧维护 **平行 trigger 解析体系**。
+- **组件树**（实现见 `packages/components/src/molecules/flotation/index.ts`）：
+
+```text
+EgFlotation
+├ #trigger  → EgFlotationTrigger（预置：标准下拉框 | 模块菜单标题；slot 可完全替换）
+├ Menu 配置  → placement / align / widthMode / width / maxHeight / showAdd / closeOnScroll…
+└ items / #content → EgFlotationMenu → EgFlotationMenuItem（Box 行；EgFlotationBox 为同一预置行别名）
+```
+
+- **三层可独立配置**（不同消费方只换其中一层或两层，**Combo 结构不变**）：
+
+| 层 | 组件 / 配置 | 典型差异 |
+|----|-------------|----------|
+| Trigger | `#trigger` + `EgFlotationTrigger` | `triggerKind`: `standard-dropdown`（Combo 页） vs `module-menu`（Module Menu `#title`） |
+| Menu | `EgFlotation` props | 宽 240（Combo 默认）vs 288（Module Menu 标题演示）、`addLabel`、`closeOnScroll` 等 |
+| Box / Items | `items` 或 `#content` | Combo 页 Label 演示 vs Module Menu 页 Solace Identity / Create Project 演示 |
+
+- **Showcase 文档分工**（子锚点 id 与 `catalog.ts` 一致）：
+
+| 路由 / 页 | 职责 |
+|-----------|------|
+| `/components/flotation` | **Combo 纵览**：完整 `EgFlotation` + `#trigger` + Menu + Box 定制 |
+| `/components/flotation-trigger` | **Trigger 原子**：`EgFlotationTrigger` 各 Style / Size / 模块菜单预置 |
+| `/components/flotation-box` | **Box 原子**：`EgFlotationMenuItem` / `EgFlotationBox` 行类型与选中态 |
+
+- **嵌套用法**（Module Menu `#title`、Nav Bar 模块切换等 **同一模式**）：
+
+```vue
+<EgModuleMenu title-mode="trigger">
+  <template #title>
+    <EgFlotation v-bind="menuProps" :items="titleMenuItems" close-on-scroll>
+      <template #trigger="{ expanded, selectedItem, hasAnyItemReddot }">
+        <EgFlotationTrigger
+          v-bind="resolveFlotationComboTriggerProps(triggerState, { expanded, selectedItem, hasAnyItemReddot })"
+        />
+      </template>
+    </EgFlotation>
+  </template>
+</EgModuleMenu>
+```
+
+- **Showcase 共享辅助**（`apps/showcase/src/views/components/previews/flotationDocCustomize.ts`）— **新增嵌套场景须复用，勿复制**：
+
+| 函数 / 常量 | 用途 |
+|-------------|------|
+| `resolveFlotationComboTriggerProps(state, slot)` | `#trigger` 插槽：`standard-dropdown` / `module-menu` 预置 props；`slot.selectedItem` 驱动 trigger 文案；**module-menu** 时 `slot.hasAnyItemReddot`（来自 `EgFlotation`）驱动 trigger 红点：任一 Box Item 有红点则 trigger 显示，全无则不显示 |
+| `resolveFlotationComboEgFlotationProps(menuState, options)` | Menu 层：`width` / `maxHeight` / `placement` / `showAdd` 等（**不含** `items` / `#trigger`） |
+| `buildFlotationComboNestedSnippet(triggerState, menuState, options)` | AI / usage 代码片段：`EgFlotation` + `#trigger` + `items` |
+| `withFlotationComboTriggerKind(state, kind)` | 合并 `triggerKind`（如 Module Menu 固定为 `module-menu`） |
+| `moduleMenuTitleFlotationDemoState` | **仅 Module Menu 页**标题浮层 Menu/Box 演示（宽 288、`Create Project`）；**不得**当作 Combo 页默认 customize |
+
+- **Module Menu 薄封装**（`moduleMenuPreviewCustomize.ts`）：`resolveModuleMenuTitleFlotationMenuState`、`resolveModuleMenuTitleFlotationTriggerState`、`buildModuleMenuTitleTriggerSnippet` — 内部 **只调** 上表共享函数；**已删除**独立的 `resolveModuleMenuTitleFlotationTriggerProps` 类重复解析。
+
+- **禁止**：
+  - 绕过 `EgFlotation` 自行拼装 Tooltip + 列表；
+  - 为各 Organism 再写一套 trigger prop 映射（须走 `resolveFlotationComboTriggerProps`）；
+  - 把 Combo 页默认 Label `items` 硬套到 Module Menu 标题演示（**结构共享、数据分离**）。
+
+**Module Menu 场景化**
+
+- 业务 preset：`apps/showcase/src/presets/module-menu/`。**Cregis 与 UDun 场景独立**，模块名列表、preset 索引、默认菜单 **互不共用**：
+  - **Cregis**：`cregisModuleMenuBusinessTitles`（Wallet、Tasks、WaaS、Payment Engine…）→ `cregisModuleMenuGroups.ts` / `cregisModuleMenuByTitle`
+  - **UDun**：`udunModuleMenuBusinessTitles`（Wallet、Approval、Developer、Bill、Manage、Auto-Signing）→ `udunModuleMenuGroups.ts` / `udunModuleMenuByTitle`
+- **菜单 preset 回退**（各场景 **内部** 独立）：仅在该场景的 `*ModuleMenuByTitle` 单独维护的模块有专属菜单；其余模块回退 **`moduleMenuComponentDefaultPresetGroups`**（与组件场景 `buildModuleMenuCustomizeDefaults()` 同一套：3 组、Label、组 2 含 tier=2 二级条目）。Cregis / UDun **共用**此组件默认回退源。
+- **默认选中**：两场景初始 `moduleBusinessTitle` 均为 **`Wallet`**（Nav Bar 首模块名；菜单走该场景默认 preset）。
+- **标题行为**（与上文 Flotation Combo 一致；仅 trigger / Menu / items 数据源按场景变化）：
+
+| 场景化 | 条件 | `#title` / `title` 行为 |
+|--------|------|-------------------------|
+| **组件**（`module-menu`） | `moduleTitleKind` = **文本** | 纯文本（默认 `Module`） |
+| **组件** | `moduleTitleKind` = **下拉框**（preset） | `#title` 嵌套 **EgFlotation Combo**，`triggerKind` = **module-menu**；Menu/Box 用 `moduleMenuTitleFlotationDemoState` |
+| **Cregis** | `moduleBusinessTitle` = **Tasks** | 纯文本 + Tasks preset |
+| **Cregis** | `moduleBusinessTitle` = **WaaS** | **`title-mode="trigger"`** + `#title` EgFlotation（288 / max-height 540 / Create Project；Trigger 文案 Doris Studio）+ `cregisWaasModuleMenuGroups` |
+| **Cregis** | `moduleBusinessTitle` = **Payment Engine** | 同上浮层标题（Trigger 文案 **Payment Engine**）+ `cregisPaymentEngineModuleMenuGroups` |
+| **Cregis** | 其余 Cregis 模块 | 纯文本模块名 + **组件场景默认菜单** |
+| **UDun** | 任意 UDun 模块 | 纯文本模块名 + **组件场景默认菜单**（`udunModuleMenuByTitle` 按需扩展） |
+
+- 组件场景默认 **`moduleTitleKind: 'text'`**（纯文本 Module）；**不**在 DS 默认里 seed Cregis Tasks 业务数据。
+- 标题 trigger 定制项：`flotationTriggerOverviewModuleMenuControls`（`triggerLabel`、`showReddot`、`disabled`）。
+- 推荐用法：`message` / `message-type` / `message-focus-background` props；复杂配件用 `#accessory` 嵌套完整 `EgMessage`。
+
+**Data List 空态（EDS 定稿，不对齐 @cregis/ui）**
+
+- 空态图标：**`eds-business-7`**（`EgDataList` 默认 `#empty` slot）；**不**使用源包 `@cregis/icon` 的 `EdsNoData`。
+- 文案 prop：`emptyText`（默认 `'No data'`）；可通过 `#empty` slot 完全替换。
 
 **实现要点**
 
@@ -329,6 +428,9 @@ function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
 
 ## 8. 变更记录
 
+- 2026-08-03：§7 — Module Menu **Cregis / UDun 场景独立**（各场景模块列表、preset、默认菜单分离；UDun：Wallet / Approval / Developer / Bill / Manage / Auto-Signing）。
+- 2026-08-03：§7 — **Flotation Combo 通用架构**（EgFlotation 三层、Showcase 三页分工、共享 `flotationDocCustomize` 辅助、禁止手搓 Tooltip / 重复 trigger 解析）；Module Menu 场景化标题表（text / preset / WaaS vs Tasks）。
+- 2026-08-03：§7 — Nav Bar 动效定稿（hover 有过渡、focus 无）；EgMessage 嵌套约定；Module Menu 场景化；Data List 空态 `eds-business-7`（不对齐 @cregis EdsNoData）。
 - 2026-08-01：§1.3 — 数字展示统一千分位：`formatGroupedNumber`（`@eds/desktop-components`）；展示层格式化 + `tabular-nums`；禁止各处手写 `toLocaleString` / 正则插逗号。
 - 2026-07-31：§1.2 — 禁止组件内私自定义 CSS 变量；须直接消费 spec/dist token 或 eds utility 类；缺失时先问维护者（EgTooltip / TooltipMenu 修正为 `--radius-md`、`eds-shadow-light-stack` 等）。
 - 2026-07-30：§7 — Organism Showcase 场景化（DS 本体 vs 业务薄组件；Nav Bar + Cregis 参考实现）。

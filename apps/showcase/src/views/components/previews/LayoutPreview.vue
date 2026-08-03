@@ -217,13 +217,13 @@ const docSlotRows = computed(() => layoutSlotRowsForType(customize.type));
                           </template>
                           <template v-if="item.tier === 2">
                             <EgModuleMenuItem
-                              v-for="(subLabel, subIndex) in item.subitems"
+                              v-for="(subItem, subIndex) in item.subitems"
                               :key="`${group.key}-item-${itemIndex}-sub-${subIndex}`"
                               subitem
-                              :label="subLabel"
+                              :label="subItem.label"
                             >
                               <template #icon>
-                                <EgIcon name="eds-add" size="sm" />
+                                <EgIcon :name="subItem.icon" size="sm" />
                               </template>
                             </EgModuleMenuItem>
                           </template>

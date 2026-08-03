@@ -22,8 +22,28 @@ export const toastPropRows: DocPropRow[] = [
 ];
 
 export const messagePropRows: DocPropRow[] = [
-  { name: 'type', type: "'subtle' | 'brand' | 'danger'", defaultValue: "'subtle'", description: 'Message 类型。' },
-  { name: 'text', type: 'string', defaultValue: "'0'", description: '文案或计数。' },
+  {
+    name: 'type',
+    type: "'subtle' | 'brand' | 'danger'",
+    defaultValue: "'subtle'",
+    description:
+      'Subtle：--material-card-moderate + --text-base-primary；Brand：--material-brand-primary + 白字；Danger：--status-danger + 白字。',
+  },
+  { name: 'text', type: 'string', defaultValue: "'0'", description: '文案或计数（Bar 11px / line-height 14px）。' },
+  {
+    name: 'focused',
+    type: 'boolean',
+    defaultValue: 'false',
+    description:
+      '行聚焦态；Module Menu item 聚焦时由父级 provide，亦可受控。聚焦时文案 --text-same-black-primary。',
+  },
+  {
+    name: 'focusBackground',
+    type: "'inherit' | 'same-white'",
+    defaultValue: "'inherit'",
+    description:
+      '聚焦背景：inherit 保持 type 原色；same-white 为 --material-same-white-primary。Module Menu item 用 message-focus-background prop；#accessory 嵌套时写在 EgMessage 上。',
+  },
 ];
 
 export const reddotPropRows: DocPropRow[] = [
@@ -72,7 +92,10 @@ export const toastCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'text', label: '文案' },
 ];
 
-export const messageCustomizeDefaults = { type: 'subtle', text: '0' };
+export const messageCustomizeDefaults = {
+  type: 'subtle',
+  text: '0',
+};
 export const messageCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',

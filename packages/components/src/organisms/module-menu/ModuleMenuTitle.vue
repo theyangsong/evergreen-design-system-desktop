@@ -6,6 +6,8 @@ import '../../styles/frostedMenuChrome.css';
 withDefaults(
   defineProps<{
     title?: string;
+    /** text → 标题文案；trigger → #title 插槽内 EgFlotationTrigger 等交互标题。 */
+    titleMode?: 'text' | 'trigger';
     /** 列表可滚动时为分割线预留占位。 */
     scrollDividerReserved?: boolean;
     /** 内容区溢出且已向下滚动时显示分割线（占位始终保留）。 */
@@ -13,6 +15,7 @@ withDefaults(
   }>(),
   {
     title: 'Module',
+    titleMode: 'text',
     scrollDividerReserved: false,
     showScrollDivider: false,
   },
@@ -22,9 +25,12 @@ withDefaults(
 <template>
   <div :class="['eds-frosted-menu-chrome', styles.titleWrap]">
     <div :class="styles.titleRaw">
-      <p :class="styles.titleText">
+      <p v-if="titleMode === 'text'" :class="styles.titleText">
         <slot>{{ title }}</slot>
       </p>
+      <div v-else :class="styles.titleTrigger">
+        <slot>{{ title }}</slot>
+      </div>
     </div>
     <EgDivider
       v-if="scrollDividerReserved"
