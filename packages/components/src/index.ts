@@ -1,5 +1,5 @@
 import './styles/global.css';
-import './styles/interactionTransitions.css';
+import './styles/interactionHoverTooltip.css';
 import { initEdsDesktopRuntime } from './setup/initEdsDesktopRuntime';
 
 initEdsDesktopRuntime();

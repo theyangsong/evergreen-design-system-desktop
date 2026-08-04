@@ -29,6 +29,8 @@ const props = withDefaults(
     tallPreview?: boolean;
     /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock）。 */
     compactPreview?: boolean;
+    /** Tag 文档：预览区 480px + 底部样式色板。 */
+    tagPreview?: boolean;
     /** 定制区按 control.row 分行排布（如 Module Menu 每组标题+顺序）。 */
     customizeSequential?: boolean;
     /** sequential + row 布局时每行列数（如 EgIconButtonPro 嵌套 6 列）。 */
@@ -55,9 +57,14 @@ const emit = defineEmits<{
 const slots = useSlots();
 
 const injectedCompactPreview = inject<ComputedRef<boolean>>('componentDocCompactPreview');
+const injectedTagPreview = inject<ComputedRef<boolean>>('componentDocTagPreview');
 
 const useCompactPreview = computed(
   () => props.compactPreview || injectedCompactPreview?.value === true,
+);
+
+const useTagPreview = computed(
+  () => props.tagPreview || injectedTagPreview?.value === true,
 );
 
 const useTallPreview = computed(() => props.tallPreview && !useCompactPreview.value);
@@ -163,6 +170,7 @@ async function copyAiPrompt() {
       styles.docBlock,
       useTallPreview && styles.docBlockTallPreview,
       useCompactPreview && styles.docBlockCompactPreview,
+      useTagPreview && styles.docBlockTagPreview,
     ]"
   >
     <header v-if="showDocTitle" :class="styles.docHeader">

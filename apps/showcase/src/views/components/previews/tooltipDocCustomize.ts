@@ -283,8 +283,20 @@ export const anchoredTooltipPropRows: DocPropRow[] = [
   {
     name: 'offset',
     type: 'number',
-    defaultValue: '8',
-    description: '与触发器间距（px）。',
+    defaultValue: '--spacing-025 (1px)',
+    description: '主轴与触发器间距（px）；未传时读 --spacing-025。',
+  },
+  {
+    name: 'crossAxisOffset',
+    type: 'number',
+    defaultValue: '按 align（start=-spacing-2，end=+spacing-2，center=0）',
+    description: '交叉轴位移（px）；未传时按 align 与 --spacing-2 计算。',
+  },
+  {
+    name: 'align',
+    type: "'start' | 'center' | 'end'",
+    defaultValue: "'start'",
+    description: '交叉轴对齐；同时影响未传 crossAxisOffset 时的默认 inset。',
   },
   {
     name: 'disabled',

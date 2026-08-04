@@ -1,0 +1,59 @@
+---
+description: eds-desktop 本地同步约定 — 用户说「同步」时自动 build 并推送到所有引用本库的项目
+alwaysApply: true
+---
+
+# eds-desktop — 本地同步约定
+
+## 触发词
+
+在 **eds-desktop** 仓库中，用户说以下指令时按约定执行：
+
+| 用户说 | Agent 行为 |
+|--------|------------|
+| **「同步」** | 构建 eds-desktop，并同步到**所有**本地引用 `@eds/desktop-components` / `@eds/desktop-tokens` 的项目 |
+| **「同步到 [项目名]」** | 仅同步到指定项目（如 `work-cregis-desktop`） |
+| **「列出可同步项目」** | 扫描并列出可同步的本地 consumer，不执行 build |
+
+在 **业务项目**（如 `work-cregis-desktop`）中，用户说 **「同步 eds-desktop」** 等同于：先在 `../eds-desktop` build，再在本项目 `pnpm install` 刷新 link。
+
+## 同步步骤（默认全流程）
+
+1. 在 eds-desktop 根目录执行：
+   ```bash
+   pnpm build:tokens && pnpm build:components
+   ```
+   或 `pnpm sync`（若已配置）。
+2. 发现本地 consumer：`pnpm sync:list` 或运行 `node scripts/sync-local-consumers.mjs --list`。
+3. 对每个 consumer 执行 `pnpm install`（刷新 `link:` / `file:` 依赖）。
+4. 汇报：已 build 的包、已同步的项目列表；若某项目 dev server 在跑，提示用户重启以加载新构建。
+
+## 发现规则
+
+扫描 `~/Projects`（eds-desktop 的上两级目录）下各项目的 `package.json`：
+
+- `dependencies` / `devDependencies` 中含 `@eds/desktop-components` 或 `@eds/desktop-tokens`
+- 且值为 `link:` / `file:` 指向 `eds-desktop/packages/*`
+
+**排除** eds-desktop 自身 monorepo 内的 workspace 包（showcase、storybook 等由 `pnpm build` 已覆盖）。
+
+## 当前已知 consumer
+
+- `work-cregis-desktop` — **Desktop 客户端**；`link:../eds-desktop/packages/components` + `link:../eds-desktop/packages/tokens`；**禁止**引入 `@eds/website-*` 或 showcase 壳层配置
+
+新 consumer 加入时无需改规则；发现脚本会自动扫描。若扫描不到（路径不在 `~/Projects`），手动指定「同步到 [路径]」。
+
+## Desktop 客户端 consumer（如 work-cregis-desktop）
+
+同步 **仅** 传播 `packages/tokens` 与 `packages/components` 的 build/源码，以及 **list-field-currency 运行时辅助文件**（`listFieldCurrencyShared.ts`、`listFieldCrypto*.ts`）到 `work-cregis-desktop/src/scenes/tasks/list-field/`。**不包含**：
+
+- `apps/showcase/**`（Website 壳 + Desktop 预览混合）
+- `@eds/website-tokens` / `@eds/website-components`
+
+客户端项目须 **100% Desktop**：排版与颜色只消费 `packages/tokens` spec 中已定义的语义 token；不得依赖 Showcase 外层 Website 变量继承。若 preview 与客户端视觉不一致，优先查 token 名是否在 Desktop spec 中存在，而非继续 sync Website 侧配置。
+
+## Agent 注意
+
+- 用户只说「同步」时，**不要**只 build eds-desktop 就结束；必须同步全部 consumer。
+- 不要 push git，除非用户明确要求。
+- build 失败则停止，不向 consumer 传播半成品。

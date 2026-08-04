@@ -85,7 +85,7 @@
   background: var(--event-hover);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: var(--motion-transition-fade);
 }
 
 .corporationWideButton:hover:not(:disabled):not(.corporationWideButtonFocused)::before {
@@ -159,9 +159,9 @@
 .corporationSubtitle {
   width: 100%;
   color: var(--text-base-tertiary);
-  font-size: var(--eds-footnote-medium-strong-size);
-  font-weight: var(--eds-footnote-medium-strong-weight);
-  line-height: var(--eds-footnote-medium-strong-line-height);
+  font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -270,7 +270,7 @@
   background: var(--event-hover);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: var(--motion-transition-fade);
 }
 
 .moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)::before {
@@ -338,7 +338,7 @@
 
 .moduleRowButton:not(.moduleRowButtonFocused) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
   color: var(--stroke-base-secondary);
-  transition: color var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)
@@ -388,7 +388,7 @@
     color-mix(in display-p3, var(--eds-shadow-shallow) 70%, transparent),
     transparent
   );
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--motion-transition-scroll-fade);
 }
 
 .corporationOverflow::after {
@@ -462,7 +462,7 @@
     color-mix(in display-p3, var(--eds-shadow-shallow) 70%, transparent),
     transparent
   );
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: var(--motion-transition-scroll-fade);
 }
 
 .individualsOverflow::after {
@@ -533,7 +533,7 @@
   opacity: 0;
   line-height: 0;
   pointer-events: none;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .trafficGlyph :global(.eds-icon) {
@@ -584,7 +584,7 @@
   line-height: var(--scale-10);
   text-align: center;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .corporationMark:hover:not(:disabled):not(.corporationMarkFocused) {
@@ -739,7 +739,7 @@
   background: var(--event-hover);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: var(--motion-transition-fade);
 }
 
 .moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused)::before {
@@ -813,7 +813,7 @@
 }
 
 .moduleIconButton:not(.moduleIconButtonFocused) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
-  transition: color var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .moduleIconGlyph:not(.moduleIconGlyphAppEntry) :global(.eds-i-f) {
@@ -845,7 +845,10 @@
   border-radius: var(--radius-full);
   background: var(--material-hide);
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+}
+
+.bottomIconHost:not(.bottomIconHostFocused) {
+  transition: var(--motion-transition-hover);
 }
 
 .bottomIconHost:hover:not(:disabled):not(.bottomIconHostFocused) {
@@ -855,6 +858,7 @@
 .bottomIconHostFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
+  transition: none;
 }
 
 .bottomIconHost:focus {
@@ -876,7 +880,10 @@
   height: var(--icon-md);
   line-height: 0;
   color: var(--stroke-base-secondary);
-  transition: var(--eds-interaction-transition);
+}
+
+.bottomIconHost:not(.bottomIconHostFocused) .bottomIconGlyph {
+  transition: var(--motion-transition-hover);
 }
 
 .bottomIconDefault,
@@ -910,6 +917,7 @@
 
 .bottomIconHostFocused:not(:disabled) .bottomIconGlyph {
   color: var(--material-brand-primary);
+  transition: none;
 }
 
 .avatarHost {
@@ -922,7 +930,7 @@
   border-radius: var(--radius-full);
   background: none;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .avatarHost:hover:not(:disabled):not(.avatarHostFocused) {

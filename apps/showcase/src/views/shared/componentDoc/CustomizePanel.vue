@@ -91,15 +91,29 @@ function patchKey(key: string, value: unknown) {
       <div
         v-for="group in sequentialRowGroups"
         :key="group.controls.map((control) => control.key).join('-')"
-        :class="styles.customizeRow"
+        :class="[
+          styles.customizeRow,
+          group.controls.length === 1 &&
+            group.controls[0]?.kind === 'heading' &&
+            styles.customizeHeadingRow,
+        ]"
       >
-        <CustomizeControlField
-          v-for="control in group.controls"
-          :key="control.key"
-          :control="control"
-          :value="state[control.key]"
-          @update="patchKey(control.key, $event)"
-        />
+        <template v-for="control in group.controls" :key="control.key">
+          <div
+            v-if="control.kind === 'heading'"
+            :class="styles.customizeField"
+          >
+            <span :class="[styles.customizeLabel, styles.customizeGroupLabel]">
+              {{ control.label }}
+            </span>
+          </div>
+          <CustomizeControlField
+            v-else
+            :control="control"
+            :value="state[control.key]"
+            @update="patchKey(control.key, $event)"
+          />
+        </template>
       </div>
     </div>
     <div

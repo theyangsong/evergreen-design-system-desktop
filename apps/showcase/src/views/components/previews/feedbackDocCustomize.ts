@@ -1,4 +1,5 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
+import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import {
   propLabelRows,
   showcaseFeedbackMessageTypeLabels,
@@ -140,3 +141,19 @@ export const formSubmissionCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (s) => s.type === 'notes',
   },
 ];
+
+export function buildFormSubmissionUsageSnippet(state: Record<string, unknown>): string {
+  const type = String(state.type ?? formSubmissionCustomizeDefaults.type);
+  const props: Record<string, unknown> = {
+    type,
+    text: String(state.text ?? formSubmissionCustomizeDefaults.text),
+  };
+  if (type === 'notes') {
+    props.linkLabel = String(state.linkLabel ?? formSubmissionCustomizeDefaults.linkLabel);
+    props.showLink = state.showLink !== false;
+    props.href = String(state.href ?? '#');
+  }
+  return buildVueSelfClosingSnippet('EgFormSubmission', props, {
+    defaults: formSubmissionCustomizeDefaults,
+  });
+}

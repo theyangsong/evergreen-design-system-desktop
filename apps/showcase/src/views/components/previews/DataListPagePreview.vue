@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue';
 import {
-  EgCrypto,
   EgDivider,
   EgDataList,
   EgDataListColumn,
@@ -13,11 +12,11 @@ import {
   EgToolBar,
 } from '@eds/desktop-components';
 import {
-  DATA_LIST_FIGMA_COLUMNS,
   DATA_LIST_FIGMA_HEADER_HEIGHT,
   DATA_LIST_FIGMA_PAGE_SIZE_OPTIONS,
-  DATA_LIST_PREVIEW_CRYPTO,
 } from './dataListPagePreviewData';
+import DataListColumnCellPreview from './DataListColumnCellPreview.vue';
+import DataListHeaderSortTrigger from './DataListHeaderSortTrigger.vue';
 import previewStyles from './DataListPreview.module.css';
 import { useDataListPagePreview } from './useDataListPagePreview';
 
@@ -173,74 +172,74 @@ const shellClass = computed(() => {
         >
           <EgDataListColumn
             prop="primary"
-            :label="DATA_LIST_FIGMA_COLUMNS.combo.label"
+            :label="previewColumnSettings[0].label"
             :min-width="previewColumnSettings[0].minWidth"
             :align="previewColumnSettings[0].align"
-            :sortable="previewColumnSettings[0].sortable"
+            :sortable="false"
           >
             <template #header>
               <div :class="previewStyles.comboHeader">
-                <span>Header</span>
-                <EgDivider
-                  type="page"
-                  direction="vertical"
-                  :class="previewStyles.comboHeaderDivider"
-                />
-                <span>Header</span>
+                <div :class="previewStyles.comboHeaderSegment">
+                  <span>{{ previewColumnSettings[0].label }}</span>
+                  <DataListHeaderSortTrigger
+                    v-if="previewColumnSettings[0].sortable"
+                    :label="previewColumnSettings[0].label"
+                    :disabled="Boolean(customize.selectMode)"
+                  />
+                </div>
+                <EgDivider type="page" direction="vertical" />
+                <div :class="previewStyles.comboHeaderSegment">
+                  <span>{{ previewColumnSettings[0].secondaryLabel }}</span>
+                  <DataListHeaderSortTrigger
+                    v-if="previewColumnSettings[0].secondarySortable"
+                    :label="previewColumnSettings[0].secondaryLabel"
+                    :disabled="Boolean(customize.selectMode)"
+                  />
+                </div>
               </div>
             </template>
             <template #default>
-              <div
-                v-if="previewColumnSettings[0].dataSource === 'currency'"
-                :class="previewStyles.fieldItemCurrency"
-              >
-                <EgCrypto :name="DATA_LIST_PREVIEW_CRYPTO" size="sm" />
-                <span :class="previewStyles.fieldBarSecondary" aria-hidden="true" />
-              </div>
-              <div v-else :class="previewStyles.fieldItem">
-                <span :class="previewStyles.fieldBarPrimary" aria-hidden="true" />
-                <span :class="previewStyles.fieldBarSecondary" aria-hidden="true" />
-              </div>
+              <DataListColumnCellPreview
+                :data-source="previewColumnSettings[0].dataSource"
+                :column-min-width="previewColumnSettings[0].minWidth"
+                variant="combo"
+              />
             </template>
           </EgDataListColumn>
 
           <EgDataListColumn
             prop="meta"
-            :label="DATA_LIST_FIGMA_COLUMNS.sortable.label"
+            :label="previewColumnSettings[1].label"
             :min-width="previewColumnSettings[1].minWidth"
             :align="previewColumnSettings[1].align"
             :sortable="previewColumnSettings[1].sortable"
           >
             <template #default>
-              <EgCrypto
-                v-if="previewColumnSettings[1].dataSource === 'currency'"
-                :name="DATA_LIST_PREVIEW_CRYPTO"
-                size="sm"
+              <DataListColumnCellPreview
+                :data-source="previewColumnSettings[1].dataSource"
+                :column-min-width="previewColumnSettings[1].minWidth"
               />
-              <span v-else :class="previewStyles.cellBar" aria-hidden="true" />
             </template>
           </EgDataListColumn>
 
           <EgDataListColumn
             prop="meta2"
-            :label="DATA_LIST_FIGMA_COLUMNS.plain.label"
+            :label="previewColumnSettings[2].label"
             :min-width="previewColumnSettings[2].minWidth"
             :align="previewColumnSettings[2].align"
             :sortable="previewColumnSettings[2].sortable"
           >
             <template #default>
-              <EgCrypto
-                v-if="previewColumnSettings[2].dataSource === 'currency'"
-                :name="DATA_LIST_PREVIEW_CRYPTO"
-                size="sm"
+              <DataListColumnCellPreview
+                :data-source="previewColumnSettings[2].dataSource"
+                :column-min-width="previewColumnSettings[2].minWidth"
               />
-              <span v-else :class="previewStyles.cellBar" aria-hidden="true" />
             </template>
           </EgDataListColumn>
 
           <EgDataListColumn
             prop="actions"
-            :label="DATA_LIST_FIGMA_COLUMNS.actions.label"
+            :label="previewColumnSettings[3].label"
             :min-width="previewColumnSettings[3].minWidth"
             :align="previewColumnSettings[3].align"
             :sortable="previewColumnSettings[3].sortable"

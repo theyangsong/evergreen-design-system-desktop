@@ -78,6 +78,10 @@
   z-index: 0;
 }
 
+.docBlockTagPreview {
+  --showcase-doc-preview-height: var(--showcase-doc-preview-height-tag);
+}
+
 /** 280px 标记页：预览区 sticky，定制/Props 滚动时预览留在页头下方。 */
 .docBlockCompactPreview .previewStage {
   position: sticky;
@@ -214,6 +218,27 @@
 }
 
 .customizeNestedTitle {
+  margin: 0;
+  color: var(--text-base-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.customizeHeadingRow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.customizeGroupLabel {
+  color: var(--text-base-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.customizeRowHeading {
   margin: 0;
   color: var(--text-base-primary);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;

@@ -25,7 +25,7 @@
   min-width: 0;
   min-height: 0;
   background: var(--box-page);
-  transition: flex var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: flex var(--motion-duration-shift) var(--motion-easing-standard);
 }
 
 .mainSkidOpen {
@@ -73,8 +73,8 @@
   pointer-events: none;
   background: var(--box-page);
   transition:
-    max-width var(--eds-interaction-duration) var(--eds-interaction-easing),
-    width var(--eds-interaction-duration) var(--eds-interaction-easing);
+    max-width var(--motion-duration-shift) var(--motion-easing-standard),
+    width var(--motion-duration-shift) var(--motion-easing-standard);
 }
 
 .skidVisible {

@@ -1,7 +1,6 @@
 /* EgDataList — ported from @cregis/ui TableList; Desktop tokens only. */
 
 .root {
-  --eds-data-list-loading-transition: 0.3s ease;
   --eds-data-list-select-column-width: 48px;
   --eds-data-list-select-content-opacity: 0;
   --eds-data-list-row-gap: var(--spacing-025);
@@ -35,7 +34,7 @@
 
 .initingIcon {
   color: var(--stroke-base-secondary);
-  animation: eds-data-list-spin 2s linear infinite;
+  animation: eds-data-list-spin var(--motion-duration-spin-slow) var(--motion-easing-linear) infinite;
 }
 
 .initingText {
@@ -58,9 +57,7 @@
 
 .operationBarEnterActive,
 .operationBarLeaveActive {
-  transition:
-    transform var(--eds-data-list-loading-transition),
-    opacity var(--eds-data-list-loading-transition);
+  transition: var(--motion-transition-float);
 }
 
 .operationBarEnterFrom,
@@ -130,7 +127,7 @@
 }
 
 .body tr:not(.loadingRow) {
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 /* loadingRow 固定为 tbody 第 1 行：偶数行 material-hide，奇数行 shallow。 */
@@ -193,7 +190,7 @@
 .loadingSlot {
   max-height: 0;
   overflow: hidden;
-  transition: max-height var(--eds-data-list-loading-transition);
+  transition: max-height var(--motion-duration-shift) var(--motion-easing-standard);
 }
 
 .loadingSlotExpanded {
@@ -202,7 +199,7 @@
 
 .loadingSlotLeaving .loadingInner {
   opacity: 0;
-  transition: opacity var(--eds-data-list-loading-transition);
+  transition: var(--motion-transition-fade);
 }
 
 .loadingInner {
@@ -219,7 +216,7 @@
 
 .loadingSpin {
   color: var(--stroke-base-secondary);
-  animation: eds-data-list-spin 2s linear infinite;
+  animation: eds-data-list-spin var(--motion-duration-spin-slow) var(--motion-easing-linear) infinite;
 }
 
 .loadingDone {
@@ -228,7 +225,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-1);
-  animation: eds-data-list-loading-done-in 0.3s ease;
+  animation: eds-data-list-loading-done-in var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .loadingDoneIcon {

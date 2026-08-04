@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue';
 
-/** 与 Layout Skid 推动动效 `--eds-interaction-duration` 对齐（0.3s）。 */
+/** 与 Layout Skid 推动动效 `--motion-duration-shift` 对齐。 */
 export const SKID_PUSH_TRANSITION_MS = 300;
 
 /**

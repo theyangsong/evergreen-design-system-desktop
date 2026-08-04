@@ -6,7 +6,7 @@
   border: none;
   background-color: var(--material-hide);
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .button:hover:not(:disabled):not(.isDisabled),
@@ -46,7 +46,7 @@
   align-items: center;
   justify-content: center;
   color: var(--text-base-secondary);
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .symbol :global(.eds-icon),

@@ -1,0 +1,70 @@
+/**
+ * 文本 Tooltip 触发器 — motion-interactive 分层（入场 + 离场）：
+ * - __target 文案：var(--motion-transition-hover)（color 300ms）
+ * - ::after 虚线：var(--motion-transition-fade)（opacity 150ms）
+ *
+ * 结构：.eds-hover-tooltip-trigger > .eds-hover-tooltip-trigger__target
+ * 聚焦模式：根节点 .eds-hover-tooltip-trigger--focus，__target tabindex="0"
+ * 浮层打开：祖先 [data-eds-tooltip-open]（EgAnchoredTooltip 写入）
+ */
+.eds-hover-tooltip-trigger {
+  cursor: pointer;
+  user-select: none;
+}
+
+.eds-hover-tooltip-trigger__target {
+  position: relative;
+  color: var(--text-base-secondary);
+  transition: var(--motion-transition-hover);
+}
+
+.eds-hover-tooltip-trigger__target::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  border-bottom: var(--stroke-sm) dashed var(--event-hover-brand-weaken);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--motion-transition-fade);
+}
+
+/* Hover — 文案 + 虚线入场/离场（trigger 或 target 任一 hover 即可） */
+.eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target,
+.eds-hover-tooltip-trigger__target:hover {
+  color: var(--event-hover-brand);
+}
+
+.eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target::after,
+.eds-hover-tooltip-trigger__target:hover::after {
+  opacity: 1;
+}
+
+/* 浮层已开、鼠标不在 __target 上 — 文案聚焦色，虚线保持隐藏 */
+[data-eds-tooltip-open] .eds-hover-tooltip-trigger__target:not(:hover) {
+  color: var(--event-focus-brand);
+}
+
+[data-eds-tooltip-open] .eds-hover-tooltip-trigger__target:not(:hover)::after {
+  opacity: 0;
+}
+
+/* Focus 模式 — 同 motion-interactive 分层 */
+.eds-hover-tooltip-trigger--focus {
+  outline: none;
+}
+
+.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target {
+  color: var(--event-hover-brand);
+}
+
+.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eds-hover-tooltip-trigger__target,
+  .eds-hover-tooltip-trigger__target::after {
+    transition: none;
+  }
+}

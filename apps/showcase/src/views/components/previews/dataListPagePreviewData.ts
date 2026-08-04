@@ -1,5 +1,16 @@
 /** Figma CE - Data List 数据列表 · frame DataList (3128:4483) — 右侧 Page 区，不含 NavBar / Module Menu。 */
 
+import {
+  findSceneCatalogItem,
+  isListFieldSceneSlug,
+  listFieldSceneSlugs,
+  type ListFieldSceneSlug,
+} from '@/data/scenes';
+import { tokenLabel, tokenOption } from '@/data/showcasePropLabels';
+import { getListFieldDocConfig } from '@/views/scenes/previews/listFieldDocCustomize';
+import { syncCurrencyAddressesForSymbol } from '@/views/scenes/previews/listFieldCurrencyAddressCustomize';
+import { syncCurrencyMinWidthForComboMode } from '@/views/scenes/previews/listFieldCurrencyShared';
+import { syncCurrencyTagCustomize } from '@/views/scenes/previews/listFieldCurrencyTagCustomize';
 import { readIconButtonProSingleItem } from './buttonDocCustomize';
 
 export const DATA_LIST_FIGMA_NODE = '3128:4483';
@@ -59,15 +70,111 @@ export const DATA_LIST_PREVIEW_COLUMN_COUNT = 4;
 
 export type DataListColumnAlign = 'left' | 'center' | 'right';
 
-export type DataListColumnDataSource = 'placeholder' | 'currency';
+export type DataListColumnDataSource = 'placeholder' | ListFieldSceneSlug;
 
-export const DATA_LIST_PREVIEW_CRYPTO = 'eds-aave-aave';
+const listFieldDataSourceZhLabels: Record<ListFieldSceneSlug, string> = {
+  'list-field-currency': '币种',
+  'list-field-address': '地址',
+  'list-field-transaction-hash': '交易哈希',
+  'list-field-identifier': '标识',
+  'list-field-general-structure': '通用结构',
+  'list-field-amount': '金额',
+  'list-field-time': '时间',
+  'list-field-status': '状态',
+  'list-field-action': '操作',
+};
+
+/** List Field 在 Data List 列中的推荐最小宽度（List Field 未配置 minWidth 时使用）。 */
+const listFieldRecommendedColumnMinWidth: Record<ListFieldSceneSlug, string> = {
+  'list-field-currency': '189px',
+  'list-field-address': '240px',
+  'list-field-transaction-hash': '240px',
+  'list-field-identifier': '200px',
+  'list-field-general-structure': '200px',
+  'list-field-amount': '160px',
+  'list-field-time': '200px',
+  'list-field-status': '120px',
+  'list-field-action': '180px',
+};
+
+export const dataListColumnDataSourceOptions = [
+  tokenOption('占位', 'placeholder'),
+  ...listFieldSceneSlugs.map((slug) => {
+    const item = findSceneCatalogItem(slug)?.item;
+    const zh = listFieldDataSourceZhLabels[slug];
+    const en = item?.name ?? slug;
+    return { value: slug, label: tokenLabel(zh, en) };
+  }),
+];
+
+function formatColumnMinWidth(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  return /px$/i.test(trimmed) ? trimmed : `${trimmed}px`;
+}
+
+function listFieldDocMinWidth(slug: ListFieldSceneSlug): string {
+  const raw = String(getListFieldDocConfig(slug).customizeDefaults.minWidth ?? '').trim();
+  return raw ? formatColumnMinWidth(raw) : '';
+}
+
+export function resolveDataListColumnMinWidthFromDataSource(
+  dataSource: DataListColumnDataSource,
+  columnIndex: number,
+): string {
+  if (dataSource === 'placeholder') {
+    return defaultDataListColumnMinWidth(columnIndex);
+  }
+  return (
+    listFieldDocMinWidth(dataSource) ||
+    listFieldRecommendedColumnMinWidth[dataSource] ||
+    defaultDataListColumnMinWidth(columnIndex)
+  );
+}
+
+export function columnMinWidthForListFieldCustomize(columnMinWidth: string): string {
+  return columnMinWidth.replace(/px$/i, '').trim();
+}
+
+export function parseDataListColumnDataSource(raw: string): DataListColumnDataSource {
+  if (raw === 'placeholder') return 'placeholder';
+  if (raw === 'currency') return 'list-field-currency';
+  if (isListFieldSceneSlug(raw)) return raw;
+  return 'placeholder';
+}
+
+export function isDataListListFieldDataSource(
+  dataSource: DataListColumnDataSource,
+): dataSource is ListFieldSceneSlug {
+  return isListFieldSceneSlug(dataSource);
+}
+
+const listFieldPreviewCustomizeCache = new Map<ListFieldSceneSlug, Record<string, unknown>>();
+
+export function getListFieldPreviewCustomize(slug: ListFieldSceneSlug): Record<string, unknown> {
+  let cached = listFieldPreviewCustomizeCache.get(slug);
+  if (!cached) {
+    cached = { ...getListFieldDocConfig(slug).customizeDefaults };
+    if (slug === 'list-field-currency') {
+      syncCurrencyAddressesForSymbol(cached, String(cached.symbol ?? 'ZEC'));
+      syncCurrencyMinWidthForComboMode(cached);
+      syncCurrencyTagCustomize(cached);
+    }
+    listFieldPreviewCustomizeCache.set(slug, cached);
+  }
+  return { ...cached };
+}
 
 export type DataListPreviewColumnSetting = {
   minWidth: string;
   align: DataListColumnAlign;
   sortable: boolean;
   dataSource: DataListColumnDataSource;
+  label: string;
+  /** 首列 Combo 表头第二段文案。 */
+  secondaryLabel?: string;
+  /** 首列 Combo 第二段表头是否可排序。 */
+  secondarySortable?: boolean;
 };
 
 export function dataListColumnSettingLabel(index: number, total = DATA_LIST_PREVIEW_COLUMN_COUNT): string {
@@ -95,6 +202,16 @@ export function defaultDataListColumnMinWidth(index: number): string {
   return widths[index - 1] ?? '160px';
 }
 
+export function defaultDataListColumnLabel(index: number): string {
+  const labels = [
+    DATA_LIST_FIGMA_COLUMNS.combo.label,
+    DATA_LIST_FIGMA_COLUMNS.sortable.label,
+    DATA_LIST_FIGMA_COLUMNS.plain.label,
+    DATA_LIST_FIGMA_COLUMNS.actions.label,
+  ];
+  return labels[index - 1] ?? 'Header';
+}
+
 export function defaultDataListColumnDataSource(): DataListColumnDataSource {
   return 'placeholder';
 }
@@ -108,6 +225,11 @@ export function dataListColumnSettingDefaults(): Record<string, string | boolean
     entries[`columnMinWidth${index}`] = defaultDataListColumnMinWidth(index);
     entries[`columnAlign${index}`] = defaultDataListColumnAlign(index);
     entries[`columnDataSource${index}`] = defaultDataListColumnDataSource();
+    entries[`columnLabel${index}`] = defaultDataListColumnLabel(index);
+    if (index === 1) {
+      entries.columnSecondaryLabel1 = defaultDataListColumnLabel(1);
+      entries.columnSecondarySortable1 = false;
+    }
     entries[`columnSortable${index}`] = false;
   }
 
@@ -128,20 +250,33 @@ export function readDataListColumnSettings(
     const dataSourceRaw = String(
       state[`columnDataSource${index}`] ?? defaultDataListColumnDataSource(),
     );
-    const dataSource: DataListColumnDataSource =
-      dataSourceRaw === 'currency' ? 'currency' : 'placeholder';
+    const dataSource = parseDataListColumnDataSource(dataSourceRaw);
+    const labelRaw = String(
+      state[`columnLabel${index}`] ?? defaultDataListColumnLabel(index),
+    ).trim();
+    const secondaryLabelRaw =
+      index === 1
+        ? String(state.columnSecondaryLabel1 ?? defaultDataListColumnLabel(1)).trim()
+        : undefined;
 
     return {
       minWidth: minWidthRaw || defaultDataListColumnMinWidth(index),
       align,
       sortable: Boolean(state[`columnSortable${index}`]),
       dataSource,
+      label: labelRaw || defaultDataListColumnLabel(index),
+      secondaryLabel:
+        index === 1
+          ? secondaryLabelRaw || defaultDataListColumnLabel(1)
+          : undefined,
+      secondarySortable: index === 1 ? Boolean(state.columnSecondarySortable1) : undefined,
     };
   });
 }
 
 function buildDataListColumnAttrs(setting: DataListPreviewColumnSetting): string {
   const attrs = [
+    `label="${setting.label}"`,
     `min-width="${setting.minWidth}"`,
     setting.align !== 'left' ? `align="${setting.align}"` : null,
     setting.sortable ? 'sortable' : null,
@@ -276,11 +411,11 @@ ${sectionSlot}
     :initing="${initing}"
   >
     <EgDataListColumn prop="primary"${buildDataListColumnAttrs(col1)}>
-      <template #header>Header | Header</template>
+      <template #header>${col1.label} | ${col1.secondaryLabel ?? col1.label}</template>
     </EgDataListColumn>
-    <EgDataListColumn prop="meta" label="Header"${buildDataListColumnAttrs(col2)} />
-    <EgDataListColumn prop="meta2" label="Header"${buildDataListColumnAttrs(col3)} />
-    <EgDataListColumn prop="actions" label="Header"${buildDataListColumnAttrs(col4)}>
+    <EgDataListColumn prop="meta"${buildDataListColumnAttrs(col2)} />
+    <EgDataListColumn prop="meta2"${buildDataListColumnAttrs(col3)} />
+    <EgDataListColumn prop="actions"${buildDataListColumnAttrs(col4)}>
       <template #default>
         <EgButton variant="text" size="sm">More</EgButton>
         <EgButton tone="decor" size="sm">Action</EgButton>

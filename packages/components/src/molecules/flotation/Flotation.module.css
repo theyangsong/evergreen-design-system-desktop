@@ -34,6 +34,49 @@
   height: 0;
 }
 
+.menuListOuter {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.menuListOuter > .menuListScrollable {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 溢出滚动：内容边缘 mask 虚化，不叠 blur 层（避免像 padding 白边） */
+.menuListScrollFadeTop {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-2));
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-2));
+  transition: var(--motion-transition-scroll-fade);
+}
+
+.menuListScrollFadeBottom {
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 var(--spacing-2));
+  mask-image: linear-gradient(to top, transparent 0, #000 var(--spacing-2));
+  transition: var(--motion-transition-scroll-fade);
+}
+
+.menuListScrollFadeTop.menuListScrollFadeBottom {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--spacing-2),
+    #000 calc(100% - var(--spacing-2)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--spacing-2),
+    #000 calc(100% - var(--spacing-2)),
+    transparent 100%
+  );
+}
+
 /* 列表末 4px 占位：视觉间距在滚动区内，避免 footer gap 滚动时露出空白。 */
 .menuListScrollEnd {
   flex-shrink: 0;
@@ -55,6 +98,19 @@
 .menuBodySticky {
   overflow: hidden;
   gap: 0;
+}
+
+:global(.eds-flotation-menu--list-header) .menuBodySticky {
+  gap: var(--spacing-2);
+}
+
+.menuHeader {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .menuDivider {
@@ -81,7 +137,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .addRow:hover {
@@ -116,6 +172,22 @@
   min-height: 0;
 }
 
+/* 列表区自滚：外壳 + panel 约束高度，列表贴满 menuBody inset */
+:global(.eds-flotation-menu--scrollable-list.desktopTokens) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+:global(.eds-flotation-menu--scrollable-list.desktopTokens) :global(.eds-tooltip-panel) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* sticky footer：圆角与玻璃底在外壳 padding 层；panel 仅矩形裁剪列表，不裁 padding、不染色。 */
 :global(.eds-flotation-menu--sticky-footer.desktopTokens) :global(.eds-tooltip-panel) {
   border-radius: 0;
@@ -141,7 +213,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .triggerWidthAdaptive {
@@ -342,11 +414,15 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .boxRoot:hover:not(:disabled):not(.boxFocused) {
   background-color: var(--event-hover);
+}
+
+.boxRootLabelWrap {
+  align-items: center;
 }
 
 .boxFocused {
@@ -392,12 +468,27 @@
   flex: 1 1 auto;
 }
 
+.boxMainLabelWrap {
+  flex: 1 1 auto;
+  align-items: center;
+  overflow: visible;
+}
+
 .boxLabel {
   flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.boxLabelWrap {
+  flex: 1 1 auto;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 .boxLabelDanger {

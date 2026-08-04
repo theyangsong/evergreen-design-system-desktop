@@ -13,6 +13,7 @@ import {
   type TooltipAlign,
   type TooltipHeightMode,
   type TooltipPlacement,
+  type TooltipTrigger,
   type TooltipWidthMode,
 } from '../tooltip';
 import FlotationMenu from './FlotationMenu.vue';
@@ -27,6 +28,14 @@ import {
   createDefaultFlotationPresetItems,
   type FlotationMenuItemPreset,
 } from './flotationPresets';
+import {
+  FALLBACK_EDGE_INSET_PX,
+  FALLBACK_MAIN_AXIS_PX,
+  readCssTokenLength,
+  resolveCrossAxisOffsetFromAlign,
+  SPACING_EDGE_INSET,
+  SPACING_MAIN_AXIS,
+} from '../../shared/cssSpacingTokens';
 
 export type { FlotationMenuItemPreset } from './flotationPresets';
 export type { FlotationTriggerSize, FlotationTriggerStyle } from './FlotationTrigger.vue';
@@ -42,24 +51,6 @@ type AnchoredApi = {
   getTriggerHeight: () => number;
   updatePosition: () => void;
 };
-
-/** 主轴间距：--spacing-025；交叉轴偏移：--spacing-2 */
-const SPACING_MAIN_AXIS = '--spacing-025';
-const SPACING_EDGE_INSET = '--spacing-2';
-const FALLBACK_MAIN_AXIS_PX = 1;
-const FALLBACK_EDGE_INSET_PX = 8;
-
-function readCssTokenLength(el: HTMLElement, tokenName: string, fallback: number): number {
-  const probe = document.createElement('div');
-  probe.style.cssText =
-    'position:absolute;visibility:hidden;pointer-events:none;padding-top:var(' +
-    tokenName +
-    ')';
-  el.appendChild(probe);
-  const px = Number.parseFloat(getComputedStyle(probe).paddingTop);
-  el.removeChild(probe);
-  return Number.isFinite(px) && px > 0 ? px : fallback;
-}
 
 const props = withDefaults(
   defineProps<{
@@ -95,6 +86,10 @@ const props = withDefaults(
     flip?: boolean;
     /** 定位边界选择器（如 `.eds-data-list`）。 */
     boundarySelector?: string;
+    /** 透传 EgAnchoredTooltip：click / hover / focus。 */
+    trigger?: TooltipTrigger;
+    openDelay?: number;
+    closeDelay?: number;
   }>(),
   {
     placement: 'bottom',
@@ -122,6 +117,9 @@ const props = withDefaults(
     items: () => createDefaultFlotationPresetItems(),
     closeOnScroll: false,
     flip: false,
+    trigger: 'click',
+    openDelay: 0,
+    closeDelay: 0,
   },
 );
 
@@ -195,22 +193,12 @@ const menuAlign = computed((): TooltipAlign =>
 /** 主轴间距固定为 --spacing-025。 */
 const menuOffset = computed(() => mainAxisGapPx.value);
 
-/**
- * 交叉轴 inset：start 向左扩 spacing-2；end 向右扩 spacing-2；center 不额外偏移。
- * trigger 宽度模式固定 start，配合宽=触发器+2×inset 左右对称。
- */
+/** 交叉轴 inset：start 向左扩 spacing-2；end 向右扩 spacing-2；center 不额外偏移。 */
 const menuCrossAxisOffset = computed(() => {
   if (props.crossAxisOffset != null) {
     return props.crossAxisOffset;
   }
-  const align = menuAlign.value;
-  if (align === 'end') {
-    return edgeInsetPx.value;
-  }
-  if (align === 'center') {
-    return 0;
-  }
-  return -edgeInsetPx.value;
+  return resolveCrossAxisOffsetFromAlign(menuAlign.value, edgeInsetPx.value);
 });
 
 function resolveSpacingTokens() {
@@ -388,7 +376,9 @@ onBeforeUnmount(() => {
   <EgAnchoredTooltip
     ref="anchoredRef"
     class="eds-flotation"
-    trigger="click"
+    :trigger="trigger"
+    :open-delay="openDelay"
+    :close-delay="closeDelay"
     :wrap-tooltip="false"
     :placement="placement"
     :align="menuAlign"

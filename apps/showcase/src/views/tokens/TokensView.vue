@@ -114,6 +114,23 @@ const textStyleItems = textStyleOrder
     metrics: formatTextStyleMetrics(key, typographySemantic, typographyBase),
   }));
 
+const motionBaseRows = computed(() =>
+  entriesToRows(tokens.motionBase as Record<string, string>),
+);
+
+const motionSemanticRows = computed(() =>
+  entriesToRows(tokens.motionSemantic as Record<string, string>),
+);
+
+const motionUtilityRows = computed(() =>
+  Object.entries(tokens.motionUtilities as Record<string, Record<string, string>>).map(
+    ([name, value]) => ({
+      name: `.${name}`,
+      value: value.transition ?? JSON.stringify(value),
+    }),
+  ),
+);
+
 const effectBaseRows = computed(() =>
   entriesToRows((tokens.effectBase as { tokens: Record<string, string> }).tokens),
 );
@@ -205,6 +222,18 @@ const effectSemanticRows = computed(() =>
             <span :class="[shared.codeText, styles.typeMetrics]">{{ item.metrics }}</span>
           </div>
         </div>
+      </section>
+
+      <section id="motion-base" :class="shared.section">
+        <h2 :class="shared.sectionTitle">Motion Base</h2>
+        <TokenParamRows :rows="motionBaseRows" />
+      </section>
+
+      <section id="motion-semantic" :class="shared.section">
+        <h2 :class="shared.sectionTitle">Motion Semantic</h2>
+        <TokenParamRows :rows="motionSemanticRows" />
+        <h3 :class="styles.subsectionTitle">Utility Classes</h3>
+        <TokenParamRows :rows="motionUtilityRows" />
       </section>
 
       <section id="eds-base" :class="shared.section">

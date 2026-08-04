@@ -38,6 +38,11 @@
       "dark": "color(var(--eds-brand) / 1)"
     },
     {
+      "name": "event-hover-brand-weaken",
+      "light": "color(var(--eds-brand) / .4)",
+      "dark": "color(var(--eds-brand) / .4)"
+    },
+    {
       "name": "event-hover-danger",
       "light": "color(var(--eds-danger) / 1)",
       "dark": "color(var(--eds-danger) / 1)"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useSlots, watch } from 'vue';
 import { EgDivider } from '../../atoms/divider';
 import { EgIcon } from '../../atoms/icons';
 import EgTooltip, {
@@ -8,6 +8,12 @@ import EgTooltip, {
 } from '../tooltip/Tooltip.vue';
 import type { TooltipPanelKind, TooltipPanelRadiusToken } from '../tooltip/tooltipPanelRadius';
 import styles from './Flotation.module.css';
+
+defineOptions({ inheritAttrs: false });
+
+const SCROLL_EDGE_EPSILON = 2;
+
+const attrs = useAttrs();
 
 const props = withDefaults(
   defineProps<{
@@ -26,6 +32,8 @@ const props = withDefaults(
     showDivider?: boolean;
     showAdd?: boolean;
     addLabel?: string;
+    /** 无 Add 底栏时仅 #default 列表区滚动（配合吸顶 Header 等）。 */
+    listScroll?: boolean;
   }>(),
   {
     panelKind: 'flotation',
@@ -38,6 +46,7 @@ const props = withDefaults(
     showDivider: true,
     showAdd: true,
     addLabel: 'Add',
+    listScroll: false,
   },
 );
 
@@ -45,13 +54,82 @@ const emit = defineEmits<{
   add: [event: MouseEvent];
 }>();
 
-/** Add 行 + 分割线在底部固定；仅列表区滚动。 */
+/** Add 行 + 分割线在底部固定；或 listScroll 时仅列表区滚动。 */
+const useScrollableList = computed(
+  () => props.scrollable && (props.showAdd || props.listScroll),
+);
 const useStickyFooter = computed(() => props.showAdd);
+const slots = useSlots();
+const showListHeader = computed(
+  () => useScrollableList.value && props.scrollable && Boolean(slots.header),
+);
+
+const listScrollRef = ref<HTMLElement | null>(null);
+const listFadeTop = ref(false);
+const listFadeBottom = ref(false);
+let listResizeObserver: ResizeObserver | undefined;
+
+function updateListScrollFade() {
+  const element = listScrollRef.value;
+
+  if (!element || !useScrollableList.value || !props.scrollable) {
+    listFadeTop.value = false;
+    listFadeBottom.value = false;
+    return;
+  }
+
+  const { scrollTop, scrollHeight, clientHeight } = element;
+  const canScroll = scrollHeight - clientHeight > SCROLL_EDGE_EPSILON;
+
+  listFadeTop.value = canScroll && scrollTop > SCROLL_EDGE_EPSILON;
+  listFadeBottom.value =
+    !useStickyFooter.value &&
+    canScroll &&
+    scrollTop + clientHeight < scrollHeight - SCROLL_EDGE_EPSILON;
+}
+
+function onListScroll() {
+  updateListScrollFade();
+}
+
+onMounted(() => {
+  updateListScrollFade();
+  listResizeObserver = new ResizeObserver(() => {
+    updateListScrollFade();
+  });
+  if (listScrollRef.value) {
+    listResizeObserver.observe(listScrollRef.value);
+  }
+});
+
+watch(listScrollRef, (nextElement, previousElement) => {
+  if (previousElement) {
+    listResizeObserver?.unobserve(previousElement);
+  }
+  if (nextElement) {
+    listResizeObserver?.observe(nextElement);
+  }
+  updateListScrollFade();
+});
+
+watch(useScrollableList, () => {
+  updateListScrollFade();
+});
+
+onBeforeUnmount(() => {
+  listResizeObserver?.disconnect();
+});
 </script>
 
 <template>
   <EgTooltip
-    :class="['eds-flotation-menu', useStickyFooter && 'eds-flotation-menu--sticky-footer']"
+    v-bind="attrs"
+    :class="[
+      'eds-flotation-menu',
+      useScrollableList && scrollable && 'eds-flotation-menu--scrollable-list',
+      useStickyFooter && 'eds-flotation-menu--sticky-footer',
+      showListHeader && 'eds-flotation-menu--list-header',
+    ]"
     :panel-kind="panelKind"
     :panel-radius="panelRadius"
     :width-mode="widthMode"
@@ -60,18 +138,44 @@ const useStickyFooter = computed(() => props.showAdd);
     :height-mode="heightMode"
     :height="height"
     :max-height="maxHeight"
-    :scrollable="!useStickyFooter && scrollable"
+    :scrollable="!useScrollableList && scrollable"
   >
-    <div :class="[styles.menuBody, useStickyFooter && scrollable && styles.menuBodySticky]">
-      <div :class="[styles.menuList, useStickyFooter && scrollable && styles.menuListScrollable]">
-        <slot />
-        <div
-          v-if="useStickyFooter && scrollable"
-          :class="styles.menuListScrollEnd"
-          aria-hidden="true"
-        />
+    <div
+      :class="[
+        'eds-flotation-menu-body',
+        styles.menuBody,
+        useScrollableList && scrollable && styles.menuBodySticky,
+      ]"
+    >
+      <div v-if="showListHeader" :class="styles.menuHeader">
+        <slot name="header" />
       </div>
-      <div v-if="showAdd" :class="styles.menuFooter">
+      <div
+        v-if="useScrollableList && scrollable"
+        :class="styles.menuListOuter"
+      >
+        <div
+          ref="listScrollRef"
+          :class="[
+            styles.menuList,
+            styles.menuListScrollable,
+            listFadeTop && styles.menuListScrollFadeTop,
+            listFadeBottom && styles.menuListScrollFadeBottom,
+          ]"
+          @scroll="onListScroll"
+        >
+          <slot />
+          <div
+            v-if="useStickyFooter && scrollable"
+            :class="styles.menuListScrollEnd"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+      <div v-else :class="styles.menuList">
+        <slot />
+      </div>
+      <div v-if="showAdd" class="eds-flotation-menu-footer" :class="styles.menuFooter">
         <div v-if="showDivider" :class="styles.menuDivider">
           <EgDivider type="page" direction="horizontal" />
         </div>

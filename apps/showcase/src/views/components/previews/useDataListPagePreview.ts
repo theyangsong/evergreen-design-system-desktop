@@ -6,9 +6,11 @@ import {
   DATA_LIST_FIGMA_PAGE_SIZE_OPTIONS,
   DATA_LIST_FIGMA_PAGINER,
   DATA_LIST_FIGMA_TOOLBAR,
+  parseDataListColumnDataSource,
   parseDataListColumnHeight,
   parseDataListRowCount,
   readDataListColumnSettings,
+  resolveDataListColumnMinWidthFromDataSource,
   DATA_LIST_PREVIEW_COLUMN_COUNT,
 } from './dataListPagePreviewData';
 import {
@@ -36,6 +38,24 @@ export function useDataListPagePreview(
   customize: Ref<Record<string, unknown>>,
   layoutSkidOpen?: Ref<boolean | undefined>,
 ) {
+  const columnDataSources = computed(() =>
+    Array.from({ length: DATA_LIST_PREVIEW_COLUMN_COUNT }, (_, offset) =>
+      String(customize.value[`columnDataSource${offset + 1}`] ?? 'placeholder'),
+    ),
+  );
+
+  watch(columnDataSources, (sources, previous) => {
+    sources.forEach((source, offset) => {
+      if (previous && source === previous[offset]) return;
+      const index = offset + 1;
+      const dataSource = parseDataListColumnDataSource(source);
+      customize.value[`columnMinWidth${index}`] = resolveDataListColumnMinWidthFromDataSource(
+        dataSource,
+        index,
+      );
+    });
+  });
+
   const allDataList = computed(() =>
     buildFigmaDataListRows(Boolean(customize.value.empty), parseDataListRowCount(customize.value)),
   );
@@ -134,6 +154,12 @@ export function useDataListPagePreview(
     for (let index = 1; index <= DATA_LIST_PREVIEW_COLUMN_COUNT; index += 1) {
       void customize.value[`columnMinWidth${index}`];
       void customize.value[`columnAlign${index}`];
+      void customize.value[`columnDataSource${index}`];
+      void customize.value[`columnLabel${index}`];
+      if (index === 1) {
+        void customize.value.columnSecondaryLabel1;
+        void customize.value.columnSecondarySortable1;
+      }
       void customize.value[`columnSortable${index}`];
     }
   }

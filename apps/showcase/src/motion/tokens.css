@@ -33,6 +33,8 @@
   --showcase-organism-page-height-fixed: 800px;
   --showcase-organism-page-height-min: 720px;
   --showcase-doc-preview-height-compact: 280px;
+  /** Tag 文档 previewShell 预览区高度（含底部全量样式色板）。 */
+  --showcase-doc-preview-height-tag: 480px;
   --showcase-doc-preview-bg: #E8F0FC;
   --showcase-doc-preview-bg-organism: var(--showcase-doc-preview-bg);
   /** Data List 文档 previewShell（与 organism 预览区同高）。 */

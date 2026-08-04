@@ -1,0 +1,97 @@
+/* Combo Title — Figma Field Item type=Combo Title */
+.combo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cellLine {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-02);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cellLine :global(.eds-flotation) {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cellCopyButton {
+  flex-shrink: 0;
+}
+
+.cellLineSecondary {
+  composes: rowCap from './ListFieldSecondary.module.css';
+}
+
+.cellLineSecondary .cellCopyButton :global(.eds-icon-button) {
+  padding: var(--spacing-05);
+}
+
+.primaryLine {
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.secondaryLine {
+  composes: cap from './ListFieldSecondary.module.css';
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+  font-weight: var(--eds-footnote-weight);
+  color: var(--text-base-secondary);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.lineEllipsis {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lineAdaptive {
+  display: block;
+  white-space: nowrap;
+}
+
+.primaryLine:global(.eds-hover-tooltip-trigger__target) {
+  color: var(--text-base-primary);
+}
+
+.menuPrimary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
+}
+
+.menuSecondary {
+  width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+  font-weight: var(--eds-footnote-weight);
+  color: var(--text-base-secondary);
+}

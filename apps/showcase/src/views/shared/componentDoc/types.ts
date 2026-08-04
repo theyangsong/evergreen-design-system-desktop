@@ -34,10 +34,19 @@ export type DocCustomizeTextControl = {
   visibleWhen?: (state: Record<string, unknown>) => boolean;
 };
 
+export type DocCustomizeHeadingControl = {
+  kind: 'heading';
+  key: string;
+  label: string;
+  row?: number;
+  visibleWhen?: (state: Record<string, unknown>) => boolean;
+};
+
 export type DocCustomizeControl =
   | DocCustomizeSelectControl
   | DocCustomizeBooleanControl
-  | DocCustomizeTextControl;
+  | DocCustomizeTextControl
+  | DocCustomizeHeadingControl;
 
 export function isControlVisible(
   control: DocCustomizeControl,

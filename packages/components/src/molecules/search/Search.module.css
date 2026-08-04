@@ -24,7 +24,7 @@
   border-radius: var(--radius-sm);
   background-color: var(--material-card-moderate);
   cursor: text;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .fieldEntering {
@@ -73,7 +73,7 @@
 
 .input::placeholder {
   color: var(--text-base-tertiary);
-  transition: color var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .fieldFocused .input::placeholder {
@@ -96,7 +96,7 @@
   background: var(--material-hide);
   color: var(--text-base-secondary);
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .clearButton:focus-visible {

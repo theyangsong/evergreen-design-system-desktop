@@ -46,6 +46,7 @@ export const eventColorTokenOrder = [
   'event-hover',
   'event-hover-light',
   'event-hover-brand',
+  'event-hover-brand-weaken',
   'event-hover-danger',
   'event-hover-base',
   'event-hover-face',

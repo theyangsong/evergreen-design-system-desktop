@@ -690,6 +690,18 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
 
 export const flotationPropRows: DocPropRow[] = [
   {
+    name: 'trigger',
+    type: "'click' | 'hover' | 'focus'",
+    defaultValue: "'click'",
+    description: '透传 EgAnchoredTooltip。click 下拉；hover/focus 用于地址、哈希等 Tooltip 场景。',
+  },
+  {
+    name: 'openDelay / closeDelay',
+    type: 'number',
+    defaultValue: '0 / 0',
+    description: 'hover/focus 时打开/关闭延迟（ms）。',
+  },
+  {
     name: 'placement / disabled',
     type: 'TooltipPlacement / boolean',
     defaultValue: "'bottom' / false",
@@ -1392,8 +1404,31 @@ export const flotationTriggerSlotRows: DocPropRow[] = [
 
 /* ── Box 小类 ── */
 
+export type FlotationBoxKind =
+  | 'standard-menu'
+  | 'standard-cascade-menu'
+  | 'scene-address-dropdown'
+  | 'scene-address-hover';
+
+export const flotationBoxSceneAddressKinds = [
+  'scene-address-dropdown',
+  'scene-address-hover',
+] as const;
+
+export type FlotationBoxSceneAddressKind = (typeof flotationBoxSceneAddressKinds)[number];
+
+export function isFlotationBoxSceneAddressKind(state: Record<string, unknown>): boolean {
+  const kind = String(state.boxKind ?? 'standard-menu');
+  return (flotationBoxSceneAddressKinds as readonly string[]).includes(kind);
+}
+
 const flotationBoxKindOptions = propLabelRows(
-  ['standard-menu', 'standard-cascade-menu'] as const,
+  [
+    'standard-menu',
+    'standard-cascade-menu',
+    'scene-address-dropdown',
+    'scene-address-hover',
+  ] as const,
   showcaseFlotationBoxKindLabels,
 );
 

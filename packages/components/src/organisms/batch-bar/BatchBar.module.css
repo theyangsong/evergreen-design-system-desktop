@@ -42,7 +42,7 @@
   font-family: var(--eds-family-sans);
   white-space: nowrap;
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .action:hover:not(:disabled) {
@@ -68,7 +68,7 @@
   font-size: var(--eds-body-small-strong-size);
   font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .actionTextBody {
@@ -119,7 +119,7 @@
 
 .actionLoadingSpin {
   color: var(--stroke-base-secondary);
-  animation: eds-batch-bar-spin 2s linear infinite;
+  animation: eds-batch-bar-spin var(--motion-duration-spin-slow) var(--motion-easing-linear) infinite;
 }
 
 @keyframes eds-batch-bar-spin {
@@ -165,7 +165,7 @@
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
-  transition: width 0.3s ease-out;
+  transition: var(--motion-transition-stat-width);
 }
 
 .statPrimary {

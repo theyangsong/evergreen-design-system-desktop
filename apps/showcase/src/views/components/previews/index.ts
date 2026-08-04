@@ -20,6 +20,7 @@ import AvatarPreview from './AvatarPreview.vue';
 import TagSystemPreview from './TagSystemPreview.vue';
 import TagStatusPreview from './TagStatusPreview.vue';
 import TagColorfulPreview from './TagColorfulPreview.vue';
+import TagCustomPreview from './TagCustomPreview.vue';
 import ToggleCheckboxPreview from './ToggleCheckboxPreview.vue';
 import ToggleRadioPreview from './ToggleRadioPreview.vue';
 import ToggleDecidePreview from './ToggleDecidePreview.vue';
@@ -73,6 +74,7 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'tag-system',
   'tag-status',
   'tag-colorful',
+  'tag-custom',
   'toggle-checkbox',
   'toggle-radio',
   'toggle-decide',
@@ -93,6 +95,18 @@ export function usesCompactComponentPreview(slug: string): boolean {
   return compactComponentPreviewSlugs.has(slug);
 }
 
+/** Tag 文档页：480px 预览区 + 底部全量样式色板。 */
+export const tagComponentPreviewSlugs = new Set<string>([
+  'tag-system',
+  'tag-status',
+  'tag-colorful',
+  'tag-custom',
+]);
+
+export function usesTagComponentPreview(slug: string): boolean {
+  return tagComponentPreviewSlugs.has(slug);
+}
+
 export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'input-input', title: 'Input', component: InputInputPreview, usesComponentDocHeader: true },
   { slug: 'input-textarea', title: 'Textarea', component: InputTextareaPreview, usesComponentDocHeader: true },
@@ -109,6 +123,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'tag-system', title: 'System', component: TagSystemPreview, usesComponentDocHeader: true },
   { slug: 'tag-status', title: 'Status', component: TagStatusPreview, usesComponentDocHeader: true },
   { slug: 'tag-colorful', title: 'Colorful', component: TagColorfulPreview, usesComponentDocHeader: true },
+  { slug: 'tag-custom', title: 'Custom', component: TagCustomPreview, usesComponentDocHeader: true },
   { slug: 'toggle-checkbox', title: 'Checkbox', component: ToggleCheckboxPreview, usesComponentDocHeader: true },
   { slug: 'toggle-radio', title: 'Radio', component: ToggleRadioPreview, usesComponentDocHeader: true },
   { slug: 'toggle-decide', title: 'Decide', component: ToggleDecidePreview, usesComponentDocHeader: true },

@@ -2,28 +2,29 @@
 import { computed, reactive } from 'vue';
 import { EgTag } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import TagPreviewGallery from './TagPreviewGallery.vue';
+import type { TagStatus } from '@eds/desktop-components';
 import {
   buildTagStatusUsageSnippet,
   tagImportCode,
   tagStatusCustomizeControls,
   tagStatusCustomizeDefaults,
   tagStatusPropRows,
+  tagStatusStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
   ...tagStatusCustomizeDefaults,
   size: tagStatusCustomizeDefaults.size as 'lg' | 'md' | 'sm',
-  status: tagStatusCustomizeDefaults.status as
-    | 'danger'
-    | 'warning'
-    | 'success'
-    | 'ready'
-    | 'invalid',
+  status: tagStatusCustomizeDefaults.status as TagStatus,
 });
 
 const usageSnippet = computed(() => buildTagStatusUsageSnippet(customize));
+
+function selectStatus(value: string) {
+  customize.status = value as TagStatus;
+}
 </script>
 
 <template>
@@ -41,11 +42,23 @@ const usageSnippet = computed(() => buildTagStatusUsageSnippet(customize));
       props-section-id="tag-status-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgTag family="status" :size="customize.size" :status="customize.status">
-            {{ customize.label }}
-          </EgTag>
-        </div>
+        <TagPreviewGallery
+          :options="tagStatusStyleOptions"
+          :selected="customize.status"
+          gallery-label="状态"
+          @select="selectStatus"
+        >
+          <template #main>
+            <EgTag family="status" :size="customize.size" :status="customize.status">
+              {{ customize.label }}
+            </EgTag>
+          </template>
+          <template #item="{ value }">
+            <EgTag family="status" :size="customize.size" :status="value">
+              {{ customize.label }}
+            </EgTag>
+          </template>
+        </TagPreviewGallery>
       </template>
     </ComponentDocLayout>
   </div>

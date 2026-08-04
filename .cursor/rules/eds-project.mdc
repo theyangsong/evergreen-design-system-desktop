@@ -83,7 +83,8 @@ line-height: var(--eds-body-small-strong-line-height);
 2. **不得**用组件局部 alias「转存」官方 token（`--foo: var(--radius-md)` 再 `border-radius: var(--foo)`）；应 **直接** 写 `var(--radius-md)`、`var(--spacing-1)` 等。
 3. **不得**用手拼 primitive 或颜色 token 替代已有 **组合 token / utility 类**（例如用 `0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow)` 代替 `var(--eds-shadow-light)`；圆角用 `--scale-3` 代替 `--radius-md`）。
 4. 若 Figma / `spec/effect` 已提供 **utility 类**（如 `.eds-shadow-light-stack`、`.effect-flotation-box`），组件 **优先复用**，不在 `.module.css` 里重复实现同一阴影 / 玻璃 / 分层结构。
-5. 若所需 **语义 token 或 utility 类在 spec 与 dist 均不存在**，按 §1 **先向维护者确认**（是否新增 token、是否允许临时值、硬编码范围），**不得**私自发明变量名或暂用错误语义的 `--scale-*` / `--size-*`。
+5. **Motion（交互动效）**：时长 / 缓动须用 `@eds/desktop-tokens/motion`（base `--eds-motion-*` → semantic `--motion-*`）。**单独使用**：`var(--motion-transition-hover)` 或 `.motion-hover` / `.motion-shift` / `.motion-fade` / `.motion-enter`；**组合使用**：`.motion-compose` + 多个 motion 层（如 `motion-compose motion-hover motion-fade`），或预设 `.motion-interactive` / `.motion-layout`。Focus / Selected 用 **`.motion-none`**。CSS Modules 可拼 `var(--motion-property-paint)` + duration + easing。禁止组件内私造 `--eds-interaction-*`。Spec：`spec/motion/base.json` + `spec/motion/semantic.json`。
+6. 若所需 **语义 token 或 utility 类在 spec 与 dist 均不存在**，按 §1 **先向维护者确认**（是否新增 token、是否允许临时值、硬编码范围），**不得**私自发明变量名或暂用错误语义的 `--scale-*` / `--size-*`。
 
 **禁止 / 推荐示例**
 
@@ -315,7 +316,7 @@ function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
 **组合式场景约定**（Nav Bar 本体）
 
 - 仍通过 slots + 子组件（`EgNavBarModuleItem` 等）拼装；Showcase 定制面板驱动预览。
-- **交互动效（已定稿）**：模块行 / 应用入口 / 底部 icon / 企业 / 头像 — **仅 hover 有过渡**（`color`、`background` 等 `var(--eds-interaction-transition)` 或等价 duration/easing）；**focus / 选中（`*Focused`）态瞬时切换**，对应规则显式 `transition: none` 或不绑 transition。勿为 focus 加回过渡。
+- **交互动效（已定稿）**：模块行 / 应用入口 / 底部 icon / 企业 / 头像 — **仅 hover 有过渡**（`var(--motion-transition-hover)` 或 `.motion-hover`）；**focus / 选中（`*Focused`）态瞬时切换**，对应规则显式 `transition: none` / `.motion-none`。勿为 focus 加回过渡。Motion token 见 `@eds/desktop-tokens/motion`（`--eds-motion-*` base → `--motion-*` semantic）。
 - **Icon 尺寸（勿混淆 EgIcon `size` prop 与语义 token）**：
   - 模块 / 应用入口 glyph 容器：`var(--icon-lg)`（`.moduleIconGlyph`）；`EgIcon` 用 **`size="md"`**（`md` → `--icon-lg`），勿用 `size="lg"`（`lg` → `--icon-xl`）。
   - 底部工具 icon 容器：`var(--icon-md)`；`EgIcon` 用 **`size="sm"`**。
@@ -355,7 +356,132 @@ EgFlotation
 |-----------|------|
 | `/components/flotation` | **Combo 纵览**：完整 `EgFlotation` + `#trigger` + Menu + Box 定制 |
 | `/components/flotation-trigger` | **Trigger 原子**：`EgFlotationTrigger` 各 Style / Size / 模块菜单预置 |
-| `/components/flotation-box` | **Box 原子**：`EgFlotationMenuItem` / `EgFlotationBox` 行类型与选中态 |
+| `/components/flotation-box` | **Box 原子**：`EgFlotationMenuItem` / `EgFlotationBox` 行类型与选中态；**须遵守下文「Flotation Box 场景化预览」** |
+
+### 【非常重要】Flotation Box 场景化预览（`/components/flotation-box`）
+
+**作用域**：Showcase **`/components/flotation-box`（侧栏锚点 Box）** 下 **全部** `boxKind`（标准下拉 / 标准级联 / 场景化-下拉地址 / 场景化-地址悬浮 及后续新增）。**禁止**在本页手搓 Tooltip 外壳、禁止在 `#default` 里堆大段业务 DOM 而不拆场景 SFC。
+
+**核心方案（库做壳 + Showcase 做内容与数据）**
+
+```text
+FlotationBoxPreview.vue（页 orchestrator：customize state + 外壳 props + 面板切换）
+  └─ EgFlotationMenu（@eds/desktop-components — 浮层容器与列表滚动）
+       ├─ 场景化 boxKind → FlotationBox*Scene*Preview.vue（Showcase 专用 SFC）
+       │    └─ EgFlotationMenuItem × N（行级预置 + default/trailing slot）
+       └─ 标准/级联 boxKind → FlotationBoxStandardPreview.vue
+            └─ EgFlotationMenuItem × N（item* customize 驱动）
+```
+
+| 层 | 职责 | 禁止 |
+|----|------|------|
+| **EgFlotationMenu** | `effect-flotation-box` 外壳、`list-scroll`、宽/高、`show-add`；**列表滚动 / padding / scroll-fade 须严格遵循下文「EgFlotationMenu 列表滚动与 padding」** | 在 Showcase 重复实现 Tooltip / 滚动容器 / 边缘虚化；`backdrop-filter` 叠层做 fade；shell 保留 padding 导致滚动染色 |
+| **场景 SFC**（如 `FlotationBoxSceneAddressPreview.vue`） | 复合 UI（Tab、Tag、复制按钮等）、`v-model:customize` | 把场景数据写入标准 Box 的 `itemLabelN` 等键 |
+| **Customize** | 每类场景 **独立 state 键**（如 `sceneItemCount`、`sceneItemLabel1`）+ 独立 `*Customize.ts` 面板 builder | 与标准 Box 共用 `item*` 键；切换 `boxKind` 时 `Object.assign` 污染另一模式 |
+| **样式** | `.eds-flotation-menu--box-doc` + `FlotationBoxPreview.module.css`（shell `padding:0` + `.eds-flotation-menu-body` 四边 `spacing-1`）；scroll-fade / flex 链见 **「EgFlotationMenu 列表滚动与 padding」** | 改 token 定义；shell 保留 padding（滚动染色）；场景 SFC 重复 padding；`backdrop-filter` fade 叠层；`#header` slot + `v-if` |
+
+**EgFlotationMenu 场景化外壳约定**（统一由 `flotationBoxPreviewShell.ts` → `resolveFlotationBoxMenuShellProps` 解析，**勿在页内复制**）：
+
+- `list-scroll=true`、`show-add=false`
+- `width-mode="adaptive"`，`max-width` / `max-height` 读场景键（`sceneMaxWidth` / `sceneMaxHeight`）
+- `class="eds-flotation-menu--box-doc"`（**全部 boxKind 必选**；shell `padding: 0` + 内层 `.eds-flotation-menu-body` 补 `spacing-1` 四边 inset，等效原 `effect-flotation-box` padding）
+
+**场景变体分叉**：同一场景 SFC + **prop**（如 `showFilterTabs` 区分下拉地址 vs 地址悬浮），**勿**为每个变体复制整页；Customize 面板用 `boxKind` 隐藏不适用的控件（如地址悬浮无「选择模式」）。
+
+**文件清单（新增场景时必须齐套）**
+
+| 文件 | 用途 |
+|------|------|
+| `FlotationBoxPreview.vue` | 仅 orchestrator：state、watch、`boxKind` 切换 preset、挂 shell + 场景 SFC |
+| `flotationBoxPreviewShell.ts` | `resolveFlotationBoxMenuShellProps` / `useFlotationBoxMenuShellProps` |
+| `FlotationBoxStandardPreview.vue` | 标准 / 级联：`item*` 键 + `EgFlotationMenuItem` 循环 |
+| `FlotationBoxScene*Preview.vue` | 场景内容组件 |
+| `FlotationBoxPreview.module.css` | **全部 boxKind**：shell `padding: 0` + `.eds-flotation-menu-body` 四边 `spacing-1` |
+| `flotationBoxScene*Customize.ts` | 独立 customize 键、`build*PanelControls`、`apply*Preset` |
+| `flotationBoxScene*PreviewData.ts` | 静态演示行 + `get*Rows(state)` |
+| `showcasePropLabels.ts` | `showcaseFlotationBoxKindLabels` 新选项文案 |
+| `flotationDocCustomize.ts` | `FlotationBoxKind` 联合类型、`isFlotationBoxSceneAddressKind` 等守卫 |
+
+**切换 `boxKind` 时**：仅 **从非场景化进入场景化** 时 `apply*Preset`；场景化之间切换 **不** 重置（共用 `sceneItem*` 时可保留编辑）；**不得**用场景 preset 覆盖标准 `item*` 键。
+
+**参考实现**：`FlotationBoxPreview.vue`、`FlotationBoxSceneAddressPreview.vue`、`flotationBoxSceneAddressCustomize.ts`、`flotationBoxPreviewShell.ts`。
+
+### 【非常重要 · 严格遵循】EgFlotationMenu 列表滚动、padding 与 scroll-fade
+
+**作用域**：`packages/components/src/molecules/flotation/FlotationMenu.vue` + `Flotation.module.css`；凡使用 `EgFlotationMenu` / `EgFlotation` Menu 层（含 `/components/flotation-box`、Module Menu 标题浮层等）**均须遵守**。Showcase **禁止**平行实现滚动容器或边缘虚化。
+
+**列表自滚触发条件**
+
+- `useScrollableList = scrollable && (showAdd || listScroll)`
+- 满足时：`EgTooltip` 传 `scrollable=false`（面板不滚，仅列表区滚）；挂全局类 `eds-flotation-menu--scrollable-list`
+- `showAdd` 时额外挂 `eds-flotation-menu--sticky-footer`
+
+**DOM 结构（禁止改层序或拆到 Showcase）**
+
+```text
+EgTooltip (.effect-flotation-box [.eds-flotation-menu--scrollable-list] [.eds-flotation-menu--sticky-footer])
+└─ .eds-tooltip-panel
+   └─ .eds-flotation-menu-body (.menuBody [.menuBodySticky])
+      ├─ .menuHeader                    ← 可选 #header（慎用，见下）
+      ├─ .menuListOuter                 ← 仅 useScrollableList；flex 包装，无 ::before/::after fade
+      │   └─ .menuListScrollable        ← 实际滚动容器 + scroll-fade mask
+      │       ├─ #default slot
+      │       └─ .menuListScrollEnd     ← 仅 showAdd：列表末 4px 占位
+      └─ .eds-flotation-menu-footer     ← 仅 showAdd：分割线 + Add 行
+```
+
+**Flex 高度链（禁止打断 — 打断会导致不能滚动）**
+
+| 节点 | 必达样式 |
+|------|----------|
+| `.eds-flotation-menu.desktopTokens` | `display:flex; flex-direction:column; min-height:0` |
+| `.eds-flotation-menu--scrollable-list` | shell + `.eds-tooltip-panel`：`overflow:hidden` |
+| `.eds-flotation-menu-body` / `.menuBody` | `flex:1 1 auto; min-height:0`；sticky 时 `.menuBodySticky { overflow:hidden; gap:0 }` |
+| `.menuListOuter` | `display:flex; flex-direction:column; flex:1 1 auto; min-height:0; overflow:hidden` |
+| `.menuListScrollable` | `flex:1 1 auto; min-height:0; overflow-y:auto` |
+
+- **禁止** 在 `menuListOuter` 与 `menuListScrollable` 之间插入无 `min-height:0` 的包装层。
+- Showcase `scrollContainment.ts` 依赖可滚动祖先；flex 链断掉时滚轮会被全局拦截吞掉。
+
+**Padding 模型（`/components/flotation-box` 全部 boxKind）**
+
+| 层 | 规则 | 禁止 |
+|----|------|------|
+| 外壳 `effect-flotation-box` | `padding: 0`（`.eds-flotation-menu--box-doc`，`FlotationBoxPreview.module.css`） | 在 shell 保留默认 `spacing-1` padding 并让列表在其内滚动（hover 背景染进 padding 区） |
+| 内层 `.eds-flotation-menu-body` | `padding: var(--spacing-1)` 四边 inset，等效原 shell padding | 在场景 SFC `.list` 等处再叠一层 padding（双倍 inset） |
+| 滚动列表区 | 贴满 menuBody 内容区（inset 内缘），**不加** `padding-block` | 用 scroll 区 padding 冒充 inset |
+
+**Scroll-fade（溢出时上下沿微量虚化）**
+
+- **唯一实现**：`FlotationMenu.vue`（`listFadeTop` / `listFadeBottom` + `@scroll` + `ResizeObserver`）+ `Flotation.module.css`（`.menuListScrollFadeTop|Bottom`）
+- **机制**：在 **`.menuListScrollable` 本体** 用 **`mask-image` 线性渐变**（淡出高度 `var(--spacing-2)`）使内容边缘透明化；过渡 `var(--motion-transition-scroll-fade)`
+- **显示条件**（`SCROLL_EDGE_EPSILON = 2`）：
+  - top：`canScroll && scrollTop > ε`
+  - bottom：`!showAdd && canScroll && 未滚到底`
+- **有 Add 底栏（sticky footer）**：**禁用 bottom fade**，避免列表与 Add 之间出现「假 padding」
+- **严格禁止**：
+  - `menuListOuter::before/::after` + `backdrop-filter` / 不透明底色渐变叠层（玻璃底上呈现为 padding 白边，列表看起来「没填满」）
+  - 硬编码 `blur(Npx)` 做 scroll-fade
+  - 在 Showcase / 场景 SFC 重复实现 scroll-fade
+
+**Sticky footer（`showAdd`）**
+
+- `.eds-tooltip-panel`：`overflow:hidden`；`border-radius:0`（`eds-flotation-menu--sticky-footer`）
+- 列表末 `.menuListScrollEnd`（`height: spacing-1`）在**滚动区内**补底间距，避免 footer `gap` 滚出时露空白
+
+**listScroll 模式（无 Add，如场景化地址）**
+
+- `list-scroll=true`、`show-add=false`（由 `flotationBoxPreviewShell.ts` 解析）
+- 复合 UI（Tab、sticky filter 等）放在 **`#default` slot 内**（如 `position:sticky; top:0`）
+- **禁止** `#header` slot + 条件 `v-if` 控制 Tab（`useSlots().header` 不可靠，Tab 会消失）
+
+**实现文件**
+
+| 文件 | 职责 |
+|------|------|
+| `FlotationMenu.vue` | 滚动逻辑、fade 状态、`eds-flotation-menu--scrollable-list` / `--sticky-footer` 类 |
+| `Flotation.module.css` | flex 链、`menuListOuter`、`menuListScrollFade*` mask、sticky footer panel 裁剪 |
+| `FlotationBoxPreview.module.css` | Box 页 shell `padding:0` + `.eds-flotation-menu-body` inset |
 
 - **嵌套用法**（Module Menu `#title`、Nav Bar 模块切换等 **同一模式**）：
 
@@ -426,8 +552,17 @@ EgFlotation
 
 **参考**：`NavBarPreview.vue`、`organismTemplateDocData.ts`（`navBarScenarioOptions`）、`presets/nav/cregisNavBarDeclarative.ts`。
 
-## 8. 变更记录
+## 8. 本地同步（「同步」指令）
 
+在 eds-desktop 中说 **「同步」** = build tokens + components，并对所有本地 `link:` / `file:` 引用本库的项目执行 `pnpm install`。详见 **`eds-sync-local-consumers.mdc`**（alwaysApply）。快捷命令：`pnpm sync` / `pnpm sync:list`。
+
+**Desktop 客户端 consumer**（如 `work-cregis-desktop`）：只同步 Desktop packages；**不要**要 consumer 引入 Website token/组件或 showcase 壳层。客户端须 100% `@eds/desktop-*`，排版 token 以 `packages/tokens/spec` 为准。
+
+## 9. 变更记录
+
+- 2026-08-04：§7 — **【严格遵循】EgFlotationMenu 列表滚动 / padding / scroll-fade 定稿**（双层 padding：shell `0` + `menuBody spacing-1`；flex 高度链 + `eds-flotation-menu--scrollable-list`；scroll-fade 仅用 `menuListScrollable` 的 `mask-image`，禁止 `backdrop-filter` 叠层；sticky footer 禁 bottom fade）。
+- 2026-08-04：§7 — **【非常重要】Flotation Box 场景化预览**（`/components/flotation-box` 全页：EgFlotationMenu 壳 + 场景 SFC + 独立 customize 键 + `flotationBoxPreviewShell`；禁止 #header slot 与 item* 键污染）。
+- 2026-08-03：§8 — 本地同步约定（「同步」→ 全部 consumer；`pnpm sync` / `scripts/sync-local-consumers.mjs`）。
 - 2026-08-03：§7 — Module Menu **Cregis / UDun 场景独立**（各场景模块列表、preset、默认菜单分离；UDun：Wallet / Approval / Developer / Bill / Manage / Auto-Signing）。
 - 2026-08-03：§7 — **Flotation Combo 通用架构**（EgFlotation 三层、Showcase 三页分工、共享 `flotationDocCustomize` 辅助、禁止手搓 Tooltip / 重复 trigger 解析）；Module Menu 场景化标题表（text / preset / WaaS vs Tasks）。
 - 2026-08-03：§7 — Nav Bar 动效定稿（hover 有过渡、focus 无）；EgMessage 嵌套约定；Module Menu 场景化；Data List 空态 `eds-business-7`（不对齐 @cregis EdsNoData）。

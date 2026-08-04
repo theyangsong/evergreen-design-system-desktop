@@ -1,0 +1,36 @@
+.moreTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  border-radius: var(--radius-xs);
+  padding: var(--spacing-025) var(--spacing-1-5);
+  background: var(--material-hide);
+  box-shadow: inset 0 0 0 var(--stroke-sm) var(--stroke-divider-page);
+  color: var(--text-base-primary);
+}
+
+.tooltipTag {
+  display: contents;
+}
+
+.root {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.inlineTag {
+  display: inline-flex;
+  flex: 0 1 auto;
+  max-width: var(--scale-16);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.inlineTag :global(.eds-tag) {
+  max-width: 100%;
+  min-width: 0;
+}

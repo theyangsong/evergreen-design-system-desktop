@@ -155,10 +155,19 @@
   line-height: var(--eds-footnote-medium-line-height);
 }
 
-.comboHeaderDivider {
-  align-self: stretch;
+.comboHeaderSegment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.comboHeader > :global(.eds-divider) {
+  align-self: center;
   flex-shrink: 0;
+  height: var(--scale-2-5);
   min-height: var(--scale-2-5);
+  max-height: var(--scale-2-5);
 }
 
 .fieldItem {
@@ -168,10 +177,11 @@
   align-items: flex-start;
 }
 
-.fieldItemCurrency {
-  display: inline-flex;
+.listFieldCell {
+  display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  min-width: 0;
+  width: 100%;
 }
 
 .fieldBarPrimary,

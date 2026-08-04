@@ -4,11 +4,13 @@ import TokensView from '@/views/tokens/TokensView.vue';
 import ComponentsView from '@/views/components/ComponentsView.vue';
 import ComponentDetailView from '@/views/components/ComponentDetailView.vue';
 import ScenesView from '@/views/scenes/ScenesView.vue';
+import SceneDetailView from '@/views/scenes/SceneDetailView.vue';
 import {
   defaultComponentSlug,
   findCatalogItem,
   isValidComponentSlug,
 } from '@/data/components/navigation';
+import { defaultSceneSlug, isValidSceneSlug, legacyListFieldsSlug } from '@/data/scenes';
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,6 +66,7 @@ export const router = createRouter({
                   'tag-system': 'tag-system',
                   'tag-status': 'tag-status',
                   'tag-colorful': 'tag-colorful',
+                  'tag-custom': 'tag-custom',
                 };
 
                 const toggleHashToPage: Record<string, string> = {
@@ -182,7 +185,40 @@ export const router = createRouter({
             },
           ],
         },
-        { path: 'scenes', name: 'scenes', component: ScenesView },
+        {
+          path: 'scenes',
+          component: ScenesView,
+          children: [
+            {
+              path: '',
+              redirect: {
+                name: 'scene-detail',
+                params: { slug: defaultSceneSlug },
+              },
+            },
+            {
+              path: ':slug',
+              name: 'scene-detail',
+              component: SceneDetailView,
+              props: true,
+              beforeEnter: (to) => {
+                const slug = to.params.slug;
+                if (slug === legacyListFieldsSlug) {
+                  return {
+                    name: 'scene-detail',
+                    params: { slug: 'list-field-currency' },
+                  };
+                }
+                if (typeof slug !== 'string' || !isValidSceneSlug(slug)) {
+                  return {
+                    name: 'scene-detail',
+                    params: { slug: defaultSceneSlug },
+                  };
+                }
+              },
+            },
+          ],
+        },
       ],
     },
   ],

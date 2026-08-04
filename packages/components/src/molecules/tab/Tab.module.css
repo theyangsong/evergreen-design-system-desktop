@@ -44,9 +44,7 @@
 }
 
 .segmentThumbReady {
-  transition:
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--motion-transition-control);
 }
 
 .square .segmentThumb {
@@ -66,7 +64,7 @@
   font-family: var(--eds-family-sans);
   font-weight: var(--eds-footnote-strong-weight);
   cursor: pointer;
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .itemSelected {
@@ -117,7 +115,7 @@
   line-height: var(--eds-body-small-strong-line-height);
   font-weight: var(--eds-body-small-strong-weight);
   color: var(--text-base-primary);
-  transition: var(--eds-interaction-transition);
+  transition: var(--motion-transition-hover);
 }
 
 .tabItemSelected {
@@ -140,9 +138,7 @@
 }
 
 .tabsSlideIndicatorReady {
-  transition:
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--motion-transition-control);
 }
 
 .tabs {

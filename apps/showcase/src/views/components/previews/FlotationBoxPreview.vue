@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
-import { EgFlotationMenu, EgFlotationMenuItem } from '@eds/desktop-components';
+import { EgFlotationMenu } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
@@ -8,7 +8,6 @@ import styles from './InputPreview.module.css';
 import {
   buildFlotationBoxKindPanelControls,
   buildFlotationBoxUsageSnippet,
-  buildFlotationPresetItems,
   enforceFlotationSingleSelection,
   flotationBoxImportCode,
   flotationBoxKindCustomizeControls,
@@ -16,25 +15,51 @@ import {
   flotationBoxDocSlotRows,
   flotationBoxPageCustomizeDefaults,
   getFlotationBoxKindPanelTitle,
+  isFlotationBoxSceneAddressKind,
   parseFlotationEditBoxIndex,
   parseFlotationItemCount,
-  parseFlotationMaxHeight,
-  parseFlotationMenuWidth,
-  parseFlotationMenuMaxWidth,
   parseFlotationBoxSelectionMode,
   flotationBoxItemKey,
   flotationDefaultCryptoAsset,
+  type FlotationBoxKind,
 } from './flotationDocCustomize';
+import { applyFlotationBoxSceneAddressPreset } from './flotationBoxSceneAddressCustomize';
+import FlotationBoxSceneAddressPreview from './FlotationBoxSceneAddressPreview.vue';
+import FlotationBoxStandardPreview from './FlotationBoxStandardPreview.vue';
+import { useFlotationBoxMenuShellProps } from './flotationBoxPreviewShell';
+import './FlotationBoxPreview.module.css';
+import './FlotationBoxSceneAddressPreview.module.css';
+import {
+  buildFlotationBoxSceneAddressPanelControls,
+  enforceSceneAddressSingleSelection,
+  parseSceneAddressSelectionMode,
+  sceneAddressItemKey,
+  sceneAddressStateKey,
+} from './flotationBoxSceneAddressCustomize';
 
 const customize = reactive({
   ...flotationBoxPageCustomizeDefaults,
-  boxKind: flotationBoxPageCustomizeDefaults.boxKind as 'standard-menu' | 'standard-cascade-menu',
+  boxKind: flotationBoxPageCustomizeDefaults.boxKind as FlotationBoxKind,
 });
 
 watch(
   () => customize.itemCount,
   () => {
+    if (isFlotationBoxSceneAddressKind(customize)) return;
     customize.editBoxIndex = String(parseFlotationEditBoxIndex(customize));
+  },
+);
+
+watch(
+  () => customize[sceneAddressStateKey.itemCount],
+  () => {
+    if (!isFlotationBoxSceneAddressKind(customize)) return;
+    customize[sceneAddressStateKey.editBoxIndex] = String(
+      parseFlotationEditBoxIndex({
+        editBoxIndex: customize[sceneAddressStateKey.editBoxIndex],
+        itemCount: String(customize[sceneAddressStateKey.itemCount]),
+      }),
+    );
   },
 );
 
@@ -42,6 +67,7 @@ watch(
   () => customize.boxItemType,
   (type) => {
     if (type !== 'image-text') return;
+    if (isFlotationBoxSceneAddressKind(customize)) return;
     const count = parseFlotationItemCount(customize);
     for (let n = 1; n <= count; n += 1) {
       customize[flotationBoxItemKey('SymbolIcon', n)] = flotationDefaultCryptoAsset;
@@ -51,40 +77,70 @@ watch(
 
 watch(
   () => customize.boxKind,
-  (kind) => {
-    if (kind !== 'standard-cascade-menu') return;
-    const editIndex = parseFlotationEditBoxIndex(customize);
-    customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
+  (kind, prevKind) => {
+    if (kind === 'standard-cascade-menu') {
+      const editIndex = parseFlotationEditBoxIndex(customize);
+      customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
+      return;
+    }
+    const enteringScene =
+      isFlotationBoxSceneAddressKind({ boxKind: kind }) &&
+      !isFlotationBoxSceneAddressKind({ boxKind: prevKind });
+    if (enteringScene) {
+      applyFlotationBoxSceneAddressPreset(customize);
+    }
   },
 );
 
 watch(
   () => {
+    if (isFlotationBoxSceneAddressKind(customize)) return null;
     const count = parseFlotationItemCount(customize);
     const keys = Array.from({ length: count }, (_, index) =>
       Boolean(customize[flotationBoxItemKey('Checked', index + 1)]),
     );
     return [parseFlotationBoxSelectionMode(customize), ...keys] as const;
   },
-  () => enforceFlotationSingleSelection(customize),
+  (value) => {
+    if (value == null) return;
+    enforceFlotationSingleSelection(customize);
+  },
+);
+
+watch(
+  () => {
+    if (customize.boxKind !== 'scene-address-dropdown') return null;
+    const count = parseFlotationItemCount({
+      itemCount: customize[sceneAddressStateKey.itemCount],
+    });
+    const keys = Array.from({ length: count }, (_, index) =>
+      Boolean(customize[sceneAddressItemKey('Checked', index + 1)]),
+    );
+    return [parseSceneAddressSelectionMode(customize), ...keys] as const;
+  },
+  (value) => {
+    if (value == null) return;
+    enforceSceneAddressSingleSelection(customize);
+  },
 );
 
 const usageSnippet = computed(() => buildFlotationBoxUsageSnippet(customize));
 
 const boxPanelTitle = computed(() => getFlotationBoxKindPanelTitle(customize.boxKind));
 
-const boxPanelControls = computed(() => buildFlotationBoxKindPanelControls(customize));
+const isSceneAddressKind = computed(() => isFlotationBoxSceneAddressKind(customize));
 
-const presetItems = computed(() => {
-  const count = parseFlotationItemCount(customize);
-  return buildFlotationPresetItems(count, customize);
-});
+const isSceneAddressDropdown = computed(
+  () => customize.boxKind === 'scene-address-dropdown',
+);
 
-const menuMaxHeight = computed(() => parseFlotationMaxHeight(customize));
-const menuWidth = computed(() => parseFlotationMenuWidth(customize));
-const menuMaxWidth = computed(() => parseFlotationMenuMaxWidth(customize));
+const boxPanelControls = computed(() =>
+  isSceneAddressKind.value
+    ? buildFlotationBoxSceneAddressPanelControls(customize)
+    : buildFlotationBoxKindPanelControls(customize),
+);
 
-const menuWidthMode = computed(() => (menuWidth.value != null ? 'fixed' : 'adaptive'));
+const menuShell = useFlotationBoxMenuShellProps(customize);
 </script>
 
 <template>
@@ -109,33 +165,22 @@ const menuWidthMode = computed(() => (menuWidth.value != null ? 'fixed' : 'adapt
           :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
         >
           <EgFlotationMenu
-            :width-mode="menuWidthMode"
-            :width="menuWidth"
-            :max-width="menuMaxWidth"
+            :class="menuShell.menuClass"
+            :width-mode="menuShell.widthMode"
+            :width="menuShell.width"
+            :max-width="menuShell.maxWidth"
             height-mode="adaptive"
-            :max-height="menuMaxHeight"
-            :show-add="Boolean(customize.showAdd)"
+            :max-height="menuShell.maxHeight"
+            :show-add="menuShell.showAdd"
+            :list-scroll="menuShell.listScroll"
             :add-label="String(customize.addLabel)"
           >
-            <EgFlotationMenuItem
-              v-for="(item, index) in presetItems"
-              :key="`${item.label}-${index}`"
-              :box-type="item.boxType ?? 'text'"
-              :label="item.label"
-              :disabled="item.disabled"
-              :focused="item.focused"
-              :show-checkbox="item.showCheckbox"
-              :checked="item.checked"
-              :show-tag="Boolean(item.showTag)"
-              :tag-text="item.tag ?? 'Tag'"
-              :tag-status="item.tagStatus ?? 'danger'"
-              :show-reddot="item.showReddot"
-              :show-cascader="item.showCascader"
-              :show-message="item.showMessage"
-              :message-text="item.messageText ?? '0'"
-              :message-type="item.messageType ?? 'subtle'"
-              :symbol-icon="item.symbolIcon ?? 'eds-add'"
+            <FlotationBoxSceneAddressPreview
+              v-if="isSceneAddressKind"
+              v-model:customize="customize"
+              :show-filter-tabs="isSceneAddressDropdown"
             />
+            <FlotationBoxStandardPreview v-else v-model:customize="customize" />
           </EgFlotationMenu>
         </div>
       </template>

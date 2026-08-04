@@ -2,7 +2,7 @@
 import { computed, provide, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
-import { componentPreviewBySlug, usesCompactComponentPreview } from './previews';
+import { componentPreviewBySlug, usesCompactComponentPreview, usesTagComponentPreview } from './previews';
 import shared from '@/views/shared/showcase.module.css';
 
 const props = defineProps<{
@@ -17,8 +17,10 @@ const location = computed(() => findCatalogItem(pageSlug.value));
 const preview = computed(() => componentPreviewBySlug[pageSlug.value]);
 
 const compactPreview = computed(() => usesCompactComponentPreview(pageSlug.value));
+const tagPreview = computed(() => usesTagComponentPreview(pageSlug.value));
 
 provide('componentDocCompactPreview', compactPreview);
+provide('componentDocTagPreview', tagPreview);
 
 async function scrollToHash(hash: string) {
   if (!hash.startsWith('#')) {

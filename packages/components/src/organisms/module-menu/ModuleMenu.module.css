@@ -171,7 +171,7 @@
   background-color: var(--event-hover);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--eds-interaction-duration) var(--eds-interaction-easing);
+  transition: var(--motion-transition-fade);
 }
 
 .itemHover > * {

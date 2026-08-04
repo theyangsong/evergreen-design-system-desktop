@@ -5,4 +5,5 @@ export type {
   TagSystemType,
   TagStatus,
   TagColorfulStyle,
+  TagCustomStyle,
 } from './Tag.vue';

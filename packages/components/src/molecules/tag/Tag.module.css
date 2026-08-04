@@ -134,6 +134,112 @@
   color: var(--tag-status-invalid-text);
 }
 
+/* Custom — 左侧竖线 + 内容区 padding（Figma Custom tag） */
+.custom {
+  --tag-custom-bar: var(--tag-custom-vermilion-bar);
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background: var(--material-card-deep);
+  color: var(--text-base-primary);
+}
+
+.custom::before {
+  content: '';
+  flex: none;
+  align-self: stretch;
+  width: 3px;
+  background-color: var(--tag-custom-bar);
+}
+
+.customVermilion {
+  --tag-custom-bar: var(--tag-custom-vermilion-bar);
+}
+
+.customOrange {
+  --tag-custom-bar: var(--tag-custom-orange-bar);
+}
+
+.customAmber {
+  --tag-custom-bar: var(--tag-custom-amber-bar);
+}
+
+.customLime {
+  --tag-custom-bar: var(--tag-custom-lime-bar);
+}
+
+.customMint {
+  --tag-custom-bar: var(--tag-custom-mint-bar);
+}
+
+.customTeal {
+  --tag-custom-bar: var(--tag-custom-teal-bar);
+}
+
+.customClearSky {
+  --tag-custom-bar: var(--tag-custom-clear-sky-bar);
+}
+
+.customCobalt {
+  --tag-custom-bar: var(--tag-custom-cobalt-bar);
+}
+
+.customAurora {
+  --tag-custom-bar: var(--tag-custom-aurora-bar);
+}
+
+.customOrchid {
+  --tag-custom-bar: var(--tag-custom-orchid-bar);
+}
+
+.customRose {
+  --tag-custom-bar: var(--tag-custom-rose-bar);
+}
+
+.customPeach {
+  --tag-custom-bar: var(--tag-custom-peach-bar);
+}
+
+.customAmlDanger {
+  --tag-custom-bar: var(--status-danger);
+  background: var(--status-danger-weaken);
+  color: var(--status-danger);
+}
+
+.customAmlSuspicious {
+  --tag-custom-bar: var(--status-warning);
+  background: var(--status-warning-weaken);
+  color: var(--status-warning);
+}
+
+.customAmlInvalid {
+  --tag-custom-bar: var(--stroke-base-tertiary);
+  color: var(--text-base-tertiary);
+}
+
+.customContent {
+  display: flex;
+  flex: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom.lg .customContent {
+  padding: 3px var(--spacing-2-5);
+}
+
+.custom.md .customContent {
+  padding: var(--spacing-05) var(--spacing-2);
+}
+
+.custom.sm .customContent {
+  padding: var(--spacing-025) var(--spacing-1-5);
+}
+
 /* Colorful — spec/color/tag-palette.json */
 .colorfulApricot {
   background: var(--tag-colorful-apricot-bg);
@@ -223,4 +329,32 @@
 .colorfulLime {
   background: var(--tag-colorful-lime-bg);
   color: var(--tag-colorful-lime-text);
+}
+
+/* Truncate — 父级约束 max-width 后文本省略（如 CryptoAddress 行内 Tag） */
+.truncate {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.truncate.custom.sm .customContent {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+.smTextTruncate {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
 }

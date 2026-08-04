@@ -2,29 +2,29 @@
 import { computed, reactive } from 'vue';
 import { EgTag } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import TagPreviewGallery from './TagPreviewGallery.vue';
+import type { TagSystemType } from '@eds/desktop-components';
 import {
   buildTagSystemUsageSnippet,
   tagImportCode,
   tagSystemCustomizeControls,
   tagSystemCustomizeDefaults,
   tagSystemPropRows,
+  tagSystemStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
   ...tagSystemCustomizeDefaults,
   size: tagSystemCustomizeDefaults.size as 'lg' | 'md' | 'sm',
-  systemType: tagSystemCustomizeDefaults.systemType as
-    | 'subtle'
-    | 'solid-brand'
-    | 'solid-red'
-    | 'gray'
-    | 'stroke-subtle'
-    | 'stroke-solid',
+  systemType: tagSystemCustomizeDefaults.systemType as TagSystemType,
 });
 
 const usageSnippet = computed(() => buildTagSystemUsageSnippet(customize));
+
+function selectSystemType(value: string) {
+  customize.systemType = value as TagSystemType;
+}
 </script>
 
 <template>
@@ -42,11 +42,23 @@ const usageSnippet = computed(() => buildTagSystemUsageSnippet(customize));
       props-section-id="tag-system-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgTag family="system" :size="customize.size" :system-type="customize.systemType">
-            {{ customize.label }}
-          </EgTag>
-        </div>
+        <TagPreviewGallery
+          :options="tagSystemStyleOptions"
+          :selected="customize.systemType"
+          gallery-label="类型"
+          @select="selectSystemType"
+        >
+          <template #main>
+            <EgTag family="system" :size="customize.size" :system-type="customize.systemType">
+              {{ customize.label }}
+            </EgTag>
+          </template>
+          <template #item="{ value }">
+            <EgTag family="system" :size="customize.size" :system-type="value">
+              {{ customize.label }}
+            </EgTag>
+          </template>
+        </TagPreviewGallery>
       </template>
     </ComponentDocLayout>
   </div>

@@ -166,6 +166,8 @@ export const showcaseFlotationBoxTypeLabels = {
 export const showcaseFlotationBoxKindLabels = {
   'standard-menu': '标准下拉菜单',
   'standard-cascade-menu': '标准下拉级联菜单',
+  'scene-address-dropdown': '场景化-下拉地址',
+  'scene-address-hover': '场景化-地址悬浮',
 } as const;
 
 export const showcaseFlotationBoxSelectionModeLabels = {
@@ -263,6 +265,24 @@ export const showcaseTagColorfulStyleLabels = {
   grape: tokenLabel('葡萄', 'grape'),
   samewhite: tokenLabel('同白', 'samewhite'),
   lime: tokenLabel('青柠', 'lime'),
+} as const;
+
+export const showcaseTagCustomStyleLabels = {
+  vermilion: tokenLabel('朱红', 'vermilion'),
+  orange: tokenLabel('橙', 'orange'),
+  amber: tokenLabel('琥珀', 'amber'),
+  lime: tokenLabel('青柠', 'lime'),
+  mint: tokenLabel('薄荷', 'mint'),
+  teal: tokenLabel('青绿', 'teal'),
+  'clear-sky': tokenLabel('晴空', 'clear-sky'),
+  cobalt: tokenLabel('钴蓝', 'cobalt'),
+  aurora: tokenLabel('极光', 'aurora'),
+  orchid: tokenLabel('兰花', 'orchid'),
+  rose: tokenLabel('玫瑰', 'rose'),
+  peach: tokenLabel('蜜桃', 'peach'),
+  'aml-danger': tokenLabel('AML 危险', 'aml-danger'),
+  'aml-suspicious': tokenLabel('AML 可疑', 'aml-suspicious'),
+  'aml-invalid': tokenLabel('AML 无效', 'aml-invalid'),
 } as const;
 
 export const showcaseBatchBarActionTypeLabels = {

@@ -9,6 +9,14 @@ import {
 } from 'vue';
 import EgTooltip, { type TooltipWidthMode } from './Tooltip.vue';
 import type { TooltipPanelKind, TooltipPanelRadiusToken } from './tooltipPanelRadius';
+import {
+  FALLBACK_EDGE_INSET_PX,
+  FALLBACK_MAIN_AXIS_PX,
+  readCssTokenLength,
+  resolveCrossAxisOffsetFromAlign,
+  SPACING_EDGE_INSET,
+  SPACING_MAIN_AXIS,
+} from '../../shared/cssSpacingTokens';
 import styles from './AnchoredTooltip.module.css';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -20,8 +28,8 @@ export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
  */
 export type TooltipAlign = 'start' | 'center' | 'end';
 
-/** Opens on click (default) or hover. */
-export type TooltipTrigger = 'click' | 'hover';
+/** Opens on click (default), hover, or focus. */
+export type TooltipTrigger = 'click' | 'hover' | 'focus';
 
 const props = withDefaults(
   defineProps<{
@@ -30,11 +38,12 @@ const props = withDefaults(
     align?: TooltipAlign;
     content?: string;
     disabled?: boolean;
+    /** 主轴间距（px）；未传时使用 --spacing-025。 */
     offset?: number;
     /**
      * 交叉轴额外位移（px）。
      * top/bottom：加到 left；left/right：加到 top。
-     * 例：等宽触发器时 Menu 左右各扩 8，传 -8 并加宽 16。
+     * 未传时按 align：start=-spacing-2，end=+spacing-2，center=0。
      */
     crossAxisOffset?: number;
     openDelay?: number;
@@ -69,8 +78,6 @@ const props = withDefaults(
     align: 'start',
     content: '',
     disabled: false,
-    offset: 8,
-    crossAxisOffset: 0,
     openDelay: 0,
     closeDelay: 0,
     trigger: 'click',
@@ -96,6 +103,8 @@ const floatingRef = ref<HTMLElement | null>(null);
 const open = ref(false);
 const positioned = ref(false);
 const floatingStyle = ref<Record<string, string>>({});
+const mainAxisGapPx = ref(FALLBACK_MAIN_AXIS_PX);
+const edgeInsetPx = ref(FALLBACK_EDGE_INSET_PX);
 
 const tooltipId = useId();
 const describedById = computed(() => `eds-tooltip-${tooltipId}`);
@@ -198,14 +207,14 @@ function onFloatingLeave() {
 }
 
 function onTriggerFocusIn() {
-  if (props.trigger === 'click') {
+  if (props.trigger !== 'focus') {
     return;
   }
   scheduleOpen();
 }
 
 function onTriggerFocusOut(event: FocusEvent) {
-  if (props.trigger === 'click') {
+  if (props.trigger !== 'focus') {
     return;
   }
   const next = event.relatedTarget as Node | null;
@@ -390,6 +399,24 @@ function clampToBoundary(
   };
 }
 
+function resolveSpacingTokens() {
+  const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
+  if (!trigger) return;
+  mainAxisGapPx.value = readCssTokenLength(trigger, SPACING_MAIN_AXIS, FALLBACK_MAIN_AXIS_PX);
+  edgeInsetPx.value = readCssTokenLength(trigger, SPACING_EDGE_INSET, FALLBACK_EDGE_INSET_PX);
+}
+
+function resolveMainAxisGap(): number {
+  return props.offset ?? mainAxisGapPx.value;
+}
+
+function resolveCrossAxisGap(): number {
+  if (props.crossAxisOffset != null) {
+    return props.crossAxisOffset;
+  }
+  return resolveCrossAxisOffsetFromAlign(props.align, edgeInsetPx.value);
+}
+
 function updatePosition() {
   const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
   const floating = floatingRef.value;
@@ -397,11 +424,13 @@ function updatePosition() {
     return;
   }
 
+  resolveSpacingTokens();
+
   const triggerRect = trigger.getBoundingClientRect();
   const floatingRect = floating.getBoundingClientRect();
-  const gap = props.offset;
+  const gap = resolveMainAxisGap();
   const align = props.align;
-  const cross = props.crossAxisOffset ?? 0;
+  const cross = resolveCrossAxisGap();
   const boundary = resolveBoundary(trigger);
 
   let placement = props.placement;
@@ -446,11 +475,23 @@ function unbindFloatingResizeObserver() {
   floatingResizeObserver = undefined;
 }
 
-function onScroll() {
+function isScrollInsideFloating(event: Event): boolean {
+  const target = event.target;
+  if (!(target instanceof Node)) {
+    return false;
+  }
+  return floatingRef.value?.contains(target) ?? false;
+}
+
+function onScroll(event: Event) {
   if (!open.value) {
     return;
   }
   if (props.closeOnScroll) {
+    // 浮层内列表自滚（如 CryptoAddress 地址 Menu）不应触发关闭。
+    if (isScrollInsideFloating(event)) {
+      return;
+    }
     closeNow();
     return;
   }
@@ -524,6 +565,9 @@ defineExpose({
     <span
       ref="triggerRef"
       :class="[styles.trigger, trigger === 'click' && styles.triggerClick]"
+      :data-eds-tooltip-open="
+        open && (trigger === 'hover' || trigger === 'focus') ? '' : undefined
+      "
       :aria-describedby="open ? describedById : undefined"
       :aria-expanded="trigger === 'click' ? open : undefined"
       :tabindex="trigger === 'click' ? 0 : undefined"

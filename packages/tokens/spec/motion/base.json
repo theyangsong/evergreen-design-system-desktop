@@ -1,0 +1,46 @@
+{
+  "$description": "Motion System — base primitives (duration & easing). 单独引用：@eds/desktop-tokens/motion/base",
+  "groups": [
+    {
+      "comment": "Duration（时长阶梯 · --eds-motion-N）",
+      "tokens": {
+        "eds-motion-0": "0ms",
+        "eds-motion-1": "100ms",
+        "eds-motion-2": "150ms",
+        "eds-motion-3": "200ms",
+        "eds-motion-4": "300ms",
+        "eds-motion-5": "400ms",
+        "eds-motion-6": "500ms",
+        "eds-motion-7": "700ms",
+        "eds-motion-8": "250ms",
+        "eds-motion-9": "350ms",
+        "eds-motion-10": "800ms",
+        "eds-motion-11": "2000ms"
+      },
+      "usageNotes": [
+        "0 = instant / focus / reduced-motion",
+        "4 = 默认 hover（300ms）",
+        "8 = Toggle / Tab 滑块（250ms）",
+        "10–11 = Spinner 周期"
+      ]
+    },
+    {
+      "comment": "Easing（缓动曲线 · --eds-motion-ease-N）",
+      "tokens": {
+        "eds-motion-ease-1": "ease-in-out",
+        "eds-motion-ease-2": "cubic-bezier(0.2, 0, 0, 1)",
+        "eds-motion-ease-3": "cubic-bezier(0.4, 0, 1, 1)",
+        "eds-motion-ease-4": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "eds-motion-ease-5": "linear",
+        "eds-motion-ease-6": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+        "eds-motion-ease-7": "cubic-bezier(0.34, 1.45, 0.64, 1)",
+        "eds-motion-ease-8": "cubic-bezier(0.22, 1, 0.36, 1)"
+      },
+      "usageNotes": [
+        "ease-1 = 缓入缓出（对称 hover，默认）",
+        "ease-4 = Material · ease-5 = 线性（Spinner）",
+        "ease-6/7 = 弹性反馈 · ease-8 = 减速渐隐（Nav 滚动遮罩）"
+      ]
+    }
+  ]
+}

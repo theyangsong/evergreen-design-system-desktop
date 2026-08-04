@@ -43,6 +43,7 @@ import {
 } from './buttonDocCustomize';
 import {
   DATA_LIST_PREVIEW_COLUMN_COUNT,
+  dataListColumnDataSourceOptions,
   dataListColumnSettingDefaults,
   dataListColumnSettingLabel,
 } from './dataListPagePreviewData';
@@ -1023,7 +1024,7 @@ export const toolBarCustomizeDefaults = {
   title: 'Title',
   showBack: false,
   showOperation: true,
-  showDivider: false,
+  showDivider: true,
   showSection: false,
   functionalCount: '1',
   sectionCount: '1',
@@ -1057,7 +1058,7 @@ export const toolBarPropRows: OrganismPropRow[] = [
   { name: 'title', type: 'string', defaultValue: "'Title'", description: 'ToolBar-Title Body Large Strong。' },
   { name: 'showBack', type: 'boolean', defaultValue: 'false', description: 'ToolBar-Title Back=Yes。' },
   { name: 'showOperation', type: 'boolean', defaultValue: 'true', description: 'Operation 开关：右侧操作 iCons。' },
-  { name: 'showDivider', type: 'boolean', defaultValue: 'false', description: '滚动置顶时 Divider=Yes。' },
+  { name: 'showDivider', type: 'boolean', defaultValue: 'true', description: '底部分割线（EgDivider type=module）；开启后默认即显示，不随滚动隐藏。' },
   { name: 'showSection', type: 'boolean', defaultValue: 'false', description: 'Functional 内以竖向 EgDivider type=page 分区。' },
 ];
 
@@ -1951,11 +1952,6 @@ const dataListColumnAlignOptions = [
   tokenOption('右', 'right'),
 ];
 
-const dataListColumnDataSourceOptions = [
-  tokenOption('占位', 'placeholder'),
-  tokenOption('币种', 'currency'),
-];
-
 const dataListColumnSettingIndexOptions = Array.from(
   { length: DATA_LIST_PREVIEW_COLUMN_COUNT },
   (_, offset) => {
@@ -2003,12 +1999,39 @@ export const dataListColumnSettingControls: DocCustomizeControl[] = [
         visibleWhen,
       },
       {
+        kind: 'text' as const,
+        key: `columnLabel${index}`,
+        label: index === 1 ? '表头 1' : '表头',
+        placeholder: 'Header',
+        row: 1,
+        visibleWhen,
+      },
+      {
         kind: 'boolean' as const,
         key: `columnSortable${index}`,
         label: '排序',
         row: 1,
         visibleWhen,
       },
+      ...(index === 1
+        ? [
+            {
+              kind: 'text' as const,
+              key: 'columnSecondaryLabel1',
+              label: '表头 2',
+              placeholder: 'Header',
+              row: 1,
+              visibleWhen,
+            },
+            {
+              kind: 'boolean' as const,
+              key: 'columnSecondarySortable1',
+              label: '排序',
+              row: 1,
+              visibleWhen,
+            },
+          ]
+        : []),
     ];
   }).flat(),
 ];

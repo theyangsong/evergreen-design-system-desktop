@@ -1,0 +1,380 @@
+/**
+ * Crypto Combo（Figma 61:6071 — List Field · Currency）
+ *
+ * EgCryptoCombo
+ *   ├ CryptoSymbol
+ *   │    ├ EgCrypto（32px）
+ *   │    └ CryptoItem（entry badge，Style=Suffix）
+ *   └ Body
+ *        ├ Title（symbol + chain Tag / suffix）
+ *        └ CryptoAddress（双地址 + System / Custom / 99+ Tag）
+ */
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── CryptoSymbol ── */
+.cryptoSymbol {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cryptoSymbolPlain {
+  overflow: clip;
+  width: var(--scale-8);
+  height: var(--scale-8);
+}
+
+.cryptoSymbolWithBadge {
+  overflow: visible;
+  width: calc(var(--scale-8) + var(--scale-1) + var(--stroke-xl));
+  height: calc(var(--scale-8) + var(--stroke-xl));
+}
+
+.cryptoSymbolIcon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--scale-8);
+  height: var(--scale-8);
+}
+
+.cryptoSymbolBadge {
+  position: absolute;
+  z-index: 1;
+  left: calc(var(--scale-6) - var(--stroke-xl));
+  top: calc(var(--scale-5) - var(--stroke-xl));
+}
+
+/*
+ * CryptoItem（Figma 61:5964 / 61:5966）
+ * 12px 色块 + 2px 外描边（stroke-face-primary）。
+ * 外圈用 ring 的 padding 露出底色，不依赖 box-shadow / overflow。
+ */
+.cryptoItemRing {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: var(--stroke-xl);
+  border-radius: var(--radius-full);
+  background: var(--stroke-face-primary);
+  line-height: 0;
+}
+
+.cryptoItemCore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--scale-3);
+  height: var(--scale-3);
+  border-radius: var(--radius-full);
+  background: var(--status-success);
+  color: var(--text-same-white-primary);
+}
+
+.cryptoItemIconWrap {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--scale-1-5);
+  height: var(--scale-1-5);
+  color: var(--text-same-white-primary);
+}
+
+.cryptoItemIconWrap :global(.icon) {
+  width: 100%;
+  height: 100%;
+}
+
+.cryptoItemIconWrap :global(.eds-i-s),
+.cryptoItemIconWrap :global(path),
+.cryptoItemIconWrap :global(line) {
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+}
+
+.cryptoItemOut {
+  background: var(--status-danger);
+}
+
+/* ── Body ── */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.bodySized {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.bodyFlex {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.networkTag {
+  display: inline-flex;
+  flex: 0 1 auto;
+  max-width: calc(var(--scale-16) + var(--scale-6));
+  min-width: 0;
+  overflow: hidden;
+}
+
+.networkTag :global(.eds-tag) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.symbolText {
+  overflow: hidden;
+  color: var(--text-base-primary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.networkSuffix {
+  flex: 0 1 auto;
+  max-width: calc(var(--scale-16) + var(--scale-6));
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-base-secondary);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── CryptoAddress（16px row · Figma 463:67670）── */
+.cryptoAddress {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-height: var(--scale-4);
+  min-width: 0;
+}
+
+.cryptoAddress > :global(.eds-flotation) {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc((100% - var(--scale-3) - 2 * var(--spacing-1)) / 2);
+}
+
+.cryptoAddress > :global(.eds-flotation) > span,
+.cryptoAddress > :global(.eds-flotation) > span > span {
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cryptoAddressSingle > :global(.eds-flotation) {
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+
+.cryptoAddressSide {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cryptoAddressLine {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.25em;
+  min-width: 0;
+}
+
+.cryptoAddressLineAlias {
+  flex: 0 0 auto;
+  max-width: calc(var(--scale-16) + var(--scale-6));
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cryptoAddressLine:not(:global(.eds-hover-tooltip-trigger__target)) {
+  color: var(--text-base-secondary);
+}
+
+.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) {
+  outline: none;
+}
+
+.cryptoAddressText {
+  composes: cap from '../list-field/ListFieldSecondary.module.css';
+  flex-shrink: 0;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+  font-weight: var(--eds-footnote-weight);
+  white-space: nowrap;
+  color: inherit;
+}
+
+.cryptoAddressAlias {
+  display: block;
+  flex-shrink: 0;
+  width: auto;
+  max-width: calc(var(--scale-16) + var(--scale-6));
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cryptoAddressTags {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.cryptoAddressCount {
+  composes: cap from '../list-field/ListFieldSecondary.module.css';
+  flex-shrink: 0;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+  font-weight: var(--eds-footnote-weight);
+  color: inherit;
+}
+
+.cryptoAddressCountValue {
+  font-weight: var(--eds-footnote-strong-weight);
+}
+
+/* CryptoAddress 浮层 Menu：shell padding 0 + menuBody spacing-1（对齐 Flotation Box box-doc） */
+:global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box) {
+  padding: 0;
+}
+
+:global(html[data-theme='light'])
+  :global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box),
+:global(html[data-theme='dark'])
+  :global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box) {
+  padding: 0;
+}
+
+:global(.eds-crypto-address-tooltip-menu) :global(.eds-flotation-menu-body) {
+  padding: var(--spacing-1);
+  box-sizing: border-box;
+}
+
+/* 浮层 Menu 行 — 对齐 FlotationBoxSceneAddressPreview rowContent / rowMain / rowTags */
+.menuRowContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-05);
+  width: 100%;
+  min-width: 0;
+}
+
+.menuRowMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.menuAddressLine {
+  display: inline;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.menuAddress {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.menuCopyButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: var(--spacing-1);
+  color: var(--stroke-base-secondary);
+  transition: var(--motion-transition-hover);
+}
+
+.menuCopyButtonCopied :global(.eds-icon-button .symbol) {
+  color: var(--status-success);
+}
+
+.menuCopyButtonCopied :global(.eds-icon-button:hover:not(:disabled) .symbol),
+.menuCopyButtonCopied :global(.eds-icon-button:active:not(:disabled) .symbol),
+.menuCopyButtonCopied :global(.eds-icon-button:focus-visible:not(:disabled) .symbol) {
+  color: var(--status-success);
+}
+
+.menuCopyButtonCopied :global(.eds-icon .eds-i-f),
+.menuCopyButtonCopied :global(.eds-icon path) {
+  fill: var(--status-success);
+}
+
+.menuRowTags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.menuRowTags :global(.eds-tag) {
+  flex-shrink: 0;
+}
+
+.cryptoAddressArrow {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--scale-3);
+  height: var(--scale-3);
+  color: var(--text-base-secondary);
+  transform: scaleY(-1);
+}
+
+.cryptoAddressArrow :global(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cryptoAddressArrow :global(.eds-i-s),
+.cryptoAddressArrow :global(path),
+.cryptoAddressArrow :global(line) {
+  stroke: currentColor;
+  stroke-width: var(--stroke-md);
+  vector-effect: non-scaling-stroke;
+}

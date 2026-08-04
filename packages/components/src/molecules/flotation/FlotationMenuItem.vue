@@ -37,6 +37,8 @@ const props = withDefaults(
     messageText?: string;
     messageType?: MessageType;
     symbolIcon?: string;
+    /** 文案区允许多行换行（场景化地址等长文本）。 */
+    labelWrap?: boolean;
   }>(),
   {
     boxType: 'text',
@@ -55,6 +57,7 @@ const props = withDefaults(
     messageText: '0',
     messageType: 'subtle',
     symbolIcon: 'eds-add',
+    labelWrap: false,
   },
 );
 
@@ -87,6 +90,7 @@ const leadingCryptoName = computed(() => leadingAsset.value as CryptoName);
 
 const itemClass = computed(() => [
   styles.boxRoot,
+  props.labelWrap && styles.boxRootLabelWrap,
   props.focused && styles.boxFocused,
   props.disabled && styles.boxDisabled,
 ]);
@@ -135,8 +139,20 @@ function onClick(event: MouseEvent) {
       </slot>
     </span>
 
-    <span :class="[styles.boxMain, showTrailing && styles.boxMainGrow]">
-      <span :class="[styles.boxLabel, danger && styles.boxLabelDanger]">
+    <span
+      :class="[
+        styles.boxMain,
+        showTrailing && styles.boxMainGrow,
+        labelWrap && styles.boxMainLabelWrap,
+      ]"
+    >
+      <span
+        :class="[
+          styles.boxLabel,
+          danger && styles.boxLabelDanger,
+          labelWrap && styles.boxLabelWrap,
+        ]"
+      >
         <slot>{{ label }}</slot>
       </span>
       <span v-if="showTag || slots.tag" :class="styles.boxTag">

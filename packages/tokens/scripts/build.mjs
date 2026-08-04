@@ -856,9 +856,10 @@ function mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette) {
   const light = { ...baseSpec.light };
   const dark = { ...baseSpec.dark };
 
-  for (const groupKey of ['status', 'colorful']) {
+  for (const groupKey of ['status', 'colorful', 'custom']) {
     for (const [key, themeValues] of Object.entries(tagPalette[groupKey] ?? {})) {
-      for (const role of ['bg', 'text']) {
+      const roles = groupKey === 'custom' ? ['bg', 'text', 'bar'] : ['bg', 'text'];
+      for (const role of roles) {
         const varName = `eds-tag-${groupKey}-${key}-${role}`;
         light[varName] = {
           hex: themeValues.light[role],
@@ -878,9 +879,10 @@ function mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette) {
 function expandTagPaletteSemanticTokens(tagPalette) {
   const tokens = [];
 
-  for (const groupKey of ['status', 'colorful']) {
+  for (const groupKey of ['status', 'colorful', 'custom']) {
     for (const key of Object.keys(tagPalette[groupKey] ?? {})) {
-      for (const role of ['bg', 'text']) {
+      const roles = groupKey === 'custom' ? ['bg', 'text', 'bar'] : ['bg', 'text'];
+      for (const role of roles) {
         const name = `tag-${groupKey}-${key}-${role}`;
         const reference = `color(var(--eds-${name}) / 1)`;
         tokens.push({ name, light: reference, dark: reference });
@@ -1094,6 +1096,183 @@ function buildTypographyFonts() {
   writeFileSync(join(cssDir, 'typography/fonts.css'), `${lines.join('\n')}\n`, 'utf-8');
 }
 
+function writeMotionBaseCssFile(destination, selector, baseSpec, headerLines = []) {
+  const lines = [
+    '/**',
+    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
+    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
+    ' */',
+    '',
+    `${selector} {`,
+  ];
+
+  for (const group of baseSpec.groups) {
+    lines.push('');
+    lines.push(`  /* ${group.comment} */`);
+    for (const [name, value] of Object.entries(group.tokens)) {
+      lines.push(`  --${name}: ${value};`);
+    }
+    if (group.usageNotes?.length) {
+      appendCssCommentBlock(lines, group.usageNotes);
+    }
+  }
+
+  lines.push('}', '');
+
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, lines.join('\n'));
+}
+
+function formatMotionSemanticLine(token) {
+  const declaration = `  --${token.name}: ${token.value};`;
+  if (!token.comment) {
+    return declaration;
+  }
+
+  const padding = Math.max(1, 34 - declaration.length);
+  return `${declaration}${' '.repeat(padding)}/* ${token.comment} */`;
+}
+
+function writeMotionSemanticCssFile(destination, selector, semanticSpec, headerLines = []) {
+  const lines = [
+    '/**',
+    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
+    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
+    ' */',
+    '',
+    `${selector} {`,
+    '',
+    '  /* ---- Semantic role tokens (语义角色 → base) ---- */',
+  ];
+
+  for (const group of semanticSpec.groups) {
+    lines.push(`  /* ${group.comment} */`);
+    for (const token of group.tokens) {
+      lines.push(formatMotionSemanticLine(token));
+    }
+    lines.push('');
+  }
+
+  lines.push('}', '');
+
+  if (semanticSpec.reducedMotionOverrides?.length) {
+    lines.push('@media (prefers-reduced-motion: reduce) {');
+    lines.push(`  ${selector} {`);
+    for (const token of semanticSpec.reducedMotionOverrides) {
+      lines.push(`    --${token.name}: ${token.value};`);
+    }
+    lines.push('  }');
+    lines.push('}', '');
+  }
+
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, lines.join('\n'));
+}
+
+function writeMotionUtilitiesCssFile(destination, semanticSpec, headerLines = []) {
+  const composeHostClass = semanticSpec.composeHost?.className ?? 'motion-compose';
+  const lines = [
+    '/**',
+    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
+    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
+    ' */',
+    '',
+    '/* ========================================',
+    '   Motion Utility Classes',
+    '   ======================================== */',
+    '',
+  ];
+
+  if (semanticSpec.composeHost) {
+    const { composeHost } = semanticSpec;
+    if (composeHost.title) {
+      lines.push(`/* ${composeHost.title} */`);
+    }
+    for (const note of composeHost.notes ?? []) {
+      lines.push(`/* ${note} */`);
+    }
+    lines.push(`.${composeHost.className} {`);
+    lines.push('  transition:');
+    for (const layer of composeHost.layers) {
+      lines.push(`    var(--${layer.layerVar},)`);
+    }
+    lines.push('}', '');
+    for (const layer of composeHost.layers) {
+      lines.push(`.${composeHost.className}.${layer.modifier} {`);
+      lines.push(`  --${layer.layerVar}: var(--${layer.presetVar});`);
+      lines.push('}', '');
+    }
+  }
+
+  for (const utility of semanticSpec.utilityClasses ?? []) {
+    if (utility.title) {
+      lines.push(`/* ${utility.title} */`);
+    }
+    for (const note of utility.notes ?? []) {
+      lines.push(`/* ${note} */`);
+    }
+
+    if (utility.composeLayer && utility.composePreset) {
+      lines.push(`.${utility.className}:not(.${composeHostClass}) {`);
+      lines.push(`  transition: ${utility.standaloneTransition};`);
+      lines.push('}', '');
+    } else {
+      lines.push(`.${utility.className} {`);
+      lines.push(`  transition: ${utility.standaloneTransition ?? 'none'};`);
+      lines.push('}', '');
+    }
+  }
+
+  for (const combo of semanticSpec.presetCombos ?? []) {
+    if (combo.title) {
+      lines.push(`/* ${combo.title} */`);
+    }
+    for (const note of combo.notes ?? []) {
+      lines.push(`/* ${note} */`);
+    }
+    lines.push(`.${combo.className}:not(.${composeHostClass}) {`);
+    lines.push(`  transition: ${combo.transition};`);
+    lines.push('}', '');
+    if (combo.composeLayers?.length && combo.composePresets?.length) {
+      lines.push(`.${composeHostClass}.${combo.className} {`);
+      combo.composeLayers.forEach((layerVar, index) => {
+        lines.push(`  --${layerVar}: var(--${combo.composePresets[index]});`);
+      });
+      lines.push('}', '');
+    }
+  }
+
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, lines.join('\n'));
+}
+
+function buildMotionSystem() {
+  const baseSpec = loadJson('motion/base.json');
+  const semanticSpec = loadJson('motion/semantic.json');
+  const selector = ':root, .desktopTokens';
+
+  writeMotionBaseCssFile(join(cssDir, 'motion/base.css'), selector, baseSpec, [
+    ' * Motion System — base primitives (duration & easing).',
+    ' * Source: spec/motion/base.json',
+  ]);
+
+  writeMotionSemanticCssFile(join(cssDir, 'motion/semantic.css'), selector, semanticSpec, [
+    ' * Motion System — semantic role variables only.',
+    ' * Source: spec/motion/semantic.json',
+  ]);
+
+  writeMotionUtilitiesCssFile(join(cssDir, 'motion/utilities.css'), semanticSpec, [
+    ' * Motion System — utility classes (standalone & compose).',
+    ' * Source: spec/motion/semantic.json',
+  ]);
+
+  writeImportAggregator(
+    join(cssDir, 'motion/index.css'),
+    ['./base.css', './semantic.css', './utilities.css'],
+    'Motion System entry',
+  );
+}
+
 function buildTypographySystem() {
   buildTypographyFonts();
   const baseSpec = loadJson('typography/base.json');
@@ -1228,6 +1407,7 @@ function buildRootIndex() {
     [
       './scale/index.css',
       './typography/index.css',
+      './motion/index.css',
       './color/index.css',
       './effect/index.css',
     ],
@@ -1243,6 +1423,8 @@ function buildJsonExport() {
   const textStylesSpec = loadJson('text/styles.json');
   const effectBaseSpec = loadJson('effect/base.json');
   const effectSemanticSpec = loadJson('effect/semantic.json');
+  const motionBaseSpec = loadJson('motion/base.json');
+  const motionSemanticSpec = loadJson('motion/semantic.json');
 
   const scaleUnit = resolveScaleBaseUnit(scaleBaseSpec);
   const scaleMultipliers = {};
@@ -1316,6 +1498,37 @@ function buildJsonExport() {
         group.styles.map((style) => [style.className, style.properties ?? {}]),
       ),
     ),
+    motionBase: Object.fromEntries(
+      motionBaseSpec.groups.flatMap((group) => Object.entries(group.tokens)),
+    ),
+    motionSemantic: Object.fromEntries(
+      motionSemanticSpec.groups.flatMap((group) =>
+        group.tokens.map((token) => [token.name, token.value]),
+      ),
+    ),
+    motionUtilities: Object.fromEntries([
+      ...(motionSemanticSpec.utilityClasses ?? []).map((utility) => [
+        utility.className,
+        {
+          transition: utility.standaloneTransition ?? utility.properties?.transition ?? 'none',
+        },
+      ]),
+      ...(motionSemanticSpec.presetCombos ?? []).map((combo) => [
+        combo.className,
+        { transition: combo.transition },
+      ]),
+      ...(motionSemanticSpec.composeHost
+        ? [
+            [
+              motionSemanticSpec.composeHost.className,
+              {
+                transition:
+                  'compose — var(--motion-layer-*) layers; pair with motion-hover / shift / fade / enter',
+              },
+            ],
+          ]
+        : []),
+    ]),
   };
 
   const baseSpec = loadJson('color/base.json');
@@ -1338,6 +1551,7 @@ async function buildAll() {
 
   buildScaleSystem();
   buildTypographySystem();
+  buildMotionSystem();
   buildEffectSystem();
   buildColorSystem();
   buildRootIndex();

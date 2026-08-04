@@ -93,6 +93,7 @@ export const componentCatalog: CatalogSection[] = [
           { id: 'tag-system', label: 'System', standalonePage: true },
           { id: 'tag-status', label: 'Status', standalonePage: true },
           { id: 'tag-colorful', label: 'Colorful', standalonePage: true },
+          { id: 'tag-custom', label: 'Custom', standalonePage: true },
         ],
       },
       {

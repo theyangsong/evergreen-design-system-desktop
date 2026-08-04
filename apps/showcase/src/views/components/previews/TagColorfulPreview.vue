@@ -2,17 +2,17 @@
 import { computed, reactive } from 'vue';
 import { EgTag } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import TagPreviewGallery from './TagPreviewGallery.vue';
+import type { TagColorfulStyle } from '@eds/desktop-components';
 import {
   buildTagColorfulUsageSnippet,
   tagImportCode,
   tagColorfulCustomizeControls,
   tagColorfulCustomizeDefaults,
   tagColorfulPropRows,
+  tagColorfulStyleOptions,
 } from './tagDocCustomize';
-
-import type { TagColorfulStyle } from '@eds/desktop-components';
 
 const customize = reactive({
   ...tagColorfulCustomizeDefaults,
@@ -21,6 +21,10 @@ const customize = reactive({
 });
 
 const usageSnippet = computed(() => buildTagColorfulUsageSnippet(customize));
+
+function selectColorfulStyle(value: string) {
+  customize.colorfulStyle = value as TagColorfulStyle;
+}
 </script>
 
 <template>
@@ -38,15 +42,27 @@ const usageSnippet = computed(() => buildTagColorfulUsageSnippet(customize));
       props-section-id="tag-colorful-props"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgTag
-            family="colorful"
-            :size="customize.size"
-            :colorful-style="customize.colorfulStyle"
-          >
-            {{ customize.label }}
-          </EgTag>
-        </div>
+        <TagPreviewGallery
+          :options="tagColorfulStyleOptions"
+          :selected="customize.colorfulStyle"
+          gallery-label="样式"
+          @select="selectColorfulStyle"
+        >
+          <template #main>
+            <EgTag
+              family="colorful"
+              :size="customize.size"
+              :colorful-style="customize.colorfulStyle"
+            >
+              {{ customize.label }}
+            </EgTag>
+          </template>
+          <template #item="{ value }">
+            <EgTag family="colorful" :size="customize.size" :colorful-style="value">
+              {{ customize.label }}
+            </EgTag>
+          </template>
+        </TagPreviewGallery>
       </template>
     </ComponentDocLayout>
   </div>

@@ -2,9 +2,9 @@ import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDo
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import {
   inputSizeRows,
-  propLabelRows,
   propLabelSelectOptions,
   showcaseTagColorfulStyleLabels,
+  showcaseTagCustomStyleLabels,
   showcaseTagStatusLabels,
   showcaseTagSystemTypeLabels,
 } from '@/data/showcasePropLabels';
@@ -66,6 +66,22 @@ export const tagColorfulPropRows: DocPropRow[] = [
   },
 ];
 
+export const tagCustomPropRows: DocPropRow[] = [
+  tagSizeProp,
+  {
+    name: 'family',
+    type: "'custom'",
+    defaultValue: "'custom'",
+    description: 'Custom 族 Tag；radius-xs、左侧竖线配色、material-card-deep 底。',
+  },
+  {
+    name: 'customStyle',
+    type: 'TagCustomStyle',
+    defaultValue: "'vermilion'",
+    description: '竖线配色；见 spec/color/tag-palette.json custom（Figma 2439:7744）。',
+  },
+];
+
 export const tagSystemCustomizeDefaults = {
   size: 'md',
   family: 'system',
@@ -73,7 +89,19 @@ export const tagSystemCustomizeDefaults = {
   label: 'Tag',
 } as const;
 
-const tagColorfulStyleOptions = propLabelSelectOptions(
+export const tagSystemStyleOptions = propLabelSelectOptions(
+  [
+    'subtle',
+    'solid-brand',
+    'solid-red',
+    'gray',
+    'stroke-subtle',
+    'stroke-solid',
+  ] as const,
+  showcaseTagSystemTypeLabels,
+);
+
+export const tagColorfulStyleOptions = propLabelSelectOptions(
   [
     'apricot',
     'khaki',
@@ -108,20 +136,26 @@ export const tagSystemCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'systemType',
     label: '类型',
-    options: propLabelRows(
-      [
-        'subtle',
-        'solid-brand',
-        'solid-red',
-        'gray',
-        'stroke-subtle',
-        'stroke-solid',
-      ] as const,
-      showcaseTagSystemTypeLabels,
-    ).map((row) => ({ value: row.key, label: row.label })),
+    options: tagSystemStyleOptions,
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];
+
+/** List Field General Structure 内嵌 Tag 固定 Sm，仅配置类型与文案。 */
+export const tagSystemSmCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'systemType',
+    label: '类型',
+    options: tagSystemStyleOptions,
+  },
+  { kind: 'text', key: 'label', label: '文案' },
+];
+
+export const tagStatusStyleOptions = propLabelSelectOptions(
+  ['danger', 'warning', 'success', 'ready', 'invalid'] as const,
+  showcaseTagStatusLabels,
+);
 
 export const tagStatusCustomizeDefaults = {
   size: 'md',
@@ -141,10 +175,7 @@ export const tagStatusCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'status',
     label: '状态',
-    options: propLabelRows(
-      ['danger', 'warning', 'success', 'ready', 'invalid'] as const,
-      showcaseTagStatusLabels,
-    ).map((row) => ({ value: row.key, label: row.label })),
+    options: tagStatusStyleOptions,
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];
@@ -172,6 +203,65 @@ export const tagColorfulCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'label', label: '文案' },
 ];
 
+export const tagCustomStyleOptions = propLabelSelectOptions(
+  [
+    'vermilion',
+    'orange',
+    'amber',
+    'lime',
+    'mint',
+    'teal',
+    'clear-sky',
+    'cobalt',
+    'aurora',
+    'orchid',
+    'rose',
+    'peach',
+    'aml-danger',
+    'aml-suspicious',
+    'aml-invalid',
+  ] as const,
+  showcaseTagCustomStyleLabels,
+);
+
+export const tagAmlStyleOptions = propLabelSelectOptions(
+  ['aml-danger', 'aml-suspicious', 'aml-invalid'] as const,
+  showcaseTagCustomStyleLabels,
+);
+
+export const tagRiskCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'customStyle',
+    label: '样式',
+    options: tagAmlStyleOptions,
+  },
+  { kind: 'text', key: 'label', label: '文案' },
+];
+
+export const tagCustomCustomizeDefaults = {
+  size: 'sm',
+  family: 'custom',
+  customStyle: 'vermilion',
+  label: 'Tag',
+} as const;
+
+export const tagCustomCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'size',
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'customStyle',
+    label: '竖线色',
+    options: tagCustomStyleOptions,
+  },
+  { kind: 'text', key: 'label', label: '文案' },
+];
+
 function buildTagSnippet(state: Record<string, unknown>, defaults: Record<string, unknown>): string {
   const props: Record<string, unknown> = {
     size: state.size,
@@ -180,6 +270,7 @@ function buildTagSnippet(state: Record<string, unknown>, defaults: Record<string
   if (state.family === 'system') props.systemType = state.systemType;
   if (state.family === 'status') props.status = state.status;
   if (state.family === 'colorful') props.colorfulStyle = state.colorfulStyle;
+  if (state.family === 'custom') props.customStyle = state.customStyle;
   const label = String(state.label ?? 'Tag');
   const open = buildVueSelfClosingSnippet('EgTag', props, { defaults });
   return open.replace('/>', `>${label}</EgTag>`);
@@ -195,4 +286,8 @@ export function buildTagStatusUsageSnippet(state: Record<string, unknown>): stri
 
 export function buildTagColorfulUsageSnippet(state: Record<string, unknown>): string {
   return buildTagSnippet({ ...state, family: 'colorful' }, tagColorfulCustomizeDefaults);
+}
+
+export function buildTagCustomUsageSnippet(state: Record<string, unknown>): string {
+  return buildTagSnippet({ ...state, family: 'custom' }, tagCustomCustomizeDefaults);
 }
