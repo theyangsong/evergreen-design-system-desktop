@@ -126,6 +126,22 @@
   font-variant-numeric: tabular-nums;
 }
 
+.amountSecondaryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.amountSecondaryRow > :global(.eds-divider) {
+  align-self: center;
+  flex-shrink: 0;
+  height: var(--scale-2-5);
+  min-height: var(--scale-2-5);
+  max-height: var(--scale-2-5);
+}
+
 .timePreview {
   display: flex;
   flex-direction: column;
@@ -169,6 +185,26 @@
   max-width: 100%;
 }
 
+.generalStructureSingleStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.generalStructureSingleStackAlignLeft {
+  align-items: flex-start;
+}
+
+.generalStructureSingleStackAlignCenter {
+  align-items: center;
+}
+
+.generalStructureSingleStackAlignRight {
+  align-items: flex-end;
+}
+
 .tagPreview {
   display: flex;
   align-items: center;
@@ -181,6 +217,25 @@
   align-items: flex-start;
   min-width: 0;
   max-width: 100%;
+}
+
+.generalStructureCountdown {
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-weight);
+  line-height: var(--eds-footnote-line-height);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.generalStructureCountdownTime {
+  display: inline-block;
+  color: var(--status-danger);
+  font-weight: var(--weight-medium);
+  min-width: 31px;
+}
+
+.generalStructureCountdownSuffix {
+  color: var(--text-base-secondary);
 }
 
 .actionPreview {

@@ -176,7 +176,7 @@
 
 .messageDanger {
   background: var(--status-danger);
-  color: var(--status-disable-same-white, var(--text-same-white-primary));
+  color: var(--text-same-white-primary);
 }
 
 .messageFocused {

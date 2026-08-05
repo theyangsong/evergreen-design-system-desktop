@@ -36,7 +36,7 @@ const emit = defineEmits<{
         </option>
       </select>
       <EgInput
-        v-else
+        v-else-if="control.kind === 'text'"
         size="sm"
         width-mode="full"
         :clearable="false"

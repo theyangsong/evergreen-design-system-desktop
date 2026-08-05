@@ -143,7 +143,7 @@
   padding: 0;
   overflow: hidden;
   border-radius: var(--radius-xs);
-  background: var(--material-card-deep);
+  background: transparent;
   color: var(--text-base-primary);
 }
 
@@ -220,12 +220,18 @@
   color: var(--text-base-tertiary);
 }
 
+.customAmlDanger .customContent,
+.customAmlSuspicious .customContent {
+  background: transparent;
+}
+
 .customContent {
   display: flex;
   flex: none;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  background: var(--material-card-deep);
 }
 
 .custom.lg .customContent {

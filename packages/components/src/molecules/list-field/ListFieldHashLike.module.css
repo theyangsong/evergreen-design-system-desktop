@@ -23,6 +23,12 @@
   max-width: 100%;
 }
 
+.tooltipTriggerWrap {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .cellCopyButton {
   flex-shrink: 0;
 }
@@ -67,10 +73,6 @@
 .lineAdaptive {
   display: block;
   white-space: nowrap;
-}
-
-.primaryLine:global(.eds-hover-tooltip-trigger__target) {
-  color: var(--text-base-primary);
 }
 
 .menuPrimary {

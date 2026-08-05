@@ -187,7 +187,7 @@ const shellClass = computed(() => {
                     :disabled="Boolean(customize.selectMode)"
                   />
                 </div>
-                <EgDivider type="page" direction="vertical" />
+                <EgDivider type="navigator" direction="vertical" />
                 <div :class="previewStyles.comboHeaderSegment">
                   <span>{{ previewColumnSettings[0].secondaryLabel }}</span>
                   <DataListHeaderSortTrigger

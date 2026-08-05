@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import '@/styles/desktop-components-scope.css';
 import '@/styles/text-style-preview.css';
 import {
   EgAnchoredTooltip,
   EgCryptoCombo,
+  EgDivider,
   EgFormSubmission,
   EgListFieldHashLikeLine,
   EgTag,
@@ -134,12 +135,116 @@ const formSubmissionText = () => String(props.customize.text ?? 'Connect to EDS'
 const formSubmissionLinkLabel = () => String(props.customize.linkLabel ?? 'Button');
 const formSubmissionShowLink = () => props.customize.showLink !== false;
 
-const showGeneralTag = () =>
-  props.slug === 'list-field-general-structure' && Boolean(props.customize.showTag);
+const showGeneralStructureTags = () =>
+  props.slug === 'list-field-general-structure' &&
+  (Boolean(props.customize.showRightTag) || Boolean(props.customize.showLeftTag));
+const showDismissFeedback = computed(
+  () =>
+    props.slug === 'list-field-general-structure' &&
+    !hashLikeIsDoubleLine.value &&
+    Boolean(props.customize.showDismissFeedback),
+);
+const showCountdown = computed(() => {
+  if (!Boolean(props.customize.showCountdown)) return false;
+  if (props.slug === 'list-field-general-structure') {
+    return !hashLikeIsDoubleLine.value;
+  }
+  if (props.slug === 'list-field-amount') {
+    return amountType() !== 'fiat';
+  }
+  return false;
+});
+const showAmountConversionCountdown = computed(
+  () => props.slug === 'list-field-amount' && amountType() === 'conversion' && showCountdown.value,
+);
+const showGeneralStructureStack = computed(
+  () => showDismissFeedback.value || showCountdown.value,
+);
+const dismissFeedbackAlignClass = computed(() => {
+  const align = String(props.customize.dismissFeedbackAlign ?? 'left');
+  if (align === 'center') return styles.generalStructureSingleStackAlignCenter;
+  if (align === 'right') return styles.generalStructureSingleStackAlignRight;
+  return styles.generalStructureSingleStackAlignLeft;
+});
+const COUNTDOWN_LOOP_SECONDS = 60 * 60;
+
+function parseCountdownTotal(customize: Record<string, unknown>): number {
+  const minutes = Math.max(0, Number.parseInt(String(customize.countdownMinutes ?? '30'), 10) || 0);
+  const seconds = Math.max(
+    0,
+    Math.min(59, Number.parseInt(String(customize.countdownSeconds ?? '0'), 10) || 0),
+  );
+  return minutes * 60 + seconds;
+}
+
+function formatCountdownTotal(total: number): string {
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+const countdownRemainingSeconds = ref(0);
+let countdownTimer: ReturnType<typeof setInterval> | undefined;
+
+function resetCountdownFromCustomize() {
+  countdownRemainingSeconds.value = parseCountdownTotal(props.customize);
+}
+
+function clearCountdownTimer() {
+  if (countdownTimer !== undefined) {
+    clearInterval(countdownTimer);
+    countdownTimer = undefined;
+  }
+}
+
+function startCountdownTimer() {
+  clearCountdownTimer();
+  if (!showCountdown.value) return;
+  resetCountdownFromCustomize();
+  countdownTimer = setInterval(() => {
+    if (countdownRemainingSeconds.value <= 0) {
+      countdownRemainingSeconds.value = COUNTDOWN_LOOP_SECONDS;
+      return;
+    }
+    countdownRemainingSeconds.value -= 1;
+  }, 1000);
+}
+
+watch(
+  showCountdown,
+  (active) => {
+    if (active) {
+      startCountdownTimer();
+      return;
+    }
+    clearCountdownTimer();
+  },
+  { immediate: true },
+);
+
+watch(
+  () => [props.customize.countdownMinutes, props.customize.countdownSeconds],
+  () => {
+    if (showCountdown.value) {
+      resetCountdownFromCustomize();
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  clearCountdownTimer();
+});
+
+const countdownTime = computed(() => formatCountdownTotal(countdownRemainingSeconds.value));
+const showRightTag = () => Boolean(props.customize.showRightTag);
+const showLeftTag = () => Boolean(props.customize.showLeftTag);
 const tagSize = () => 'sm' as const;
-const tagSystemType = () =>
-  String(props.customize.systemType ?? 'stroke-subtle') as TagSystemType;
-const tagLabel = () => String(props.customize.label ?? 'Tag');
+const rightTagSystemType = () =>
+  String(props.customize.rightSystemType ?? 'stroke-subtle') as TagSystemType;
+const rightTagLabel = () => String(props.customize.rightLabel ?? 'Tag');
+const leftTagSystemType = () =>
+  String(props.customize.leftSystemType ?? 'stroke-subtle') as TagSystemType;
+const leftTagLabel = () => String(props.customize.leftLabel ?? 'Tag');
 
 const actionPrimary = computed(() => ({
   label: String(props.customize.primaryLabel ?? 'Action'),
@@ -211,12 +316,20 @@ const actionMinWidthStyle = computed(() => {
 
     <template v-else-if="isHashLikeSlug">
       <div
-        v-if="showGeneralTag()"
+        v-if="showGeneralStructureTags()"
         :class="hashLikeIsDoubleLine ? styles.stackPreview : styles.generalStructureTitleRow"
         :style="hashLikeMinWidthStyle"
       >
         <template v-if="hashLikeIsDoubleLine">
           <div :class="styles.generalStructureTitleRow">
+            <EgTag
+              v-if="showLeftTag()"
+              family="system"
+              :system-type="leftTagSystemType()"
+              :size="tagSize()"
+            >
+              {{ leftTagLabel() }}
+            </EgTag>
             <EgListFieldHashLikeLine
               :text="hashLikeValue"
               variant="primary"
@@ -225,8 +338,13 @@ const actionMinWidthStyle = computed(() => {
               :tooltip-trigger="hashLikeTooltipTrigger"
               :ellipsis="hashLikeLineEllipsis"
             />
-            <EgTag family="system" :system-type="tagSystemType()" :size="tagSize()">
-              {{ tagLabel() }}
+            <EgTag
+              v-if="showRightTag()"
+              family="system"
+              :system-type="rightTagSystemType()"
+              :size="tagSize()"
+            >
+              {{ rightTagLabel() }}
             </EgTag>
           </div>
           <EgListFieldHashLikeLine
@@ -239,17 +357,75 @@ const actionMinWidthStyle = computed(() => {
           />
         </template>
         <template v-else>
-          <EgListFieldHashLikeLine
-            :text="hashLikeValue"
-            variant="primary"
-            :identifier-mode="slug === 'list-field-identifier'"
-            :copy-on-row-hover="hashLikeCopyOnRowHover"
-            :tooltip-trigger="hashLikeTooltipTrigger"
-            :ellipsis="hashLikeLineEllipsis"
-          />
-          <EgTag family="system" :system-type="tagSystemType()" :size="tagSize()">
-            {{ tagLabel() }}
-          </EgTag>
+          <div
+            v-if="showGeneralStructureStack"
+            :class="[styles.generalStructureSingleStack, dismissFeedbackAlignClass]"
+            :style="hashLikeMinWidthStyle"
+          >
+            <div :class="styles.generalStructureTitleRow">
+              <EgTag
+                v-if="showLeftTag()"
+                family="system"
+                :system-type="leftTagSystemType()"
+                :size="tagSize()"
+              >
+                {{ leftTagLabel() }}
+              </EgTag>
+              <EgListFieldHashLikeLine
+                :text="hashLikeValue"
+                variant="primary"
+                :identifier-mode="slug === 'list-field-identifier'"
+                :copy-on-row-hover="hashLikeCopyOnRowHover"
+                :tooltip-trigger="hashLikeTooltipTrigger"
+                :ellipsis="hashLikeLineEllipsis"
+              />
+              <EgTag
+                v-if="showRightTag()"
+                family="system"
+                :system-type="rightTagSystemType()"
+                :size="tagSize()"
+              >
+                {{ rightTagLabel() }}
+              </EgTag>
+            </div>
+            <EgFormSubmission
+              v-if="showDismissFeedback"
+              :type="formSubmissionType()"
+              :text="formSubmissionText()"
+              :link-label="formSubmissionLinkLabel()"
+              :show-link="formSubmissionShowLink()"
+            />
+            <span v-if="showCountdown" :class="styles.generalStructureCountdown">
+              <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
+              <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
+            </span>
+          </div>
+          <div v-else :class="styles.generalStructureTitleRow" :style="hashLikeMinWidthStyle">
+            <EgTag
+              v-if="showLeftTag()"
+              family="system"
+              :system-type="leftTagSystemType()"
+              :size="tagSize()"
+            >
+              {{ leftTagLabel() }}
+            </EgTag>
+            <EgListFieldHashLikeLine
+              :text="hashLikeValue"
+              variant="primary"
+              :identifier-mode="slug === 'list-field-identifier'"
+              :copy-on-row-hover="hashLikeCopyOnRowHover"
+              :tooltip-trigger="hashLikeTooltipTrigger"
+              :ellipsis="hashLikeLineEllipsis"
+            />
+            <EgTag
+              v-if="showRightTag()"
+              family="system"
+              :system-type="rightTagSystemType()"
+              :size="tagSize()"
+            >
+              {{ rightTagLabel() }}
+            </EgTag>
+          </div>
         </template>
       </div>
 
@@ -276,7 +452,11 @@ const actionMinWidthStyle = computed(() => {
             :ellipsis="hashLikeLineEllipsis"
           />
         </span>
-        <div v-else :style="hashLikeMinWidthStyle">
+        <div
+          v-else
+          :class="showGeneralStructureStack ? [styles.generalStructureSingleStack, dismissFeedbackAlignClass] : undefined"
+          :style="hashLikeMinWidthStyle"
+        >
           <EgListFieldHashLikeLine
             :text="hashLikeValue"
             variant="primary"
@@ -285,6 +465,17 @@ const actionMinWidthStyle = computed(() => {
             :tooltip-trigger="hashLikeTooltipTrigger"
             :ellipsis="hashLikeLineEllipsis"
           />
+          <EgFormSubmission
+            v-if="showDismissFeedback"
+            :type="formSubmissionType()"
+            :text="formSubmissionText()"
+            :link-label="formSubmissionLinkLabel()"
+            :show-link="formSubmissionShowLink()"
+          />
+          <span v-if="showCountdown" :class="styles.generalStructureCountdown">
+            <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
+            <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
+          </span>
         </div>
       </template>
     </template>
@@ -297,10 +488,22 @@ const actionMinWidthStyle = computed(() => {
         <span :class="['typography-body-medium', styles.amountPrimary]">
           {{ formatGroupedNumber('66666.6666') }} BTC
         </span>
+        <span v-if="showCountdown" :class="styles.generalStructureCountdown">
+          <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
+          <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
+        </span>
       </div>
       <div v-else :class="styles.amountPreview" :style="cellMinWidthStyle">
         <span :class="['typography-body-medium', styles.amountPrimary]">{{ cryptoValue() }} USDT</span>
-        <span :class="['typography-footnote', styles.amountSecondary]">≈ {{ fiatValue() }}</span>
+        <div v-if="showAmountConversionCountdown" :class="styles.amountSecondaryRow">
+          <span :class="['typography-footnote', styles.amountSecondary]">≈ {{ fiatValue() }}</span>
+          <EgDivider type="page" direction="vertical" />
+          <span :class="styles.generalStructureCountdown">
+            <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
+            <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
+          </span>
+        </div>
+        <span v-else :class="['typography-footnote', styles.amountSecondary]">≈ {{ fiatValue() }}</span>
       </div>
     </template>
 

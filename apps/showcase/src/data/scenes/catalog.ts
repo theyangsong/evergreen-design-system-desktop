@@ -2,11 +2,11 @@ import type { CatalogSection } from '../types';
 
 /** eds-biz-list-fields — universal business field scenes (one route each). */
 export const listFieldSceneSlugs = [
+  'list-field-general-structure',
   'list-field-currency',
   'list-field-address',
   'list-field-transaction-hash',
   'list-field-identifier',
-  'list-field-general-structure',
   'list-field-amount',
   'list-field-time',
   'list-field-status',
@@ -47,6 +47,12 @@ export const scenesCatalog: CatalogSection[] = [
     title: 'List Fields',
     items: [
       {
+        name: 'General Structure',
+        slug: 'list-field-general-structure',
+        description: 'Generic Combo Title cell with primary and secondary text lines.',
+        status: 'implemented',
+      },
+      {
         name: 'Currency',
         slug: 'list-field-currency',
         description: 'Token logo, symbol, and network suffix for cross-chain assets.',
@@ -68,12 +74,6 @@ export const scenesCatalog: CatalogSection[] = [
         name: 'Identifier',
         slug: 'list-field-identifier',
         description: 'ID / reference numbers with the same overflow rules as transaction hash.',
-        status: 'implemented',
-      },
-      {
-        name: 'General Structure',
-        slug: 'list-field-general-structure',
-        description: 'Generic Combo Title cell with primary and secondary text lines.',
         status: 'implemented',
       },
       {

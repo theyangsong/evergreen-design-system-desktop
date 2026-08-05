@@ -3,6 +3,7 @@ import { computed, reactive } from 'vue';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import PropsDocTables from '@/views/shared/componentDoc/PropsDocTables.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import shared from '@/views/shared/showcase.module.css';
 import styles from './InputPreview.module.css';
 import previewStyles from './DataListPreview.module.css';
@@ -58,10 +59,12 @@ const eventRows = [
 </script>
 
 <template>
-  <div :class="[styles.previewPage, previewStyles.docPreviewHeight]">
+  <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
+      anchor-id="data-list"
       title="Data List"
+      tall-preview
       :show-doc-title="false"
       component-tag="EgDataList"
       :import-code="ORGANISM_IMPORT"
@@ -77,13 +80,21 @@ const eventRows = [
         <div
           class="desktopTokens"
           :class="[
-            previewStyles.pageShell,
-            String(customize.pageHeightMode) === 'adaptive'
-              ? previewStyles.pageShellAdaptive
-              : previewStyles.pageShellFixed,
+            docStyles.previewEffectPanelHost,
+            docStyles.previewEffectPanelHostTall,
+            previewStyles.previewOrganismDataListHost,
           ]"
         >
-          <DataListPagePreview :customize="customize" :use-page-shell="false" />
+          <div
+            :class="[
+              previewStyles.pageShell,
+              String(customize.pageHeightMode) === 'adaptive'
+                ? previewStyles.pageShellAdaptive
+                : previewStyles.pageShellFixed,
+            ]"
+          >
+            <DataListPagePreview :customize="customize" :use-page-shell="false" />
+          </div>
         </div>
       </template>
 
@@ -122,8 +133,8 @@ const eventRows = [
         />
       </template>
 
-      <section :class="shared.section">
-        <h2 :class="shared.sectionTitle">EgDataListColumn</h2>
+      <section id="data-list-column-props" :class="shared.section">
+        <h2 :class="shared.sectionTitle">列 EgDataListColumn</h2>
         <PropsDocTables bare :show-title="false" :prop-rows="dataListColumnPropRows" />
       </section>
     </ComponentDocLayout>

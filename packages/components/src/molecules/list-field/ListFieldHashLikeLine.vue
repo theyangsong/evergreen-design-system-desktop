@@ -15,6 +15,7 @@ const props = withDefaults(
     variant?: 'primary' | 'secondary';
     identifierMode?: boolean;
     copyOnRowHover?: boolean;
+    showTooltipCopy?: boolean;
     tooltipTrigger?: 'hover' | 'focus';
     ellipsis?: boolean;
   }>(),
@@ -22,6 +23,7 @@ const props = withDefaults(
     variant: 'primary',
     identifierMode: false,
     copyOnRowHover: false,
+    showTooltipCopy: true,
     tooltipTrigger: 'hover',
     ellipsis: false,
   },
@@ -34,6 +36,10 @@ const tooltipCopied = ref(false);
 let resizeObserver: ResizeObserver | undefined;
 let cellCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
 let tooltipCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
+
+const tooltipTargetModifier = computed(() =>
+  props.variant === 'primary' ? 'eds-hover-tooltip-trigger__target--primary' : undefined,
+);
 
 const hoverTriggerClass = computed(() =>
   props.tooltipTrigger === 'focus' ? 'eds-hover-tooltip-trigger--focus' : undefined,
@@ -156,13 +162,21 @@ async function onCopy(event: Event, target: 'cell' | 'tooltip') {
     >
       <template #trigger>
         <span
+          v-if="overflowing"
+          :class="['eds-hover-tooltip-trigger', hoverTriggerClass, styles.tooltipTriggerWrap]"
+        >
+          <span
+            ref="lineRef"
+            :class="['eds-hover-tooltip-trigger__target', tooltipTargetModifier, lineClasses]"
+            :tabindex="tooltipTrigger === 'focus' ? 0 : undefined"
+          >
+            {{ text }}
+          </span>
+        </span>
+        <span
+          v-else
           ref="lineRef"
-          :class="[
-            overflowing && ['eds-hover-tooltip-trigger', 'eds-hover-tooltip-trigger__target'],
-            overflowing && hoverTriggerClass,
-            lineClasses,
-          ]"
-          :tabindex="overflowing && tooltipTrigger === 'focus' ? 0 : undefined"
+          :class="lineClasses"
         >
           {{ text }}
         </span>
@@ -184,6 +198,7 @@ async function onCopy(event: Event, target: 'cell' | 'tooltip') {
                 <span :class="cryptoComboStyles.menuAddressLine">
                   <span :class="menuTextClass">{{ text }}</span>
                   <span
+                    v-if="showTooltipCopy"
                     :class="[
                       cryptoComboStyles.menuCopyButton,
                       tooltipCopied && cryptoComboStyles.menuCopyButtonCopied,

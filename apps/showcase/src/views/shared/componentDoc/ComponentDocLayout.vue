@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, ref, useSlots, type ComputedRef } from 'vue';
-import { EgButton, EgSegmentedControl } from '@eds/desktop-components';
-import { rescanCornerSmoothing } from '@eds/desktop-components';
+import { EgButton, EgSegmentedControl, rescanCornerSmoothing } from '@eds/desktop-components';
 import { buildComponentAiPrompt, buildVueSelfClosingSnippet } from './buildUsageSnippet';
 import CustomizePanel from './CustomizePanel.vue';
 import PropsDocTables from './PropsDocTables.vue';

@@ -48,12 +48,13 @@ defineOptions({ name: 'EgDataList' });
 const LOADING_BAR_HEIGHT = 28;
 const LOADING_DONE_VISIBLE_MS = 1500;
 const LOADING_TRANSITION_MS = 300;
-const SELECT_COLUMN_WIDTH = 48;
+const SELECT_COLUMN_WIDTH = 40;
 const SELECT_COLUMN_ANIM_MS = 300;
 const SELECT_CONTENT_SLIDE_ENTER_PX = 16;
 const SELECT_CONTENT_SLIDE_EXIT_PX = 32;
 const RESIZE_DEBOUNCE_MS = 100;
 const BATCH_TOAST_VISIBLE_MS = 3000;
+const SCROLL_EDGE_EPSILON = 2;
 
 const props = withDefaults(
   defineProps<{
@@ -378,11 +379,15 @@ function buildColumnMetas() {
   });
 }
 
+const selectColumnBudgetPx = computed(() =>
+  selectColumnInDom.value ? SELECT_COLUMN_WIDTH : 0,
+);
+
 const visibleSlotIndices = computed(() =>
   getVisibleColumnSlotIndices(buildColumnMetas(), size.value.width, {
     clientViewportWidth: clientViewportWidth.value,
     skidOpen: effectiveSkidOpen.value,
-    selectOffsetPx: selectOffsetPx.value,
+    selectOffsetPx: selectColumnBudgetPx.value,
   }),
 );
 
@@ -704,6 +709,47 @@ defineExpose({ openSelect, closeSelect });
 
 let resizeObserver: ResizeObserver | null = null;
 let viewportResizeTimer: ReturnType<typeof setTimeout> | undefined;
+let tableContentWheelTarget: HTMLElement | null = null;
+
+function clampTableScroll(region: HTMLElement) {
+  const maxScrollTop = Math.max(0, region.scrollHeight - region.clientHeight);
+  if (region.scrollTop < 0) {
+    region.scrollTop = 0;
+  } else if (region.scrollTop > maxScrollTop) {
+    region.scrollTop = maxScrollTop;
+  }
+}
+
+function onTableContentWheel(event: WheelEvent) {
+  const region = tableContentRef.value;
+  if (!region) return;
+
+  const maxScrollTop = region.scrollHeight - region.clientHeight;
+  if (maxScrollTop <= 0) return;
+
+  const atTop = region.scrollTop <= 0;
+  const atBottom = region.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
+  const scrollingUp = event.deltaY < 0;
+  const scrollingDown = event.deltaY > 0;
+
+  if ((scrollingUp && atTop) || (scrollingDown && atBottom)) {
+    event.preventDefault();
+  }
+}
+
+function bindTableContentWheelListener() {
+  const region = tableContentRef.value;
+  if (!region || region === tableContentWheelTarget) return;
+
+  tableContentWheelTarget?.removeEventListener('wheel', onTableContentWheel);
+  tableContentWheelTarget = region;
+  region.addEventListener('wheel', onTableContentWheel, { passive: false });
+}
+
+function unbindTableContentWheelListener() {
+  tableContentWheelTarget?.removeEventListener('wheel', onTableContentWheel);
+  tableContentWheelTarget = null;
+}
 
 function syncClientViewportWidth() {
   if (typeof document === 'undefined') return;
@@ -744,10 +790,14 @@ onMounted(() => {
   };
   emit('update:pagination-locked', selectMode.value);
   syncColumnWidthSnapshots();
+  nextTick(() => {
+    bindTableContentWheelListener();
+  });
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onViewportResize);
+  unbindTableContentWheelListener();
   if (viewportResizeTimer !== undefined) clearTimeout(viewportResizeTimer);
   resizeObserver?.disconnect();
   stopSelectAnim();
@@ -827,6 +877,7 @@ function onMoreAction(key: string, row: DataListItem, rowIndex: number) {
 
 function onTableScroll(event: Event) {
   const target = event.target as HTMLElement;
+  clampTableScroll(target);
   scrollTop.value = target.scrollTop;
 }
 </script>
@@ -839,6 +890,7 @@ function onTableScroll(event: Event) {
     :style="{
       '--eds-data-list-row-height': `${columnHeight}px`,
       '--eds-data-list-header-height': headerHeightCss,
+      '--eds-data-list-select-column-width': `${SELECT_COLUMN_WIDTH}px`,
       '--eds-data-list-select-content-opacity': String(selectContentOpacity),
       '--eds-data-list-select-content-translate-x': selectContentTranslateX,
     }"

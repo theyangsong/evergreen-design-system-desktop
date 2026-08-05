@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   computed,
-  nextTick,
   onBeforeUnmount,
   ref,
   useId,
@@ -101,13 +100,39 @@ const emit = defineEmits<{
 const triggerRef = ref<HTMLElement | null>(null);
 const floatingRef = ref<HTMLElement | null>(null);
 const open = ref(false);
-const positioned = ref(false);
+const resolvedPlacement = ref<TooltipPlacement>(props.placement);
 const floatingStyle = ref<Record<string, string>>({});
 const mainAxisGapPx = ref(FALLBACK_MAIN_AXIS_PX);
 const edgeInsetPx = ref(FALLBACK_EDGE_INSET_PX);
 
 const tooltipId = useId();
 const describedById = computed(() => `eds-tooltip-${tooltipId}`);
+
+const floatingMotionEnterFromClass = computed(() => {
+  switch (resolvedPlacement.value) {
+    case 'top':
+      return styles.floatingEnterFromTop;
+    case 'left':
+      return styles.floatingEnterFromLeft;
+    case 'right':
+      return styles.floatingEnterFromRight;
+    default:
+      return styles.floatingEnterFromBottom;
+  }
+});
+
+const floatingMotionLeaveToClass = computed(() => {
+  switch (resolvedPlacement.value) {
+    case 'top':
+      return styles.floatingLeaveToTop;
+    case 'left':
+      return styles.floatingLeaveToLeft;
+    case 'right':
+      return styles.floatingLeaveToRight;
+    default:
+      return styles.floatingLeaveToBottom;
+  }
+});
 
 let openTimer: ReturnType<typeof setTimeout> | undefined;
 let closeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -148,7 +173,6 @@ function closeNow() {
   clearTimers();
   if (open.value) {
     open.value = false;
-    positioned.value = false;
     emit('close');
     const active = document.activeElement;
     if (
@@ -452,12 +476,13 @@ function updatePosition() {
 
   coords = clampToBoundary(coords.top, coords.left, floatingRect, boundary);
 
+  resolvedPlacement.value = placement;
+
   // 不 round：等宽+左右 inset 8 时 round 会导致左右不对称
   floatingStyle.value = {
     top: `${coords.top}px`,
     left: `${coords.left}px`,
   };
-  positioned.value = true;
 }
 
 function bindFloatingResizeObserver() {
@@ -508,35 +533,41 @@ function unbindWindowListeners() {
   window.removeEventListener('resize', updatePosition);
 }
 
-watch(open, async (isOpen) => {
-  if (isOpen) {
-    positioned.value = false;
-    await nextTick();
+function onFloatingBeforeEnter(el: Element) {
+  floatingRef.value = el as HTMLElement;
+  updatePosition();
+}
+
+function bindOpenSideEffects() {
+  bindFloatingResizeObserver();
+  bindWindowListeners();
+  requestAnimationFrame(() => {
     updatePosition();
-    bindFloatingResizeObserver();
-    bindWindowListeners();
-    // 内容宽高（如 Flotation trigger+16）常在首帧后才落地，再补两次定位
+    requestAnimationFrame(() => updatePosition());
+  });
+  if (props.trigger === 'click') {
     requestAnimationFrame(() => {
-      updatePosition();
-      requestAnimationFrame(() => updatePosition());
+      document.addEventListener('pointerdown', onDocumentPointerDown, true);
     });
-    if (props.trigger === 'click') {
-      requestAnimationFrame(() => {
-        document.addEventListener('pointerdown', onDocumentPointerDown, true);
-      });
-    }
-    return;
   }
+}
+
+function unbindOpenSideEffects() {
   unbindFloatingResizeObserver();
   unbindWindowListeners();
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
-});
+}
+
+watch(
+  () => props.placement,
+  (placement) => {
+    resolvedPlacement.value = placement;
+  },
+);
 
 onBeforeUnmount(() => {
   clearTimers();
-  unbindFloatingResizeObserver();
-  unbindWindowListeners();
-  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+  unbindOpenSideEffects();
 });
 
 defineExpose({
@@ -583,41 +614,49 @@ defineExpose({
     </span>
 
     <Teleport :to="teleportTo">
-      <div
-        v-if="open"
-        ref="floatingRef"
-        :id="describedById"
-        :class="[
-          styles.floating,
-          tokenScopeClass,
-          !positioned && styles.floatingHidden,
-        ]"
-        :style="floatingStyle"
-        @mouseenter="trigger === 'hover' ? onFloatingEnter() : undefined"
-        @mouseleave="trigger === 'hover' ? onFloatingLeave() : undefined"
-        @contextmenu.prevent
+      <Transition
+        :enter-active-class="styles.floatingEnterActive"
+        :leave-active-class="styles.floatingLeaveActive"
+        :enter-from-class="floatingMotionEnterFromClass"
+        :enter-to-class="styles.floatingEnterTo"
+        :leave-from-class="styles.floatingLeaveFrom"
+        :leave-to-class="floatingMotionLeaveToClass"
+        @before-enter="onFloatingBeforeEnter"
+        @after-enter="bindOpenSideEffects"
+        @after-leave="unbindOpenSideEffects"
       >
-        <div :class="styles.floatingInner">
-          <EgTooltip
-            v-if="wrapTooltip"
-            :panel-kind="panelKind"
-            :panel-radius="panelRadius"
-            :width-mode="widthMode"
-            :width="width"
-            :max-width="maxWidth"
-            height-mode="fixed"
-            :height="height"
-            :max-height="maxHeight"
-          >
-            <slot name="content">
+        <div
+          v-if="open"
+          ref="floatingRef"
+          :id="describedById"
+          :class="[styles.floating, tokenScopeClass]"
+          :style="floatingStyle"
+          @mouseenter="trigger === 'hover' ? onFloatingEnter() : undefined"
+          @mouseleave="trigger === 'hover' ? onFloatingLeave() : undefined"
+          @contextmenu.prevent
+        >
+          <div :class="styles.floatingInner">
+            <EgTooltip
+              v-if="wrapTooltip"
+              :panel-kind="panelKind"
+              :panel-radius="panelRadius"
+              :width-mode="widthMode"
+              :width="width"
+              :max-width="maxWidth"
+              height-mode="fixed"
+              :height="height"
+              :max-height="maxHeight"
+            >
+              <slot name="content">
+                {{ content }}
+              </slot>
+            </EgTooltip>
+            <slot v-else name="content">
               {{ content }}
             </slot>
-          </EgTooltip>
-          <slot v-else name="content">
-            {{ content }}
-          </slot>
+          </div>
         </div>
-      </div>
+      </Transition>
     </Teleport>
   </span>
 </template>

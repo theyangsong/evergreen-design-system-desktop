@@ -1,7 +1,7 @@
 /* EgDataList — ported from @cregis/ui TableList; Desktop tokens only. */
 
 .root {
-  --eds-data-list-select-column-width: 48px;
+  --eds-data-list-select-column-width: 40px;
   --eds-data-list-select-content-opacity: 0;
   --eds-data-list-row-gap: var(--spacing-025);
   position: relative;
@@ -88,11 +88,12 @@
 
 .tableContentScrollY {
   overflow-y: auto;
+  overscroll-behavior: none;
 }
 
 .tableContentScrollLocked {
   overflow-y: hidden;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
 }
 
 .tableContent::-webkit-scrollbar {
@@ -341,6 +342,8 @@
 .headerCellSelect,
 .columnSelect {
   overflow: hidden;
+  box-sizing: border-box;
+  min-width: 0;
   padding: 0;
   border: 0;
 }
@@ -457,6 +460,17 @@
 
 .column:last-child {
   max-width: none;
+}
+
+/* 选择列不参与 flex 列 max-width:0 压缩；须写在 .column 之后以免被覆盖。 */
+.headerCellSelect,
+.column.columnSelect {
+  max-width: var(--eds-data-list-select-column-width);
+}
+
+.column.columnSelect {
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .cellContent {

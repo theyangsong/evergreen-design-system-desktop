@@ -88,7 +88,10 @@ const timeLineLayoutOptions = [
 function buildHashLikeCustomizeControls(
   valueLabel: string,
   samples: { value: string; secondaryValue: string },
-  afterCopy?: DocCustomizeControl[],
+  options?: {
+    insertAfterCopy?: DocCustomizeControl[];
+    afterCopy?: DocCustomizeControl[];
+  },
 ): DocCustomizeControl[] {
   const controls: DocCustomizeControl[] = [
     {
@@ -115,22 +118,22 @@ function buildHashLikeCustomizeControls(
     },
     { kind: 'text', key: 'minWidth', label: '最小宽度', row: 0 },
     { kind: 'boolean', key: 'copyOnRowHover', label: '复制', row: 0 },
-    {
-      kind: 'select',
-      key: 'tooltipTrigger',
-      label: 'Tooltip 交互',
-      options: addressTooltipTriggerOptions,
-      row: 1,
-    },
   ];
 
-  if (afterCopy?.length) {
-    const copyIndex = controls.findIndex((control) => control.key === 'copyOnRowHover');
-    if (copyIndex >= 0) {
-      controls.splice(copyIndex + 1, 0, ...afterCopy);
-    } else {
-      controls.push(...afterCopy);
-    }
+  if (options?.insertAfterCopy?.length) {
+    controls.push(...options.insertAfterCopy);
+  }
+
+  controls.push({
+    kind: 'select',
+    key: 'tooltipTrigger',
+    label: 'Tooltip 交互',
+    options: addressTooltipTriggerOptions,
+    row: 0,
+  });
+
+  if (options?.afterCopy?.length) {
+    controls.push(...options.afterCopy);
   }
 
   return controls;
@@ -142,6 +145,18 @@ function listFieldMinWidthControl(row = 0): DocCustomizeControl {
 
 function withCustomizeRow(controls: DocCustomizeControl[], row: number): DocCustomizeControl[] {
   return controls.map((control) => ({ ...control, row }));
+}
+
+function generalStructureTagCustomizeControls(
+  side: 'left' | 'right',
+): DocCustomizeControl[] {
+  const systemTypeKey = side === 'left' ? 'leftSystemType' : 'rightSystemType';
+  const labelKey = side === 'left' ? 'leftLabel' : 'rightLabel';
+
+  return tagSystemSmCustomizeControls.map((control) => ({
+    ...control,
+    key: control.key === 'systemType' ? systemTypeKey : labelKey,
+  }));
 }
 
 const listFieldMinWidthProp = sceneProp(
@@ -375,19 +390,36 @@ function buildHashLikeUsageSnippet(
 
 function buildAmountUsageSnippet(state: Record<string, unknown>): string {
   const amountType = String(state.amountType ?? 'conversion');
+  const showCountdown =
+    amountType !== 'fiat' && Boolean(state.showCountdown);
 
   if (amountType === 'fiat') {
     return `<span class="typography-body-medium">${String(state.fiatValue ?? '$10')}</span>`;
   }
 
   if (amountType === 'crypto') {
-    return `<span class="typography-body-medium">${String(state.cryptoValue ?? '66,666.6666')} BTC</span>`;
+    const primary = `<span class="typography-body-medium">${String(state.cryptoValue ?? '66,666.6666')} BTC</span>`;
+    if (!showCountdown) return primary;
+    return ['<div class="list-field-amount">', primary, buildCountdownUsageSnippet(state), '</div>'].join(
+      '\n',
+    );
+  }
+
+  const primary = `<span class="typography-body-medium">${String(state.cryptoValue ?? '12,500.000001')} USDT</span>`;
+  const fiat = `<span class="typography-footnote">≈ ${String(state.fiatValue ?? '$12,500.01')}</span>`;
+
+  if (!showCountdown) {
+    return ['<div class="list-field-amount">', primary, fiat, '</div>'].join('\n');
   }
 
   return [
     '<div class="list-field-amount">',
-    `  <span class="typography-body-medium">${String(state.cryptoValue ?? '12,500.000001')} USDT</span>`,
-    `  <span class="typography-footnote">≈ ${String(state.fiatValue ?? '$12,500.01')}</span>`,
+    primary,
+    '  <div class="list-field-amount-secondary-row">',
+    `    ${fiat}`,
+    '    <EgDivider type="page" direction="vertical" />',
+    `    ${buildCountdownUsageSnippet(state)}`,
+    '  </div>',
     '</div>',
   ].join('\n');
 }
@@ -421,6 +453,122 @@ function buildStatusUsageSnippet(state: Record<string, unknown>): string {
 
   const feedback = buildFormSubmissionUsageSnippet(state);
   return ['<div class="list-field-status">', tag, feedback, '</div>'].join('\n');
+}
+
+const dismissFeedbackAlignOptions = [
+  chineseOption('left', '左'),
+  chineseOption('center', '中'),
+  chineseOption('right', '右'),
+];
+
+const dismissFeedbackCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'dismissFeedbackAlign',
+    label: '对齐',
+    options: dismissFeedbackAlignOptions,
+  },
+  ...formSubmissionCustomizeControls,
+];
+
+const countdownTimeCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'countdownMinutes', label: '分钟', placeholder: '30' },
+  { kind: 'text', key: 'countdownSeconds', label: '秒', placeholder: '00' },
+];
+
+const countdownCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'dismissFeedbackAlign',
+    label: '对齐',
+    options: dismissFeedbackAlignOptions,
+    visibleWhen: (state) =>
+      Boolean(state.showCountdown) && !Boolean(state.showDismissFeedback),
+  },
+  ...countdownTimeCustomizeControls,
+];
+
+function formatCountdownTime(state: Record<string, unknown>): string {
+  const minutes = String(state.countdownMinutes ?? '30');
+  const seconds = String(state.countdownSeconds ?? '0').padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function buildCountdownUsageSnippet(state: Record<string, unknown>): string {
+  const time = formatCountdownTime(state);
+  return [
+    '<span class="list-field-general-structure-countdown">',
+    `<span class="list-field-general-structure-countdown-time">${time}</span>`,
+    '<span class="list-field-general-structure-countdown-suffix"> Until Expiry</span>',
+    '</span>',
+  ].join('');
+}
+
+function buildGeneralStructureUsageSnippet(state: Record<string, unknown>): string {
+  const hashLike = buildHashLikeUsageSnippet(
+    'ListFieldGeneralStructure',
+    state,
+    SAMPLE_GENERAL_TITLE,
+  );
+  const lineLayout = String(state.lineLayout ?? 'single');
+  const showDismissFeedback =
+    lineLayout === 'single' && Boolean(state.showDismissFeedback);
+  const showCountdown = lineLayout === 'single' && Boolean(state.showCountdown);
+
+  const parts: string[] = [];
+  if (state.showLeftTag) {
+    parts.push(
+      buildTagSystemUsageSnippet({
+        size: 'sm',
+        systemType: state.leftSystemType ?? 'stroke-subtle',
+        label: state.leftLabel ?? tagSystemCustomizeDefaults.label,
+      }),
+    );
+  }
+  parts.push(hashLike);
+  if (state.showRightTag) {
+    parts.push(
+      buildTagSystemUsageSnippet({
+        size: 'sm',
+        systemType: state.rightSystemType ?? 'stroke-subtle',
+        label: state.rightLabel ?? tagSystemCustomizeDefaults.label,
+      }),
+    );
+  }
+
+  const align = String(state.dismissFeedbackAlign ?? 'left');
+  const alignClass =
+    align === 'center'
+      ? 'list-field-general-structure--align-center'
+      : align === 'right'
+        ? 'list-field-general-structure--align-right'
+        : 'list-field-general-structure--align-left';
+
+  if (showDismissFeedback || showCountdown) {
+    const stackLines: string[] = [];
+    const body =
+      parts.length > 1
+        ? ['<div class="list-field-general-structure-title-row">', ...parts, '</div>'].join('\n')
+        : parts[0] ?? hashLike;
+    stackLines.push(body);
+    if (showDismissFeedback) {
+      stackLines.push(buildFormSubmissionUsageSnippet(state));
+    }
+    if (showCountdown) {
+      stackLines.push(buildCountdownUsageSnippet(state));
+    }
+    return [
+      `<div class="list-field-general-structure ${alignClass}">`,
+      ...stackLines,
+      '</div>',
+    ].join('\n');
+  }
+
+  if (parts.length > 1) {
+    return ['<div class="list-field-general-structure">', ...parts, '</div>'].join('\n');
+  }
+
+  return hashLike;
 }
 
 function buildMoreActionCustomizeControls(): DocCustomizeControl[] {
@@ -775,11 +923,21 @@ const generalStructureConfig: ListFieldDocConfig = {
     minWidth: '',
     copyOnRowHover: false,
     tooltipTrigger: 'hover',
-    showTag: false,
-    size: 'sm',
-    family: 'system',
-    systemType: 'stroke-subtle',
-    label: tagSystemCustomizeDefaults.label,
+    showRightTag: false,
+    showLeftTag: false,
+    showDismissFeedback: false,
+    showCountdown: false,
+    countdownMinutes: '30',
+    countdownSeconds: '0',
+    dismissFeedbackAlign: 'left',
+    type: formSubmissionCustomizeDefaults.type,
+    text: formSubmissionCustomizeDefaults.text,
+    linkLabel: formSubmissionCustomizeDefaults.linkLabel,
+    showLink: formSubmissionCustomizeDefaults.showLink,
+    rightSystemType: 'stroke-subtle',
+    rightLabel: tagSystemCustomizeDefaults.label,
+    leftSystemType: 'stroke-subtle',
+    leftLabel: tagSystemCustomizeDefaults.label,
   },
   customizeControls: buildHashLikeCustomizeControls(
     '主文本 value',
@@ -787,13 +945,51 @@ const generalStructureConfig: ListFieldDocConfig = {
       value: SAMPLE_GENERAL_TITLE,
       secondaryValue: SAMPLE_GENERAL_SECONDARY,
     },
-    [{ kind: 'boolean', key: 'showTag', label: '显示 Tag', row: 0 }],
+    {
+      insertAfterCopy: [
+        {
+          kind: 'boolean',
+          key: 'showDismissFeedback',
+          label: '显示反馈',
+          row: 0,
+          visibleWhen: (state) => String(state.lineLayout ?? 'single') === 'single',
+        },
+        {
+          kind: 'boolean',
+          key: 'showCountdown',
+          label: '显示倒计时',
+          row: 0,
+          visibleWhen: (state) => String(state.lineLayout ?? 'single') === 'single',
+        },
+      ],
+      afterCopy: [
+        { kind: 'boolean', key: 'showRightTag', label: '显示右侧Tag', row: 1 },
+        { kind: 'boolean', key: 'showLeftTag', label: '显示左侧Tag', row: 1 },
+      ],
+    },
   ),
   customizePanels: [
     {
+      title: 'EgFormSubmission',
+      controls: dismissFeedbackCustomizeControls,
+      visibleWhen: (state) =>
+        String(state.lineLayout ?? 'single') === 'single' && Boolean(state.showDismissFeedback),
+    },
+    {
+      title: '倒计时',
+      controls: countdownCustomizeControls,
+      visibleWhen: (state) =>
+        String(state.lineLayout ?? 'single') === 'single' && Boolean(state.showCountdown),
+    },
+    {
       title: 'EgTag',
-      controls: tagSystemSmCustomizeControls,
-      visibleWhen: (state) => Boolean(state.showTag),
+      controls: generalStructureTagCustomizeControls('right'),
+      visibleWhen: (state) => Boolean(state.showRightTag),
+    },
+    {
+      title: 'EgTag',
+      controls: generalStructureTagCustomizeControls('left'),
+      visibleWhen: (state) => Boolean(state.showLeftTag),
     },
   ],
   propRows: [
@@ -825,28 +1021,64 @@ const generalStructureConfig: ListFieldDocConfig = {
     ),
     sceneProp('ellipsis', "'tail'", "'tail'", '设置 minWidth 后超出宽度时尾部省略（同交易哈希）。'),
     sceneProp('tooltipWhenTruncated', 'boolean', 'true', '仅文本溢出省略时启用 Tooltip 交互。'),
-    sceneProp('showTag', 'boolean', 'false', '勾选后在主文本同行展示 EgTag（spacing-1，固定 Sm）。'),
+    sceneProp(
+      'showDismissFeedback',
+      'boolean',
+      'false',
+      '单行时勾选后在主文本下方展示 EgFormSubmission（spacing-05）。',
+    ),
+    sceneProp(
+      'showCountdown',
+      'boolean',
+      'false',
+      '单行时勾选后在主文本下方展示倒计时文案（spacing-05）。',
+    ),
+    sceneProp(
+      'countdownMinutes',
+      'string',
+      "'30'",
+      'Customize「倒计时」嵌套 — 分钟部分（danger 色）。',
+    ),
+    sceneProp(
+      'countdownSeconds',
+      'string',
+      "'0'",
+      'Customize「倒计时」嵌套 — 秒部分（danger 色）。',
+    ),
+    sceneProp(
+      'dismissFeedbackAlign',
+      "'left' | 'center' | 'right'",
+      "'left'",
+      'Customize「EgFormSubmission」嵌套 — 与主文本垂直排列时的对齐方式。',
+    ),
+    ...formSubmissionPropRows.map((row) => ({
+      ...row,
+      description: `Customize「EgFormSubmission」嵌套 — ${row.description}`,
+    })),
+    sceneProp('showRightTag', 'boolean', 'false', '勾选后在主文本右侧展示 EgTag（spacing-1，固定 Sm）。'),
+    sceneProp('showLeftTag', 'boolean', 'false', '勾选后在主文本左侧展示 EgTag（spacing-1，固定 Sm）。'),
     sceneProp('size', "'sm'", "'sm'", 'General Structure 内嵌 EgTag 固定 Sm，不可配置。'),
     ...tagSystemPropRows
       .filter((row) => row.name !== 'size')
       .map((row) =>
         row.name === 'systemType'
-          ? { ...row, defaultValue: "'stroke-subtle'", description: 'System 类型变体；General Structure 默认 stroke-subtle。' }
-          : row,
+          ? {
+              ...row,
+              name: 'rightSystemType / leftSystemType',
+              defaultValue: "'stroke-subtle'",
+              description: 'System 类型变体；左右 Tag 独立配置，默认 stroke-subtle。',
+            }
+          : row.name === 'label'
+            ? {
+                ...row,
+                name: 'rightLabel / leftLabel',
+                description: '左右 EgTag 文案，独立配置。',
+              }
+            : row,
       ),
     sceneProp('family', "'system'", "'system'", 'Customize「EgTag」嵌套 System Tag 属性。'),
   ],
-  buildUsageSnippet: (state) => {
-    const hashLike = buildHashLikeUsageSnippet(
-      'ListFieldGeneralStructure',
-      state,
-      SAMPLE_GENERAL_TITLE,
-    );
-    if (!state.showTag) return hashLike;
-
-    const tag = buildTagSystemUsageSnippet({ ...state, size: 'sm', systemType: state.systemType ?? 'stroke-subtle' });
-    return ['<div class="list-field-general-structure">', hashLike, tag, '</div>'].join('\n');
-  },
+  buildUsageSnippet: buildGeneralStructureUsageSnippet,
 };
 
 const amountConfig: ListFieldDocConfig = {
@@ -857,6 +1089,9 @@ const amountConfig: ListFieldDocConfig = {
     amountType: 'conversion',
     fiatValue: '$12,500.01',
     cryptoValue: '12,500.000001',
+    showCountdown: false,
+    countdownMinutes: '30',
+    countdownSeconds: '0',
     minWidth: '',
   },
   customizeControls: [
@@ -882,6 +1117,21 @@ const amountConfig: ListFieldDocConfig = {
       row: 2,
       visibleWhen: (state) => state.amountType !== 'fiat',
     },
+    {
+      kind: 'boolean',
+      key: 'showCountdown',
+      label: '显示倒计时',
+      row: 2,
+      visibleWhen: (state) => state.amountType !== 'fiat',
+    },
+  ],
+  customizePanels: [
+    {
+      title: '倒计时',
+      controls: countdownTimeCustomizeControls,
+      visibleWhen: (state) =>
+        state.amountType !== 'fiat' && Boolean(state.showCountdown),
+    },
   ],
   propRows: [
     sceneProp(
@@ -893,6 +1143,24 @@ const amountConfig: ListFieldDocConfig = {
     sceneProp('groupSeparator', 'boolean', 'true', '千分位分隔符。'),
     sceneProp('fiatPrecision', 'number', '2', '法币小数精度。'),
     sceneProp('conversionLine', 'string', '-', '折合行：`数量 币种 ≈ 折合法币`。'),
+    sceneProp(
+      'showCountdown',
+      'boolean',
+      'false',
+      '勾选后在折合行内、副文本后展示倒计时（spacing-1 + 竖向 EgDivider type=page）。',
+    ),
+    sceneProp(
+      'countdownMinutes',
+      'string',
+      "'30'",
+      'Customize「倒计时」嵌套 — 分钟部分（danger 色）。',
+    ),
+    sceneProp(
+      'countdownSeconds',
+      'string',
+      "'0'",
+      'Customize「倒计时」嵌套 — 秒部分（danger 色）。',
+    ),
     listFieldMinWidthProp,
   ],
   buildUsageSnippet: buildAmountUsageSnippet,
