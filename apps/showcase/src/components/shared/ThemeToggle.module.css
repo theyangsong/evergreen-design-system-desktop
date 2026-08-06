@@ -4,7 +4,7 @@
   border-radius: var(--radius-full);
   background: var(--material-card-moderate);
   color: var(--text-base-primary);
-  cursor: pointer;
+  cursor: default;
 }
 
 .button:hover {

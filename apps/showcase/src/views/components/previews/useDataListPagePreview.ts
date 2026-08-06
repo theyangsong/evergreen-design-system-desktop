@@ -208,7 +208,6 @@ export function useDataListPagePreview(
   const isLastPage = computed(() => currentPage.value >= totalPages.value);
   const prevNavDisabled = computed(() => totalRowCount.value === 0 || isFirstPage.value);
   const nextNavDisabled = computed(() => totalRowCount.value === 0 || isLastPage.value);
-  const paginationLocked = computed(() => Boolean(customize.value.selectMode));
 
   const dataListBatchActions = [{ key: 'archive', label: 'Archive' }] as const;
 
@@ -398,7 +397,6 @@ export function useDataListPagePreview(
     onToolbarActionClick,
     paginatedDataList,
     pagePagination,
-    paginationLocked,
     prevNavDisabled,
     prevPagination,
     previewColumnSettings,

@@ -6,12 +6,13 @@
 .trigger {
   display: inline-flex;
   max-width: 100%;
+  cursor: default;
+  user-select: none;
 }
 
 .triggerClick {
-  cursor: pointer;
+  cursor: default;
   outline: none;
-  transition: var(--motion-transition-hover);
 }
 
 .triggerClick:focus-visible {

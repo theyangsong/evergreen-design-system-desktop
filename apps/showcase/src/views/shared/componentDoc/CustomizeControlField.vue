@@ -27,6 +27,7 @@ const emit = defineEmits<{
       />
       <select
         v-else-if="control.kind === 'select'"
+        :key="control.key"
         :class="styles.customizeControl"
         :value="String(value ?? '')"
         @change="emit('update', ($event.target as HTMLSelectElement).value)"

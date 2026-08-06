@@ -1,0 +1,36 @@
+.cellLine {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-02);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.addressHost {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.addressLine {
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.menuText {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
+}

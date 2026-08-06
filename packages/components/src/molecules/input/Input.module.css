@@ -296,7 +296,7 @@
   border: 0;
   background: transparent;
   color: var(--text-base-secondary);
-  cursor: pointer;
+  cursor: default;
   box-sizing: border-box;
   width: calc(var(--icon-sm) + 2 * var(--spacing-1));
   height: calc(var(--icon-sm) + 2 * var(--spacing-1));

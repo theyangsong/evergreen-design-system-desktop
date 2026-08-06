@@ -417,6 +417,7 @@ function mapColumnConfig(node: VNode) {
     minWidth: readProp(p, 'minWidth') as string | undefined,
     minTableWidth: readProp(p, 'minTableWidth') as number | undefined,
     displayOrder: Number(readProp(p, 'displayOrder') ?? slotIndex + 1),
+    flexGrow: Boolean(readProp(p, 'flexGrow')),
     isAction,
     prop: (p.prop as string) || '',
     headerSlot: children?.header,
@@ -447,6 +448,13 @@ function parsePx(value?: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function isTrailingFlexColumn(
+  cols: ReturnType<typeof mapColumnConfig>[],
+  lastIndex: number,
+): boolean {
+  return Boolean(cols[lastIndex]?.flexGrow);
+}
+
 /** Figma Apply_Data Table-Grids: trailing column shrink-0, leading columns flex equally with min-width. */
 function computeRestDataColumnWidthsPx(): number[] {
   const cols = bodyColumns.value;
@@ -471,24 +479,51 @@ function computeRestDataColumnWidthsPx(): number[] {
   const widths = new Array<number>(cols.length);
   const lastIndex = cols.length - 1;
   const lastCol = cols[lastIndex];
-  const trailingWidth = Math.round(parsePx(lastCol?.width) || parsePx(lastCol?.minWidth));
-  widths[lastIndex] = trailingWidth;
+  const trailingIsFlex = isTrailingFlexColumn(cols, lastIndex);
+  const trailingWidth = trailingIsFlex
+    ? 0
+    : Math.round(parsePx(lastCol?.width) || parsePx(lastCol?.minWidth));
+  if (!trailingIsFlex) {
+    widths[lastIndex] = trailingWidth;
+  }
 
-  const flexCols = cols.slice(0, -1);
-  const flexMinWidths = flexCols.map((col) => parsePx(col.minWidth));
+  const flexIndices: number[] = [];
+  let fixedLeadingTotal = 0;
+  const leadingEnd = trailingIsFlex ? cols.length : lastIndex;
+
+  for (let index = 0; index < leadingEnd; index += 1) {
+    const col = cols[index];
+    if (col?.width) {
+      const fixedWidth = Math.round(parsePx(col.width));
+      widths[index] = fixedWidth;
+      fixedLeadingTotal += fixedWidth;
+    } else {
+      flexIndices.push(index);
+    }
+  }
+
+  const flexMinWidths = flexIndices.map((index) => parsePx(cols[index]?.minWidth));
   const minSum = flexMinWidths.reduce((sum, min) => sum + min, 0);
-  const flexSpace = Math.max(0, containerWidth - trailingWidth - DATA_LIST_FLEX_RESERVE_PX);
+  const flexSpace = Math.max(
+    0,
+    containerWidth - trailingWidth - fixedLeadingTotal - DATA_LIST_FLEX_RESERVE_PX,
+  );
   const extra = Math.max(0, flexSpace - minSum);
-  const extraPerCol = flexCols.length > 0 ? extra / flexCols.length : 0;
+  const extraPerCol = flexIndices.length > 0 ? extra / flexIndices.length : 0;
 
-  flexCols.forEach((_col, index) => {
-    widths[index] = Math.round(flexMinWidths[index] + extraPerCol);
+  flexIndices.forEach((colIndex, flexOffset) => {
+    widths[colIndex] = Math.round(flexMinWidths[flexOffset] + extraPerCol);
   });
 
-  const flexTotal = widths.slice(0, lastIndex).reduce((sum, width) => sum + width, 0);
+  const flexTotal = flexIndices.reduce((sum, colIndex) => sum + widths[colIndex], 0);
   const delta = flexSpace - flexTotal;
-  if (delta !== 0 && lastIndex > 0) {
-    widths[0] = Math.max(flexMinWidths[0] ?? 0, widths[0] + delta);
+  if (delta !== 0 && flexIndices.length > 0) {
+    const lastFlexIndex = flexIndices[flexIndices.length - 1];
+    const lastFlexOffset = flexIndices.length - 1;
+    widths[lastFlexIndex] = Math.max(
+      flexMinWidths[lastFlexOffset] ?? 0,
+      widths[lastFlexIndex] + delta,
+    );
   }
 
   return widths;
@@ -530,32 +565,63 @@ function computeDataColumnLayoutWidthsPx(selectOffset: number): number[] {
   }
 
   const lastIndex = cols.length - 1;
-  const trailingWidth = rest[lastIndex] ?? Math.round(
-    parsePx(cols[lastIndex]?.width) || parsePx(cols[lastIndex]?.minWidth),
-  );
-  const restFlexWidths = rest.slice(0, lastIndex);
+  const trailingIsFlex = isTrailingFlexColumn(cols, lastIndex);
+  const trailingWidth = trailingIsFlex
+    ? 0
+    : rest[lastIndex] ??
+      Math.round(parsePx(cols[lastIndex]?.width) || parsePx(cols[lastIndex]?.minWidth));
+
+  let fixedLeadingTotal = 0;
+  const flexIndices: number[] = [];
+  const leadingEnd = trailingIsFlex ? cols.length : lastIndex;
+  for (let index = 0; index < leadingEnd; index += 1) {
+    if (cols[index]?.width) {
+      fixedLeadingTotal += rest[index] ?? Math.round(parsePx(cols[index]?.width));
+    } else {
+      flexIndices.push(index);
+    }
+  }
+
   const flexBudget = Math.max(
     0,
-    containerWidth - selectOffset - trailingWidth - DATA_LIST_FLEX_RESERVE_PX,
+    containerWidth - selectOffset - trailingWidth - fixedLeadingTotal - DATA_LIST_FLEX_RESERVE_PX,
   );
+  const restFlexWidths = flexIndices.map((index) => rest[index] ?? parsePx(cols[index]?.minWidth));
   const restFlexTotal = restFlexWidths.reduce((sum, width) => sum + width, 0);
 
-  if (restFlexTotal <= 0 || restFlexWidths.length === 0) {
-    return [...restFlexWidths, trailingWidth];
+  if (restFlexTotal <= 0 || flexIndices.length === 0) {
+    return cols.map((col, index) => {
+      if (!trailingIsFlex && index === lastIndex) return trailingWidth;
+      if (col?.width) return rest[index] ?? Math.round(parsePx(col.width));
+      return rest[index] ?? parsePx(col.minWidth);
+    });
   }
 
-  const flexWidths = restFlexWidths.map((restWidth, index) => {
-    const minWidth = parsePx(cols[index]?.minWidth);
-    return Math.max(minWidth, (restWidth / restFlexTotal) * flexBudget);
+  const flexWidthsByIndex = new Map<number, number>();
+  flexIndices.forEach((colIndex, flexOffset) => {
+    const minWidth = parsePx(cols[colIndex]?.minWidth);
+    const scaled = Math.max(
+      minWidth,
+      (restFlexWidths[flexOffset] / restFlexTotal) * flexBudget,
+    );
+    flexWidthsByIndex.set(colIndex, scaled);
   });
 
-  const flexSum = flexWidths.reduce((sum, width) => sum + width, 0);
+  const flexSum = flexIndices.reduce((sum, colIndex) => sum + (flexWidthsByIndex.get(colIndex) ?? 0), 0);
   const delta = flexBudget - flexSum;
-  if (Math.abs(delta) > 0.001) {
-    flexWidths[flexWidths.length - 1] += delta;
+  if (Math.abs(delta) > 0.001 && flexIndices.length > 0) {
+    const lastFlexIndex = flexIndices[flexIndices.length - 1];
+    flexWidthsByIndex.set(
+      lastFlexIndex,
+      (flexWidthsByIndex.get(lastFlexIndex) ?? 0) + delta,
+    );
   }
 
-  return [...flexWidths, trailingWidth];
+  return cols.map((col, index) => {
+    if (!trailingIsFlex && index === lastIndex) return trailingWidth;
+    if (col?.width) return rest[index] ?? Math.round(parsePx(col.width));
+    return flexWidthsByIndex.get(index) ?? rest[index] ?? parsePx(col.minWidth);
+  });
 }
 
 function syncColumnWidthSnapshots() {
@@ -846,7 +912,7 @@ function showBatchError(message: string) {
 
 async function onBatchLabelClick(_label: string, index: number) {
   const action = props.batchActions[index];
-  if (!action || batchLoadingKey.value) return;
+  if (!action || batchLoadingKey.value || selectedList.value.length === 0) return;
 
   batchLoadingKey.value = action.key;
   emit('batch-action', action.key, selectedList.value);
@@ -985,6 +1051,7 @@ function onTableScroll(event: Event) {
               :align="column.align"
               :height="headerHeightCss"
               :sortable="column.sortable"
+              :has-custom-header="Boolean(column.headerSlot)"
               :select-mode="selectMode"
               :bg="headerBg"
               @sort-change="(order) => onSortChange(index, order)"

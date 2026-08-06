@@ -192,6 +192,18 @@ export function defaultDataListColumnAlign(
   return 'center';
 }
 
+/** 首列固定左、尾列固定右；仅第 2 / 第 3 列可定制对齐。 */
+export function resolveDataListColumnAlign(
+  index: number,
+  state: Record<string, unknown>,
+  total = DATA_LIST_PREVIEW_COLUMN_COUNT,
+): DataListColumnAlign {
+  if (index <= 1) return 'left';
+  if (index >= total) return 'right';
+  const alignRaw = String(state[`columnAlign${index}`] ?? defaultDataListColumnAlign(index));
+  return alignRaw === 'left' || alignRaw === 'right' ? alignRaw : 'center';
+}
+
 export function defaultDataListColumnMinWidth(index: number): string {
   const widths = [
     DATA_LIST_FIGMA_COLUMNS.combo.minWidth,
@@ -242,11 +254,7 @@ export function readDataListColumnSettings(
   return Array.from({ length: DATA_LIST_PREVIEW_COLUMN_COUNT }, (_, offset) => {
     const index = offset + 1;
     const minWidthRaw = String(state[`columnMinWidth${index}`] ?? defaultDataListColumnMinWidth(index)).trim();
-    const alignRaw = String(
-      state[`columnAlign${index}`] ?? defaultDataListColumnAlign(index),
-    );
-    const align: DataListColumnAlign =
-      alignRaw === 'left' || alignRaw === 'right' ? alignRaw : 'center';
+    const align = resolveDataListColumnAlign(index, state);
     const dataSourceRaw = String(
       state[`columnDataSource${index}`] ?? defaultDataListColumnDataSource(),
     );

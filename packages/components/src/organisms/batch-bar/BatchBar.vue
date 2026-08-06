@@ -57,6 +57,15 @@ const resolvedLabels = computed(() => {
   return [String(props.actionLabel ?? 'Label')];
 });
 
+const selectedCountNumber = computed(() => {
+  const raw = props.selectedCount;
+  const parsed = typeof raw === 'number' ? raw : Number.parseInt(String(raw), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+});
+
+/** 未选中任何项时禁用 Text / More 操作（Figma：0 selected 不可点）。 */
+const actionsDisabled = computed(() => selectedCountNumber.value <= 0);
+
 const shouldCollapse = computed(
   () => resolvedLabels.value.length > props.collapseThreshold,
 );
@@ -93,6 +102,7 @@ function isLabelDanger(index: number) {
 }
 
 function onLabelClick(label: string, index: number) {
+  if (actionsDisabled.value) return;
   emit('label-click', label, index);
 }
 
@@ -144,6 +154,7 @@ function onOverflowLabelClick(
             :label="label"
             :loading="isLabelLoading(index)"
             :danger="isLabelDanger(index)"
+            :disabled="actionsDisabled"
             @click="onLabelClick(label, index)"
           />
         </template>
@@ -167,6 +178,7 @@ function onOverflowLabelClick(
                 :label="moreLabel"
                 :active="expanded && !moreLoading"
                 :loading="moreLoading"
+                :disabled="actionsDisabled"
               />
             </template>
 
@@ -188,6 +200,7 @@ function onOverflowLabelClick(
                     :label="label"
                     :show-tag="false"
                     :danger="isLabelDanger(collapsedVisibleCount + overflowIndex)"
+                    :disabled="actionsDisabled"
                     @click="
                       onOverflowLabelClick(
                         label,

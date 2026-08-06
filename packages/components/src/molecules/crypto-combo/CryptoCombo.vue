@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { EgTag } from '../tag';
+import EgListFieldOverflowText from '../list-field/ListFieldOverflowText.vue';
 import type { CryptoName } from '../../atoms/crypto';
 import CryptoAddress from './CryptoAddress.vue';
 import CryptoAddressSide from './CryptoAddressSide.vue';
@@ -99,7 +100,13 @@ const bodyStyle = computed(() => {
 
     <span :class="bodyClass" :style="bodyStyle">
       <span :class="styles.titleRow">
-        <span :class="styles.symbolText">{{ symbol }}</span>
+        <span :class="styles.symbolTextWrap">
+          <EgListFieldOverflowText
+            :text="symbol"
+            variant="primary"
+            :tooltip-trigger="addressTooltipTrigger"
+          />
+        </span>
         <span v-if="showNetworkTag" :class="styles.networkTag">
           <EgTag
             family="system"

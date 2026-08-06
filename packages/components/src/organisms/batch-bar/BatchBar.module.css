@@ -41,7 +41,7 @@
   color: var(--text-base-primary);
   font-family: var(--eds-family-sans);
   white-space: nowrap;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

@@ -7,6 +7,23 @@ alwaysApply: false
 # EDS Desktop — 项目约定
 
 > 技术规则不重复：颜色见 `display-p3-color-usage.mdc`；圆角见 `corner-smoothing.mdc`；描边 SVG 缩放见 `stroke-svg-scaling.mdc`；Showcase Website/Desktop 作用域见 **§5** 与 `showcase-token-scope.mdc`。
+> **Agent 执行范围**：**§0** — 只按用户明确指令改代码，禁止思维扩散。
+
+## 0. Agent 执行范围（严格按指令）
+
+- **只执行用户明确要求的改动**；不得因「顺带更好」「对齐某处」「预防性问题」而扩大 scope。
+- **禁止思维扩散**：指令未提到的布局重构、额外 prop/API、consumer 业务代码、文档、测试、相关组件「一并修」——**一律不做**，除非用户**明确**要求。
+- **最小 diff**：在完成任务所需的最少文件、最少行内完成；改 A 时不要动 B，即使 B 看起来也该改。
+- **不确定时先问**：若你认为必须连带改其他地方，先列出将改什么并等确认，**不要**默认实施。
+- **仍须遵守的扩展指令**：用户说「深度处理」「一并」「同步」「强推」等时，按该指令执行；本仓库 `alwaysApply` 规则（如 `eds-sync-local-consumers.mdc`、Showcase 临时演示数据）仍适用。
+
+**示例**
+
+| 用户说 | ✅ 做 | ❌ 不做（除非另说） |
+|--------|------|---------------------|
+| 表头溢出也用 `…` | 表头文字 `text-overflow: ellipsis` | 改列宽 flex、表头全宽、tooltip、combo 分段布局 |
+| 去掉首列偏移 | 删 `comboHeaderWithSymbol` 及 padding | 顺带改 typography、divider、sync |
+| 同步 | §8 build + consumer `pnpm install` | 额外改 consumer 业务页、自动 commit |
 
 ## 1. 属性与数值必须使用变量
 
@@ -560,6 +577,7 @@ EgTooltip (.effect-flotation-box [.eds-flotation-menu--scrollable-list] [.eds-fl
 
 ## 9. 变更记录
 
+- 2026-08-05：§0 — **Agent 执行范围**：严格按用户指令、最小 diff、禁止思维扩散；扩展 scope 须用户明确说或 alwaysApply 规则触发。
 - 2026-08-04：§7 — **【严格遵循】EgFlotationMenu 列表滚动 / padding / scroll-fade 定稿**（双层 padding：shell `0` + `menuBody spacing-1`；flex 高度链 + `eds-flotation-menu--scrollable-list`；scroll-fade 仅用 `menuListScrollable` 的 `mask-image`，禁止 `backdrop-filter` 叠层；sticky footer 禁 bottom fade）。
 - 2026-08-04：§7 — **【非常重要】Flotation Box 场景化预览**（`/components/flotation-box` 全页：EgFlotationMenu 壳 + 场景 SFC + 独立 customize 键 + `flotationBoxPreviewShell`；禁止 #header slot 与 item* 键污染）。
 - 2026-08-03：§8 — 本地同步约定（「同步」→ 全部 consumer；`pnpm sync` / `scripts/sync-local-consumers.mjs`）。

@@ -157,7 +157,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   border: none;
-  cursor: pointer;
+  cursor: default;
   transition: none;
 }
 

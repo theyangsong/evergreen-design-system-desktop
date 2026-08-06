@@ -361,6 +361,13 @@ export const showcaseTooltipPanelKindLabels = {
   molde: tokenLabel('模块层级', 'molde'),
 } as const;
 
+export const showcaseTooltipFlotationScenarioLabels = {
+  component: '组件',
+  'text-overflow': '字段溢出',
+  'paragraph-overflow-info': '段落溢出',
+  'multi-address': '地址溢出（Item、可复制）',
+} as const;
+
 export const showcaseTooltipPanelRadiusLabels: Record<string, string> = {
   '': tokenLabel('默认', 'default'),
   'radius-0': tokenLabel('无圆角', 'radius-0'),
@@ -418,6 +425,7 @@ export const showcaseInputCustomizeFieldLabels = {
 } as const;
 
 export const showcaseTooltipCustomizeFieldLabels = {
+  scenario: '场景化',
   panelRadius: '圆角',
   widthMode: '宽度模式',
   width: '宽度',

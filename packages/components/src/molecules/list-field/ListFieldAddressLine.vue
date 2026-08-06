@@ -1,23 +1,21 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { EgTextOverflowTooltip } from '../tooltip';
+import type { TooltipTrigger } from '../tooltip';
 import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../icon-button';
 import { copyToClipboard } from '../../utils/copyToClipboard';
+import { truncateAddressMiddle } from '../crypto-combo/cryptoAddressUtils';
 import cryptoComboStyles from '../crypto-combo/CryptoCombo.module.css';
-import styles from './ListFieldHashLike.module.css';
+import styles from './ListFieldAddressLine.module.css';
 
 const props = withDefaults(
   defineProps<{
     text: string;
-    variant?: 'primary' | 'secondary';
-    identifierMode?: boolean;
     copyOnRowHover?: boolean;
-    tooltipTrigger?: 'hover' | 'focus';
+    tooltipTrigger?: TooltipTrigger;
   }>(),
   {
-    variant: 'primary',
-    identifierMode: false,
     copyOnRowHover: false,
     tooltipTrigger: 'hover',
   },
@@ -26,17 +24,9 @@ const props = withDefaults(
 const cellCopied = ref(false);
 let cellCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
 
-const targetTone = computed(() =>
-  props.variant === 'secondary' ? 'secondary' : 'primary',
-);
-
-const lineTypographyClass = computed(() =>
-  props.variant === 'primary' ? styles.primaryLine : styles.secondaryLine,
-);
-
-const copyLabel = computed(() =>
-  props.identifierMode ? `复制编号 ${props.text}` : `复制哈希 ${props.text}`,
-);
+const displayText = computed(() => truncateAddressMiddle(props.text, 6, 6));
+const copyLabel = computed(() => `复制地址 ${props.text}`);
+const semanticallyTruncated = computed(() => displayText.value !== props.text);
 
 onBeforeUnmount(() => {
   if (cellCopiedResetTimer) clearTimeout(cellCopiedResetTimer);
@@ -57,21 +47,22 @@ async function onCopy(event: Event) {
 </script>
 
 <template>
-  <div :class="[styles.cellLine, props.variant === 'secondary' && styles.cellLineSecondary]">
+  <div :class="styles.cellLine">
     <EgTextOverflowTooltip
       :tooltip-text="text"
       :copy-value="text"
       :trigger="tooltipTrigger"
-      :target-tone="targetTone"
-      :typography-class="lineTypographyClass"
-      :menu-text-class="props.variant === 'primary' ? styles.menuPrimary : styles.menuSecondary"
+      :semantic-truncated="semanticallyTruncated"
+      target-tone="primary"
+      :typography-class="styles.addressLine"
+      :menu-text-class="styles.menuText"
       :copy-label="copyLabel"
       show-tooltip-copy
       boundary-selector=".eds-data-list"
       host-flex
-      :host-class="styles.lineFlotationHost"
+      :host-class="styles.addressHost"
     >
-      {{ text }}
+      {{ displayText }}
     </EgTextOverflowTooltip>
 
     <EgIconButton

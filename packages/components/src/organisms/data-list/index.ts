@@ -1,5 +1,6 @@
 export { default as EgDataList } from './DataList.vue';
 export { default as EgDataListColumn } from './DataListColumn.vue';
+export { default as EgDataListCellOverflow } from './DataListCellOverflow.vue';
 export type {
   DataListItem,
   DataListColumnAlign,

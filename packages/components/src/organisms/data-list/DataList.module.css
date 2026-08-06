@@ -321,6 +321,8 @@
   top: 0;
   z-index: 9;
   white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
   background: transparent;
 }
 
@@ -374,6 +376,7 @@
   display: flex;
   width: 100%;
   height: 100%;
+  min-width: 0;
   padding: 0 var(--spacing-6);
   align-items: center;
   align-self: stretch;
@@ -394,6 +397,93 @@
   max-width: 100%;
 }
 
+.headerTitleGroupSlot {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.headerText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  cursor: default;
+  user-select: none;
+}
+
+.overflowTriggerWrap {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  cursor: default;
+  user-select: none;
+}
+
+/** 表头 combo：撑满 textWrap，保证 scrollWidth 测量可靠。 */
+.headerOverflowHost {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.headerOverflowHost > span {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.headerOverflowHost > span > span {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.overflowTriggerWrapHeader {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cellOverflowHost {
+  display: contents;
+}
+
+.headerOverflowTrigger {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.headerOverflowTrigger:global(.eds-hover-tooltip-trigger__target) {
+  color: inherit;
+}
+
+.headerOverflowTooltip :global(.eds-tooltip-panel) {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  color: var(--text-base-primary);
+  white-space: normal;
+  word-break: break-word;
+}
+
 .sortDropdown {
   display: inline-flex;
   flex-shrink: 0;
@@ -404,8 +494,14 @@
   flex-shrink: 0;
 }
 
-.sortTrigger :global(.symbol) {
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button) :global(.symbol) {
   color: var(--stroke-base-tertiary);
+}
+
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):hover:not(:disabled) :global(.symbol),
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):focus-visible:not(:disabled) :global(.symbol),
+:global(.eds-data-list) .sortTriggerFocus:global(.eds-icon-button) :global(.symbol) {
+  color: var(--stroke-base-secondary);
 }
 
 .sortTriggerDisabled {
@@ -414,10 +510,6 @@
 
 .sortTriggerFocus {
   background-color: var(--event-hover);
-}
-
-.sortTriggerFocus :global(.symbol) {
-  color: var(--text-base-secondary);
 }
 
 .sortMenu:global(.desktopTokens.effect-flotation-box) {

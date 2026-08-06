@@ -141,15 +141,10 @@
   min-width: 0;
 }
 
-.symbolText {
-  overflow: hidden;
-  color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
-  font-size: var(--eds-body-medium-size);
-  line-height: var(--eds-body-medium-line-height);
-  font-weight: var(--eds-body-medium-weight);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.symbolTextWrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .networkSuffix {
@@ -166,7 +161,20 @@
   white-space: nowrap;
 }
 
-/* ── CryptoAddress（16px row · Figma 463:67670）── */
+/* ── CryptoAddress（16px row · Figma 463:67670）
+ *
+ * LAYOUT CONTRACT — List Field · Currency 双地址行（EgCryptoCombo）
+ * 改 ellipsis / tooltip 时勿破坏下列不变量（详见 .cursor/rules/crypto-address-row-layout.mdc）：
+ *
+ * 1. 双地址侧（.cryptoAddress:not(.cryptoAddressSingle)）— 按内容收缩，禁止 50/50 撑满：
+ *    - .eds-crypto-address-flotation → flex: 0 1 auto（禁止 flex: 1 1 auto）
+ *    - trigger / .eds-crypto-address-side → width: max-content（禁止 width: 100%）
+ * 2. 侧内三段（地址 · (N) · Tag）仅隔 --spacing-1：
+ *    - .cryptoAddressLine → flex-grow: 0（禁止 1 1 auto 拉宽行盒）
+ *    - .cryptoAddressTags / .inlineTag → flex-shrink: 0（禁止外层 overflow:hidden 压成竖条）
+ * 3. hover 虚线 __target 只在 .cryptoAddressTextTarget，不在整行 .cryptoAddressLine
+ * 4. 单地址（.cryptoAddressSingle）可 width: 100% 撑满列宽
+ */
 .cryptoAddress {
   display: flex;
   flex-direction: row;
@@ -177,73 +185,112 @@
   min-width: 0;
 }
 
-.cryptoAddress > :global(.eds-flotation) {
+/* 双地址：每侧 shrink-wrap，上限半行宽 */
+.cryptoAddress:not(.cryptoAddressSingle) > :global(.eds-crypto-address-flotation) {
   flex: 0 1 auto;
   min-width: 0;
   max-width: calc((100% - var(--scale-3) - 2 * var(--spacing-1)) / 2);
 }
 
-.cryptoAddress > :global(.eds-flotation) > span,
-.cryptoAddress > :global(.eds-flotation) > span > span {
+.cryptoAddress:not(.cryptoAddressSingle)
+  > :global(.eds-crypto-address-flotation)
+  > span {
+  display: inline-flex;
   width: max-content;
   max-width: 100%;
   min-width: 0;
 }
 
-.cryptoAddressSingle > :global(.eds-flotation) {
+/* 单地址：撑满可用列宽 */
+.cryptoAddressSingle > :global(.eds-crypto-address-flotation) {
   flex: 1 1 auto;
+  min-width: 0;
   max-width: 100%;
+}
+
+.cryptoAddressSingle > :global(.eds-crypto-address-flotation) > span {
+  display: inline-flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cryptoAddressSingle :global(.eds-crypto-address-side) {
+  width: 100%;
 }
 
 .cryptoAddressSide {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--spacing-1);
   width: max-content;
-  max-width: 100%;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  vertical-align: middle;
 }
 
 .cryptoAddressLine {
   display: inline-flex;
   align-items: center;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  flex-grow: 0;
   gap: 0.25em;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-base-secondary);
 }
 
 .cryptoAddressLineAlias {
   flex: 0 0 auto;
   max-width: calc(var(--scale-16) + var(--scale-6));
   min-width: 0;
+}
+
+.cryptoAddressTextTarget {
+  display: inline-flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
-}
-
-.cryptoAddressLine:not(:global(.eds-hover-tooltip-trigger__target)) {
-  color: var(--text-base-secondary);
-}
-
-.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) {
   outline: none;
+}
+
+.cryptoAddressLineAlias .cryptoAddressTextTarget {
+  max-width: calc(var(--scale-16) + var(--scale-6));
+}
+
+.cryptoAddressTextHost {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .cryptoAddressText {
   composes: cap from '../list-field/ListFieldSecondary.module.css';
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
   font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   font-weight: var(--eds-footnote-weight);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: inherit;
 }
 
 .cryptoAddressAlias {
   display: block;
-  flex-shrink: 0;
-  width: auto;
-  max-width: calc(var(--scale-16) + var(--scale-6));
+  flex-shrink: 1;
+  width: 100%;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -321,24 +368,20 @@
   flex-shrink: 0;
   align-items: center;
   vertical-align: middle;
-  margin-left: var(--spacing-1);
-  color: var(--stroke-base-secondary);
-  transition: var(--motion-transition-hover);
+  margin-inline-start: var(--spacing-1);
 }
 
 .menuCopyButtonCopied :global(.eds-icon-button .symbol) {
   color: var(--status-success);
 }
 
-.menuCopyButtonCopied :global(.eds-icon-button:hover:not(:disabled) .symbol),
-.menuCopyButtonCopied :global(.eds-icon-button:active:not(:disabled) .symbol),
-.menuCopyButtonCopied :global(.eds-icon-button:focus-visible:not(:disabled) .symbol) {
-  color: var(--status-success);
-}
-
 .menuCopyButtonCopied :global(.eds-icon .eds-i-f),
 .menuCopyButtonCopied :global(.eds-icon path) {
   fill: var(--status-success);
+}
+
+.menuCopyButtonCopied :global(.eds-icon .eds-i-s) {
+  stroke: var(--status-success);
 }
 
 .menuRowTags {

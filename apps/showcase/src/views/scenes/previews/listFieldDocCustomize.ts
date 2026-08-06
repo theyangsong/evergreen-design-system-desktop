@@ -48,12 +48,11 @@ const CRYPTO_COMBO_IMPORT = `import { EgCryptoCombo } from '@eds/desktop-compone
 
 const LIST_FIELD_IMPORT = `import {
   EgAnchoredTooltip,
-  EgCrypto,
   EgCryptoCombo,
-  EgFlotation,
-  EgFlotationMenu,
-  EgFlotationMenuItem,
   EgIcon,
+  EgListFieldAddressLine,
+  EgListFieldHashLikeLine,
+  EgListFieldOverflowText,
   EgTag,
   formatGroupedNumber,
 } from '@eds/desktop-components';`;
@@ -315,9 +314,13 @@ function buildAddressUsageSnippet(state: Record<string, unknown>): string {
   }
 
   return [
-    buildVueOpeningTag('EgAnchoredTooltip', { content: address, placement: 'top' }),
-    `  <span class="mono">${address.slice(0, 8)}...${address.slice(-8)}</span>`,
-    '</EgAnchoredTooltip>',
+    buildVueOpeningTag('EgListFieldAddressLine', {
+      text: address,
+      'copy-on-row-hover': Boolean(state.copyOnRowHover ?? true),
+      'tooltip-trigger': String(state.tooltipTrigger ?? 'hover'),
+    }),
+    '  <!-- CryptoAddressSide + EgFlotationMenu：地址溢出 Item、可复制 -->',
+    '</EgListFieldAddressLine>',
   ].join('\n');
 }
 
@@ -336,56 +339,36 @@ function buildHashLikeUsageSnippet(
           : SAMPLE_ID),
   );
   const lineLayout = String(state.lineLayout ?? 'single');
-  const minWidthRaw = String(state.minWidth ?? '').trim();
-  const minWidth = minWidthRaw ? Number(minWidthRaw) : 0;
-  const displayValue =
-    minWidth > 0 && value.length > 22 ? `${value.slice(0, 22)}...` : value;
   const tooltipTrigger = String(state.tooltipTrigger ?? 'hover');
-  const focusClass = tooltipTrigger === 'focus' ? ' eds-hover-tooltip-trigger--focus' : '';
-  const tabindex = tooltipTrigger === 'focus' ? ' tabindex="0"' : '';
+  const copyOnRowHover = Boolean(state.copyOnRowHover ?? false);
 
-  const triggerBody =
-    lineLayout === 'double'
-      ? [
-          '      <span class="hash-like-combo">',
-          `        <span class="hash-like-primary">${displayValue}</span>`,
-          `        <span class="hash-like-secondary">${secondaryValue}</span>`,
-          '      </span>',
-        ].join('\n')
-      : `      <span class="eds-hover-tooltip-trigger__target"${tabindex}>${displayValue}</span>`;
-
-  return [
-    buildVueOpeningTag('EgFlotation', {
-      placement: 'bottom',
-      align: 'start',
-      trigger: tooltipTrigger,
-      'open-delay': 120,
-      'close-delay': 80,
-      'show-add': false,
-      'show-menu-divider': false,
+  const primaryLine = [
+    buildVueOpeningTag('EgListFieldHashLikeLine', {
+      text: value,
+      variant: 'primary',
+      'identifier-mode': tag === 'ListFieldIdentifier',
+      'copy-on-row-hover': copyOnRowHover,
+      'tooltip-trigger': tooltipTrigger,
     }),
-    '  <template #trigger>',
-    `    <span class="eds-hover-tooltip-trigger${focusClass}">`,
-    triggerBody,
-    '    </span>',
-    '  </template>',
-    '  <template #content>',
-    '    <EgFlotationMenu',
-    '      class="eds-crypto-address-tooltip-menu eds-flotation-menu--box-doc"',
-    '      height-mode="adaptive"',
-    '      :max-height="280"',
-    '      width-mode="adaptive"',
-    '      :max-width="480"',
-    '      :show-add="false"',
-    '      list-scroll',
-    '    >',
-    '      <EgFlotationMenuItem box-type="text" label-wrap :show-tag="false">',
-    `        <!-- ${value} + copy -->`,
-    '      </EgFlotationMenuItem>',
-    '    </EgFlotationMenu>',
-    '  </template>',
-    '</EgFlotation>',
+    '</EgListFieldHashLikeLine>',
   ].join('\n');
+
+  if (lineLayout === 'double') {
+    const secondaryLine = [
+      buildVueOpeningTag('EgListFieldHashLikeLine', {
+        text: secondaryValue,
+        variant: 'secondary',
+        'identifier-mode': tag === 'ListFieldIdentifier',
+        'copy-on-row-hover': copyOnRowHover,
+        'tooltip-trigger': tooltipTrigger,
+      }),
+      '</EgListFieldHashLikeLine>',
+    ].join('\n');
+
+    return ['<span class="hash-like-combo">', primaryLine, secondaryLine, '</span>'].join('\n');
+  }
+
+  return primaryLine;
 }
 
 function buildAmountUsageSnippet(state: Record<string, unknown>): string {
@@ -757,6 +740,8 @@ const addressConfig: ListFieldDocConfig = {
     alias: 'Treasury',
     collectionCount: '3',
     minWidth: '',
+    copyOnRowHover: true,
+    tooltipTrigger: 'hover',
   },
   customizeControls: [
     listFieldMinWidthControl(1),
@@ -851,7 +836,7 @@ const transactionHashConfig: ListFieldDocConfig = {
       "'hover'",
       'Tooltip 交互：hover 悬浮展开；focus 聚焦（Tab）展开。',
     ),
-    sceneProp('ellipsis', "'tail'", "'tail'", '设置 minWidth 后超出宽度时尾部省略（CSS ellipsis）。'),
+    sceneProp('ellipsis', "'tail'", "'tail'", '文本单行尾部省略（text-overflow: ellipsis）；溢出时启用 Tooltip。'),
     sceneProp('tooltipWhenTruncated', 'boolean', 'true', '仅文本溢出省略时启用 Tooltip 交互。'),
   ],
   buildUsageSnippet: (state) => buildHashLikeUsageSnippet('ListFieldTransactionHash', state, SAMPLE_HASH),
@@ -903,7 +888,7 @@ const identifierConfig: ListFieldDocConfig = {
       "'hover'",
       'Tooltip 交互：hover 悬浮展开；focus 聚焦（Tab）展开。',
     ),
-    sceneProp('ellipsis', "'tail'", "'tail'", '设置 minWidth 后超出宽度时尾部省略（同交易哈希）。'),
+    sceneProp('ellipsis', "'tail'", "'tail'", '文本单行尾部省略（同交易哈希）；溢出时启用 Tooltip。'),
     sceneProp('tooltipWhenTruncated', 'boolean', 'true', '仅文本溢出省略时启用 Tooltip 交互。'),
   ],
   buildUsageSnippet: (state) => buildHashLikeUsageSnippet('ListFieldIdentifier', state, SAMPLE_ID),
@@ -1019,7 +1004,7 @@ const generalStructureConfig: ListFieldDocConfig = {
       "'hover'",
       'Tooltip 交互：hover 悬浮展开；focus 聚焦（Tab）展开。',
     ),
-    sceneProp('ellipsis', "'tail'", "'tail'", '设置 minWidth 后超出宽度时尾部省略（同交易哈希）。'),
+    sceneProp('ellipsis', "'tail'", "'tail'", '文本单行尾部省略（同交易哈希）；溢出时启用 Tooltip。'),
     sceneProp('tooltipWhenTruncated', 'boolean', 'true', '仅文本溢出省略时启用 Tooltip 交互。'),
     sceneProp(
       'showDismissFeedback',

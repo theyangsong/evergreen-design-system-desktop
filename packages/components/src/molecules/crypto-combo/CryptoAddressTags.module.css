@@ -1,3 +1,10 @@
+/**
+ * CryptoAddress 行内 Tag — LAYOUT CONTRACT
+ * 与 CryptoCombo.module.css 配套；改 truncate / tooltip 时勿破坏：
+ * - .root / .inlineTag / .eds-tag → flex-shrink: 0（禁止外层 overflow:hidden 压成 Custom 竖条）
+ * - 省略只在 EgTag truncate 内部；max-width 约束在 .eds-tag
+ * 详见 .cursor/rules/crypto-address-row-layout.mdc
+ */
 .moreTag {
   display: inline-flex;
   align-items: center;
@@ -24,13 +31,26 @@
 
 .inlineTag {
   display: inline-flex;
-  flex: 0 1 auto;
-  max-width: var(--scale-16);
+  flex: 0 0 auto;
   min-width: 0;
-  overflow: hidden;
+}
+
+.inlineTag :global(.eds-anchored-tooltip) {
+  display: inline-flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.inlineTag :global(.eds-anchored-tooltip) > span {
+  display: inline-flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .inlineTag :global(.eds-tag) {
-  max-width: 100%;
+  flex: 0 0 auto;
+  max-width: var(--scale-16);
   min-width: 0;
 }

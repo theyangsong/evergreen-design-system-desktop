@@ -67,6 +67,18 @@ function onCheckboxUpdate(index: number, checked: boolean) {
   customize.value[sceneAddressItemKey('Checked', index + 1)] = checked;
 }
 
+function onMenuItemClick(
+  row: { id: string; address: string },
+  index: number,
+  event: MouseEvent,
+) {
+  if (showCopyButton.value) {
+    void onCopyAddress(rowKey(row, index), row.address, event);
+    return;
+  }
+  onRowClick(index);
+}
+
 async function onCopyAddress(key: string, address: string, event: MouseEvent) {
   event.stopPropagation();
   event.preventDefault();
@@ -120,7 +132,7 @@ onBeforeUnmount(() => {
         :focused="showFilterTabs && row.focused"
         :show-checkbox="showCheckbox"
         :checked="row.checked"
-        @click="onRowClick(index)"
+        @click="onMenuItemClick(row, index, $event)"
         @update:checked="onCheckboxUpdate(index, $event)"
       >
         <span :class="styles.rowContent">
@@ -136,11 +148,12 @@ onBeforeUnmount(() => {
                   styles.copyButton,
                   copiedRowKey === rowKey(row, index) && styles.copyButtonCopied,
                 ]"
+                @click.stop
               >
                 <EgIconButton
                   shape="square"
                   size="xs"
-                  :label="`复制地址 ${row.address}`"
+                  label="复制"
                   @click="onCopyAddress(rowKey(row, index), row.address, $event)"
                 >
                   <EgIcon

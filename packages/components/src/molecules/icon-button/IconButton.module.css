@@ -5,7 +5,7 @@
   box-sizing: border-box;
   border: none;
   background-color: var(--material-hide);
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

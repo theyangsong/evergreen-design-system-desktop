@@ -7,7 +7,7 @@
   font-family: var(--eds-family-sans);
   font-weight: var(--eds-body-medium-strong-weight);
   text-decoration: none;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

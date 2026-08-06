@@ -1332,9 +1332,6 @@ export function buildBatchBarLabelDanger(state: Record<string, unknown>): boolea
   const count = parseBatchBarLabelCount(state);
   return Array.from({ length: count }, (_, index) => {
     const itemIndex = index + 1;
-    if (itemIndex !== count) {
-      return false;
-    }
     return Boolean(state[`label${itemIndex}Danger`]);
   });
 }
@@ -1375,15 +1372,12 @@ export function buildBatchBarLabelCustomizeControls(
       label: `标签 ${itemIndex}`,
       row: itemIndex,
     });
-
-    if (itemIndex === count) {
-      controls.push({
-        kind: 'boolean',
-        key: `label${itemIndex}Danger`,
-        label: '危险',
-        row: itemIndex,
-      });
-    }
+    controls.push({
+      kind: 'boolean',
+      key: `label${itemIndex}Danger`,
+      label: '危险',
+      row: itemIndex,
+    });
   }
 
   return controls;
@@ -1461,7 +1455,7 @@ export const batchBarPropRows: OrganismPropRow[] = [
     name: 'labelDanger',
     type: 'boolean[]',
     defaultValue: '[]',
-    description: '与 labels 等长；为 true 时该项 Text 使用 --text-danger-primary（通常仅最后一项）。',
+    description: '与 labels 等长；为 true 时该项 Text 使用 --text-danger-primary。',
   },
   { name: 'moreLabel', type: 'string', defaultValue: "'More'", description: '折叠时的 More 文案。' },
   { name: 'collapseThreshold', type: 'number', defaultValue: '4', description: 'Label 数超过该值时折叠（默认 4）。' },
@@ -1981,19 +1975,23 @@ export const dataListColumnSettingControls: DocCustomizeControl[] = [
       String(state.columnSettingIndex ?? '1') === String(index);
 
     return [
+      ...(index > 1 && index < DATA_LIST_PREVIEW_COLUMN_COUNT
+        ? [
+            {
+              kind: 'select' as const,
+              key: `columnAlign${index}`,
+              label: '对齐方式',
+              options: dataListColumnAlignOptions,
+              row: 0,
+              visibleWhen,
+            },
+          ]
+        : []),
       {
         kind: 'text' as const,
         key: `columnMinWidth${index}`,
         label: '最小宽度',
         placeholder: '168px',
-        row: 1,
-        visibleWhen,
-      },
-      {
-        kind: 'select' as const,
-        key: `columnAlign${index}`,
-        label: '对齐方式',
-        options: dataListColumnAlignOptions,
         row: 1,
         visibleWhen,
       },

@@ -6,7 +6,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: var(--material-card-deep);
-  cursor: pointer;
+  cursor: default;
   padding: var(--spacing-1);
   transition: var(--motion-transition-hover);
 }

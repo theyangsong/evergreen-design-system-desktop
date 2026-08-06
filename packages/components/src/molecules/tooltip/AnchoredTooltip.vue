@@ -6,7 +6,7 @@ import {
   useId,
   watch,
 } from 'vue';
-import EgTooltip, { type TooltipWidthMode } from './Tooltip.vue';
+import EgTooltip, { type TooltipHeightMode, type TooltipWidthMode } from './Tooltip.vue';
 import type { TooltipPanelKind, TooltipPanelRadiusToken } from './tooltipPanelRadius';
 import {
   FALLBACK_EDGE_INSET_PX,
@@ -54,8 +54,11 @@ const props = withDefaults(
     widthMode?: TooltipWidthMode;
     width?: number;
     maxWidth?: number;
+    heightMode?: TooltipHeightMode;
     height?: number;
     maxHeight?: number;
+    /** false：面板随内容增高，不滚动、不裁剪。 */
+    scrollable?: boolean;
     tokenScopeClass?: string;
     teleportTo?: string | HTMLElement;
     /**
@@ -82,7 +85,9 @@ const props = withDefaults(
     trigger: 'click',
     panelKind: 'flotation',
     widthMode: 'adaptive',
+    heightMode: 'fixed',
     height: 380,
+    scrollable: true,
     tokenScopeClass: 'desktopTokens',
     teleportTo: 'body',
     wrapTooltip: true,
@@ -107,6 +112,9 @@ const edgeInsetPx = ref(FALLBACK_EDGE_INSET_PX);
 
 const tooltipId = useId();
 const describedById = computed(() => `eds-tooltip-${tooltipId}`);
+
+/** 浮动层 enter/leave 仅 hover 触发；click / focus 瞬时切换（§ motion-interactive）。 */
+const floatingMotionEnabled = computed(() => props.trigger === 'hover');
 
 const floatingMotionEnterFromClass = computed(() => {
   switch (resolvedPlacement.value) {
@@ -318,7 +326,12 @@ function resolveBoundary(trigger: HTMLElement): BoundaryRect {
         const headerPx = Number.parseFloat(
           getComputedStyle(boundaryEl).getPropertyValue('--eds-data-list-header-height'),
         );
-        if (Number.isFinite(headerPx) && headerPx > 0) {
+        const triggerInHeader = Boolean(trigger.closest('thead'));
+        if (
+          !triggerInHeader &&
+          Number.isFinite(headerPx) &&
+          headerPx > 0
+        ) {
           insetTop = headerPx;
         }
       }
@@ -615,6 +628,7 @@ defineExpose({
 
     <Teleport :to="teleportTo">
       <Transition
+        :css="floatingMotionEnabled"
         :enter-active-class="styles.floatingEnterActive"
         :leave-active-class="styles.floatingLeaveActive"
         :enter-from-class="floatingMotionEnterFromClass"
@@ -643,9 +657,10 @@ defineExpose({
               :width-mode="widthMode"
               :width="width"
               :max-width="maxWidth"
-              height-mode="fixed"
-              :height="height"
+              :height-mode="heightMode"
+              :height="heightMode === 'fixed' ? height : undefined"
               :max-height="maxHeight"
+              :scrollable="scrollable"
             >
               <slot name="content">
                 {{ content }}

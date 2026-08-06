@@ -1,0 +1,60 @@
+---
+description: EgCryptoCombo 双地址行布局契约 — 禁止 flex/width 回归导致地址与 Tag 间距异常
+globs: packages/components/src/molecules/crypto-combo/**/*
+alwaysApply: false
+---
+
+# CryptoAddress 双地址行 — 布局契约（锁死）
+
+> **Showcase 验收点**：List Field · Currency 预览  
+> `ZEC Base  t1g722...JKnQfK Risk  →  t1g722...JKnQfB Custom +2`  
+> 地址 / `(N)` / Tag 之间 **仅 `--spacing-1`**；无半列空白、无孤立 Custom 3px 竖条。
+
+## DOM 结构（勿改层级）
+
+```
+.cryptoAddress                          ← 双地址行容器
+├ .eds-crypto-address-flotation         ← CryptoAddressSide 的 EgFlotation（每侧一个）
+│   └ span（AnchoredTooltip trigger）
+│       └ .eds-crypto-address-side     ← 侧容器（地址 + Tag）
+│           ├ .cryptoAddressLine       ← 地址 + (N)；flex-grow: 0
+│           │   └ .cryptoAddressTextTarget ← hover __target 仅包文本
+│           └ .cryptoAddressTags       ← flex-shrink: 0
+├ .cryptoAddressArrow
+└ .eds-crypto-address-flotation
+```
+
+Hook 类 **`eds-crypto-address-flotation`**、**`eds-crypto-address-side`** 写在 `CryptoAddressSide.vue`；CSS 选择器必须用它们，**禁止**回退到泛化 `.cryptoAddress > .eds-flotation > span`。
+
+## 双地址模式 — 不变量（禁止违反）
+
+| 节点 | 必须 | 禁止 |
+|------|------|------|
+| `.cryptoAddress:not(.cryptoAddressSingle) > .eds-crypto-address-flotation` | `flex: 0 1 auto` | `flex: 1 1 auto`（会 50/50 撑满留空） |
+| 同上 `> span`（AnchoredTooltip trigger） | `width: max-content` | `width: 100%` |
+| `.cryptoAddressSide` / `.eds-crypto-address-side` | `width: max-content` | `width: 100%` |
+| `.cryptoAddressLine` | `flex-grow: 0` | `flex: 1 1 auto`（拉宽行盒，Tag 被推到半列末尾） |
+| `.cryptoAddressTags`、`.inlineTag` | `flex-shrink: 0` | 外层 `overflow: hidden` + `flex-shrink: 1` |
+| hover `__target` | 只在 `.cryptoAddressTextTarget` | 挂在整行 `.cryptoAddressLine` |
+
+## 单地址模式 — 例外
+
+`.cryptoAddressSingle` 下 flotation / trigger 可用 `width: 100%`、`flex: 1 1 auto` 撑满列宽。
+
+## 地址展示
+
+- 行内地址用 **`truncateAddressMiddle(address, 6, 6)`**（JS 中截断），勿改回整段 CSS tail ellipsis，除非产品明确要求。
+- 列宽不足时 **优先收缩 `.cryptoAddressLine`**（`flex: 0 1 auto` + `overflow: hidden`），Tag 不压成竖条。
+
+## 改 ellipsis / tooltip 时的检查清单
+
+1. 双地址 Showcase 预览：Risk 紧贴 `(N)` / 地址，箭头两侧无大块空白  
+2. Custom Tag 列宽不足时显示省略号或完整 Tag，**不能**只剩 3px 色条  
+3. hover 虚线宽度 = 地址文本宽度，不含 `(N)` 与 Tag  
+4. 改 `CryptoCombo.module.css` 后 **build + 同步** consumer
+
+## 相关文件
+
+- `CryptoCombo.module.css` — LAYOUT CONTRACT 注释块
+- `CryptoAddressTags.module.css` — Tag 行内 flex 契约
+- `CryptoAddressSide.vue` — hook 类 + `cryptoAddressTextTarget`

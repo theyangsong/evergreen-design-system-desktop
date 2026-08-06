@@ -27,8 +27,8 @@ const previewLabels = computed(() => buildBatchBarLabels(customize));
 const previewLabelDanger = computed(() => {
   const count = parseBatchBarLabelCount(customize);
   void customize.labelCount;
-  if (count > 0) {
-    void customize[`label${count}Danger` as keyof typeof customize];
+  for (let index = 1; index <= count; index += 1) {
+    void customize[`label${index}Danger` as keyof typeof customize];
   }
   return buildBatchBarLabelDanger(customize);
 });

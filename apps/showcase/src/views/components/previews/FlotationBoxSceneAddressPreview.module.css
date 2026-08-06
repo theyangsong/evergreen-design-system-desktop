@@ -53,7 +53,7 @@
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
   white-space: nowrap;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 
@@ -115,28 +115,9 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  vertical-align: middle;
-  margin-left: var(--spacing-1);
-  color: var(--stroke-base-secondary);
-  transition: var(--motion-transition-hover);
-}
-
-.rowTags {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-1);
-  width: 100%;
-  min-width: 0;
 }
 
 .copyButtonCopied :global(.eds-icon-button .symbol) {
-  color: var(--status-success);
-}
-
-.copyButtonCopied :global(.eds-icon-button:hover:not(:disabled) .symbol),
-.copyButtonCopied :global(.eds-icon-button:active:not(:disabled) .symbol),
-.copyButtonCopied :global(.eds-icon-button:focus-visible:not(:disabled) .symbol) {
   color: var(--status-success);
 }
 
@@ -147,4 +128,13 @@
 
 .copyButtonCopied :global(.eds-icon .eds-i-s) {
   stroke: var(--status-success);
+}
+
+.rowTags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
 }

@@ -71,7 +71,7 @@
   color: inherit;
   font: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   isolation: isolate;
   box-sizing: border-box;
 }
@@ -203,9 +203,10 @@
 }
 
 .rootWide .moduleRegionDivider {
-  align-self: stretch;
-  width: auto;
-  margin-inline: var(--spacing-3);
+  align-self: center;
+  width: 100%;
+  max-width: var(--scale-6);
+  margin-inline: 0;
 }
 
 .rootWide .individuals {
@@ -256,7 +257,7 @@
   color: var(--text-base-primary);
   font: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   isolation: isolate;
   box-sizing: border-box;
 }
@@ -428,9 +429,10 @@
 
 .moduleRegionDivider {
   flex-shrink: 0;
-  align-self: stretch;
-  width: auto;
-  margin-inline: var(--spacing-3);
+  align-self: center;
+  width: 100%;
+  max-width: var(--scale-6);
+  margin-inline: 0;
 }
 
 .individuals {
@@ -583,7 +585,7 @@
   font-weight: var(--eds-title-weight);
   line-height: var(--scale-10);
   text-align: center;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 
@@ -726,7 +728,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: var(--material-hide);
-  cursor: pointer;
+  cursor: default;
   isolation: isolate;
 }
 
@@ -844,7 +846,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: var(--material-hide);
-  cursor: pointer;
+  cursor: default;
 }
 
 .bottomIconHost:not(.bottomIconHostFocused) {
@@ -929,7 +931,7 @@
   border: var(--stroke-xl) solid transparent;
   border-radius: var(--radius-full);
   background: none;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

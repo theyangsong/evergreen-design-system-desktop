@@ -95,7 +95,7 @@
   border-radius: var(--scale-1-5);
   background: var(--material-hide);
   color: var(--text-base-secondary);
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

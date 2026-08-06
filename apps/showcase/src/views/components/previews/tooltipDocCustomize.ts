@@ -3,11 +3,25 @@ import { buildVueOpeningTag } from '@/views/shared/componentDoc/buildUsageSnippe
 import {
   placementRows,
   showcaseTooltipCustomizeFieldLabels,
+  showcaseTooltipFlotationScenarioLabels,
   showcaseTooltipPanelKindLabels,
   showcaseTooltipPanelRadiusLabels,
   triggerRows,
   widthModeAdaptiveFixedRows,
 } from '@/data/showcasePropLabels';
+
+export const tooltipFlotationScenarioOptions = [
+  { value: 'component', label: showcaseTooltipFlotationScenarioLabels.component },
+  { value: 'text-overflow', label: showcaseTooltipFlotationScenarioLabels['text-overflow'] },
+  {
+    value: 'paragraph-overflow-info',
+    label: showcaseTooltipFlotationScenarioLabels['paragraph-overflow-info'],
+  },
+  { value: 'multi-address', label: showcaseTooltipFlotationScenarioLabels['multi-address'] },
+] as const;
+
+export type TooltipFlotationScenarioValue =
+  (typeof tooltipFlotationScenarioOptions)[number]['value'];
 
 export const tooltipPanelRadiusOptions = [
   { value: '', label: showcaseTooltipPanelRadiusLabels[''] },
@@ -58,6 +72,7 @@ export const tooltipPanelKindDefaultRadiusLabel: Record<TooltipPanelKindValue, s
 
 export const tooltipCustomizeDefaults = {
   panelKind: 'flotation',
+  scenario: 'component',
   panelRadius: '',
   widthMode: 'fixed',
   width: '328',
@@ -65,6 +80,7 @@ export const tooltipCustomizeDefaults = {
   maxHeight: '',
   placement: 'bottom',
   trigger: 'click',
+  tooltipTrigger: 'hover',
   disabled: false,
   triggerLabel: '点击我',
 } as const;
@@ -72,46 +88,110 @@ export const tooltipCustomizeDefaults = {
 const isFixedWidth = (state: Record<string, unknown>) =>
   String(state.widthMode ?? 'fixed') === 'fixed';
 
+const isFlotationPanel = (state: Record<string, unknown>) =>
+  String(state.panelKind ?? tooltipCustomizeDefaults.panelKind) === 'flotation';
+
+const isTextOverflowScenario = (state: Record<string, unknown>) =>
+  isFlotationPanel(state) &&
+  String(state.scenario ?? tooltipCustomizeDefaults.scenario) === 'text-overflow';
+
+const isParagraphOverflowInfoScenario = (state: Record<string, unknown>) =>
+  isFlotationPanel(state) &&
+  String(state.scenario ?? tooltipCustomizeDefaults.scenario) === 'paragraph-overflow-info';
+
+const isMultiAddressScenario = (state: Record<string, unknown>) =>
+  isFlotationPanel(state) &&
+  String(state.scenario ?? tooltipCustomizeDefaults.scenario) === 'multi-address';
+
+const isFlotationPresetScenario = (state: Record<string, unknown>) =>
+  isTextOverflowScenario(state) ||
+  isParagraphOverflowInfoScenario(state) ||
+  isMultiAddressScenario(state);
+
+const isComponentScenario = (state: Record<string, unknown>) => !isFlotationPresetScenario(state);
+
 const L = showcaseTooltipCustomizeFieldLabels;
 
 export const tooltipCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
+    key: 'scenario',
+    label: L.scenario,
+    options: tooltipFlotationScenarioOptions.map(({ value, label }) => ({ value, label })),
+    visibleWhen: isFlotationPanel,
+  },
+  {
+    kind: 'select',
+    key: 'tooltipTrigger',
+    label: 'Tooltip 交互',
+    options: [
+      { value: 'hover', label: '悬浮时' },
+      { value: 'focus', label: '聚焦时' },
+    ],
+    visibleWhen: isFlotationPresetScenario,
+  },
+  {
+    kind: 'select',
     key: 'panelRadius',
     label: L.panelRadius,
     options: tooltipPanelRadiusOptions.map(({ value, label }) => ({ value, label })),
+    visibleWhen: isComponentScenario,
   },
   {
     kind: 'select',
     key: 'widthMode',
     label: L.widthMode,
     options: widthModeAdaptiveFixedRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: isComponentScenario,
   },
   {
     kind: 'text',
     key: 'width',
     label: L.width,
-    visibleWhen: isFixedWidth,
+    visibleWhen: (state) => isComponentScenario(state) && isFixedWidth(state),
   },
-  { kind: 'text', key: 'height', label: L.height },
-  { kind: 'text', key: 'maxHeight', label: L.maxHeight, placeholder: '可选' },
+  {
+    kind: 'text',
+    key: 'height',
+    label: L.height,
+    visibleWhen: isComponentScenario,
+  },
+  {
+    kind: 'text',
+    key: 'maxHeight',
+    label: L.maxHeight,
+    placeholder: '可选',
+    visibleWhen: isComponentScenario,
+  },
   {
     kind: 'select',
     key: 'placement',
     label: L.placement,
     options: placementRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: isComponentScenario,
   },
   {
     kind: 'select',
     key: 'trigger',
     label: L.trigger,
     options: triggerRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: isComponentScenario,
   },
-  { kind: 'boolean', key: 'disabled', label: L.disabled },
-  { kind: 'text', key: 'triggerLabel', label: L.triggerLabel },
+  {
+    kind: 'boolean',
+    key: 'disabled',
+    label: L.disabled,
+    visibleWhen: isComponentScenario,
+  },
+  {
+    kind: 'text',
+    key: 'triggerLabel',
+    label: L.triggerLabel,
+    visibleWhen: isComponentScenario,
+  },
 ];
 
-const CUSTOMIZE_ONLY_KEYS = new Set(['triggerLabel']);
+const CUSTOMIZE_ONLY_KEYS = new Set(['triggerLabel', 'scenario']);
 
 function buildAnchoredTooltipUsageSnippet(
   state: Record<string, unknown>,
@@ -186,6 +266,7 @@ export function buildTooltipSectionCustomizeDefaults(
 ): Record<string, unknown> {
   return {
     panelKind,
+    scenario: tooltipCustomizeDefaults.scenario,
     panelRadius: tooltipCustomizeDefaults.panelRadius,
     widthMode: tooltipCustomizeDefaults.widthMode,
     width: tooltipCustomizeDefaults.width,
@@ -193,6 +274,7 @@ export function buildTooltipSectionCustomizeDefaults(
     maxHeight: tooltipCustomizeDefaults.maxHeight,
     placement: tooltipCustomizeDefaults.placement,
     trigger: tooltipCustomizeDefaults.trigger,
+    tooltipTrigger: tooltipCustomizeDefaults.tooltipTrigger,
     disabled: tooltipCustomizeDefaults.disabled,
     triggerLabel: tooltipCustomizeDefaults.triggerLabel,
   };

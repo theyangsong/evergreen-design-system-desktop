@@ -21,6 +21,9 @@ import {
   tooltipSlotRows,
   type TooltipPanelKindValue,
 } from './tooltipDocCustomize';
+import TooltipFlotationTextOverflowPreview from './TooltipFlotationTextOverflowPreview.vue';
+import TooltipFlotationParagraphOverflowPreview from './TooltipFlotationParagraphOverflowPreview.vue';
+import TooltipFlotationMultiAddressPreview from './TooltipFlotationMultiAddressPreview.vue';
 
 const route = useRoute();
 
@@ -52,6 +55,31 @@ const panelProps = computed(() =>
 
 const customizeDefaults = computed(() => buildTooltipSectionCustomizeDefaults(panelKind.value));
 
+const isTextOverflowScenario = computed(
+  () =>
+    panelKind.value === 'flotation' &&
+    String(customize.scenario ?? 'component') === 'text-overflow',
+);
+
+const isParagraphOverflowInfoScenario = computed(
+  () =>
+    panelKind.value === 'flotation' &&
+    String(customize.scenario ?? 'component') === 'paragraph-overflow-info',
+);
+
+const isMultiAddressScenario = computed(
+  () =>
+    panelKind.value === 'flotation' &&
+    String(customize.scenario ?? 'component') === 'multi-address',
+);
+
+const isFlotationPresetScenario = computed(
+  () =>
+    isTextOverflowScenario.value ||
+    isParagraphOverflowInfoScenario.value ||
+    isMultiAddressScenario.value,
+);
+
 const propsSectionId = computed(() => `${pageSlug.value}-props`);
 </script>
 
@@ -79,9 +107,22 @@ const propsSectionId = computed(() => `${pageSlug.value}-props`);
             docStyles.subPreviewWidth,
             docStyles.previewEffectPanelHost,
             panelKind === 'molde' && tooltipStyles.moldeScene,
+            isTextOverflowScenario && tooltipStyles.textOverflowScene,
+            isParagraphOverflowInfoScenario && tooltipStyles.paragraphOverflowScene,
+            isMultiAddressScenario && tooltipStyles.multiAddressScene,
           ]"
         >
+          <TooltipFlotationTextOverflowPreview
+            v-if="isTextOverflowScenario"
+            :tooltip-trigger="String(customize.tooltipTrigger ?? 'hover') as 'hover' | 'focus'"
+          />
+          <TooltipFlotationParagraphOverflowPreview v-else-if="isParagraphOverflowInfoScenario" />
+          <TooltipFlotationMultiAddressPreview
+            v-else-if="isMultiAddressScenario"
+            :tooltip-trigger="String(customize.tooltipTrigger ?? 'hover') as 'hover' | 'focus'"
+          />
           <EgAnchoredTooltip
+            v-else-if="!isFlotationPresetScenario"
             :placement="customize.placement as 'top' | 'bottom' | 'left' | 'right'"
             :trigger="customize.trigger as 'click' | 'hover'"
             :disabled="Boolean(customize.disabled)"

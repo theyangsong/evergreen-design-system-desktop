@@ -152,9 +152,12 @@
 }
 
 .comboHeader {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--spacing-1-5);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   color: var(--text-base-tertiary);
   font-size: var(--eds-footnote-strong-size);
   font-weight: var(--eds-footnote-strong-weight);
@@ -163,9 +166,47 @@
 
 .comboHeaderSegment {
   display: inline-flex;
+  flex: 0 1 auto;
   align-items: center;
   gap: 0;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.comboHeaderSegmentTextWrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  flex: 1 1 0;
+}
+
+.comboHeaderSegmentText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  cursor: default;
+  user-select: none;
+}
+
+/** Legacy span 规则：仅纯文本 span，不含 EgFlotation 排序（text 已在 textWrap div 内）。 */
+.comboHeaderSegment > span:not(:global(.eds-flotation)) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.comboHeaderSegment > span:not(:only-child):not(:global(.eds-flotation)) {
+  flex: 1 1 auto;
+}
+
+.comboHeaderSegment > :global(.eds-flotation) {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .comboHeader > :global(.eds-divider) {

@@ -1,0 +1,418 @@
+<script setup lang="ts">
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  onUpdated,
+  ref,
+  watch,
+} from 'vue';
+import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../flotation';
+import { EgIcon } from '../../atoms/icons';
+import { EgIconButton } from '../icon-button';
+import { EgTag } from '../tag';
+import CryptoAddressTags from '../crypto-combo/CryptoAddressTags.vue';
+import type { CryptoAddressSideTags } from '../crypto-combo/cryptoAddressTypes';
+import { hasAddressTags } from '../crypto-combo/cryptoAddressTagUtils';
+import cryptoComboStyles from '../crypto-combo/CryptoCombo.module.css';
+import { copyToClipboard } from '../../utils/copyToClipboard';
+import EgAnchoredTooltip, { type TooltipTrigger } from './AnchoredTooltip.vue';
+import styles from './TextOverflowTooltip.module.css';
+import {
+  COPYABLE_OVERFLOW_MENU_CLASS,
+  COPYABLE_OVERFLOW_TOOLTIP_MAX_HEIGHT,
+  COPYABLE_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  FLOTATION_OVERFLOW_CLOSE_DELAY,
+  FLOTATION_OVERFLOW_OPEN_DELAY,
+  TEXT_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE,
+  type TextOverflowTooltipTargetTone,
+} from './textOverflowTooltipConstants';
+
+const props = withDefaults(
+  defineProps<{
+    tooltipText?: string;
+    trigger?: TooltipTrigger;
+    targetTone?: TextOverflowTooltipTargetTone;
+    panelScopeClass?: string;
+    menuTextClass?: string | string[];
+    typographyClass?: string | string[];
+    measureClass?: string | string[];
+    hostClass?: string;
+    hostFlex?: boolean;
+    wrapClass?: string;
+    boundarySelector?: string;
+    maxWidth?: number;
+    showTooltipCopy?: boolean;
+    copyLabel?: string;
+    copyValue?: string;
+    disabled?: boolean;
+    /** 展示文本已语义截断（如 6…6 地址）时也启用复制 Menu（悬浮/聚焦均可）。 */
+    semanticTruncated?: boolean;
+    /** CryptoAddress Menu：别名 Tag（solid-brand）。 */
+    menuAlias?: string;
+    /** CryptoAddress Menu：第二行展开全部 Tag（tooltip-mode）。 */
+    menuTags?: CryptoAddressSideTags;
+  }>(),
+  {
+    trigger: 'hover',
+    targetTone: 'primary',
+    panelScopeClass: '',
+    menuTextClass: undefined,
+    typographyClass: undefined,
+    measureClass: undefined,
+    hostClass: undefined,
+    wrapClass: undefined,
+    boundarySelector: '',
+    maxWidth: TEXT_OVERFLOW_TOOLTIP_MAX_WIDTH,
+    showTooltipCopy: false,
+    copyLabel: '复制',
+    copyValue: undefined,
+    disabled: false,
+    semanticTruncated: false,
+    menuAlias: undefined,
+    menuTags: undefined,
+  },
+);
+
+const hostRef = ref<HTMLElement | null>(null);
+const measureRef = ref<HTMLElement | null>(null);
+const overflowing = ref(false);
+const resolvedTooltipText = ref('');
+const tooltipCopied = ref(false);
+let resizeObserver: ResizeObserver | null = null;
+let tooltipCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
+
+const showCopyTooltip = computed(() => {
+  if (!props.showTooltipCopy) return false;
+  if (overflowing.value) return true;
+  return props.semanticTruncated;
+});
+
+const showHoverTrigger = computed(() => {
+  if (!showCopyTooltip.value) return false;
+  if (props.trigger === 'focus') return true;
+  return overflowing.value || props.semanticTruncated;
+});
+
+const showFlatHoverTrigger = computed(() => overflowing.value);
+
+const tooltipDisabled = computed(
+  () =>
+    props.disabled ||
+    (!props.showTooltipCopy && !overflowing.value) ||
+    !resolvedTooltipText.value,
+);
+
+const hoverTriggerClass = computed(() =>
+  props.trigger === 'focus' ? 'eds-hover-tooltip-trigger--focus' : undefined,
+);
+
+const tooltipTargetModifier = computed(() => {
+  if (props.targetTone === 'inherit') {
+    return 'eds-hover-tooltip-trigger__target--inherit';
+  }
+  if (props.targetTone === 'secondary') {
+    return 'eds-hover-tooltip-trigger__target--secondary';
+  }
+  return 'eds-hover-tooltip-trigger__target--primary';
+});
+
+const tokenScopeClass = computed(
+  () => `${TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE} ${styles.panel} ${props.panelScopeClass}`.trim(),
+);
+
+const hostClasses = computed(() => [
+  styles.host,
+  props.hostFlex && styles.hostFlex,
+  props.hostClass,
+]);
+
+const typographyClasses = computed(() => {
+  const value = props.typographyClass;
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+});
+
+const menuTextClasses = computed(() => {
+  const value = props.menuTextClass;
+  if (!value) return [styles.menuText];
+  return Array.isArray(value) ? value : [value];
+});
+
+const measureClasses = computed(() => {
+  const value = props.measureClass;
+  const extra = value ? (Array.isArray(value) ? value : [value]) : [];
+  return [styles.measure, ...extra];
+});
+
+const panelCopyValue = computed(
+  () => props.copyValue ?? props.tooltipText ?? resolvedTooltipText.value,
+);
+
+const showMenuExpandedTags = computed(() => {
+  if (!props.menuTags) return false;
+  return hasAddressTags(props.menuTags.system, props.menuTags.custom);
+});
+
+const resolvedBoundarySelector = computed(() => props.boundarySelector || undefined);
+
+function measureOverflow() {
+  const el = measureRef.value;
+  const host = hostRef.value;
+  if (!el) {
+    overflowing.value = false;
+    resolvedTooltipText.value = '';
+    return;
+  }
+
+  const text =
+    props.tooltipText?.trim() ||
+    el.textContent?.trim() ||
+    '';
+  resolvedTooltipText.value = text;
+
+  if (!text) {
+    overflowing.value = false;
+    return;
+  }
+
+  const scrollWidth = el.scrollWidth;
+  const clientWidth = el.clientWidth;
+  if (scrollWidth > clientWidth + 1) {
+    overflowing.value = true;
+    return;
+  }
+
+  if (host && scrollWidth > host.clientWidth + 1) {
+    overflowing.value = true;
+    return;
+  }
+
+  overflowing.value = false;
+}
+
+function bindResizeObserver() {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  resizeObserver = new ResizeObserver(() => measureOverflow());
+  if (measureRef.value) {
+    resizeObserver.observe(measureRef.value);
+  }
+  if (hostRef.value) {
+    resizeObserver.observe(hostRef.value);
+  }
+}
+
+function scheduleOverflowMeasure() {
+  nextTick(() => {
+    measureOverflow();
+    bindResizeObserver();
+  });
+}
+
+watch(
+  () => [props.tooltipText, props.semanticTruncated, props.trigger] as const,
+  () => {
+    scheduleOverflowMeasure();
+  },
+);
+
+onMounted(() => {
+  scheduleOverflowMeasure();
+});
+
+onUpdated(() => {
+  measureOverflow();
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  if (tooltipCopiedResetTimer) clearTimeout(tooltipCopiedResetTimer);
+});
+
+async function onTooltipCopy(event: Event) {
+  event.stopPropagation();
+  event.preventDefault();
+  const copied = await copyToClipboard(panelCopyValue.value);
+  if (!copied) return;
+
+  tooltipCopied.value = true;
+  if (tooltipCopiedResetTimer) clearTimeout(tooltipCopiedResetTimer);
+  tooltipCopiedResetTimer = setTimeout(() => {
+    tooltipCopied.value = false;
+  }, 2000);
+}
+</script>
+
+<template>
+  <span ref="hostRef" :class="hostClasses">
+    <EgFlotation
+      v-if="showTooltipCopy && showCopyTooltip"
+      :trigger="trigger"
+      placement="bottom"
+      align="start"
+      :open-delay="FLOTATION_OVERFLOW_OPEN_DELAY"
+      :close-delay="FLOTATION_OVERFLOW_CLOSE_DELAY"
+      :show-add="false"
+      :show-menu-divider="false"
+      close-on-scroll
+      :boundary-selector="resolvedBoundarySelector"
+      :class="styles.copyFlotationHost"
+    >
+      <template #trigger>
+        <span
+          :class="[
+            styles.wrap,
+            wrapClass,
+            showHoverTrigger && 'eds-hover-tooltip-trigger',
+            showHoverTrigger && hoverTriggerClass,
+          ]"
+        >
+          <span
+            :class="[
+              styles.targetShell,
+              showHoverTrigger && 'eds-hover-tooltip-trigger__target',
+              showHoverTrigger && tooltipTargetModifier,
+              showHoverTrigger && typographyClasses,
+            ]"
+            :tabindex="showHoverTrigger && trigger === 'focus' ? 0 : undefined"
+          >
+            <span
+              ref="measureRef"
+              :class="[
+                measureClasses,
+                !showHoverTrigger && typographyClasses,
+              ]"
+            >
+              <slot />
+            </span>
+          </span>
+        </span>
+      </template>
+
+      <template #content>
+        <EgFlotationMenu
+          :class="COPYABLE_OVERFLOW_MENU_CLASS"
+          height-mode="adaptive"
+          :max-height="COPYABLE_OVERFLOW_TOOLTIP_MAX_HEIGHT"
+          width-mode="adaptive"
+          :max-width="COPYABLE_OVERFLOW_TOOLTIP_MAX_WIDTH"
+          :show-add="false"
+          list-scroll
+        >
+          <EgFlotationMenuItem
+            box-type="text"
+            label-wrap
+            :show-tag="false"
+            @click="onTooltipCopy"
+          >
+            <span :class="cryptoComboStyles.menuRowContent">
+              <span :class="cryptoComboStyles.menuRowMain">
+                <EgTag
+                  v-if="menuAlias"
+                  family="system"
+                  system-type="solid-brand"
+                  size="sm"
+                >
+                  {{ menuAlias }}
+                </EgTag>
+                <span :class="cryptoComboStyles.menuAddressLine">
+                  <span :class="menuTextClasses">{{ resolvedTooltipText }}</span>
+                  <span
+                    :class="[
+                      cryptoComboStyles.menuCopyButton,
+                      tooltipCopied && cryptoComboStyles.menuCopyButtonCopied,
+                    ]"
+                    @click.stop
+                  >
+                    <EgIconButton
+                      shape="square"
+                      size="xs"
+                      :label="copyLabel"
+                      @click="onTooltipCopy"
+                    >
+                      <EgIcon
+                        :name="tooltipCopied ? 'eds-enable-fill' : 'eds-copy'"
+                        fit
+                      />
+                    </EgIconButton>
+                  </span>
+                </span>
+              </span>
+
+              <span
+                v-if="showMenuExpandedTags && menuTags"
+                :class="cryptoComboStyles.menuRowTags"
+              >
+                <CryptoAddressTags
+                  :tags="menuTags"
+                  :default-show-more="false"
+                  tooltip-mode
+                />
+              </span>
+            </span>
+          </EgFlotationMenuItem>
+        </EgFlotationMenu>
+      </template>
+    </EgFlotation>
+
+    <span
+      v-else-if="showTooltipCopy"
+      :class="[styles.wrap, wrapClass]"
+    >
+      <span :class="styles.targetShell">
+        <span ref="measureRef" :class="[measureClasses, typographyClasses]">
+          <slot />
+        </span>
+      </span>
+    </span>
+
+    <EgAnchoredTooltip
+      v-else
+      :content="resolvedTooltipText"
+      :disabled="tooltipDisabled"
+      :trigger="trigger"
+      panel-kind="flotation"
+      placement="bottom"
+      align="start"
+      width-mode="adaptive"
+      :max-width="maxWidth"
+      height-mode="adaptive"
+      :scrollable="false"
+      close-on-scroll
+      :boundary-selector="resolvedBoundarySelector"
+      :token-scope-class="tokenScopeClass"
+    >
+      <span
+        :class="[
+          styles.wrap,
+          wrapClass,
+          showFlatHoverTrigger && 'eds-hover-tooltip-trigger',
+          showFlatHoverTrigger && hoverTriggerClass,
+        ]"
+      >
+        <span
+          :class="[
+            styles.targetShell,
+            showFlatHoverTrigger && 'eds-hover-tooltip-trigger__target',
+            showFlatHoverTrigger && tooltipTargetModifier,
+            showFlatHoverTrigger && typographyClasses,
+          ]"
+          :tabindex="showFlatHoverTrigger && trigger === 'focus' ? 0 : undefined"
+        >
+          <span
+            ref="measureRef"
+            :class="[
+              measureClasses,
+              !showFlatHoverTrigger && typographyClasses,
+            ]"
+          >
+            <slot />
+          </span>
+        </span>
+      </span>
+    </EgAnchoredTooltip>
+  </span>
+</template>

@@ -4,6 +4,7 @@ import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
 import { EgCheckbox } from '../../molecules/toggle';
 import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../../molecules/flotation';
+import DataListCellOverflow from './DataListCellOverflow.vue';
 import styles from './DataList.module.css';
 import type { DataListSelectAllMode, DataListSortOrder } from './types';
 
@@ -20,6 +21,7 @@ const props = withDefaults(
     selectAllMode?: DataListSelectAllMode;
     bg?: string;
     sortable?: boolean;
+    hasCustomHeader?: boolean;
   }>(),
   {
     type: 'default',
@@ -27,6 +29,7 @@ const props = withDefaults(
     selectMode: false,
     selectAllMode: 'none',
     sortable: false,
+    hasCustomHeader: false,
   },
 );
 
@@ -83,16 +86,26 @@ defineExpose({ resetSort });
       />
     </div>
     <div v-else-if="type === 'default'" :class="styles.headerContent" :style="contentStyle">
-      <div :class="styles.headerTitleGroup">
+      <div
+        :class="[
+          styles.headerTitleGroup,
+          hasCustomHeader ? styles.headerTitleGroupSlot : undefined,
+        ]"
+      >
         <slot>
-          <div>{{ label }}</div>
+          <DataListCellOverflow
+            v-if="label"
+            :content-class="styles.headerText"
+            context="header"
+          >
+            {{ label }}
+          </DataListCellOverflow>
         </slot>
         <EgFlotation
           v-if="sortable"
           :class="styles.sortDropdown"
           placement="bottom"
           align="start"
-          :disabled="selectMode"
           :show-add="false"
           :show-menu-divider="false"
           close-on-scroll
@@ -103,11 +116,9 @@ defineExpose({ resetSort });
               size="xs"
               :label="sortTriggerLabel"
               :aria-expanded="expanded"
-              :disabled="selectMode"
               :class="[
                 styles.sortTrigger,
                 expanded && styles.sortTriggerFocus,
-                selectMode && styles.sortTriggerDisabled,
               ]"
             >
               <EgIcon

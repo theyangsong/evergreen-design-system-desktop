@@ -3,6 +3,7 @@ import { computed, toRef } from 'vue';
 import {
   EgDivider,
   EgDataList,
+  EgDataListCellOverflow,
   EgDataListColumn,
   EgIcon,
   EgIconButtonPro,
@@ -66,7 +67,6 @@ const {
   onToolbarActionClick,
   paginatedDataList,
   pagePagination,
-  paginationLocked,
   prevNavDisabled,
   prevPagination,
   previewColumnSettings,
@@ -180,7 +180,14 @@ const shellClass = computed(() => {
             <template #header>
               <div :class="previewStyles.comboHeader">
                 <div :class="previewStyles.comboHeaderSegment">
-                  <span>{{ previewColumnSettings[0].label }}</span>
+                  <div :class="previewStyles.comboHeaderSegmentTextWrap">
+                    <EgDataListCellOverflow
+                      :content-class="previewStyles.comboHeaderSegmentText"
+                      context="header"
+                    >
+                      {{ previewColumnSettings[0].label }}
+                    </EgDataListCellOverflow>
+                  </div>
                   <DataListHeaderSortTrigger
                     v-if="previewColumnSettings[0].sortable"
                     :label="previewColumnSettings[0].label"
@@ -189,7 +196,14 @@ const shellClass = computed(() => {
                 </div>
                 <EgDivider type="navigator" direction="vertical" />
                 <div :class="previewStyles.comboHeaderSegment">
-                  <span>{{ previewColumnSettings[0].secondaryLabel }}</span>
+                  <div :class="previewStyles.comboHeaderSegmentTextWrap">
+                    <EgDataListCellOverflow
+                      :content-class="previewStyles.comboHeaderSegmentText"
+                      context="header"
+                    >
+                      {{ previewColumnSettings[0].secondaryLabel }}
+                    </EgDataListCellOverflow>
+                  </div>
                   <DataListHeaderSortTrigger
                     v-if="previewColumnSettings[0].secondarySortable"
                     :label="previewColumnSettings[0].secondaryLabel"
@@ -264,7 +278,7 @@ const shellClass = computed(() => {
           <EgPaginationItem
             :kind="firstPagination.kind"
             :tone="firstPagination.tone"
-            :disabled="paginationLocked || prevNavDisabled || firstPagination.disabled"
+            :disabled="prevNavDisabled || firstPagination.disabled"
             @click="goFirstPage"
           >
             <EgIcon name="eds-arrow-go-first" fit />
@@ -272,7 +286,7 @@ const shellClass = computed(() => {
           <EgPaginationItem
             :kind="prevPagination.kind"
             :tone="prevPagination.tone"
-            :disabled="paginationLocked || prevNavDisabled || prevPagination.disabled"
+            :disabled="prevNavDisabled || prevPagination.disabled"
             @click="goPrevPage"
           >
             <EgIcon name="eds-arrow-left-mini-ios" fit />
@@ -282,7 +296,7 @@ const shellClass = computed(() => {
               :kind="pagePagination.kind"
               :tone="pagePagination.tone"
               selected
-              :disabled="paginationLocked || pagePagination.disabled"
+              :disabled="pagePagination.disabled"
               :label="String(currentPage)"
             />
           </template>
@@ -294,7 +308,7 @@ const shellClass = computed(() => {
               :tone="pagePagination.tone"
               :interactive="item.kind !== 'ellipsis'"
               :selected="isManyPageSelected(item, index)"
-              :disabled="paginationLocked || pagePagination.disabled"
+              :disabled="pagePagination.disabled"
               :label="item.label"
               @click="onManyPageItemClick(item)"
             />
@@ -302,7 +316,7 @@ const shellClass = computed(() => {
           <EgPaginationItem
             :kind="nextPagination.kind"
             :tone="nextPagination.tone"
-            :disabled="paginationLocked || nextNavDisabled || nextPagination.disabled"
+            :disabled="nextNavDisabled || nextPagination.disabled"
             @click="goNextPage"
           >
             <EgIcon name="eds-arrow-right-mini-ios" fit />
@@ -310,7 +324,7 @@ const shellClass = computed(() => {
           <EgPaginationItem
             :kind="lastPagination.kind"
             :tone="lastPagination.tone"
-            :disabled="paginationLocked || nextNavDisabled || lastPagination.disabled"
+            :disabled="nextNavDisabled || lastPagination.disabled"
             @click="goLastPage"
           >
             <EgIcon name="eds-arrow-go-last" fit />

@@ -266,13 +266,13 @@ onBeforeUnmount(() => {
                 </template>
               </div>
               <template v-if="slots.appEntries">
-                <EgDivider :class="styles.moduleRegionDivider" type="page" />
+                <EgDivider :class="styles.moduleRegionDivider" type="navigator" />
                 <div :class="styles.appEntryItems">
                   <slot name="appEntries" />
                 </div>
               </template>
               <template v-else-if="declarativeAppEntries.length > 0">
-                <EgDivider :class="styles.moduleRegionDivider" type="page" />
+                <EgDivider :class="styles.moduleRegionDivider" type="navigator" />
                 <div :class="styles.appEntryItems">
                   <NavBarModuleItem
                     v-for="(item, index) in declarativeAppEntries"

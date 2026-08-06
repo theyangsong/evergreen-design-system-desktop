@@ -45,8 +45,9 @@ alwaysApply: true
 
 ## Desktop 客户端 consumer（如 work-cregis-desktop）
 
-同步 **仅** 传播 `packages/tokens` 与 `packages/components` 的 build/源码，以及 **list-field-currency 运行时辅助文件**（`listFieldCurrencyShared.ts`、`listFieldCrypto*.ts`）到 `work-cregis-desktop/src/scenes/tasks/list-field/`。**不包含**：
+同步 **仅** 传播 `packages/tokens` 与 `packages/components` 的 build/源码，以及 **list-field-currency 运行时辅助文件**（`listFieldCurrencyShared.ts`、`listFieldCryptoResolve.ts` 等）到 `work-cregis-desktop/src/scenes/tasks/list-field/`。**不包含**：
 
+- `listFieldCryptoSampleAddresses.ts`（work-cregis-desktop 维护业务本地扩展，sync **跳过**）
 - `apps/showcase/**`（Website 壳 + Desktop 预览混合）
 - `@eds/website-tokens` / `@eds/website-components`
 

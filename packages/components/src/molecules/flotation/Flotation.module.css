@@ -136,7 +136,7 @@
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 
@@ -212,7 +212,7 @@
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 
@@ -413,7 +413,7 @@
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   transition: var(--motion-transition-hover);
 }
 

@@ -7,7 +7,10 @@ import {
   EgCryptoCombo,
   EgDivider,
   EgFormSubmission,
+  EgIcon,
+  EgListFieldAddressLine,
   EgListFieldHashLikeLine,
+  EgListFieldOverflowText,
   EgTag,
   formatGroupedNumber,
   type CryptoComboEntryBadge,
@@ -75,7 +78,9 @@ const hashLikeTooltipTrigger = computed(
 
 const hashLikeCopyOnRowHover = computed(() => readHashLikeCopyOnRowHover(props.customize));
 
-const hashLikeLineEllipsis = computed(() => Boolean(hashLikeMinWidth.value));
+const listFieldTooltipTrigger = computed(
+  () => String(props.customize.tooltipTrigger ?? 'hover') as 'hover' | 'focus',
+);
 
 const currencyFromTagsList = computed(() => buildCurrencySideTagsList('from', props.customize));
 
@@ -107,7 +112,6 @@ const currencyToAddress = computed(() => buildCurrencySideAddressData('to', prop
 
 const addressFrom = () => truncateMiddle(String(props.customize.address ?? SAMPLE_ADDRESS), 6, 6);
 const addressTo = () => truncateMiddle(String(props.customize.address ?? SAMPLE_ADDRESS), 5, 5);
-const addressSingle = () => truncateMiddle(String(props.customize.address ?? SAMPLE_ADDRESS));
 const fullAddress = () => String(props.customize.address ?? SAMPLE_ADDRESS);
 
 const displayMode = () => String(props.customize.displayMode ?? 'single');
@@ -288,9 +292,11 @@ const actionMinWidthStyle = computed(() => {
 
     <template v-else-if="slug === 'list-field-address'">
       <div v-if="displayMode() === 'single'" :class="styles.addressPreview" :style="cellMinWidthStyle">
-        <EgAnchoredTooltip :content="fullAddress()" placement="top" align="start">
-          <span :class="styles.addressText">{{ addressSingle() }}</span>
-        </EgAnchoredTooltip>
+        <EgListFieldAddressLine
+          :text="fullAddress()"
+          :copy-on-row-hover="hashLikeCopyOnRowHover"
+          :tooltip-trigger="hashLikeTooltipTrigger"
+        />
       </div>
 
       <div v-else-if="displayMode() === 'alias'" :class="styles.addressPreview" :style="cellMinWidthStyle">
@@ -336,7 +342,6 @@ const actionMinWidthStyle = computed(() => {
               :identifier-mode="slug === 'list-field-identifier'"
               :copy-on-row-hover="hashLikeCopyOnRowHover"
               :tooltip-trigger="hashLikeTooltipTrigger"
-              :ellipsis="hashLikeLineEllipsis"
             />
             <EgTag
               v-if="showRightTag()"
@@ -353,7 +358,6 @@ const actionMinWidthStyle = computed(() => {
             :identifier-mode="slug === 'list-field-identifier'"
             :copy-on-row-hover="hashLikeCopyOnRowHover"
             :tooltip-trigger="hashLikeTooltipTrigger"
-            :ellipsis="hashLikeLineEllipsis"
           />
         </template>
         <template v-else>
@@ -377,7 +381,6 @@ const actionMinWidthStyle = computed(() => {
                 :identifier-mode="slug === 'list-field-identifier'"
                 :copy-on-row-hover="hashLikeCopyOnRowHover"
                 :tooltip-trigger="hashLikeTooltipTrigger"
-                :ellipsis="hashLikeLineEllipsis"
               />
               <EgTag
                 v-if="showRightTag()"
@@ -415,7 +418,6 @@ const actionMinWidthStyle = computed(() => {
               :identifier-mode="slug === 'list-field-identifier'"
               :copy-on-row-hover="hashLikeCopyOnRowHover"
               :tooltip-trigger="hashLikeTooltipTrigger"
-              :ellipsis="hashLikeLineEllipsis"
             />
             <EgTag
               v-if="showRightTag()"
@@ -441,7 +443,6 @@ const actionMinWidthStyle = computed(() => {
             :identifier-mode="slug === 'list-field-identifier'"
             :copy-on-row-hover="hashLikeCopyOnRowHover"
             :tooltip-trigger="hashLikeTooltipTrigger"
-            :ellipsis="hashLikeLineEllipsis"
           />
           <EgListFieldHashLikeLine
             :text="hashLikeSecondaryValue"
@@ -449,7 +450,6 @@ const actionMinWidthStyle = computed(() => {
             :identifier-mode="slug === 'list-field-identifier'"
             :copy-on-row-hover="hashLikeCopyOnRowHover"
             :tooltip-trigger="hashLikeTooltipTrigger"
-            :ellipsis="hashLikeLineEllipsis"
           />
         </span>
         <div
@@ -463,7 +463,6 @@ const actionMinWidthStyle = computed(() => {
             :identifier-mode="slug === 'list-field-identifier'"
             :copy-on-row-hover="hashLikeCopyOnRowHover"
             :tooltip-trigger="hashLikeTooltipTrigger"
-            :ellipsis="hashLikeLineEllipsis"
           />
           <EgFormSubmission
             v-if="showDismissFeedback"
@@ -482,53 +481,78 @@ const actionMinWidthStyle = computed(() => {
 
     <template v-else-if="slug === 'list-field-amount'">
       <div v-if="amountType() === 'fiat'" :class="styles.amountPreview" :style="cellMinWidthStyle">
-        <span :class="['typography-body-medium', styles.amountPrimary]">{{ fiatValue() }}</span>
+        <EgListFieldOverflowText
+          :text="fiatValue()"
+          variant="primary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
       </div>
       <div v-else-if="amountType() === 'crypto'" :class="styles.amountPreview" :style="cellMinWidthStyle">
-        <span :class="['typography-body-medium', styles.amountPrimary]">
-          {{ formatGroupedNumber('66666.6666') }} BTC
-        </span>
+        <EgListFieldOverflowText
+          :text="`${formatGroupedNumber('66666.6666')} BTC`"
+          variant="primary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
         <span v-if="showCountdown" :class="styles.generalStructureCountdown">
           <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
           <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
         </span>
       </div>
       <div v-else :class="styles.amountPreview" :style="cellMinWidthStyle">
-        <span :class="['typography-body-medium', styles.amountPrimary]">{{ cryptoValue() }} USDT</span>
+        <EgListFieldOverflowText
+          :text="`${cryptoValue()} USDT`"
+          variant="primary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
         <div v-if="showAmountConversionCountdown" :class="styles.amountSecondaryRow">
-          <span :class="['typography-footnote', styles.amountSecondary]">≈ {{ fiatValue() }}</span>
+          <EgListFieldOverflowText
+            :text="`≈ ${fiatValue()}`"
+            variant="secondary"
+            tabular
+            :tooltip-trigger="listFieldTooltipTrigger"
+          />
           <EgDivider type="page" direction="vertical" />
           <span :class="styles.generalStructureCountdown">
             <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
             <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
           </span>
         </div>
-        <span v-else :class="['typography-footnote', styles.amountSecondary]">≈ {{ fiatValue() }}</span>
+        <EgListFieldOverflowText
+          v-else
+          :text="`≈ ${fiatValue()}`"
+          variant="secondary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
       </div>
     </template>
 
     <template v-else-if="slug === 'list-field-time'">
       <div :class="styles.timePreview" :style="cellMinWidthStyle">
-        <span
-          :class="[
-            timeIsDoubleLine ? 'typography-body-small' : 'typography-body-medium',
-            styles.timeCell,
-          ]"
-        >
-          {{ datetime() }}
-        </span>
-        <span
+        <EgListFieldOverflowText
+          :text="datetime()"
+          :size="timeIsDoubleLine ? 'small' : 'medium'"
+          variant="primary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
+        <EgListFieldOverflowText
           v-if="timeIsDoubleLine"
-          :class="['typography-body-small', styles.timeSecondary]"
-        >
-          {{ secondaryDatetime() }}
-        </span>
+          :text="secondaryDatetime()"
+          size="small"
+          variant="primary"
+          tabular
+          :tooltip-trigger="listFieldTooltipTrigger"
+        />
       </div>
     </template>
 
     <template v-else-if="slug === 'list-field-status'">
       <div :class="styles.statusPreview" :style="cellMinWidthStyle">
-        <EgTag family="status" :status="status()" :size="statusTagSize()">
+        <EgTag family="status" :status="status()" :size="statusTagSize()" truncate>
           {{ statusLabel() }}
         </EgTag>
         <EgFormSubmission

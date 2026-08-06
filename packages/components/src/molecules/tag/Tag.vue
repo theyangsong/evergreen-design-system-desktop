@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
+import { EgAnchoredTooltip } from '../tooltip';
 import styles from './Tag.module.css';
 
 export type TagSize = 'lg' | 'md' | 'sm';
@@ -96,7 +97,7 @@ const props = withDefaults(
     status?: TagStatus;
     colorfulStyle?: TagColorfulStyle;
     customStyle?: TagCustomStyle;
-    /** 文本超出容器宽度时省略（需父级约束 max-width） */
+    /** 文本超出容器宽度时省略（需父级约束 max-width）；溢出时 hover 展示完整 tooltip。 */
     truncate?: boolean;
   }>(),
   {
@@ -109,6 +110,11 @@ const props = withDefaults(
     truncate: false,
   },
 );
+
+const textRef = ref<HTMLElement | null>(null);
+const overflowing = ref(false);
+const tooltipText = ref('');
+let resizeObserver: ResizeObserver | null = null;
 
 const variantClass = computed((): string | string[] => {
   if (props.family === 'status') {
@@ -157,14 +163,100 @@ const tagClasses = computed(() => {
     ...(Array.isArray(variant) ? variant : [variant]),
   ];
 });
+
+const overflowTooltipScopeClass = computed(
+  () => `desktopTokens eds-overflow-text-tooltip ${styles.overflowTooltip}`,
+);
+
+function measureOverflow() {
+  if (!props.truncate) {
+    overflowing.value = false;
+    tooltipText.value = '';
+    return;
+  }
+
+  const el = textRef.value;
+  if (!el) {
+    overflowing.value = false;
+    tooltipText.value = '';
+    return;
+  }
+
+  overflowing.value = el.scrollWidth > el.clientWidth + 1;
+  tooltipText.value = el.textContent?.trim() || '';
+}
+
+function bindResizeObserver() {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  if (!props.truncate || !textRef.value) return;
+  resizeObserver = new ResizeObserver(() => measureOverflow());
+  resizeObserver.observe(textRef.value);
+}
+
+watch(
+  () => props.truncate,
+  () => {
+    nextTick(() => {
+      measureOverflow();
+      bindResizeObserver();
+    });
+  },
+);
+
+onMounted(() => {
+  measureOverflow();
+  bindResizeObserver();
+});
+
+onUpdated(() => {
+  if (props.truncate) {
+    measureOverflow();
+  }
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
 </script>
 
 <template>
-  <span :class="tagClasses">
+  <EgAnchoredTooltip
+    v-if="truncate"
+    :content="tooltipText"
+    :disabled="!overflowing || !tooltipText"
+    trigger="hover"
+    width-mode="adaptive"
+    :max-width="240"
+    height-mode="adaptive"
+    :scrollable="false"
+    :token-scope-class="overflowTooltipScopeClass"
+    boundary-selector=".eds-data-list"
+  >
+    <span :class="tagClasses">
+      <template v-if="family === 'custom'">
+        <span :class="styles.customContent">
+          <span v-if="size === 'sm'" ref="textRef" :class="styles.smTextTruncate">
+            <slot />
+          </span>
+          <span v-else ref="textRef" :class="styles.textTruncate">
+            <slot />
+          </span>
+        </span>
+      </template>
+      <template v-else-if="size === 'sm'">
+        <span ref="textRef" :class="styles.smTextTruncate"><slot /></span>
+      </template>
+      <template v-else>
+        <span ref="textRef" :class="styles.textTruncate"><slot /></span>
+      </template>
+    </span>
+  </EgAnchoredTooltip>
+
+  <span v-else :class="tagClasses">
     <template v-if="family === 'custom'">
       <span :class="styles.customContent">
-        <span v-if="size === 'sm' && truncate" :class="styles.smTextTruncate"><slot /></span>
-        <span v-else-if="size === 'sm'" :class="styles.smText">
+        <span v-if="size === 'sm'" :class="styles.smText">
           <span :class="styles.smTextPaint" aria-hidden="true"><slot /></span>
           <span :class="styles.smTextSizer"><slot /></span>
         </span>
@@ -172,8 +264,7 @@ const tagClasses = computed(() => {
       </span>
     </template>
     <template v-else>
-      <span v-if="size === 'sm' && truncate" :class="styles.smTextTruncate"><slot /></span>
-      <span v-else-if="size === 'sm'" :class="styles.smText">
+      <span v-if="size === 'sm'" :class="styles.smText">
         <span :class="styles.smTextPaint" aria-hidden="true"><slot /></span>
         <span :class="styles.smTextSizer"><slot /></span>
       </span>

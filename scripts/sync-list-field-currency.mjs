@@ -29,6 +29,14 @@ const COPY_VERBATIM = [
   'listFieldCryptoResolve.ts',
 ];
 
+/**
+ * Consumer-local files — sync must not overwrite (business extensions beyond showcase slim copy).
+ * work-cregis-desktop: listFieldCryptoSampleAddresses.ts has getPinnedAddressForRow, ton/sui, 23-pool.
+ */
+const CONSUMER_SKIP_COPY = {
+  'work-cregis-desktop': new Set(['listFieldCryptoSampleAddresses.ts']),
+};
+
 /** Consumer tag customize must include these markers (custom tag family + AML risk). */
 const TAG_CUSTOMIZE_MARKERS = [
   "return 'aml-danger'",
@@ -48,6 +56,10 @@ export function syncListFieldCurrencyForConsumer(consumerName, consumerRoot) {
   const copied = [];
 
   for (const fileName of COPY_VERBATIM) {
+    if (CONSUMER_SKIP_COPY[consumerName]?.has(fileName)) {
+      console.log(`  skip ${fileName}: consumer maintains local extensions`);
+      continue;
+    }
     const source = join(SHOWCASE_LIST_FIELD, fileName);
     const dest = join(targetDir, fileName);
     if (!existsSync(source)) {

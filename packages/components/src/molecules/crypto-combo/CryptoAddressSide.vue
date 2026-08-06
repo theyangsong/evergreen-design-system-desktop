@@ -1,18 +1,25 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue';
-import { EgIcon } from '../../atoms/icons';
-import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../flotation';
-import { EgIconButton } from '../icon-button';
-import { EgTag } from '../tag';
+import { EgFlotation } from '../flotation';
+import { EgTextOverflowTooltip } from '../tooltip';
 import CryptoAddressTags from './CryptoAddressTags.vue';
+import CryptoAddressSideMenuPanel, {
+  type CryptoAddressSideMenuRow,
+} from './CryptoAddressSideMenuPanel.vue';
 import styles from './CryptoCombo.module.css';
 import type { CryptoAddressSideTags } from './cryptoAddressTypes';
 import { truncateAddressMiddle } from './cryptoAddressUtils';
 import { hasAddressTags, splitTagsForDisplay } from './cryptoAddressTagUtils';
+import {
+  FLOTATION_OVERFLOW_CLOSE_DELAY,
+  FLOTATION_OVERFLOW_OPEN_DELAY,
+} from '../tooltip/textOverflowTooltipConstants';
 
-/** CryptoAddress 浮层：EgFlotation Combo（#trigger + #content Menu/Box）。 */
-const CRYPTO_ADDRESS_TOOLTIP_MAX_HEIGHT = 280;
-const CRYPTO_ADDRESS_TOOLTIP_MAX_WIDTH = 480;
+/**
+ * CryptoAddress 侧：
+ * - 地址字段 → EgTextOverflowTooltip（与 ListFieldAddressLine 同一套；JS 6…6 + 列宽裁切才开 Menu）
+ * - Tag +N / (N) 多地址 → 独立 EgFlotation，不包裹地址字段
+ */
 
 export type CryptoAddressTooltipTrigger = 'hover' | 'focus';
 
@@ -23,7 +30,6 @@ const props = withDefaults(
     addressCount?: number;
     addresses?: string[];
     tags?: CryptoAddressSideTags;
-    /** 按地址索引的 Tag 列表；首项用于行内展示 */
     addressTags?: CryptoAddressSideTags[];
     addressMode?: 'single' | 'double';
     minWidth?: number;
@@ -83,78 +89,48 @@ const primaryAlias = computed(() => props.alias?.trim() || undefined);
 
 const displayAddress = computed(() => truncateAddressMiddle(props.address, 6, 6));
 
-const isAddressDisplayTruncated = computed(
+const addressDisplayText = computed(
+  () => primaryAlias.value ?? displayAddress.value,
+);
+
+const addressTypographyClass = computed(() =>
+  primaryAlias.value
+    ? [styles.cryptoAddressText, styles.cryptoAddressAlias]
+    : styles.cryptoAddressText,
+);
+
+const addressCopyLabel = computed(() => `复制地址 ${props.address}`);
+
+const addressSemanticallyTruncated = computed(
   () => !primaryAlias.value && displayAddress.value !== props.address,
 );
 
-const showSideTooltip = computed(
-  () =>
-    showAddressCollection.value ||
-    hasOverflowTags.value ||
-    isAddressDisplayTruncated.value ||
-    Boolean(primaryAlias.value) ||
-    props.tooltipTrigger === 'hover' ||
-    props.tooltipTrigger === 'focus',
+const useCountAsMenuTrigger = computed(
+  () => showAddressCollection.value && !hasOverflowTags.value,
 );
 
-const hoverTriggerClass = computed(() =>
-  props.tooltipTrigger === 'focus'
-    ? 'eds-hover-tooltip-trigger--focus'
-    : undefined,
-);
+const sideMenuRows = computed((): CryptoAddressSideMenuRow[] => {
+  const rows: CryptoAddressSideMenuRow[] = [];
 
-type CryptoAddressTooltipMenuRow = {
-  key: string;
-  address: string;
-  alias?: string;
-  tags?: CryptoAddressSideTags;
-  showExpandedTags?: boolean;
-};
-
-const tooltipMenuRows = computed((): CryptoAddressTooltipMenuRow[] => {
-  const rows: CryptoAddressTooltipMenuRow[] = [];
-
-  if (showSideTooltip.value) {
-    rows.push({
-      key: 'primary',
-      address: props.address,
-      alias: primaryAlias.value,
-      tags: primaryTags.value,
-      showExpandedTags: primaryTags.value
-        ? hasAddressTags(primaryTags.value.system, primaryTags.value.custom)
-        : false,
-    });
-
-    if (showAddressCollection.value) {
-      const rest = props.addresses?.length
-        ? props.addresses.slice(1, count.value)
-        : addressList.value.slice(1);
-      rest.forEach((address, index) => {
-        const tags = resolveAddressTags(index + 1);
-        rows.push({
-          key: `rest-${index}`,
-          address,
-          tags,
-          showExpandedTags: tags
-            ? hasAddressTags(tags.system, tags.custom)
-            : false,
-        });
-      });
-    }
-
-    return rows;
-  }
+  rows.push({
+    key: 'primary',
+    address: props.address,
+    alias: primaryAlias.value,
+    tags: primaryTags.value,
+    showExpandedTags: primaryTags.value
+      ? hasAddressTags(primaryTags.value.system, primaryTags.value.custom)
+      : false,
+  });
 
   if (showAddressCollection.value) {
-    const list = props.addresses?.length
-      ? props.addresses.slice(0, count.value)
-      : addressList.value;
-    list.forEach((address, index) => {
-      const tags = resolveAddressTags(index);
+    const rest = props.addresses?.length
+      ? props.addresses.slice(1, count.value)
+      : addressList.value.slice(1);
+    rest.forEach((address, index) => {
+      const tags = resolveAddressTags(index + 1);
       rows.push({
-        key: `addr-${index}`,
-        address: index === 0 ? props.address : address,
-        alias: index === 0 ? primaryAlias.value : undefined,
+        key: `rest-${index}`,
+        address,
         tags,
         showExpandedTags: tags
           ? hasAddressTags(tags.system, tags.custom)
@@ -168,6 +144,17 @@ const tooltipMenuRows = computed((): CryptoAddressTooltipMenuRow[] => {
 
 const copiedRowKey = ref<string | null>(null);
 let copiedResetTimer: ReturnType<typeof setTimeout> | undefined;
+
+const sideMenuFlotationProps = {
+  placement: 'bottom' as const,
+  align: 'start' as const,
+  openDelay: FLOTATION_OVERFLOW_OPEN_DELAY,
+  closeDelay: FLOTATION_OVERFLOW_CLOSE_DELAY,
+  showAdd: false,
+  showMenuDivider: false,
+  closeOnScroll: true,
+  boundarySelector: '.eds-data-list',
+};
 
 async function onCopyAddress(key: string, address: string, event: MouseEvent) {
   event.stopPropagation();
@@ -190,123 +177,81 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <EgFlotation
-    v-if="showSideTooltip"
-    :trigger="tooltipTrigger"
-    placement="bottom"
-    align="start"
-    :open-delay="120"
-    :close-delay="80"
-    :show-add="false"
-    :show-menu-divider="false"
-    close-on-scroll
-    boundary-selector=".eds-data-list"
-  >
-    <template #trigger>
-      <span :class="[styles.cryptoAddressSide, 'eds-hover-tooltip-trigger', hoverTriggerClass]">
-        <span
-          :class="[
-            styles.cryptoAddressLine,
-            primaryAlias && styles.cryptoAddressLineAlias,
-            'eds-hover-tooltip-trigger__target',
-          ]"
-          :tabindex="tooltipTrigger === 'focus' ? 0 : undefined"
-        >
-          <span
-            v-if="primaryAlias"
-            :class="[styles.cryptoAddressText, styles.cryptoAddressAlias]"
-          >{{ primaryAlias }}</span>
-          <span v-else :class="styles.cryptoAddressText">{{ displayAddress }}</span>
-          <span v-if="showAddressCollection" :class="styles.cryptoAddressCount">
-            (<span :class="styles.cryptoAddressCountValue">{{ count }}</span>)
-          </span>
-        </span>
-        <span :class="styles.cryptoAddressTags">
-          <CryptoAddressTags
-            :tags="primaryTags"
-            :default-show-more="defaultShowMore"
-          />
-        </span>
-      </span>
-    </template>
-
-    <template #content>
-      <EgFlotationMenu
-        class="desktopTokens eds-crypto-address-tooltip-menu eds-flotation-menu--box-doc"
-        height-mode="adaptive"
-        :max-height="CRYPTO_ADDRESS_TOOLTIP_MAX_HEIGHT"
-        width-mode="adaptive"
-        :max-width="CRYPTO_ADDRESS_TOOLTIP_MAX_WIDTH"
-        :show-add="false"
-        list-scroll
-      >
-        <EgFlotationMenuItem
-          v-for="row in tooltipMenuRows"
-          :key="row.key"
-          box-type="text"
-          label-wrap
-          :show-tag="false"
-        >
-          <span :class="styles.menuRowContent">
-            <span :class="styles.menuRowMain">
-              <EgTag
-                v-if="row.alias"
-                family="system"
-                system-type="solid-brand"
-                size="sm"
-              >
-                {{ row.alias }}
-              </EgTag>
-              <span :class="styles.menuAddressLine">
-                <span :class="styles.menuAddress">{{ row.address }}</span>
-                <span
-                  :class="[
-                    styles.menuCopyButton,
-                    copiedRowKey === row.key && styles.menuCopyButtonCopied,
-                  ]"
-                >
-                  <EgIconButton
-                    shape="square"
-                    size="xs"
-                    :label="`复制地址 ${row.address}`"
-                    @click="onCopyAddress(row.key, row.address, $event)"
-                  >
-                    <EgIcon
-                      :name="copiedRowKey === row.key ? 'eds-enable-fill' : 'eds-copy'"
-                      fit
-                    />
-                  </EgIconButton>
-                </span>
-              </span>
-            </span>
-
-            <span v-if="row.showExpandedTags && row.tags" :class="styles.menuRowTags">
-              <CryptoAddressTags
-                :tags="row.tags"
-                :default-show-more="false"
-                tooltip-mode
-              />
-            </span>
-          </span>
-        </EgFlotationMenuItem>
-      </EgFlotationMenu>
-    </template>
-  </EgFlotation>
-
-  <span v-else :class="styles.cryptoAddressSide">
+  <span :class="[styles.cryptoAddressSide, 'eds-crypto-address-side']">
     <span
       :class="[
         styles.cryptoAddressLine,
         primaryAlias && styles.cryptoAddressLineAlias,
       ]"
     >
-      <span
-        v-if="primaryAlias"
-        :class="[styles.cryptoAddressText, styles.cryptoAddressAlias]"
-      >{{ primaryAlias }}</span>
-      <span v-else :class="styles.cryptoAddressText">{{ displayAddress }}</span>
+      <EgTextOverflowTooltip
+        :tooltip-text="props.address"
+        :copy-value="props.address"
+        :copy-label="addressCopyLabel"
+        show-tooltip-copy
+        :trigger="tooltipTrigger"
+        :semantic-truncated="addressSemanticallyTruncated"
+        :menu-alias="primaryAlias"
+        :menu-tags="primaryTags"
+        target-tone="secondary"
+        :typography-class="addressTypographyClass"
+        :menu-text-class="styles.menuAddress"
+        :host-class="styles.cryptoAddressTextHost"
+        host-flex
+        boundary-selector=".eds-data-list"
+      >
+        {{ addressDisplayText }}
+      </EgTextOverflowTooltip>
+
+      <EgFlotation
+        v-if="useCountAsMenuTrigger"
+        class="eds-crypto-address-flotation"
+        :trigger="tooltipTrigger"
+        v-bind="sideMenuFlotationProps"
+      >
+        <template #trigger>
+          <span :class="styles.cryptoAddressCount">
+            (<span :class="styles.cryptoAddressCountValue">{{ count }}</span>)
+          </span>
+        </template>
+        <template #content>
+          <CryptoAddressSideMenuPanel
+            :rows="sideMenuRows"
+            :copied-row-key="copiedRowKey"
+            @copy="onCopyAddress"
+          />
+        </template>
+      </EgFlotation>
+
+      <span v-else-if="showAddressCollection" :class="styles.cryptoAddressCount">
+        (<span :class="styles.cryptoAddressCountValue">{{ count }}</span>)
+      </span>
     </span>
-    <span :class="styles.cryptoAddressTags">
+
+    <EgFlotation
+      v-if="hasOverflowTags"
+      class="eds-crypto-address-flotation"
+      :trigger="tooltipTrigger"
+      v-bind="sideMenuFlotationProps"
+    >
+      <template #trigger>
+        <span :class="styles.cryptoAddressTags">
+          <CryptoAddressTags
+            :tags="primaryTags"
+            :default-show-more="defaultShowMore"
+          />
+        </span>
+      </template>
+      <template #content>
+        <CryptoAddressSideMenuPanel
+          :rows="sideMenuRows"
+          :copied-row-key="copiedRowKey"
+          @copy="onCopyAddress"
+        />
+      </template>
+    </EgFlotation>
+
+    <span v-else :class="styles.cryptoAddressTags">
       <CryptoAddressTags
         :tags="primaryTags"
         :default-show-more="defaultShowMore"

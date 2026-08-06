@@ -32,6 +32,8 @@ const props = withDefaults(
     sortable?: boolean;
     /** 列展示优先级，越小越靠左；默认按声明顺序。 */
     displayOrder?: number;
+    /** 尾列参与多余空间均分（默认尾列仅保 min-width）。 */
+    flexGrow?: boolean;
     /** 标记操作列（默认最后一列）。 */
     isAction?: boolean;
     primaryAction?: DataListPrimaryAction;

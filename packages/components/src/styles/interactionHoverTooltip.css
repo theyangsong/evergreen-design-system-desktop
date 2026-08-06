@@ -8,7 +8,7 @@
  * 浮层打开：祖先 [data-eds-tooltip-open]（EgAnchoredTooltip 写入）
  */
 .eds-hover-tooltip-trigger {
-  cursor: pointer;
+  cursor: default;
   user-select: none;
 }
 
@@ -40,9 +40,9 @@
   opacity: 1;
 }
 
-/* 浮层已开、鼠标不在 __target 上 — 文案聚焦色，虚线保持隐藏 */
+/* 浮层已开、鼠标离开 __target（移向 panel 或离场）— 保持品牌色，虚线隐藏 */
 [data-eds-tooltip-open] .eds-hover-tooltip-trigger__target:not(:hover) {
-  color: var(--event-focus-brand);
+  color: var(--event-hover-brand);
 }
 
 [data-eds-tooltip-open] .eds-hover-tooltip-trigger__target:not(:hover)::after {
@@ -62,7 +62,7 @@
   opacity: 1;
 }
 
-/* Primary 行（List Field 主文本等）— 默认保持 text-base-primary（100%），仅 hover / focus 时品牌色 */
+/* Primary 行（List Field 主文本等）— 默认 text-base-primary；hover / 浮层打开 / focus 时为品牌色 */
 .eds-hover-tooltip-trigger__target--primary {
   color: var(--text-base-primary);
 }
@@ -70,10 +70,6 @@
 .eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target--primary,
 .eds-hover-tooltip-trigger__target--primary:hover {
   color: var(--event-hover-brand);
-}
-
-[data-eds-tooltip-open] .eds-hover-tooltip-trigger__target--primary:not(:hover) {
-  color: var(--text-base-primary);
 }
 
 .eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target--primary {
@@ -84,9 +80,52 @@
   opacity: 1;
 }
 
+/* Secondary 行（List Field 副文本 / footnote）— 默认 text-base-secondary；hover / 浮层打开 / focus 时为品牌色 */
+.eds-hover-tooltip-trigger__target--secondary {
+  color: var(--text-base-secondary);
+}
+
+.eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target--secondary,
+.eds-hover-tooltip-trigger__target--secondary:hover {
+  color: var(--event-hover-brand);
+}
+
+.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target--secondary {
+  color: var(--event-hover-brand);
+}
+
+.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target--secondary::after {
+  opacity: 1;
+}
+
+/* 保留语义色（如 Status Tag），hover 时仍走品牌色 + 虚线 */
+.eds-hover-tooltip-trigger__target--inherit {
+  color: inherit;
+}
+
+.eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target--inherit,
+.eds-hover-tooltip-trigger__target--inherit:hover {
+  color: var(--event-hover-brand);
+}
+
+[data-eds-tooltip-open] .eds-hover-tooltip-trigger__target--inherit:not(:hover) {
+  color: inherit;
+}
+
+.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target--inherit {
+  color: var(--event-hover-brand);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .eds-hover-tooltip-trigger__target,
   .eds-hover-tooltip-trigger__target::after {
     transition: none;
   }
+}
+
+/* 只读文本 overflow tooltip 面板：默认指针、禁止选中/复制 */
+:global(.eds-overflow-text-tooltip) :global(.eds-tooltip-panel) {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
 }
