@@ -37,7 +37,7 @@
 }
 
 .decor .symbol {
-  color: var(--text-base-secondary);
+  color: var(--stroke-base-secondary);
 }
 
 .symbol {
@@ -45,7 +45,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  color: var(--text-base-secondary);
+  color: var(--stroke-base-secondary);
   transition: var(--motion-transition-hover);
 }
 
@@ -58,20 +58,20 @@
 }
 
 .button:hover:not(:disabled):not(.isDisabled) .symbol {
-  color: var(--text-base-primary);
+  color: var(--stroke-base-primary);
 }
 
 .button:focus-visible:not(:disabled):not(.isDisabled) .symbol {
-  color: var(--text-base-secondary);
+  color: var(--stroke-base-secondary);
 }
 
 .button:active:not(:disabled):not(.isDisabled) .symbol {
-  color: var(--text-base-secondary);
+  color: var(--stroke-base-secondary);
 }
 
 .button:disabled .symbol,
 .button.isDisabled .symbol {
-  color: var(--text-base-quaternary);
+  color: var(--stroke-base-quaternary);
 }
 
 /* ── Icon sizes (Figma symbol scale) ── */

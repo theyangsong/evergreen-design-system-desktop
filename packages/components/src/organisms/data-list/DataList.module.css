@@ -493,10 +493,19 @@
   color: var(--stroke-base-tertiary);
 }
 
-:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):hover:not(:disabled) :global(.symbol),
-:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):focus-visible:not(:disabled) :global(.symbol),
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):focus-visible:not(:disabled):not(.isDisabled) :global(.symbol),
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):active:not(:disabled):not(.isDisabled) :global(.symbol),
 :global(.eds-data-list) .sortTriggerFocus:global(.eds-icon-button) :global(.symbol) {
+  color: var(--stroke-base-tertiary);
+}
+
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):hover:not(:disabled):not(.isDisabled) :global(.symbol) {
   color: var(--stroke-base-secondary);
+}
+
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button):disabled :global(.symbol),
+:global(.eds-data-list) .sortTrigger:global(.eds-icon-button).isDisabled :global(.symbol) {
+  color: var(--stroke-base-quaternary);
 }
 
 .sortTriggerDisabled {

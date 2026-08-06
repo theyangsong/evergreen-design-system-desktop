@@ -160,14 +160,11 @@
   transition: none;
 }
 
-/* 与 bottomIconHost / NavBar 模块按钮一致：背景走 motion-transition-hover；聚焦仍瞬时。 */
-.itemHover:not(.itemFocused) {
-  transition: var(--motion-transition-hover);
-}
-
+/* 仅悬浮时背景淡入；失焦、聚焦切换、失 hover 均瞬时（同 bottomIconHost 聚焦策略）。 */
 @media (hover: hover) {
   .itemHover:hover:not(.itemFocused) {
     background-color: var(--event-hover);
+    transition: var(--motion-transition-hover);
   }
 }
 

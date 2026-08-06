@@ -45,15 +45,15 @@
 
 .root:hover:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon),
 .root:focus-visible:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
-  color: var(--text-base-primary);
+  color: var(--stroke-base-primary);
 }
 
 .root:active:not(:disabled) .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
-  color: var(--text-base-secondary);
+  color: var(--stroke-base-secondary);
 }
 
 .root:disabled .iconSlot :global(.eds-icon-button) :global(.eds-icon) {
-  color: var(--text-base-quaternary);
+  color: var(--stroke-base-quaternary);
 }
 
 /* Bar 11px：sizer 1× 撑布局，paint 2× + scale(0.5) 渲染（同 NavBar .moduleLabel） */
