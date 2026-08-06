@@ -142,7 +142,6 @@
 
 .item {
   position: relative;
-  isolation: isolate;
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -161,27 +160,14 @@
   transition: none;
 }
 
-/* Hover 用 overlay 过渡，与聚焦背景解耦：离开悬浮也有动效，聚焦仍瞬时切换。 */
-.itemHover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background-color: var(--event-hover);
-  opacity: 0;
-  pointer-events: none;
-  transition: var(--motion-transition-fade);
-}
-
-.itemHover > * {
-  position: relative;
-  z-index: 1;
+/* 与 bottomIconHost / NavBar 模块按钮一致：背景走 motion-transition-hover；聚焦仍瞬时。 */
+.itemHover:not(.itemFocused) {
+  transition: var(--motion-transition-hover);
 }
 
 @media (hover: hover) {
-  .itemHover:hover:not(.itemFocused)::before {
-    opacity: 1;
+  .itemHover:hover:not(.itemFocused) {
+    background-color: var(--event-hover);
   }
 }
 
@@ -261,11 +247,6 @@
   background-color: var(--event-focus-brand);
   color: var(--text-same-white-primary);
   transition: none !important;
-}
-
-.itemFocused::before {
-  opacity: 0;
-  transition: none;
 }
 
 .itemFocused .itemIcon,

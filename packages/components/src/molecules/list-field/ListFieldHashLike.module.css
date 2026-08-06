@@ -42,7 +42,6 @@
 }
 
 .primaryLine {
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);
   font-weight: var(--eds-body-medium-weight);
@@ -53,7 +52,6 @@
 
 .secondaryLine {
   composes: cap from './ListFieldSecondary.module.css';
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   font-weight: var(--eds-footnote-weight);
@@ -76,7 +74,6 @@
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-all;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);
   font-weight: var(--eds-body-medium-weight);
@@ -87,7 +84,6 @@
   width: 100%;
   overflow-wrap: anywhere;
   word-break: break-all;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   font-weight: var(--eds-footnote-weight);

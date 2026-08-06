@@ -258,33 +258,22 @@
   font: inherit;
   text-align: left;
   cursor: default;
-  isolation: isolate;
   box-sizing: border-box;
 }
 
-.moduleRowButton::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: var(--event-hover);
-  opacity: 0;
-  pointer-events: none;
-  transition: var(--motion-transition-fade);
+.moduleRowButton:not(.moduleRowButtonFocused) {
+  transition: var(--motion-transition-hover);
 }
 
-.moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)::before {
-  opacity: 1;
+@media (hover: hover) {
+  .moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused) {
+    background-color: var(--event-hover);
+  }
 }
 
 .moduleRowButtonFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
-}
-
-.moduleRowButtonFocused::before {
-  opacity: 0;
   transition: none;
 }
 
@@ -348,7 +337,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moduleRowButton::before {
+  .moduleRowButton:not(.moduleRowButtonFocused) {
     transition: none;
   }
 
@@ -670,7 +659,6 @@
   width: 100%;
   padding: 0;
   margin: 0;
-  font-family: var(--eds-family-sans);
   font-size: calc(var(--eds-bar-size) * 2);
   font-weight: var(--eds-bar-weight);
   line-height: calc(var(--eds-bar-line-height) * 2);
@@ -690,7 +678,6 @@
   width: 200%;
   padding: 0;
   margin: 0;
-  font-family: var(--eds-family-sans);
   font-size: calc(var(--eds-bar-size) * 2);
   font-weight: var(--eds-bar-weight);
   line-height: calc(var(--eds-bar-line-height) * 2);
@@ -729,37 +716,26 @@
   border-radius: var(--radius-sm);
   background: var(--material-hide);
   cursor: default;
-  isolation: isolate;
 }
 
-.moduleIconButton::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: var(--event-hover);
-  opacity: 0;
-  pointer-events: none;
-  transition: var(--motion-transition-fade);
+.moduleIconButton:not(.moduleIconButtonFocused) {
+  transition: var(--motion-transition-hover);
 }
 
-.moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused)::before {
-  opacity: 1;
+@media (hover: hover) {
+  .moduleIconButton:hover:not(:disabled):not(.moduleIconButtonFocused) {
+    background-color: var(--event-hover);
+  }
 }
 
 .moduleIconButtonFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
-}
-
-.moduleIconButtonFocused::before {
-  opacity: 0;
   transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moduleIconButton::before {
+  .moduleIconButton:not(.moduleIconButtonFocused) {
     transition: none;
   }
 

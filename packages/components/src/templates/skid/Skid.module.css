@@ -70,7 +70,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-large-strong-size);
   font-weight: var(--eds-body-large-strong-weight);
   line-height: var(--eds-body-large-strong-line-height);

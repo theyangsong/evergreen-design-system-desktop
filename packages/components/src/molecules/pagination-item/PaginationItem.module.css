@@ -51,7 +51,6 @@
 }
 
 .label {
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-strong-size);
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);

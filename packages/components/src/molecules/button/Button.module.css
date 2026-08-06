@@ -6,7 +6,6 @@
   gap: var(--spacing-1);
   border: var(--stroke-sm) solid transparent;
   border-radius: var(--radius-full);
-  font-family: var(--eds-family-sans);
   font-weight: var(--eds-body-medium-strong-weight);
   white-space: nowrap;
   cursor: default;

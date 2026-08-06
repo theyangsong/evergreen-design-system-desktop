@@ -61,6 +61,8 @@ alwaysApply: false
 
 排版优先 **整组 typography 角色 token**（size + weight + line-height 同角色），避免单独拼 `--size-md` + `--weight-medium` 替代已有 Strong 角色。
 
+**`font-family`**：只在 **`body` / `.desktopTokens`**（`packages/components/src/styles/global.css`）声明 `var(--eds-family-sans)`；**禁止**在组件 CSS Modules、SFC `<style>` 里再写 `font-family`（含 `--eds-family-sans`）。表单控件靠 global 的 `button, input, textarea, select { font: inherit; }` 继承。组件只绑 **size / weight / line-height** 角色 token。
+
 **Bar（11px / `--eds-bar-size`）**：Chrome 等会把小于 12px 的字抬到最小字号。消费 Bar 字号时用 **`barTextSubpixel.module.css`**（2× `font-size` + `transform: scale(0.5)`，与 eds-doc `PersonAvatar` 8px initials 同手法），或 token 工具类 **`.eds-bar-text-subpixel`**（`spec/typography/bar-subpixel.json`）。不要指望裸写 `font-size: var(--eds-bar-size)` 在所有浏览器里视觉仍是 11px。**`EgNavBar` 模块 Label**：Nav 根 `overflow-x: clip`，不可用会横向溢出的 2× 排版；用 **`.moduleLabel` 外层 clip + `.moduleLabelPaint`（2×+scale，origin top left，宽 200%）+ `.moduleLabelSizer`（隐藏、直出 `--eds-bar-*` 撑换行/高度）**，与头像 initials 同一类子像素策略。
 
 **禁止 / 推荐示例**

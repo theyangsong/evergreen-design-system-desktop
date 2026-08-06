@@ -23,7 +23,6 @@
 .label {
   margin: 0;
   color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
@@ -37,7 +36,6 @@
 .feedback {
   margin: 0;
   color: var(--text-base-secondary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   font-weight: var(--eds-footnote-weight);
   line-height: var(--eds-footnote-line-height);

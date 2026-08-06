@@ -39,7 +39,6 @@
   border-radius: var(--radius-full);
   background: var(--material-hide);
   color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
   white-space: nowrap;
   cursor: default;
   transition: var(--motion-transition-hover);

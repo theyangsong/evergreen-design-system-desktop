@@ -6,7 +6,6 @@
  * 各 Eg* 组件在文本节点上再绑定语义角色 token。
  */
 .desktopTokens {
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);

@@ -6,7 +6,6 @@
   min-width: var(--scale-40);
   background: var(--box-page);
   overflow: hidden;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
@@ -41,7 +40,6 @@
 
 .titleText {
   color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-large-strong-size);
   font-weight: var(--eds-body-large-strong-weight);
   line-height: var(--eds-body-large-strong-line-height);

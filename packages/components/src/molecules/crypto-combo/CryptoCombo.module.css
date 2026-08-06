@@ -153,7 +153,6 @@
   min-width: 0;
   overflow: hidden;
   color: var(--text-base-secondary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);
   font-weight: var(--eds-body-medium-weight);
@@ -172,7 +171,7 @@
  * 2. 侧内三段（地址 · (N) · Tag）仅隔 --spacing-1：
  *    - .cryptoAddressLine → flex-grow: 0（禁止 1 1 auto 拉宽行盒）
  *    - .cryptoAddressTags / .inlineTag → flex-shrink: 0（禁止外层 overflow:hidden 压成竖条）
- * 3. hover 虚线 __target 只在 .cryptoAddressTextTarget，不在整行 .cryptoAddressLine
+ * 3. Side Menu：根节点仍是 `.cryptoAddressSide`；Flotation **内嵌**于侧内；`__target` 仅 `.cryptoAddressLine`（地址+(N)）
  * 4. 单地址（.cryptoAddressSingle）可 width: 100% 撑满列宽
  */
 .cryptoAddress {
@@ -231,6 +230,30 @@
   vertical-align: middle;
 }
 
+/* Side Menu：Flotation 在 .cryptoAddressSide 内（非 .cryptoAddress 直接子级），复刻侧内 line+Tag 间距 */
+.cryptoAddressSideMenuTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-1);
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cryptoAddressSide :global(.eds-crypto-address-flotation) {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cryptoAddressSide :global(.eds-crypto-address-flotation) > span {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .cryptoAddressLine {
   display: inline-flex;
   align-items: center;
@@ -241,6 +264,20 @@
   max-width: 100%;
   overflow: hidden;
   color: var(--text-base-secondary);
+}
+
+.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) {
+  overflow: visible;
+  transition: var(--motion-transition-hover);
+}
+
+.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target)::after {
+  transition: var(--motion-transition-fade);
+}
+
+.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) .cryptoAddressText,
+.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) .cryptoAddressCount {
+  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .cryptoAddressLineAlias {
@@ -275,7 +312,6 @@
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   font-weight: var(--eds-footnote-weight);
@@ -305,7 +341,6 @@
 .cryptoAddressCount {
   composes: cap from '../list-field/ListFieldSecondary.module.css';
   flex-shrink: 0;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   font-weight: var(--eds-footnote-weight);
@@ -353,12 +388,19 @@
 }
 
 .menuAddressLine {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
   min-width: 0;
   max-width: 100%;
 }
 
 .menuAddress {
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
   overflow-wrap: anywhere;
   word-break: break-all;
 }
@@ -367,8 +409,6 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  vertical-align: middle;
-  margin-inline-start: var(--spacing-1);
 }
 
 .menuCopyButtonCopied :global(.eds-icon-button .symbol) {

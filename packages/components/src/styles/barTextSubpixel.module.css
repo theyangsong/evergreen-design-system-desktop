@@ -6,7 +6,6 @@
 .barTextSubpixel {
   display: inline-block;
   box-sizing: border-box;
-  font-family: var(--eds-family-sans);
   font-size: calc(var(--eds-bar-size) * 2);
   font-weight: var(--eds-bar-weight);
   line-height: calc(var(--eds-bar-line-height) * 2);

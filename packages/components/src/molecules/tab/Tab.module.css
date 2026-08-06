@@ -61,7 +61,6 @@
   border: none;
   background: transparent;
   color: var(--text-base-primary);
-  font-family: var(--eds-family-sans);
   font-weight: var(--eds-footnote-strong-weight);
   cursor: default;
   transition: var(--motion-transition-hover);
@@ -110,7 +109,6 @@
   padding: 0;
   background: transparent;
   cursor: default;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-strong-size);
   line-height: var(--eds-body-small-strong-line-height);
   font-weight: var(--eds-body-small-strong-weight);

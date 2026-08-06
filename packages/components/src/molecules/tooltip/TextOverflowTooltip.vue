@@ -84,16 +84,20 @@ const tooltipCopied = ref(false);
 let resizeObserver: ResizeObserver | null = null;
 let tooltipCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
 
+const hasMenuAlias = computed(() => Boolean(props.menuAlias?.trim()));
+
 const showCopyTooltip = computed(() => {
   if (!props.showTooltipCopy) return false;
   if (overflowing.value) return true;
-  return props.semanticTruncated;
+  if (props.semanticTruncated) return true;
+  if (hasMenuAlias.value) return true;
+  return false;
 });
 
 const showHoverTrigger = computed(() => {
   if (!showCopyTooltip.value) return false;
   if (props.trigger === 'focus') return true;
-  return overflowing.value || props.semanticTruncated;
+  return overflowing.value || props.semanticTruncated || hasMenuAlias.value;
 });
 
 const showFlatHoverTrigger = computed(() => overflowing.value);
@@ -213,7 +217,7 @@ function scheduleOverflowMeasure() {
 }
 
 watch(
-  () => [props.tooltipText, props.semanticTruncated, props.trigger] as const,
+  () => [props.tooltipText, props.semanticTruncated, props.menuAlias, props.trigger] as const,
   () => {
     scheduleOverflowMeasure();
   },

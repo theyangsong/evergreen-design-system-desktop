@@ -40,7 +40,6 @@
 .initingText {
   color: var(--text-base-secondary);
   text-align: center;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-style: normal;
   font-weight: var(--eds-body-small-weight);
@@ -237,7 +236,6 @@
 .loadingDoneText {
   flex-shrink: 0;
   color: var(--status-success);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-strong-size);
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
@@ -283,7 +281,6 @@
 }
 
 .emptyText {
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
@@ -382,7 +379,6 @@
   align-self: stretch;
   color: var(--text-base-tertiary);
   text-align: center;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-strong-size);
   font-style: normal;
   font-weight: var(--eds-footnote-strong-weight);
@@ -475,7 +471,6 @@
 
 .headerOverflowTooltip :global(.eds-tooltip-panel) {
   padding: var(--spacing-1) var(--spacing-2);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
@@ -579,7 +574,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);

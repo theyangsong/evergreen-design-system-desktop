@@ -9,7 +9,6 @@
   border-radius: var(--radius-md);
   background: var(--eds-prompt);
   color: var(--text-same-white-primary);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-strong-size);
   line-height: var(--eds-body-medium-strong-line-height);
   font-weight: var(--eds-body-medium-strong-weight);
@@ -88,7 +87,6 @@
   max-width: 350px;
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-sm);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-strong-size);
   line-height: var(--eds-body-medium-strong-line-height);
   font-weight: var(--eds-body-medium-strong-weight);
@@ -117,7 +115,6 @@
   overflow: hidden;
   vertical-align: middle;
   /* 嵌套在 button / 菜单行内时，Bar 字号与 type 色由本组件自持，不随父级 font-size / color 缩放或覆盖 */
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-bar-size);
   font-weight: var(--eds-bar-weight);
   line-height: var(--eds-bar-line-height);
@@ -136,7 +133,6 @@
 
 .messageSizer {
   visibility: hidden;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-bar-size);
   font-weight: var(--eds-bar-weight);
   line-height: var(--eds-bar-line-height);
@@ -200,7 +196,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-1);
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   color: var(--text-base-primary);

@@ -14,7 +14,6 @@
 }
 
 .addressLine {
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);
   font-weight: var(--eds-body-medium-weight);
@@ -28,7 +27,6 @@
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-all;
-  font-family: var(--eds-family-sans);
   font-size: var(--eds-body-medium-size);
   line-height: var(--eds-body-medium-line-height);
   font-weight: var(--eds-body-medium-weight);

@@ -4,6 +4,19 @@
   box-sizing: border-box;
 }
 
+/* 字体只在根作用域声明一次；组件内只绑 size/weight/line-height 角色 token。 */
+body,
+.desktopTokens {
+  font-family: var(--eds-family-sans);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
 /* Stable hooks — native inputs may not inherit body text-rendering in WebKit. */
 .eds-input-field,
 .eds-input-control,
