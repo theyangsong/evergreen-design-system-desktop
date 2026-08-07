@@ -157,14 +157,26 @@
   text-align: left;
   border: none;
   cursor: default;
+}
+
+/*
+ * is-asym 契约（moduleMenuMotion.ts）：仅 :hover 入场有过渡；离场 / focus / active 无过渡。
+ * 覆盖 semantic `.motion-ease.is-asym` 对 :focus-visible/:active 的入场 timing。
+ */
+.item:global(.motion-ease.is-asym) {
   transition: none;
 }
 
-/* 仅悬浮时背景淡入；失焦、聚焦切换、失 hover 均瞬时（同 bottomIconHost 聚焦策略）。 */
 @media (hover: hover) {
-  .itemHover:hover:not(.itemFocused) {
+  .item:global(.motion-ease.is-asym):not(.itemFocused):hover {
+    transition: var(--motion-recipe-hover-asym);
+    transition-timing-function: var(--motion-easing-enter);
+  }
+}
+
+@media (hover: hover) {
+  .item:hover:not(.itemFocused) {
     background-color: var(--event-hover);
-    transition: var(--motion-transition-hover);
   }
 }
 
@@ -210,8 +222,11 @@
 }
 
 .itemLabel {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -243,7 +258,6 @@
 .itemFocused:hover {
   background-color: var(--event-focus-brand);
   color: var(--text-same-white-primary);
-  transition: none !important;
 }
 
 .itemFocused .itemIcon,

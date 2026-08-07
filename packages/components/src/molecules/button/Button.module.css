@@ -6,10 +6,13 @@
   gap: var(--spacing-1);
   border: var(--stroke-sm) solid transparent;
   border-radius: var(--radius-full);
-  font-weight: var(--eds-body-medium-strong-weight);
   white-space: nowrap;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
+}
+
+.button:global(.eds-button) {
+  font-family: var(--eds-family-sans);
 }
 
 .button:disabled {
@@ -18,27 +21,31 @@
 
 /* ── Sizes (Figma Lg / Md / Sm / Xs) ── */
 
-.lg {
+.lg:global(.eds-button) {
   padding: var(--spacing-2) var(--spacing-5);
   font-size: var(--eds-body-medium-strong-size);
+  font-weight: var(--eds-body-medium-strong-weight);
   line-height: var(--eds-body-medium-strong-line-height);
 }
 
-.md {
+.md:global(.eds-button) {
   padding: var(--spacing-1-5) var(--spacing-4);
   font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
 }
 
-.sm {
+.sm:global(.eds-button) {
   padding: var(--spacing-05) var(--spacing-3);
   font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
 }
 
-.xs {
+.xs:global(.eds-button) {
   padding: var(--spacing-05) var(--spacing-2);
   font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
 }
 
@@ -327,7 +334,10 @@
   width: var(--icon-md);
   height: var(--icon-md);
   overflow: visible;
-  animation: eds-button-spin var(--motion-duration-spin) var(--motion-easing-linear) infinite;
+  animation-duration: var(--motion-duration-spin); animation-timing-function: var(--motion-easing-linear);
+  
+  animation-name: eds-button-spin;
+  animation-iteration-count: infinite;
 }
 
 .spinnerIcon :global(circle) {

@@ -8,6 +8,7 @@ import {
   showcasePaginationSymbolIconName,
 } from '@/views/shared/showcaseIcons';
 import styles from './InputPreview.module.css';
+import BorderArrowDocPreviewItem from './BorderArrowDocPreviewItem.vue';
 import {
   buildPaginationUsageSnippet,
   paginationCustomizeControls,
@@ -19,13 +20,15 @@ import { paginationPropRows, paginationSlotRows } from './buttonSubPreviewData';
 const paginationCustomize = reactive({ ...paginationCustomizeDefaults });
 
 const paginationUsageSnippet = computed(() => buildPaginationUsageSnippet(paginationCustomize));
+
+const isBorderArrow = computed(() => String(paginationCustomize.kind) === 'borderArrow');
 </script>
 
 <template>
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="paginationCustomize"
-      title="Pagination"
+      title="Custom"
       :show-doc-title="false"
       component-tag="EgPaginationItem"
       :import-code="paginationImportCode"
@@ -38,8 +41,14 @@ const paginationUsageSnippet = computed(() => buildPaginationUsageSnippet(pagina
     >
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewButtonHost">
+          <BorderArrowDocPreviewItem
+            v-if="isBorderArrow"
+            :event="String(paginationCustomize.event)"
+            :disabled="Boolean(paginationCustomize.disabled)"
+          />
           <EgPaginationItem
-            :kind="paginationCustomize.kind as 'number' | 'symbol' | 'button'"
+            v-else
+            :kind="paginationCustomize.kind as 'number' | 'symbol' | 'button' | 'borderArrow'"
             :tone="paginationCustomize.tone as 'brand' | 'decor'"
             :label="String(paginationCustomize.label)"
             :disabled="Boolean(paginationCustomize.disabled)"

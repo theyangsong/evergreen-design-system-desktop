@@ -268,16 +268,6 @@
 
 .cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) {
   overflow: visible;
-  transition: var(--motion-transition-hover);
-}
-
-.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target)::after {
-  transition: var(--motion-transition-fade);
-}
-
-.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) .cryptoAddressText,
-.cryptoAddressLine:global(.eds-hover-tooltip-trigger__target) .cryptoAddressCount {
-  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .cryptoAddressLineAlias {

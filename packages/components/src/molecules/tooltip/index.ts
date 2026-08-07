@@ -8,10 +8,19 @@ export type { TextOverflowTooltipTargetTone } from './textOverflowTooltipConstan
 export {
   TEXT_OVERFLOW_TOOLTIP_MAX_WIDTH,
   TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE,
+  DATA_LIST_HEADER_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  DATA_LIST_CELL_OVERFLOW_TOOLTIP_MAX_WIDTH,
   COPYABLE_OVERFLOW_TOOLTIP_MAX_WIDTH,
   COPYABLE_OVERFLOW_TOOLTIP_MAX_HEIGHT,
   COPYABLE_OVERFLOW_MENU_CLASS,
 } from './textOverflowTooltipConstants';
+export {
+  closeAllAnchoredTooltips,
+  closeBarBlockingAnchoredTooltips,
+  hasOpenClickAnchoredTooltip,
+  registerAnchoredTooltipClose,
+  setClickAnchoredTooltipOpen,
+} from './anchoredTooltipManager';
 export {
   TOOLTIP_PANEL_KIND_DEFAULT_RADIUS,
   TOOLTIP_PANEL_RADIUS_TOKENS,

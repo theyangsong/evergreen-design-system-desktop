@@ -139,6 +139,7 @@ onBeforeUnmount(() => {
     :height="height"
     :max-height="maxHeight"
     :scrollable="!useScrollableList && scrollable"
+    panel-micro-float
   >
     <div
       :class="[

@@ -42,7 +42,7 @@
             "padding": "var(--spacing-1)",
             "border-radius": "var(--radius-md)",
             "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
-            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--eds-flotation-box)",
+            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-flotation-box)",
             "background-blend-mode": "normal, luminosity",
             "box-shadow": "var(--eds-shadow-light)",
             "backdrop-filter": "var(--eds-blur-bg)",
@@ -51,6 +51,30 @@
           "notes": [
             "圆角 var(--radius-md) + 全局 --corner-smoothing 60% squircle",
             "同白 border（material-same-white-quaternary）与 eds-shadow-light 并存"
+          ]
+        },
+        {
+          "title": "Popover Box（Popover 面板）",
+          "className": "effect-popover-box",
+          "properties": {
+            "box-sizing": "border-box",
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "width": "max-content",
+            "overflow": "visible",
+            "padding": "var(--spacing-1)",
+            "border-radius": "var(--radius-md)",
+            "border": "none",
+            "background": "linear-gradient(0deg, var(--material-same-white-quaternary) 0%, var(--material-same-white-quaternary) 100%), var(--effect-popover-box)",
+            "background-blend-mode": "normal, luminosity",
+            "box-shadow": "var(--eds-shadow-light)",
+            "backdrop-filter": "var(--eds-blur-bg)",
+            "-webkit-backdrop-filter": "var(--eds-blur-bg)"
+          },
+          "notes": [
+            "圆角 var(--radius-md) + 全局 --corner-smoothing 60% squircle",
+            "底层 effect-popover-box（eds-popup @ 85%）+ 同白 luminosity 叠色；无边框"
           ]
         },
         {
@@ -63,7 +87,7 @@
             "align-items": "flex-start",
             "width": "max-content",
             "overflow": "visible",
-            "padding": "var(--spacing-1)",
+            "padding": "var(--spacing-0)",
             "border-radius": "var(--radius-lg)",
             "border": "var(--stroke-xs) solid var(--material-same-white-quaternary)",
             "background": "linear-gradient(0deg, var(--box-flotation) 0%, var(--box-flotation) 100%), var(--eds-flotation)",

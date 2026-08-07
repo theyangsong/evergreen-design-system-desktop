@@ -15,7 +15,9 @@ withDefaults(
 <template>
   <div class="eds-end-feedback-card" :class="styles.endCard" role="status">
     <span :class="styles.stateIcon">
-      <EgIcon name="eds-tick-strong-fill" size="sm" />
+      <span :class="styles.stateIconTick">
+        <EgIcon name="eds-tick-strong-fill" size="sm" />
+      </span>
     </span>
     <span>{{ text }}</span>
   </div>

@@ -1,596 +1,212 @@
 ---
-description: EDS Desktop 项目约定（维护者自管）— token、语义映射、命名、Showcase 文档、锚点、嵌套滚动边界
+description: EDS Desktop 项目约定 — token、Showcase、同步、Organism 场景化
 globs: packages/**/*,apps/showcase/**/*
 alwaysApply: false
 ---
 
 # EDS Desktop — 项目约定
 
-> 技术规则不重复：颜色见 `display-p3-color-usage.mdc`；圆角见 `corner-smoothing.mdc`；描边 SVG 缩放见 `stroke-svg-scaling.mdc`；Showcase Website/Desktop 作用域见 **§5** 与 `showcase-token-scope.mdc`。
-> **Agent 执行范围**：**§0** — 只按用户明确指令改代码，禁止思维扩散。
+> 专项规则：`display-p3-color-usage.mdc`（颜色）、`corner-smoothing.mdc`（圆角）、`stroke-svg-scaling.mdc`（SVG 描边）。
+> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR · **§6** 滚动边界 · **§7** Organism · **§8** 同步。
 
-## 0. Agent 执行范围（严格按指令）
+## 0. Agent 执行范围
 
-- **只执行用户明确要求的改动**；不得因「顺带更好」「对齐某处」「预防性问题」而扩大 scope。
-- **禁止思维扩散**：指令未提到的布局重构、额外 prop/API、consumer 业务代码、文档、测试、相关组件「一并修」——**一律不做**，除非用户**明确**要求。
-- **最小 diff**：在完成任务所需的最少文件、最少行内完成；改 A 时不要动 B，即使 B 看起来也该改。
-- **不确定时先问**：若你认为必须连带改其他地方，先列出将改什么并等确认，**不要**默认实施。
-- **仍须遵守的扩展指令**：用户说「深度处理」「一并」「同步」「强推」等时，按该指令执行；本仓库 `alwaysApply` 规则（如 `eds-sync-local-consumers.mdc`、Showcase 临时演示数据）仍适用。
+- 只做用户明确要求的事；**最小 diff**；禁止思维扩散（顺带改 layout、API、consumer、文档、测试）。
+- 不确定时先问；用户说「同步」「生成数据」「一并」等 → 见 **§8**、**§4.4**。
+- 无 token / 无 prop 枚举 → **停改**，先问是否允许硬编码。
 
-**示例**
+| 用户说 | ✅ | ❌（除非另说） |
+|--------|-----|----------------|
+| 表头溢出也用 `…` | 表头 `text-overflow: ellipsis` | 改 flex、tooltip、combo 布局 |
+| 同步 | §8 全流程 | 改 consumer 业务、自动 commit |
 
-| 用户说 | ✅ 做 | ❌ 不做（除非另说） |
-|--------|------|---------------------|
-| 表头溢出也用 `…` | 表头文字 `text-overflow: ellipsis` | 改列宽 flex、表头全宽、tooltip、combo 分段布局 |
-| 去掉首列偏移 | 删 `comboHeaderWithSymbol` 及 padding | 顺带改 typography、divider、sync |
-| 同步 | §8 build + consumer `pnpm install` | 额外改 consumer 业务页、自动 commit |
+## 1. Token 与样式
 
-## 1. 属性与数值必须使用变量
+**作用域**：Desktop 组件 + `.desktopTokens` → Desktop token；Showcase **壳层** → `@eds/website-tokens`（见 §5）。
 
-- **Desktop 组件**（`packages/components/**`）、**`.desktopTokens` 作用域内**、以及 Showcase 中 **组件 props/示例** 的可配置取值，须通过 Desktop token / CSS 变量 / prop 枚举表达。
-- **展示站点壳层**（布局、文档排版、导航、demo 标签等）须通过 **Website** token / 变量表达，见 **§5**。
-- 若任务需要某个数值，而 **对应作用域的仓库中不存在** token、变量或 prop 取值：
-  1. **停止继续改代码**；
-  2. **先向维护者确认**是否允许临时硬编码，以及硬编码的范围与位置；
-  3. 仅在得到明确同意后再写硬编码，并在变更中注明原因。
-- 颜色仅通过 `var(--*)` 消费，遵守 Display P3 规则文件。
+**核心**
 
-### 1.1 数字 → 语义 token（禁止「数值碰巧相同就用 scale」）
+1. **语义优先**：先用途再选 token；查 `packages/tokens/spec/**` 与 `dist/css/**`。禁止因数值相同就用 `--scale-*` 代替 `--radius-*` / `--spacing-*` / `--stroke-*`。
+2. **禁止私造 `--*`**、禁止局部 alias（`--foo: var(--radius-md)`）、禁止手拼 shadow/玻璃（用 `--eds-shadow-light`、`.effect-*`、`.eds-shadow-*-stack`）。
+3. **Motion**（Base → Recipe → Semantic → DS glue）：
+   - **base**（`@eds/desktop-tokens/motion/base`）：primitive only（`--eds-motion-*`、opacity/scale/offset 物理量）。**禁止**场景名。
+   - **recipe**（`@eds/desktop-tokens/motion/recipe`）：duration role + easing + property 组合（`--motion-recipe-*`）。**仅 DS glue**；业务用 semantic。
+   - **semantic**（`@eds/desktop-tokens/motion/semantic`）：**一个完整场景的默认动效组合** — **Ease**、**Layout**、**Flotation**、**Deform**、**Page**（如 `.motion-page { transition: var(--motion-recipe-page-push) }`）。只回答「这类场景用什么动效」，不回答「框架里怎么切页」。
+   - **utilities**：`.motion-none`（focus/selected）。
+   - **DS glue**（`packages/components/src/styles/*` 等）：框架 lifecycle（Vue `enter-from` / `leave-to`）、叠层布局、方向状态、`host` marker。**禁止**写入 `spec/motion/semantic.json`。
+   - **Semantic 禁止**：`enter-from` / `leave-to` / `enter-active`、`host*`、direction modifier（`is-next` 等）、任何框架 lifecycle class名。
+   - DS glue 示例：`overlayGlassMicroFloat.module.css`、`motionPageTransition.module.css`（`.motion-page-stack` + `data-page-direction` + Transition `name="motion-page"`）。
 
-**作用域**：`packages/components/**` 的样式，以及 Showcase 内 **`.desktopTokens`  subtree**（Desktop 组件 live 预览、Desktop `/tokens` 文本样式预览等）。**Showcase 壳层 CSS 不用 Desktop `packages/tokens` 的 `--eds-*` 排版**（如 `--eds-headline-size` 单档）；壳层改用 **`@eds/website-tokens`** 导出的 **`--eds-*` 角色 token**（带档位后缀，如 `--eds-headline-small-*`、`--eds-body-medium-*`），见 §5。
+**Overlay 微浮动（microFloat）— 毛玻璃不失效**
 
-维护者或设计稿用 **px / 字号 / 字重** 描述时，须映射到 **带语义的 CSS 变量**，而不是仅因数值相等就使用 `--scale-*`、`--size-*` 等 **基数 primitive**。
+- **核心**：`opacity` / `transform` 必须与 `backdrop-filter` 同在 **glass 自身**（`.effect-flotation-box` / `.effect-popup-box`），**禁止**挂在 glass 的父级（含 `.floatingInner`、`.eds-popover` 根、`.motion-micro-float` 包一层 children）。
+- **实现**：组件内 overlay glue 用 `overlayGlassMicroFloat.module.css`（recipe/base 变量 + host active）；业务侧挂 semantic `.motion-flotation`（host `.is-active` / `.glassMicroFloatHostActive`）。
+- **Popover** `.shapeSurface`：`backdrop-filter`（`--eds-blur-bg`）；SVG 填充/描边复刻 effect；**SVG `.outline` 专用 `drop-shadow`**（`stroke-base-tertiary` + `effect-popup-background`，与 `eds-shadow-light` 无关）；**禁止** `.shell` 挂 `filter`。
+- **Flotation / List Field**：`EgAnchoredTooltip` microFloat 常驻 Teleport；入场 `visibility:hidden` 定位后再 reveal；离场不卸载 DOM、不用 `visibility:hidden` 收尾。
+- **禁止**：为修闪烁去掉 opacity 动画；microFloat 路径每次 hover `v-if` 销毁 Teleport；改 `packages/tokens/spec/motion` 的 microFloat 参数（除非用户明确要求）。
+- **详案**：`packages/components/docs/overlay-microfloat-flash-fix.md`。
+4. **Typography**：整组角色 token（size+weight+line-height）；`font-family` 仅在 `global.css` 的 `body`/`.desktopTokens`；组件只绑 size/weight/line-height。
+5. **Bar 11px**：`.eds-bar-text-subpixel` 或 2×+scale；NavBar 用 `.moduleLabel`/`.moduleLabelPaint`/`.moduleLabelSizer`（§7）。
+6. **顶边距 %**：`height: var(--padding-top-*)` 或 flex 占位；**禁止** `padding-top: …%`。
+7. **数字展示**：`formatGroupedNumber()`（展示层）；动态数字区加 `tabular-nums`。不适用：输入态、纯文案。
 
-**原则**
+**常用映射**
 
-1. **先判断用途（语义角色）**，再选 token；查 `packages/tokens/spec/scale/semantic.json`、`packages/tokens/dist/css/scale/semantic.css`、`packages/tokens/dist/css/typography/semantic.css`（或 Figma 同名角色）。
-2. **`--scale-*` 是尺度基数**（间距网格）；**圆角、间距、描边、顶边距、图标、模糊、层级** 各有语义层，默认 **不要** 在组件里直接写 `--scale-3` 当圆角或当间距，除非现有 effect / spec 已明确绑定（effect 内层仍引用 scale 时以 spec 与 `corner-smoothing.mdc` 为准）。
-3. 映射后使用 **`var(--语义-token)`**；禁止 `12px`、`1px`、`13px`、`font-weight: 500` 等硬编码，除非上文「先询问是否硬编码」已获批。
-4. 同一 px 在不同语义下 **变量不同**（例如 12px 可能是圆角 `--radius-md`，也可能是图标 `--icon-sm` 或间距 `--spacing-3`）——**以用途为准，不以数字为准**。
+| 说法 | 用 |
+|------|-----|
+| 圆角 12 | `--radius-md` |
+| 1px 边框 | `--stroke-sm` / `--stroke-xs` |
+| 间距 12 | `--spacing-3` |
+| 13px 常规 / 中黑 | `--eds-body-small-*` / `--eds-body-small-strong-*` |
 
-**常用映射（示例）**
+**`.module.css` 速查**：radius→`--radius-*`；spacing→`--spacing-*`；border→`--stroke-*`；shadow→`--eds-shadow-*`；color→`--material-*`/`--text-*`/`--stroke-*`。
 
-| 维护者说法 / 设计稿 | 语义 | 应使用的变量（示例） |
-|---------------------|------|----------------------|
-| 圆角 12 | 圆角 Radius | `var(--radius-md)`（12px） |
-| 描边 1 / 1px 边框 | 描边 Stroke | `var(--stroke-sm)` |
-| 间距 12 | 布局 Spacing | `var(--spacing-3)` |
-| 顶边距 xs/sm/md/lg | 顶边距 Padding Top | `var(--padding-top-xs)` … `var(--padding-top-lg)`（6% / 14% / 22% / 30% 容器**高度**）；用 `height` / flex 占位，**禁止** `padding-top` |
-| 文本 13、常规 | Body Small | `--eds-body-small-size` / `-weight` / `-line-height` |
-| 文本 13、中黑 / Medium | Body Small Strong | `--eds-body-small-strong-size` + `-weight` + `-line-height` |
+## 2. 维度命名（preview key / fixture）
 
-排版优先 **整组 typography 角色 token**（size + weight + line-height 同角色），避免单独拼 `--size-md` + `--weight-medium` 替代已有 Strong 角色。
+`{component}_{style}_{tone}_{size}_{status}` — 5 段 snake_case，无第六段。DOM 锚点仍 kebab-case（`button-sizes`）。
 
-**`font-family`**：只在 **`body` / `.desktopTokens`**（`packages/components/src/styles/global.css`）声明 `var(--eds-family-sans)`；**禁止**在组件 CSS Modules、SFC `<style>` 里再写 `font-family`（含 `--eds-family-sans`）。表单控件靠 global 的 `button, input, textarea, select { font: inherit; }` 继承。组件只绑 **size / weight / line-height** 角色 token。
+- style：`solid`|`outline`|`text`；tone/size/status 与组件 API literal 一致。
+- 例：`button_solid_brand_lg_disabled`
 
-**Bar（11px / `--eds-bar-size`）**：Chrome 等会把小于 12px 的字抬到最小字号。消费 Bar 字号时用 **`barTextSubpixel.module.css`**（2× `font-size` + `transform: scale(0.5)`，与 eds-doc `PersonAvatar` 8px initials 同手法），或 token 工具类 **`.eds-bar-text-subpixel`**（`spec/typography/bar-subpixel.json`）。不要指望裸写 `font-size: var(--eds-bar-size)` 在所有浏览器里视觉仍是 11px。**`EgNavBar` 模块 Label**：Nav 根 `overflow-x: clip`，不可用会横向溢出的 2× 排版；用 **`.moduleLabel` 外层 clip + `.moduleLabelPaint`（2×+scale，origin top left，宽 200%）+ `.moduleLabelSizer`（隐藏、直出 `--eds-bar-*` 撑换行/高度）**，与头像 initials 同一类子像素策略。
+## 3. Showcase 多子类锚点
 
-**禁止 / 推荐示例**
+- `catalog.ts` `children[].id` = 预览页根 `id`（如 `button-text`）；内层 section 二级锚点。
+- 新增子类：**先 catalog + 根 id，再 section**。
+- 同族 **一条整合 import**；第一个 child 无 `previewGroupLabel`，第二个起分割线 + 标题（`getCatalogChildLabel`）。
 
-```css
-/* ❌ 圆角 12 — 数值对，语义错 */
-border-radius: var(--scale-3);
+## 4. Showcase 文案与演示数据
 
-/* ✅ */
-border-radius: var(--radius-md);
+**文案**：章节标题中文；prop 取值标签「中文 + 英文 token」（维护于 `showcasePropLabels.ts`）；prop 名/类型/Eg* 标签英文；说明中文。
 
-/* ❌ 1px 描边 */
-border: 1px solid …;
+**§4.4 生成数据**（「生成数据」等）：仅临时 `*DemoCustomizeState` 或会话内 `Object.assign`；**不写** `*CustomizeDefaults`；不 localStorage；优先只改 `apps/showcase/**`。`:customize-defaults` 始终指向永久 defaults；刷新须恢复。
 
-/* ✅ */
-border: var(--stroke-sm) solid …;
+## 5. 库作用域 · HMR · Token Scope
 
-/* ❌ 13px 中黑 — 只用 primitive */
-font-size: var(--size-md);
-font-weight: var(--weight-medium);
+**Website 壳**（布局、导航、demo 标签）：`@eds/website-tokens` / `@eds/website-components`（`--eds-headline-small-*`、`--text-base-*`、`--spacing-*` 等）。
 
-/* ✅ Body Small Strong */
-font-size: var(--eds-body-small-strong-size);
-font-weight: var(--eds-body-small-strong-weight);
-line-height: var(--eds-body-small-strong-line-height);
-```
+**Desktop**（`@eds/desktop-*`）仅用于：组件实现；live 预览实例；`.desktopTokens` 包裹 subtree；`/tokens` 页。
 
-**无法一一对应时**：spec / dist 中找不到与语义匹配的 token → 按第 1 节 **先问维护者**，不得默认 `--scale-n` 或裸 px。
+**禁止**：壳层用 Desktop 排版 `--eds-*`（无档位）或 `--typography-*`；把 label/previewStack 包进 `.desktopTokens`；Desktop 组件 CSS 用 Website token。例外：壳层动效 `apps/showcase/src/motion/tokens.css`。
 
-### 1.2 禁止组件内私自定义 CSS 变量（须用设计系统已有 token / 类）
+### 5.1 实时生效（`pnpm dev`）
 
-**作用域**：`packages/components/**` 的 `.module.css` 与组件模板中的 `class` / `style`（Showcase 壳层见 §5，同样禁止私造 Desktop token 名）。
+| 改什么 | 机制 |
+|--------|------|
+| `packages/components/**` | Vite alias → 源码；**HMR**；默认 **不** `build:components` |
+| `packages/tokens/spec/**` | `watchDesktopTokens` → rebuild dist → full-reload |
+| 手动 `build:tokens` | watch `dist/**` 触发刷新 |
 
-**原则**
+未生效时：查 HMR、token 是否在 dist、specificity、硬刷新；勿先说「要 build」。仅 build：用户要求 / 验 dist / consumer / HMR 失败。
 
-1. **不得定义** spec / `packages/tokens/dist` 中 **不存在** 的 `--*` 变量名（例如 `--tooltip-panel-radius`、`--menu-inner-gap`）。设计系统未发布的名字 **不是** token。
-2. **不得**用组件局部 alias「转存」官方 token（`--foo: var(--radius-md)` 再 `border-radius: var(--foo)`）；应 **直接** 写 `var(--radius-md)`、`var(--spacing-1)` 等。
-3. **不得**用手拼 primitive 或颜色 token 替代已有 **组合 token / utility 类**（例如用 `0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow)` 代替 `var(--eds-shadow-light)`；圆角用 `--scale-3` 代替 `--radius-md`）。
-4. 若 Figma / `spec/effect` 已提供 **utility 类**（如 `.eds-shadow-light-stack`、`.effect-flotation-box`），组件 **优先复用**，不在 `.module.css` 里重复实现同一阴影 / 玻璃 / 分层结构。
-5. **Motion（交互动效）**：时长 / 缓动须用 `@eds/desktop-tokens/motion`（base `--eds-motion-*` → semantic `--motion-*`）。**单独使用**：`var(--motion-transition-hover)` 或 `.motion-hover` / `.motion-shift` / `.motion-fade` / `.motion-enter`；**组合使用**：`.motion-compose` + 多个 motion 层（如 `motion-compose motion-hover motion-fade`），或预设 `.motion-interactive` / `.motion-layout`。Focus / Selected 用 **`.motion-none`**。CSS Modules 可拼 `var(--motion-property-paint)` + duration + easing。禁止组件内私造 `--eds-interaction-*`。Spec：`spec/motion/base.json` + `spec/motion/semantic.json`。
-6. 若所需 **语义 token 或 utility 类在 spec 与 dist 均不存在**，按 §1 **先向维护者确认**（是否新增 token、是否允许临时值、硬编码范围），**不得**私自发明变量名或暂用错误语义的 `--scale-*` / `--size-*`。
+**HMR 陷阱**：`.desktopTokens button { font: inherit }` → 字重须 `.md:global(.eds-button)`；子组件类名是哈希 → 用 `:global(.eds-icon-button > span)` 等。
 
-**禁止 / 推荐示例**
+### 5.2 `.desktopTokens` DOM
 
-```css
-/* ❌ 私造 DS 未定义的变量 + 圆角绑 scale */
-.panelRoot {
-  --tooltip-panel-radius: var(--scale-3);
-  --tooltip-panel-shadow: 0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow);
-  border-radius: var(--tooltip-panel-radius);
-}
+- ✅ 壳层在外；**单独 div.desktopTokens 包组件 subtree**。
+- ❌ label 进 desktopTokens；❌ `class="desktopTokens"` 打在 Eg* 根上（PostCSS 选择器失效）。
+- 组件样式：`desktop-components-scope.css` scoped 引入 `@eds/desktop-components/style.css`。
 
-/* ❌ 手拼 shadow，忽略已有的 --eds-shadow-light */
-box-shadow: 0 var(--scale-2) var(--scale-12) 0 var(--eds-vulvar-shadow);
+## 6. 嵌套滚动边界
 
-/* ✅ 直接消费语义 token；阴影用官方 stack 类或 --eds-shadow-light */
-.panelRoot {
-  border-radius: var(--radius-md);
-}
-/* 模板：class="eds-shadow-light-stack" */
-.panel {
-  padding: var(--spacing-1);
-  border-radius: var(--radius-md);
-  box-shadow: var(--eds-shadow-light); /* 仅当未用 stack 类且单层 shadow 足够时 */
-}
-```
+带内部滚动的 Desktop 组件（NavBar、ModuleMenu、Layout 侧栏等）：滚到顶/底 **不** 链式滚动外层、不回弹。
 
-**排查清单**（改 `.module.css` 时逐项核对）
+- CSS：`overflow-y: auto` + `overscroll-behavior: none`（不用 `contain`）。
+- JS 同容器：**wheel**（passive:false，边界 preventDefault）+ **scroll** 钳制 scrollTop + `SCROLL_EDGE_EPSILON=2`。
+- 参考：`NavBar.vue` + `.moduleRegion`；onBeforeUnmount 必须 removeListener。
 
-| 检查项 | 正确做法 |
-|--------|----------|
-| 文件内 `--*` 自定义名 | 仅允许 spec/dist 已列出的 token；否则删除 alias，直接用官方名 |
-| `border-radius` | `var(--radius-xs\|sm\|md\|lg\|full)`，不用 `--scale-n` |
-| `padding` / `gap` / `margin` | `var(--spacing-n)`，不用 `--scale-n`（除非 effect spec 内层已绑定且文档允许） |
-| `padding-top` 语义（相对容器高度 %） | `height: var(--padding-top-xs\|sm\|md\|lg)` 或 flex/grid 占位；ancestor 须有明确高度；**禁止** `padding-top: …%`（CSS 按宽度算） |
-| `border-width` | `var(--stroke-xs\|sm\|…)` |
-| `box-shadow` | `var(--eds-shadow-light\|…)` 或 `.eds-shadow-*-stack`，不手拼 scale + 颜色 |
-| 颜色 | `var(--material-*\|text-*\|stroke-*)`，不抄 hex |
+## 7. Organism Showcase 场景化
 
-### 1.3 数字展示：千分位分隔（通用规则）
+**模式**：`ComponentDocLayout` + 定制首项「场景化」下拉 — DS 本体（全定制）vs 业务 preset（如 Cregis，仅场景化）。`customize.scenario` 不进 usage snippet（`omitKeys`）。
 
-**作用域**：`packages/components/**` 中所有 **面向用户展示的数字**（数量、统计、页码、Badge 等）；Showcase 预览中通过 Desktop 组件间接消费，**不得在壳层手写另一套格式化逻辑**。
+**Nav Bar**：preset 在 `apps/showcase/src/presets/<domain>/`；声明式 kebab-case props；无 slot 时用 `moduleLabelN` 等索引 props。动效：**仅 hover 过渡**；focus/选中 `.motion-none`。Icon：模块 glyph 容器 `--icon-lg` → `EgIcon size="md"`；底栏 `--icon-md` → `size="sm"`。
 
-**原则**
+**EgMessage 嵌套**：`provide(MESSAGE_PARENT_FOCUSED_KEY)`；`focusBackground: inherit|same-white`；Bar 11px 用 sizer/paint，不用 barTextSubpixel composes。
 
-1. **统一工具**：使用 `@eds/desktop-components` 导出的 **`formatGroupedNumber(value)`**（`packages/components/src/utils/formatGroupedNumber.ts`），基于 **`Intl.NumberFormat`** 按 locale 添加千分位；非数字字符串 **原样返回**，不在输入框编辑态强行格式化。
-2. **展示层格式化**：prop / 数据层可仍为原始字符串或 number；**在组件模板或 computed 展示前**调用 `formatGroupedNumber`，不要把带逗号的字符串再当数值解析回传。
-3. **整数字面量**：无小数部分的值格式化为整数（如 `1000` → `1,000`）；含小数则保留小数并分组（如 `1234.5` → `1,234.5`）。
-4. **等宽数字**：会随数值变化产生宽度动画或对齐需求的区域（Paginer 数量、BatchBar 统计数字等），CSS 配合 **`font-variant-numeric: tabular-nums`**。
-5. **新增组件**：任何新增的数字展示 UI **默认接入** `formatGroupedNumber`，不得在各处手写 `toLocaleString` 或正则插逗号。
+**EgPopup — 覆盖整个客户端窗口**
 
-**已接入参考**
+- **遮罩范围**：Popup 须铺满 **NavBar + 侧栏 + 主内容** 整块客户端，不是仅列表/主内容区。
+- **原因**：`EgPopup` 根为 `width/height: 100%`，只填满**直接父容器**；父级若是 DataList 页内 div，遮罩就被限制在该区域。
+- **挂载**：业务 Popup host（如 ApprovalFlowHost、Detail/Reminder 流程）放在**客户端 shell**（与 Layout 同级或 shell Teleport 目标），**禁止**挂在列表页、ModuleMenu 内容区等业务 subtree 内。
+- **Showcase**：文档预览可用静态 Popup Box 壳（无全屏 scrim）；完整 `EgPopup` 行为见 `PopupPreview.vue`。
 
-| 组件 | 字段 |
-|------|------|
-| `EgPaginerDataVolume` | Data Volume 数量 |
-| `EgPaginerStatistics` | 统计数值 |
-| `EgBatchBarActionItem` | Statistics 主数字 |
-| `EgPaginationItem` | `kind="number"` 的页码 label |
-| `EgIconButtonPro` | Badge |
-| `EgSegmentedControl` | 数值型 label（如每页 1000 条） |
-
-**推荐 / 禁止**
-
-```typescript
-import { formatGroupedNumber } from '@eds/desktop-components';
-
-// ✅ 展示层
-const formattedCount = computed(() => formatGroupedNumber(props.count));
-
-// ❌ 组件内各自实现
-count.toLocaleString();
-String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-```
-
-```vue
-<!-- ✅ -->
-<span>{{ formatGroupedNumber(count) }}</span>
-
-<!-- ❌ 裸输出大数 -->
-<span>{{ count }}</span>
-```
-
-**不适用**：表单 **输入中** 的数值、非数字文案 label、Design token 取值本身（token 名不是 UI 数字）。
-
-## 2. 维度命名规则（关联变量类）
-
-用于 **需要唯一标识某一组 prop 组合** 的命名（如 preview 行 key、demo id、测试 fixture 名、内部常量名等），格式固定为 **5 段、下划线连接、小写**，且 **不得增加第六段或任意前缀/后缀**：
+**Flotation Combo — 必须用 `EgFlotation`**
 
 ```text
-{component}_{style}_{tone}_{size}_{status}
+EgFlotation → #trigger (EgFlotationTrigger) + Menu props + items/#content → EgFlotationMenu → EgFlotationMenuItem
 ```
 
-- **component**：组件在约定中的英文名，与 Showcase / 目录一致（如 `button`；子类用 catalog 子项语义，如 `icon_button`、`link`）。**DOM 锚点 id** 仍用现有 kebab-case（如 `button-sizes`），与本节的 snake 名区分。
-- **style**：对应 prop `variant` 的取值：`solid` | `outline` | `text`（Figma Style；命名中不用 `primary` 等别名）。
-- **tone**：与组件 API 一致的 literal（如 `brand` | `danger` | `decor` | `subtle` | `sameWhite`）。
-- **size**：与组件 API 一致的 literal（如 `lg` | `md` | `sm` | `xs`）。
-- **status**：与状态 prop 一致（如 `disabled` | `loading`）；无特殊状态时仍须占一段，使用该组件 Preview data 中统一约定的默认状态 literal（如 `enabled` 或 `default`）。
+- 禁止手搓 AnchoredTooltip+菜单、禁止平行 trigger 解析；须用 `flotationDocCustomize.ts`：`resolveFlotationComboTriggerProps`、`resolveFlotationComboEgFlotationProps`、`buildFlotationComboNestedSnippet`。
+- Showcase 页：`/flotation`（Combo）、`/flotation-trigger`（Trigger）、`/flotation-box`（Box）。
 
-**示例**：`button_solid_brand_lg_disabled`
+**Flotation Box 页（`/flotation-box`）**
 
-**禁止**：`button-solid-brand-lg`、`btn_solid_brand_lg_disabled_extra`、`button_solid_brand_large_disabled`（size 必须用 `lg` 而非英文全称）。
+- 架构：`FlotationBoxPreview` orchestrator → `EgFlotationMenu`（shell 由 `flotationBoxPreviewShell.ts`）→ 场景 SFC 或 `FlotationBoxStandardPreview`。
+- 场景 **独立 customize 键**（`scene*`），不与标准 `item*` 混用；切换 boxKind 仅「进入场景化」时 `apply*Preset`。
+- Shell：`list-scroll=true`、`show-add=false`、`eds-flotation-menu--box-doc`（shell padding:0，body spacing-1 inset）。
+- 禁止 Showcase 手搓 Tooltip/scroll-fade；禁止 `#header` slot + v-if 控 Tab。
 
-## 3. 多子类组件：拆分锚点
+**EgFlotationMenu 滚动（严格 — 见 `FlotationMenu.vue` + `Flotation.module.css`）**
 
-- 一个 Molecule 下若有 **多个独立小组件**（如 Button 下的 Button / IconButton / Link / Pagination / Combo），Showcase 必须：
-  - 在 `catalog.ts` 的 `children` 中列出子类，**id 与预览页顶层容器 `id` 一致**（如 `button-text`、`button-icon`）；
-  - 每个子类单独一块预览区；子类内部再用 `section` + `id`（如 `button-sizes`、`button-tones`）做二级锚点；
-  - 侧栏/页内导航只链到这些稳定 id，结构参考 `Button` + `ButtonPreview.vue`。
-- 新增子类时：**先加 catalog child + 预览根节点 id，再加 section**，避免只有 DOM 没有导航项。
-- **Import 语句**：同一 Molecule 家族在 Showcase 页 **顶部只保留一条整合 import**（列出该族下所有已发布/规划中的 `Eg*` 导出，格式同 Button 页）；子类区块（Textarea / Search 等）仅保留属性与示例，**不再重复 import**。侧栏子锚点用于跳转；**第一个** `catalog.children` 预览根节点（如 `#input-input`、`#button-text`）**不加** `previewGroupLabel`；从**第二个**子类起，在分割线下方 `padding-top: var(--spacing-6)`（24px）后显示标题（**Body Medium Strong**（18px / medium）+ `text-brand-primary`；文案 `getCatalogChildLabel`）。
+- 自滚：`scrollable && (showAdd || listScroll)` → `eds-flotation-menu--scrollable-list`；面板 `scrollable=false`。
+- Flex 链不断：`min-height:0` 贯穿 menu→panel→menuBody→menuListOuter→menuListScrollable。
+- Padding：box-doc shell **padding:0**；inset 在 `.eds-flotation-menu-body`；列表区不加 padding-block。
+- Scroll-fade：**仅** `menuListScrollable` 的 `mask-image`；有 Add 时禁 bottom fade；禁止 backdrop-filter 叠层 fade。
+- sticky footer（showAdd）：panel overflow:hidden；列表末 `menuListScrollEnd`。
 
-## 4. Showcase 文案语言
+**Module Menu 场景化**：Cregis / UDun **独立** preset；其余回退 `moduleMenuComponentDefaultPresetGroups`；默认 `moduleBusinessTitle: Wallet`。标题：text / EgFlotation trigger（module-menu）/ Cregis WaaS·Payment Engine 浮层 — 见原表逻辑，preset 在 `presets/module-menu/`。
 
-### 4.1 章节标题（如 `<h2 class="sectionTitle">`）
+**EgModuleMenuItem 动效（锁死 — `moduleMenuMotion.ts` + `ModuleMenu.module.css`）**：**始终**挂 `.motion-ease.is-asym`（600ms 仅 `--motion-duration-hover-asym` / `eds-motion-5`）。悬浮入场有过渡、离场无；点击/聚焦/选中无过渡（CSS hover-only，不用 `motion-none`）。禁止 NavBar `is-hover` / `is-focus`。
 
-- 面向读者的 **章节名使用中文**（必要时括号保留设计系统英文名）。
-- 示例：`Size` → **尺寸**；`Style` → **风格**；`Tone` → **色调**；`States` → **状态**。
+**Data List 空态**：`eds-business-7`；不用 @cregis `EdsNoData`。
 
-### 4.2 变量取值标签（如 `sizeLabel`）
+**EgDetail · Apply_Item（强约束 — 详案 `packages/components/docs/detail-apply-item.md`）**
 
-- 展示 **token / prop 取值** 时，使用 **「中文 + 英文 token」**，中间空格；**英文 token 必须与组件 props / 类型字面量一致**（如 `lg`、`rectangular`、`sameWhite`、`disabled`）。
-- 统一维护：`apps/showcase/src/data/showcasePropLabels.ts`（预览行 `key` 绑定真实 prop 值，`label` 为展示文案）。
-- 示例：
-  - `Large` → **大 Lg**
-  - `Medium` → **中 Md**
-  - `Small` → **小 Sm**
-  - `Extra Small` → **特小 Xs**
-  - `Solid` → **实心 Solid**
-  - `Disabled` → **禁用 disabled**
-  - `rectangular` → **矩形 rectangular**
-- **prop 名、类型、import、组件标签名（EgButton）** 保持英文；说明句、表格 description 用中文。
+Figma **Apply_Item@Cregis**（`2267:11092`）。标准 Detail 行 = **变体 id + 展示字段**；挂件（符号 / Tag / Link / Copy / 地址簿 / AML / 浏览器 / Title 图标组合等）由 DS catalog **锁死**。
 
-### 4.3 组件文档撰写
+| 角色 | 允许 | 禁止 |
+|------|------|------|
+| **业务** | `createDetailApplyItemRow(variantId, overrides)`；传接口展示字段 | 手拼 `DetailItemData` 并关挂件；CSS 隐藏；spread preset 后改挂件 |
+| **DS** | 维护 `applyItemPresets.ts` 与 `EgDetail` 渲染 | 为单业务开 widget escape hatch |
+| **Showcase** | preset 行仅切换「数据来源」 | merge customize 挂件字段；duplicate catalog |
 
-- 新增或修改组件 Showcase 页时，**默认按中文读者撰写**（属性表 description、段落说明、按钮 aria-label 等）；与上两条冲突时，以本文件为准。
+- **业务必须**：`createDetailApplyItemRow`（`@eds/desktop-components`）。
+- **仅可覆盖**：`key` | `title` | `value` | `tag` | `valueSymbolCrypto` | `valueIcon` | `valueSymbolAvatarName`。
+- **Catalog 真源**：`packages/components/src/organisms/detail/applyItemPresets.ts`。
+- **Showcase preset 行**：`createDetailApplyItemRow` / `resolveDetailItemFromApplyPreset` + `structuredClone`；切换数据来源时 reset 该行 customize 挂件字段。
+- **非 catalog 自定义行**：文档/demo 例外，须 PR 说明；不得作常规详情页实现。
+- **新增变体**：Figma 评审 → 更新 `applyItemPresets.ts` → export `DetailApplyItemVariantId` → 文档/Changelog。
 
-## 5. 库引用：Website 承载层 vs Desktop 组件层
+```ts
+// ✅ 业务
+createDetailApplyItemRow('receiver', { value: addr, tag: alias })
 
-预览站、文档站、官网等 **承载组件展示的站点**，页面壳（布局、导航、文档排版、demo 外壳、标签与间距）一律使用 **`@eds/website-tokens` / `@eds/website-components`** 的变量与组件（如 **`--eds-headline-small-*` / `--eds-body-medium-*` 等 Website 排版角色**、`--text-base-*`、`--spacing-*`、`--box-page`、`--eds-family-sans` 等）。
-
-**Desktop 库**（`@eds/desktop-tokens`、`@eds/desktop-components`）仅用于：
-
-1. **`packages/components/**`** 组件实现（含 `--eds-*`、material、radius、stroke 等）；
-2. 展示站中的 **Desktop 组件实例** 及其 **props / 事件 / 示例代码**；
-3. Showcase 中 **`.desktopTokens`** 最小包裹容器内的 subtree（PostCSS 注入 Desktop token，细则见 `showcase-token-scope.mdc`）；
-4. **`/tokens`** 等专门展示 Desktop token 的区域（`.desktopTokens` 或等价作用域内的 `--eds-*` 文本预览）。
-
-**禁止**：
-
-- 在 PageHeader、侧栏、preview 模块壳层 CSS 中使用 **Desktop token 包**（`packages/tokens`）的排版 **`--eds-*`**（如 `--eds-headline-size` 无档位后缀），或已废弃的 **`--typography-*`**（Website 侧已统一为 `@eds/website-tokens` 的 `--eds-*` 角色名）；
-- 把 demo 的 `sizeLabel`、`previewStack` 等文档 chrome 包进 `.desktopTokens`（仅组件 subtree 进入 Desktop 作用域）；
-- 在 Desktop 组件 `.module.css` 中用 **Website 壳层 token** 冒充组件样式。
-
-**例外**：`apps/showcase/src/motion/tokens.css` 为 Showcase **壳层动效** 时长/缓动（`--eds-motion-*`），不是 Desktop 组件 API；新壳层动效优先加在此文件，勿扩散到 `packages/components`。
-
-**交叉引用**：DOM 与 CSS 结构见 `showcase-token-scope.mdc`；Desktop 数字→语义映射见 §1.1；数字展示千分位见 §1.3。
-
-## 6. Desktop 组件：嵌套滚动边界（滚到顶/底不晃动）
-
-**作用域**：`packages/components/**` 内所有带 **内部可滚动区域** 的 Desktop 组件（Nav Bar 模块区、Module Menu、Layout 侧栏等）。滚轮 / 触控板滚到 **顶或底** 时，**不得**把滚动链传给外层页面，也 **不得**出现边界回弹、页面跟着抖。
-
-**参考实现**：`packages/components/src/organisms/nav-bar/NavBar.vue` + `NavBar.module.css`（`.moduleRegion`）。
-
-### 6.1 CSS（滚动容器）
-
-- 滚动容器使用 `overflow-y: auto`（或 `scroll`）+ `overscroll-behavior: none`（**不用** `contain`）。
-- 按需隐藏滚动条（`scrollbar-width: none` 等），但不影响边界行为。
-
-```css
-.scrollRegion {
-  overflow-y: auto;
-  overscroll-behavior: none;
-}
+// ❌ 业务
+{ title: 'Receiver', value: addr, showValueCopy: false }
 ```
 
-### 6.2 JS（边界拦截 + 钳制）
+**参考文件**：`FlotationBoxPreview.vue`、`flotationBoxSceneAddressCustomize.ts`、`NavBarPreview.vue`、`moduleMenuPreviewCustomize.ts`、`detail-apply-item.md`、`applyItemPresets.ts`。
 
-对同一滚动容器 **同时** 做三件事：
+## 8. 本地同步
 
-1. **`wheel` 监听**（`{ passive: false }`）：已到顶仍向上滚、已到底仍向下滚时 `event.preventDefault()`。
-2. **`scroll` 回调内钳制** `scrollTop` 到 `[0, scrollHeight - clientHeight]`，避免负值或越界。
-3. **边界容差**：用常量（如 `SCROLL_EDGE_EPSILON = 2`）判断顶/底；若滚动边界还驱动 UI（溢出阴影、渐变遮罩等），同一容差复用，避免边界闪烁。
+| 用户说 | 行为 |
+|--------|------|
+| 「同步」 | `pnpm build:tokens && pnpm build:components`（或 `pnpm sync`）→ **所有** link consumer `pnpm install` |
+| 「同步到 X」 | 仅指定项目 |
+| 「列出可同步项目」 | `pnpm sync:list`，不 build |
 
-```typescript
-const SCROLL_EDGE_EPSILON = 2;
+业务项目「同步 eds-desktop」= 先 build eds-desktop，再本项目 `pnpm install`。
 
-function clampScrollRegionScroll(region: HTMLElement) {
-  const maxScrollTop = Math.max(0, region.scrollHeight - region.clientHeight);
-  if (region.scrollTop < 0) region.scrollTop = 0;
-  else if (region.scrollTop > maxScrollTop) region.scrollTop = maxScrollTop;
-}
+**单向边界：** 同步只 **eds-desktop → consumer**（build、install、list-field 辅助复制）。consumer 的 `src/**` **不得**回写 `packages/**`。业务改 DS 须在开 **eds-desktop** 仓库进行。详见 `eds-sync-local-consumers.mdc`「单向边界」。
 
-function onScrollRegionWheel(event: WheelEvent, region: HTMLElement) {
-  const maxScrollTop = region.scrollHeight - region.clientHeight;
-  if (maxScrollTop <= 0) return;
-
-  const atTop = region.scrollTop <= 0;
-  const atBottom = region.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
-  const scrollingUp = event.deltaY < 0;
-  const scrollingDown = event.deltaY > 0;
-
-  if ((scrollingUp && atTop) || (scrollingDown && atBottom)) {
-    event.preventDefault();
-  }
-}
-```
-
-- 在 `onMounted` / `onUpdated` 绑定 `wheel`（ref 就绪后）；`onBeforeUnmount` **必须** `removeEventListener`。
-- 新建或改可滚动 Desktop 组件时，**默认按本节实现**；勿只依赖 CSS 或只拦 `@scroll` 而不拦 `wheel`。
-
-## 7. Organism Showcase：场景化（组件本体 + 业务薄组件）
-
-**作用域**：`apps/showcase` 中 **Organisms / Templates** 文档页（Nav Bar、Module Menu 等）。
-
-每个 Organism 文档页采用 **单一 `ComponentDocLayout` 预览块**，在「定制」**第一项**增加 **场景化** 下拉：
-
-| 场景值（示例） | 预览 | 代码 / AI 提示词 | 定制项 |
-|----------------|------|------------------|--------|
-| 组件名（如 `Nav Bar`） | `@eds/desktop-components` 本体 | `EgNavBar` + props | 全部 DS 定制 + 嵌套面板 |
-| 业务产品线（如 `Cregis`） | 同 `EgNavBar` 声明式 props | `EgNavBar` + `module-count` / `module-labelN` 等 | 仅场景化；隐藏 DS 逐 prop 定制 |
-
-**Cregis / 声明式场景约定**
-
-- 配置：`apps/showcase/src/presets/<domain>/`（如 `presets/nav/cregisNavBarDeclarative.ts`）。
-- Showcase 预览与 AI 提示词使用 **同一套 `EgNavBar` 声明式 attributes**（kebab-case），不单独导出薄 Vue 组件。
-- 组件库侧：`EgNavBar` 在无 default slot 时读取 `moduleCount` + `moduleLabelN` / `moduleIconN` / `moduleFocusIconN` 及 `appEntry*` 索引 props 渲染模块与应用入口。
-- 不进入 `@eds/desktop-components` 之外的业务封装；不修改 DS 组件 DOM / 样式。
-
-**组合式场景约定**（Nav Bar 本体）
-
-- 仍通过 slots + 子组件（`EgNavBarModuleItem` 等）拼装；Showcase 定制面板驱动预览。
-- **交互动效（已定稿）**：模块行 / 应用入口 / 底部 icon / 企业 / 头像 — **仅 hover 有过渡**（`var(--motion-transition-hover)` 或 `.motion-hover`）；**focus / 选中（`*Focused`）态瞬时切换**，对应规则显式 `transition: none` / `.motion-none`。勿为 focus 加回过渡。Motion token 见 `@eds/desktop-tokens/motion`（`--eds-motion-*` base → `--motion-*` semantic）。
-- **Icon 尺寸（勿混淆 EgIcon `size` prop 与语义 token）**：
-  - 模块 / 应用入口 glyph 容器：`var(--icon-lg)`（`.moduleIconGlyph`）；`EgIcon` 用 **`size="md"`**（`md` → `--icon-lg`），勿用 `size="lg"`（`lg` → `--icon-xl`）。
-  - 底部工具 icon 容器：`var(--icon-md)`；`EgIcon` 用 **`size="sm"`**。
-- **模块 Label（Bar 11px）**：Nav 根 `overflow-x: clip`，用 **`.moduleLabel` 外层 clip + `.moduleLabelPaint`（2×+scale，origin top left，宽 200%）+ `.moduleLabelSizer`（隐藏、直出 `--eds-bar-*` 撑换行/高度）**；详见 §1.1 Bar 小节。
-
-**EgMessage 嵌套（Module Menu / Flotation）**
-
-- **消费方**：`EgModuleMenuItem`（`message` props 或 `#accessory` 嵌套 `EgMessage`）、`EgFlotationMenuItem`（`showMessage` / `#message`）、`EgFlotationTrigger`（仅展示计数，**无**行聚焦同步）。
-- **行聚焦**：父级 `provide(MESSAGE_PARENT_FOCUSED_KEY)`；`EgMessage` 通过 inject 同步 `focused`；显式 `:focused="false"` 可覆盖。
-- **聚焦背景**：`focusBackground: 'inherit' | 'same-white'`（Module Menu 便捷 prop：`message-focus-background`）；Signing 等 danger 计数在 item 聚焦时用 `same-white` → 白底黑字。
-- **布局**：Message 用 sizer/paint（2×+scale(0.5)）绘 Bar 11px，**不**用 `barTextSubpixel` composes；根节点 `flex-shrink: 0`，嵌套在 button / 菜单行内不受父级 `font-size` / `color` 污染。
-- **Showcase**：Message 独立页只定制 `type` / `text`；`focusBackground` 在 Props 表说明，用于 Module Menu / `#accessory` 场景。
-
-**Flotation Combo（通用下拉浮层架构）**
-
-- **原则**：凡「点击展开浮层菜单 / 下拉选择」交互，**统一**使用 `EgFlotation` Combo；**禁止**手搓 `EgAnchoredTooltip` + 菜单 DOM、或在 Showcase / 业务侧维护 **平行 trigger 解析体系**。
-- **组件树**（实现见 `packages/components/src/molecules/flotation/index.ts`）：
-
-```text
-EgFlotation
-├ #trigger  → EgFlotationTrigger（预置：标准下拉框 | 模块菜单标题；slot 可完全替换）
-├ Menu 配置  → placement / align / widthMode / width / maxHeight / showAdd / closeOnScroll…
-└ items / #content → EgFlotationMenu → EgFlotationMenuItem（Box 行；EgFlotationBox 为同一预置行别名）
-```
-
-- **三层可独立配置**（不同消费方只换其中一层或两层，**Combo 结构不变**）：
-
-| 层 | 组件 / 配置 | 典型差异 |
-|----|-------------|----------|
-| Trigger | `#trigger` + `EgFlotationTrigger` | `triggerKind`: `standard-dropdown`（Combo 页） vs `module-menu`（Module Menu `#title`） |
-| Menu | `EgFlotation` props | 宽 240（Combo 默认）vs 288（Module Menu 标题演示）、`addLabel`、`closeOnScroll` 等 |
-| Box / Items | `items` 或 `#content` | Combo 页 Label 演示 vs Module Menu 页 Solace Identity / Create Project 演示 |
-
-- **Showcase 文档分工**（子锚点 id 与 `catalog.ts` 一致）：
-
-| 路由 / 页 | 职责 |
-|-----------|------|
-| `/components/flotation` | **Combo 纵览**：完整 `EgFlotation` + `#trigger` + Menu + Box 定制 |
-| `/components/flotation-trigger` | **Trigger 原子**：`EgFlotationTrigger` 各 Style / Size / 模块菜单预置 |
-| `/components/flotation-box` | **Box 原子**：`EgFlotationMenuItem` / `EgFlotationBox` 行类型与选中态；**须遵守下文「Flotation Box 场景化预览」** |
-
-### 【非常重要】Flotation Box 场景化预览（`/components/flotation-box`）
-
-**作用域**：Showcase **`/components/flotation-box`（侧栏锚点 Box）** 下 **全部** `boxKind`（标准下拉 / 标准级联 / 场景化-下拉地址 / 场景化-地址悬浮 及后续新增）。**禁止**在本页手搓 Tooltip 外壳、禁止在 `#default` 里堆大段业务 DOM 而不拆场景 SFC。
-
-**核心方案（库做壳 + Showcase 做内容与数据）**
-
-```text
-FlotationBoxPreview.vue（页 orchestrator：customize state + 外壳 props + 面板切换）
-  └─ EgFlotationMenu（@eds/desktop-components — 浮层容器与列表滚动）
-       ├─ 场景化 boxKind → FlotationBox*Scene*Preview.vue（Showcase 专用 SFC）
-       │    └─ EgFlotationMenuItem × N（行级预置 + default/trailing slot）
-       └─ 标准/级联 boxKind → FlotationBoxStandardPreview.vue
-            └─ EgFlotationMenuItem × N（item* customize 驱动）
-```
-
-| 层 | 职责 | 禁止 |
-|----|------|------|
-| **EgFlotationMenu** | `effect-flotation-box` 外壳、`list-scroll`、宽/高、`show-add`；**列表滚动 / padding / scroll-fade 须严格遵循下文「EgFlotationMenu 列表滚动与 padding」** | 在 Showcase 重复实现 Tooltip / 滚动容器 / 边缘虚化；`backdrop-filter` 叠层做 fade；shell 保留 padding 导致滚动染色 |
-| **场景 SFC**（如 `FlotationBoxSceneAddressPreview.vue`） | 复合 UI（Tab、Tag、复制按钮等）、`v-model:customize` | 把场景数据写入标准 Box 的 `itemLabelN` 等键 |
-| **Customize** | 每类场景 **独立 state 键**（如 `sceneItemCount`、`sceneItemLabel1`）+ 独立 `*Customize.ts` 面板 builder | 与标准 Box 共用 `item*` 键；切换 `boxKind` 时 `Object.assign` 污染另一模式 |
-| **样式** | `.eds-flotation-menu--box-doc` + `FlotationBoxPreview.module.css`（shell `padding:0` + `.eds-flotation-menu-body` 四边 `spacing-1`）；scroll-fade / flex 链见 **「EgFlotationMenu 列表滚动与 padding」** | 改 token 定义；shell 保留 padding（滚动染色）；场景 SFC 重复 padding；`backdrop-filter` fade 叠层；`#header` slot + `v-if` |
-
-**EgFlotationMenu 场景化外壳约定**（统一由 `flotationBoxPreviewShell.ts` → `resolveFlotationBoxMenuShellProps` 解析，**勿在页内复制**）：
-
-- `list-scroll=true`、`show-add=false`
-- `width-mode="adaptive"`，`max-width` / `max-height` 读场景键（`sceneMaxWidth` / `sceneMaxHeight`）
-- `class="eds-flotation-menu--box-doc"`（**全部 boxKind 必选**；shell `padding: 0` + 内层 `.eds-flotation-menu-body` 补 `spacing-1` 四边 inset，等效原 `effect-flotation-box` padding）
-
-**场景变体分叉**：同一场景 SFC + **prop**（如 `showFilterTabs` 区分下拉地址 vs 地址悬浮），**勿**为每个变体复制整页；Customize 面板用 `boxKind` 隐藏不适用的控件（如地址悬浮无「选择模式」）。
-
-**文件清单（新增场景时必须齐套）**
-
-| 文件 | 用途 |
-|------|------|
-| `FlotationBoxPreview.vue` | 仅 orchestrator：state、watch、`boxKind` 切换 preset、挂 shell + 场景 SFC |
-| `flotationBoxPreviewShell.ts` | `resolveFlotationBoxMenuShellProps` / `useFlotationBoxMenuShellProps` |
-| `FlotationBoxStandardPreview.vue` | 标准 / 级联：`item*` 键 + `EgFlotationMenuItem` 循环 |
-| `FlotationBoxScene*Preview.vue` | 场景内容组件 |
-| `FlotationBoxPreview.module.css` | **全部 boxKind**：shell `padding: 0` + `.eds-flotation-menu-body` 四边 `spacing-1` |
-| `flotationBoxScene*Customize.ts` | 独立 customize 键、`build*PanelControls`、`apply*Preset` |
-| `flotationBoxScene*PreviewData.ts` | 静态演示行 + `get*Rows(state)` |
-| `showcasePropLabels.ts` | `showcaseFlotationBoxKindLabels` 新选项文案 |
-| `flotationDocCustomize.ts` | `FlotationBoxKind` 联合类型、`isFlotationBoxSceneAddressKind` 等守卫 |
-
-**切换 `boxKind` 时**：仅 **从非场景化进入场景化** 时 `apply*Preset`；场景化之间切换 **不** 重置（共用 `sceneItem*` 时可保留编辑）；**不得**用场景 preset 覆盖标准 `item*` 键。
-
-**参考实现**：`FlotationBoxPreview.vue`、`FlotationBoxSceneAddressPreview.vue`、`flotationBoxSceneAddressCustomize.ts`、`flotationBoxPreviewShell.ts`。
-
-### 【非常重要 · 严格遵循】EgFlotationMenu 列表滚动、padding 与 scroll-fade
-
-**作用域**：`packages/components/src/molecules/flotation/FlotationMenu.vue` + `Flotation.module.css`；凡使用 `EgFlotationMenu` / `EgFlotation` Menu 层（含 `/components/flotation-box`、Module Menu 标题浮层等）**均须遵守**。Showcase **禁止**平行实现滚动容器或边缘虚化。
-
-**列表自滚触发条件**
-
-- `useScrollableList = scrollable && (showAdd || listScroll)`
-- 满足时：`EgTooltip` 传 `scrollable=false`（面板不滚，仅列表区滚）；挂全局类 `eds-flotation-menu--scrollable-list`
-- `showAdd` 时额外挂 `eds-flotation-menu--sticky-footer`
-
-**DOM 结构（禁止改层序或拆到 Showcase）**
-
-```text
-EgTooltip (.effect-flotation-box [.eds-flotation-menu--scrollable-list] [.eds-flotation-menu--sticky-footer])
-└─ .eds-tooltip-panel
-   └─ .eds-flotation-menu-body (.menuBody [.menuBodySticky])
-      ├─ .menuHeader                    ← 可选 #header（慎用，见下）
-      ├─ .menuListOuter                 ← 仅 useScrollableList；flex 包装，无 ::before/::after fade
-      │   └─ .menuListScrollable        ← 实际滚动容器 + scroll-fade mask
-      │       ├─ #default slot
-      │       └─ .menuListScrollEnd     ← 仅 showAdd：列表末 4px 占位
-      └─ .eds-flotation-menu-footer     ← 仅 showAdd：分割线 + Add 行
-```
-
-**Flex 高度链（禁止打断 — 打断会导致不能滚动）**
-
-| 节点 | 必达样式 |
-|------|----------|
-| `.eds-flotation-menu.desktopTokens` | `display:flex; flex-direction:column; min-height:0` |
-| `.eds-flotation-menu--scrollable-list` | shell + `.eds-tooltip-panel`：`overflow:hidden` |
-| `.eds-flotation-menu-body` / `.menuBody` | `flex:1 1 auto; min-height:0`；sticky 时 `.menuBodySticky { overflow:hidden; gap:0 }` |
-| `.menuListOuter` | `display:flex; flex-direction:column; flex:1 1 auto; min-height:0; overflow:hidden` |
-| `.menuListScrollable` | `flex:1 1 auto; min-height:0; overflow-y:auto` |
-
-- **禁止** 在 `menuListOuter` 与 `menuListScrollable` 之间插入无 `min-height:0` 的包装层。
-- Showcase `scrollContainment.ts` 依赖可滚动祖先；flex 链断掉时滚轮会被全局拦截吞掉。
-
-**Padding 模型（`/components/flotation-box` 全部 boxKind）**
-
-| 层 | 规则 | 禁止 |
-|----|------|------|
-| 外壳 `effect-flotation-box` | `padding: 0`（`.eds-flotation-menu--box-doc`，`FlotationBoxPreview.module.css`） | 在 shell 保留默认 `spacing-1` padding 并让列表在其内滚动（hover 背景染进 padding 区） |
-| 内层 `.eds-flotation-menu-body` | `padding: var(--spacing-1)` 四边 inset，等效原 shell padding | 在场景 SFC `.list` 等处再叠一层 padding（双倍 inset） |
-| 滚动列表区 | 贴满 menuBody 内容区（inset 内缘），**不加** `padding-block` | 用 scroll 区 padding 冒充 inset |
-
-**Scroll-fade（溢出时上下沿微量虚化）**
-
-- **唯一实现**：`FlotationMenu.vue`（`listFadeTop` / `listFadeBottom` + `@scroll` + `ResizeObserver`）+ `Flotation.module.css`（`.menuListScrollFadeTop|Bottom`）
-- **机制**：在 **`.menuListScrollable` 本体** 用 **`mask-image` 线性渐变**（淡出高度 `var(--spacing-2)`）使内容边缘透明化；过渡 `var(--motion-transition-scroll-fade)`
-- **显示条件**（`SCROLL_EDGE_EPSILON = 2`）：
-  - top：`canScroll && scrollTop > ε`
-  - bottom：`!showAdd && canScroll && 未滚到底`
-- **有 Add 底栏（sticky footer）**：**禁用 bottom fade**，避免列表与 Add 之间出现「假 padding」
-- **严格禁止**：
-  - `menuListOuter::before/::after` + `backdrop-filter` / 不透明底色渐变叠层（玻璃底上呈现为 padding 白边，列表看起来「没填满」）
-  - 硬编码 `blur(Npx)` 做 scroll-fade
-  - 在 Showcase / 场景 SFC 重复实现 scroll-fade
-
-**Sticky footer（`showAdd`）**
-
-- `.eds-tooltip-panel`：`overflow:hidden`；`border-radius:0`（`eds-flotation-menu--sticky-footer`）
-- 列表末 `.menuListScrollEnd`（`height: spacing-1`）在**滚动区内**补底间距，避免 footer `gap` 滚出时露空白
-
-**listScroll 模式（无 Add，如场景化地址）**
-
-- `list-scroll=true`、`show-add=false`（由 `flotationBoxPreviewShell.ts` 解析）
-- 复合 UI（Tab、sticky filter 等）放在 **`#default` slot 内**（如 `position:sticky; top:0`）
-- **禁止** `#header` slot + 条件 `v-if` 控制 Tab（`useSlots().header` 不可靠，Tab 会消失）
-
-**实现文件**
-
-| 文件 | 职责 |
-|------|------|
-| `FlotationMenu.vue` | 滚动逻辑、fade 状态、`eds-flotation-menu--scrollable-list` / `--sticky-footer` 类 |
-| `Flotation.module.css` | flex 链、`menuListOuter`、`menuListScrollFade*` mask、sticky footer panel 裁剪 |
-| `FlotationBoxPreview.module.css` | Box 页 shell `padding:0` + `.eds-flotation-menu-body` inset |
-
-- **嵌套用法**（Module Menu `#title`、Nav Bar 模块切换等 **同一模式**）：
-
-```vue
-<EgModuleMenu title-mode="trigger">
-  <template #title>
-    <EgFlotation v-bind="menuProps" :items="titleMenuItems" close-on-scroll>
-      <template #trigger="{ expanded, selectedItem, hasAnyItemReddot }">
-        <EgFlotationTrigger
-          v-bind="resolveFlotationComboTriggerProps(triggerState, { expanded, selectedItem, hasAnyItemReddot })"
-        />
-      </template>
-    </EgFlotation>
-  </template>
-</EgModuleMenu>
-```
-
-- **Showcase 共享辅助**（`apps/showcase/src/views/components/previews/flotationDocCustomize.ts`）— **新增嵌套场景须复用，勿复制**：
-
-| 函数 / 常量 | 用途 |
-|-------------|------|
-| `resolveFlotationComboTriggerProps(state, slot)` | `#trigger` 插槽：`standard-dropdown` / `module-menu` 预置 props；`slot.selectedItem` 驱动 trigger 文案；**module-menu** 时 `slot.hasAnyItemReddot`（来自 `EgFlotation`）驱动 trigger 红点：任一 Box Item 有红点则 trigger 显示，全无则不显示 |
-| `resolveFlotationComboEgFlotationProps(menuState, options)` | Menu 层：`width` / `maxHeight` / `placement` / `showAdd` 等（**不含** `items` / `#trigger`） |
-| `buildFlotationComboNestedSnippet(triggerState, menuState, options)` | AI / usage 代码片段：`EgFlotation` + `#trigger` + `items` |
-| `withFlotationComboTriggerKind(state, kind)` | 合并 `triggerKind`（如 Module Menu 固定为 `module-menu`） |
-| `moduleMenuTitleFlotationDemoState` | **仅 Module Menu 页**标题浮层 Menu/Box 演示（宽 288、`Create Project`）；**不得**当作 Combo 页默认 customize |
-
-- **Module Menu 薄封装**（`moduleMenuPreviewCustomize.ts`）：`resolveModuleMenuTitleFlotationMenuState`、`resolveModuleMenuTitleFlotationTriggerState`、`buildModuleMenuTitleTriggerSnippet` — 内部 **只调** 上表共享函数；**已删除**独立的 `resolveModuleMenuTitleFlotationTriggerProps` 类重复解析。
-
-- **禁止**：
-  - 绕过 `EgFlotation` 自行拼装 Tooltip + 列表；
-  - 为各 Organism 再写一套 trigger prop 映射（须走 `resolveFlotationComboTriggerProps`）；
-  - 把 Combo 页默认 Label `items` 硬套到 Module Menu 标题演示（**结构共享、数据分离**）。
-
-**Module Menu 场景化**
-
-- 业务 preset：`apps/showcase/src/presets/module-menu/`。**Cregis 与 UDun 场景独立**，模块名列表、preset 索引、默认菜单 **互不共用**：
-  - **Cregis**：`cregisModuleMenuBusinessTitles`（Wallet、Tasks、WaaS、Payment Engine…）→ `cregisModuleMenuGroups.ts` / `cregisModuleMenuByTitle`
-  - **UDun**：`udunModuleMenuBusinessTitles`（Wallet、Approval、Developer、Bill、Manage、Auto-Signing）→ `udunModuleMenuGroups.ts` / `udunModuleMenuByTitle`
-- **菜单 preset 回退**（各场景 **内部** 独立）：仅在该场景的 `*ModuleMenuByTitle` 单独维护的模块有专属菜单；其余模块回退 **`moduleMenuComponentDefaultPresetGroups`**（与组件场景 `buildModuleMenuCustomizeDefaults()` 同一套：3 组、Label、组 2 含 tier=2 二级条目）。Cregis / UDun **共用**此组件默认回退源。
-- **默认选中**：两场景初始 `moduleBusinessTitle` 均为 **`Wallet`**（Nav Bar 首模块名；菜单走该场景默认 preset）。
-- **标题行为**（与上文 Flotation Combo 一致；仅 trigger / Menu / items 数据源按场景变化）：
-
-| 场景化 | 条件 | `#title` / `title` 行为 |
-|--------|------|-------------------------|
-| **组件**（`module-menu`） | `moduleTitleKind` = **文本** | 纯文本（默认 `Module`） |
-| **组件** | `moduleTitleKind` = **下拉框**（preset） | `#title` 嵌套 **EgFlotation Combo**，`triggerKind` = **module-menu**；Menu/Box 用 `moduleMenuTitleFlotationDemoState` |
-| **Cregis** | `moduleBusinessTitle` = **Tasks** | 纯文本 + Tasks preset |
-| **Cregis** | `moduleBusinessTitle` = **WaaS** | **`title-mode="trigger"`** + `#title` EgFlotation（288 / max-height 540 / Create Project；Trigger 文案 Doris Studio）+ `cregisWaasModuleMenuGroups` |
-| **Cregis** | `moduleBusinessTitle` = **Payment Engine** | 同上浮层标题（Trigger 文案 **Payment Engine**）+ `cregisPaymentEngineModuleMenuGroups` |
-| **Cregis** | 其余 Cregis 模块 | 纯文本模块名 + **组件场景默认菜单** |
-| **UDun** | 任意 UDun 模块 | 纯文本模块名 + **组件场景默认菜单**（`udunModuleMenuByTitle` 按需扩展） |
-
-- 组件场景默认 **`moduleTitleKind: 'text'`**（纯文本 Module）；**不**在 DS 默认里 seed Cregis Tasks 业务数据。
-- 标题 trigger 定制项：`flotationTriggerOverviewModuleMenuControls`（`triggerLabel`、`showReddot`、`disabled`）。
-- 推荐用法：`message` / `message-type` / `message-focus-background` props；复杂配件用 `#accessory` 嵌套完整 `EgMessage`。
-
-**Data List 空态（EDS 定稿，不对齐 @cregis/ui）**
-
-- 空态图标：**`eds-business-7`**（`EgDataList` 默认 `#empty` slot）；**不**使用源包 `@cregis/icon` 的 `EdsNoData`。
-- 文案 prop：`emptyText`（默认 `'No data'`）；可通过 `#empty` slot 完全替换。
-
-**实现要点**
-
-- `customize.scenario` 为 Showcase 专用，**不出现在** DS 组件 usage snippet（`omitKeys: ['scenario']`）。
-- 切换场景时同步：`#preview`、`usage-snippet-override`、`component-tag`、`import-code`、Props 表。
-- 后续 Organism（Module Menu、Tool Bar 等）按同一模式扩展场景选项。
-
-**参考**：`NavBarPreview.vue`、`organismTemplateDocData.ts`（`navBarScenarioOptions`）、`presets/nav/cregisNavBarDeclarative.ts`。
-
-## 8. 本地同步（「同步」指令）
-
-在 eds-desktop 中说 **「同步」** = build tokens + components，并对所有本地 `link:` / `file:` 引用本库的项目执行 `pnpm install`。详见 **`eds-sync-local-consumers.mdc`**（alwaysApply）。快捷命令：`pnpm sync` / `pnpm sync:list`。
-
-**Desktop 客户端 consumer**（如 `work-cregis-desktop`）：只同步 Desktop packages；**不要**要 consumer 引入 Website token/组件或 showcase 壳层。客户端须 100% `@eds/desktop-*`，排版 token 以 `packages/tokens/spec` 为准。
+- 扫描 `~/Projects/**/package.json` 中含 `link:`/`file:` 指向 `eds-desktop/packages/{components,tokens}`；排除 monorepo 内 showcase/storybook。
+- 已知 consumer：`work-cregis-desktop`（100% Desktop；禁 `@eds/website-*`、showcase 壳）。
+- 同步含 list-field 辅助 ts 到 consumer；**不含** `listFieldCryptoSampleAddresses.ts`、showcase、website 包。
+- 勿只 build 不同步 consumer；build 失败则停；不 push 除非明确要求。
 
 ## 9. 变更记录
 
-- 2026-08-05：§0 — **Agent 执行范围**：严格按用户指令、最小 diff、禁止思维扩散；扩展 scope 须用户明确说或 alwaysApply 规则触发。
-- 2026-08-04：§7 — **【严格遵循】EgFlotationMenu 列表滚动 / padding / scroll-fade 定稿**（双层 padding：shell `0` + `menuBody spacing-1`；flex 高度链 + `eds-flotation-menu--scrollable-list`；scroll-fade 仅用 `menuListScrollable` 的 `mask-image`，禁止 `backdrop-filter` 叠层；sticky footer 禁 bottom fade）。
-- 2026-08-04：§7 — **【非常重要】Flotation Box 场景化预览**（`/components/flotation-box` 全页：EgFlotationMenu 壳 + 场景 SFC + 独立 customize 键 + `flotationBoxPreviewShell`；禁止 #header slot 与 item* 键污染）。
-- 2026-08-03：§8 — 本地同步约定（「同步」→ 全部 consumer；`pnpm sync` / `scripts/sync-local-consumers.mjs`）。
-- 2026-08-03：§7 — Module Menu **Cregis / UDun 场景独立**（各场景模块列表、preset、默认菜单分离；UDun：Wallet / Approval / Developer / Bill / Manage / Auto-Signing）。
-- 2026-08-03：§7 — **Flotation Combo 通用架构**（EgFlotation 三层、Showcase 三页分工、共享 `flotationDocCustomize` 辅助、禁止手搓 Tooltip / 重复 trigger 解析）；Module Menu 场景化标题表（text / preset / WaaS vs Tasks）。
-- 2026-08-03：§7 — Nav Bar 动效定稿（hover 有过渡、focus 无）；EgMessage 嵌套约定；Module Menu 场景化；Data List 空态 `eds-business-7`（不对齐 @cregis EdsNoData）。
-- 2026-08-01：§1.3 — 数字展示统一千分位：`formatGroupedNumber`（`@eds/desktop-components`）；展示层格式化 + `tabular-nums`；禁止各处手写 `toLocaleString` / 正则插逗号。
-- 2026-07-31：§1.2 — 禁止组件内私自定义 CSS 变量；须直接消费 spec/dist token 或 eds utility 类；缺失时先问维护者（EgTooltip / TooltipMenu 修正为 `--radius-md`、`eds-shadow-light-stack` 等）。
-- 2026-07-30：§7 — Organism Showcase 场景化（DS 本体 vs 业务薄组件；Nav Bar + Cregis 参考实现）。
-- 2026-07-30：§6 — Desktop 嵌套滚动边界（`overscroll-behavior: none` + wheel 拦截 + scrollTop 钳制）；参考 Nav Bar `.moduleRegion`。
-
-- 2026-07-28：§5 — Website 壳层排版为 **`@eds/website-tokens` 的 `--eds-*`（带档位）**；勿用 `--typography-*` 或 Desktop 单档 `--eds-headline-size` 于壳层。
-- 2026-07-28：§5 — Website 承载层与 Desktop 组件层库引用；§1.1 作用域说明。
-- 2026-07-28：初版 — token/硬编码确认、语义数字映射、维度命名、锚点拆分、Showcase 中文与标签格式。
+- 2026-08-07：§7 EgDetail Apply_Item — 变体 catalog + `createDetailApplyItemRow` 业务契约。
+- 2026-08-07：§1 Motion 四层 — base primitive / recipe / semantic（is-active）/ utilities。
+- 2026-08-07：§1 增补 Overlay microFloat 毛玻璃动效约束；共享 `overlayGlassMicroFloat.module.css`。
+- 2026-08-07：全文精简；原分散 mdc 已并入 §4.4 / §5 / §8。
+- 更早条目见 git history。

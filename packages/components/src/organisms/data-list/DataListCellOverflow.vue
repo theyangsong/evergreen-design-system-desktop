@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
-import { EgAnchoredTooltip, type TooltipPlacement } from '../../molecules/tooltip';
+import {
+  DATA_LIST_CELL_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  DATA_LIST_HEADER_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  EgAnchoredTooltip,
+  type TooltipPlacement,
+} from '../../molecules/tooltip';
 import styles from './DataList.module.css';
 
 const props = withDefaults(
@@ -36,7 +41,9 @@ const resolvedPlacement = computed(
 
 const resolvedMaxWidth = computed(() => {
   if (props.maxWidth != null) return props.maxWidth;
-  return props.context === 'header' ? 240 : 480;
+  return props.context === 'header'
+    ? DATA_LIST_HEADER_OVERFLOW_TOOLTIP_MAX_WIDTH
+    : DATA_LIST_CELL_OVERFLOW_TOOLTIP_MAX_WIDTH;
 });
 
 const resolvedTokenScopeClass = computed(() =>
@@ -152,12 +159,29 @@ onBeforeUnmount(() => {
         ]"
       >
         <span
-          ref="contentRef"
+          v-if="context === 'header'"
           :class="[
+            styles.headerOverflowTargetShell,
             showHeaderHoverTrigger && 'eds-hover-tooltip-trigger__target',
-            context === 'header' && styles.headerOverflowTrigger,
-            resolvedContentClass,
+            showHeaderHoverTrigger && 'eds-hover-tooltip-trigger__target--inherit',
+            showHeaderHoverTrigger && styles.headerOverflowTargetShellMotion,
+            showHeaderHoverTrigger && resolvedContentClass,
           ]"
+        >
+          <span
+            ref="contentRef"
+            :class="[
+              styles.headerOverflowTrigger,
+              !showHeaderHoverTrigger && resolvedContentClass,
+            ]"
+          >
+            <slot>{{ text }}</slot>
+          </span>
+        </span>
+        <span
+          v-else
+          ref="contentRef"
+          :class="[resolvedContentClass]"
         >
           <slot>{{ text }}</slot>
         </span>

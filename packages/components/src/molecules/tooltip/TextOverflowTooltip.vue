@@ -123,6 +123,19 @@ const tooltipTargetModifier = computed(() => {
   return 'eds-hover-tooltip-trigger__target--primary';
 });
 
+const hasHoverTriggerMarkup = computed(
+  () => showHoverTrigger.value || showFlatHoverTrigger.value,
+);
+
+const targetShellMotionClass = computed(() => {
+  if (!hasHoverTriggerMarkup.value) {
+    return undefined;
+  }
+  return props.trigger === 'focus'
+    ? styles.targetShellFocusMotion
+    : styles.targetShellHoverMotion;
+});
+
 const tokenScopeClass = computed(
   () => `${TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE} ${styles.panel} ${props.panelScopeClass}`.trim(),
 );
@@ -279,6 +292,7 @@ async function onTooltipCopy(event: Event) {
               styles.targetShell,
               showHoverTrigger && 'eds-hover-tooltip-trigger__target',
               showHoverTrigger && tooltipTargetModifier,
+              showHoverTrigger && targetShellMotionClass,
               showHoverTrigger && typographyClasses,
             ]"
             :tabindex="showHoverTrigger && trigger === 'focus' ? 0 : undefined"
@@ -402,6 +416,7 @@ async function onTooltipCopy(event: Event) {
             styles.targetShell,
             showFlatHoverTrigger && 'eds-hover-tooltip-trigger__target',
             showFlatHoverTrigger && tooltipTargetModifier,
+            showFlatHoverTrigger && targetShellMotionClass,
             showFlatHoverTrigger && typographyClasses,
           ]"
           :tabindex="showFlatHoverTrigger && trigger === 'focus' ? 0 : undefined"

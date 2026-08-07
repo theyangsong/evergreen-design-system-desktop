@@ -7,7 +7,7 @@
   font-weight: var(--eds-body-medium-strong-weight);
   text-decoration: none;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .link[aria-disabled='true'] {

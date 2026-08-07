@@ -130,9 +130,9 @@ export const linkSlotRows: DocPropRow[] = [
 export const paginationPropRows: DocPropRow[] = [
   {
     name: 'kind',
-    type: "'number' | 'symbol' | 'button'",
+    type: "'number' | 'symbol' | 'button' | 'borderArrow'",
     defaultValue: "'number'",
-    description: '分页项类型：数字、符号或箭头按钮。',
+    description: '分页项类型：数字、符号、填充箭头或工具栏边框箭头。',
   },
   {
     name: 'tone',
@@ -159,6 +159,6 @@ export const paginationSlotRows: DocPropRow[] = [
     name: 'default',
     type: 'slot',
     defaultValue: '-',
-    description: 'kind 为 symbol / button 时的图标。',
+    description: 'kind 为 symbol / button / borderArrow 时的图标。',
   },
 ];

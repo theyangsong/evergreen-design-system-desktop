@@ -16,3 +16,7 @@ export {
   getVisibleColumnSlotIndices,
 } from './useResponsiveColumns';
 export { DATA_LIST_VIRTUAL_THRESHOLD } from './useVirtualRows';
+export {
+  DATA_LIST_HEADER_OVERFLOW_TOOLTIP_MAX_WIDTH,
+  DATA_LIST_CELL_OVERFLOW_TOOLTIP_MAX_WIDTH,
+} from '../../molecules/tooltip/textOverflowTooltipConstants';

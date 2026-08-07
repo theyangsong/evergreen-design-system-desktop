@@ -98,6 +98,7 @@ function isEffectBoxRoot(element) {
   return (
     element.classList.contains('effect-container-box') ||
     element.classList.contains('effect-flotation-box') ||
+    element.classList.contains('effect-popover-box') ||
     element.classList.contains('effect-popup-box') ||
     element.classList.contains('effect-subtle-card')
   );

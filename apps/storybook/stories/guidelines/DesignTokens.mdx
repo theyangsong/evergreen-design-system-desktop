@@ -14,11 +14,12 @@ EverGreen tokens are authored in `packages/tokens/spec/` and built to CSS via `p
 | Typography | `spec/typography/` | `--eds-*` (semantic roles), `--eds-family-sans` |
 | Text (metadata) | `spec/text/styles.json` | JSON `textStyles` only; preview classes live in Showcase `text-style-preview.css` |
 | Color | `spec/color/` | `--text-*`, `--material-*`, `--box-*`, `--event-*` |
+| Tag | `spec/color/tag-palette.json` | `--tag-status-*`, `--tag-colorful-*`, `--tag-custom-*` (separate from Color System) |
 | EDS Effect | `spec/effect/` | `--eds-shadow-*`, `.effect-molde-level`, `.effect-flotation-box`, … |
 
 EDS Effect mirrors Color: `effect/themes/light/` and `effect/themes/dark/` each contain `base.css` (variables) + `semantic.css` (classes). Light values resolve from the light color palette; dark from dark.
 
-Import order: `scale → typography → color → effect`
+Import order: `scale → typography → color → tag → effect`
 
 ```css
 @import '@eds/desktop-tokens';

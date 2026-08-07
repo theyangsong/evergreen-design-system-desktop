@@ -10,6 +10,7 @@ import {
 } from '@/data/showcasePropLabels';
 
 export const popoversImportCode = `import {
+  EgAnchoredPopover,
   EgAnchoredTooltip,
   EgButton,
   EgPopover,
@@ -34,9 +35,9 @@ export const popoversCustomizeDefaults = {
   trigger: 'hover',
   disabled: false,
   triggerLabel: '悬浮我',
-  widthMode: 'adaptive',
+  widthMode: 'fixed',
   heightMode: 'adaptive',
-  width: '340',
+  width: '336',
   height: '490',
   maxWidth: '',
   maxHeight: '',
@@ -218,13 +219,13 @@ export const popoverPropRows: DocPropRow[] = [
   {
     name: 'widthMode',
     type: "'fixed' | 'adaptive'",
-    defaultValue: "'adaptive'",
-    description: '面板宽度模式：fixed 使用 width；adaptive 随 slot 内容（受 maxWidth 约束）。',
+    defaultValue: "'fixed'",
+    description: '面板宽度模式：fixed 使用 width（默认 336）；adaptive 随 slot 内容（受 maxWidth 约束）。',
   },
   {
     name: 'width',
     type: 'number',
-    defaultValue: '340',
+    defaultValue: '336',
     description: 'widthMode=fixed 时面板区宽度（px，不含箭头）。',
   },
   {

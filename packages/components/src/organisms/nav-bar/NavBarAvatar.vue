@@ -39,7 +39,11 @@ function onAvatarClick(event: MouseEvent) {
   <button
     type="button"
     class="eds-nav-bar-avatar"
-    :class="[styles.avatarHost, isFocused && styles.avatarHostFocused]"
+    :class="[
+      styles.avatarHost,
+      isFocused ? 'motion-none' : 'motion-ease is-hover',
+      isFocused && styles.avatarHostFocused,
+    ]"
     :aria-label="label"
     :aria-pressed="isFocused"
     @click="onAvatarClick"

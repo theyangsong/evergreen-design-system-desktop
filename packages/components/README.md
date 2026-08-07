@@ -81,8 +81,15 @@ Not like this:
 
 ### Reference: `EgPaginationItem`
 
-- `kind` (`number` | `symbol` | `button`), `tone` (`brand` | `decor`), `label` (number kind), `disabled`.
-- Default slot carries icon for `symbol` / `button` kinds.
+- `kind` (`number` | `symbol` | `button` | `borderArrow`), `tone` (`brand` | `decor`), `label` (number kind), `disabled`.
+- Default slot carries icon for `symbol` / `button` / `borderArrow` kinds.
+
+### Reference: `EgDetail` · Apply_Item
+
+- Popup 内容区 organism；sections 传 `DetailSectionData[]`。
+- **标准行**：`createDetailApplyItemRow(variantId, overrides)` — 变体 catalog 锁死挂件（Copy / Tag / Link / 符号等）；业务 **仅** 覆盖展示字段。
+- **禁止** 手拼 `DetailItemData` 并关闭挂件或 CSS 隐藏。
+- 详案：`docs/detail-apply-item.md` · Figma `2267:11092`。
 
 ### Showcase vs component
 

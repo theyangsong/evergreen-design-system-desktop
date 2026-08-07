@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { EgDivider } from '../../atoms/divider';
 import { EgButton } from '../button';
 import styles from './ComboAction.module.css';
 
@@ -30,10 +31,15 @@ const emit = defineEmits<{
 
 <template>
   <div :class="styles.flotationRoot">
-    <div
-      :class="[styles.divider, !divider && styles.dividerHidden]"
-      role="separator"
-      :aria-hidden="!divider || undefined"
+    <EgDivider
+      :class="[
+        styles.divider,
+        styles.dividerAnimated,
+        !divider && styles.dividerAnimatedHidden,
+      ]"
+      type="module"
+      direction="horizontal"
+      :hide="!divider"
     />
     <div :class="[styles.flotationBar, !clear && styles.flotationBarEnd]">
       <EgButton

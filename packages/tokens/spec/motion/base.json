@@ -1,5 +1,5 @@
 {
-  "$description": "Motion System — base primitives (duration & easing). 单独引用：@eds/desktop-tokens/motion/base",
+  "$description": "Motion Base — primitive only（duration / easing / opacity / scale / offset）。无场景语义。引用：@eds/desktop-tokens/motion/base",
   "groups": [
     {
       "comment": "Duration（时长阶梯 · --eds-motion-N）",
@@ -9,7 +9,7 @@
         "eds-motion-2": "150ms",
         "eds-motion-3": "200ms",
         "eds-motion-4": "300ms",
-        "eds-motion-5": "400ms",
+        "eds-motion-5": "600ms",
         "eds-motion-6": "500ms",
         "eds-motion-7": "700ms",
         "eds-motion-8": "250ms",
@@ -39,7 +39,20 @@
       "usageNotes": [
         "ease-1 = 缓入缓出（对称 hover，默认）",
         "ease-4 = Material · ease-5 = 线性（Spinner）",
-        "ease-6/7 = 弹性反馈 · ease-8 = 减速渐隐（Nav 滚动遮罩）"
+        "ease-6/7 = 弹性反馈 · ease-8 = 减速渐隐"
+      ]
+    },
+    {
+      "comment": "Primitive State（物理量 — 无场景语义）",
+      "tokenList": [
+        { "name": "motion-opacity-hidden", "value": "0" },
+        { "name": "motion-opacity-visible", "value": "1" },
+        { "name": "motion-scale-small", "value": "0.95" },
+        { "name": "motion-scale-flotation-enter", "value": "0.96", "comment": "Flotation 入场 scale" },
+        { "name": "motion-offset-small", "value": "var(--spacing-2)", "comment": "8px · shift" },
+        { "name": "motion-offset-nudge-y", "value": "calc(-1 * var(--spacing-1-5))", "comment": "-6px · nudge（legacy）" },
+        { "name": "motion-offset-flotation-y", "value": "calc(-1 * var(--spacing-2-5))", "comment": "-10px · Flotation 入场" },
+        { "name": "motion-offset-page-push", "value": "50%", "comment": "页面推动位移（相对容器宽度）" }
       ]
     }
   ]

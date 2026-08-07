@@ -1,4 +1,5 @@
 export { default as EgPopover } from './Popover.vue';
+export { default as EgAnchoredPopover } from './AnchoredPopover.vue';
 export type {
   PopoverAlign,
   PopoverHeightMode,

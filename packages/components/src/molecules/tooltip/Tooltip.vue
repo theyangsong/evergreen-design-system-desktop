@@ -2,6 +2,7 @@
 import { computed, type CSSProperties } from 'vue';
 import styles from './Tooltip.module.css';
 import panelStyles from './TooltipMenu.module.css';
+import '../../styles/popupInnerBackdrop.css';
 import {
   resolveTooltipPanelRadius,
   tooltipPanelRadiusCssVar,
@@ -39,12 +40,21 @@ const props = withDefaults(
     maxHeight?: number;
     /** false：面板随内容增高，不滚动、不裁剪。 */
     scrollable?: boolean;
+    /** true：内容贴边，去掉 effect-* 默认 spacing-1 内边距（Popup Detail 等）。 */
+    panelFlush?: boolean;
+    /** true：面板 glass 挂 semantic `.motion-flotation`（overlay micro-float；host 控 active）。 */
+    panelMicroFloat?: boolean;
+    /** true：面板挂 semantic `.motion-layout`（Popup Detail 等大位移；host 控 active）。 */
+    panelLayoutMotion?: boolean;
   }>(),
   {
     panelKind: 'flotation',
     widthMode: 'adaptive',
     heightMode: 'adaptive',
     scrollable: true,
+    panelFlush: false,
+    panelMicroFloat: false,
+    panelLayoutMotion: false,
   },
 );
 
@@ -60,8 +70,11 @@ const shellClass = computed(() => [
   'desktopTokens',
   effectPanelClass.value,
   styles.root,
+  props.panelLayoutMotion ? 'motion-layout' : null,
+  props.panelMicroFloat ? 'motion-flotation' : null,
   props.widthMode === 'fixed' ? styles.widthFixed : null,
   props.heightMode === 'fixed' ? styles.heightFixed : null,
+  props.panelFlush ? styles.panelFlush : null,
 ]);
 
 const shellStyle = computed((): CSSProperties => {
@@ -111,13 +124,29 @@ const shellStyle = computed((): CSSProperties => {
     style.borderRadius = tooltipPanelRadiusCssVar(radiusToken);
   }
 
+  if (props.panelFlush) {
+    style.padding = '0';
+    style.alignItems = 'stretch';
+  }
+
   return style;
 });
+const panelContentClass = computed(() =>
+  props.panelKind === 'popup' ? 'eds-popup-box-content' : null,
+);
 </script>
 
 <template>
   <div :class="shellClass" :style="shellStyle">
-    <div :class="[panelStyles.panel, 'eds-tooltip-panel', !scrollable && panelStyles.panelStatic]">
+    <div
+      :class="[
+        panelStyles.panel,
+        'eds-tooltip-panel',
+        panelContentClass,
+        !scrollable && panelStyles.panelStatic,
+        panelFlush && styles.panelFlushPanel,
+      ]"
+    >
       <slot />
     </div>
   </div>

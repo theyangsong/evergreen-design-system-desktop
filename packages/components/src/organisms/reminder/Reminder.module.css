@@ -1,33 +1,52 @@
+/**
+ * Reminder — Popup Box 内容 organism（Figma 2769:8357）。
+ * Info：280px 固定宽、居中；Echo：460px 固定宽、左对齐 + 滚动 + sticky 工具栏。
+ */
 .root {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.info {
+  align-items: center;
+  width: 280px;
+  max-width: 100%;
+}
+
+.infoBody {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-6);
   width: 100%;
-  max-width: var(--scale-30);
   padding-top: var(--spacing-8);
+  box-sizing: border-box;
 }
 
 .symbol {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--scale-14);
-  height: var(--scale-14);
+  width: var(--graphic-sm);
+  height: var(--graphic-sm);
   border-radius: var(--radius-full);
-  background: var(--material-card-moderate);
-  color: var(--text-base-primary);
+  background: var(--eds-reminder-symbol-bg, var(--material-card-moderate));
+  color: var(--eds-reminder-symbol-color, var(--text-base-primary));
+}
+
+.symbol :global(.icon) {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
 
-.symbol :global(.eds-icon),
-.symbol :global(.eds-icon svg),
-.symbol :global(svg) {
-  width: var(--scale-6);
-  height: var(--scale-6);
-}
-
-.copy {
+.infoCopy {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,8 +56,10 @@
   text-align: center;
 }
 
-.title {
-  max-width: var(--scale-30);
+.infoTitle {
+  width: 100%;
+  max-width: 232px;
+  margin: 0;
   color: var(--text-base-primary);
   font-size: var(--eds-body-large-strong-size);
   font-weight: var(--eds-body-large-strong-weight);
@@ -46,8 +67,10 @@
   word-break: break-word;
 }
 
-.secondary {
-  max-width: var(--scale-30);
+.infoSecondary {
+  width: 100%;
+  max-width: 232px;
+  margin: 0;
   color: var(--text-base-secondary);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
@@ -55,18 +78,89 @@
   word-break: break-word;
 }
 
-.actions {
+.infoActions {
   width: 100%;
-  max-width: var(--scale-30);
 }
 
 .echo {
   align-items: stretch;
-  max-width: var(--scale-40);
-  gap: var(--spacing-4);
+  width: 460px;
+  max-width: 100%;
+}
+
+.echoScroll {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: inherit;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.echoScroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.echoContent {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: min-content;
+  box-sizing: border-box;
+}
+
+.echoCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--spacing-4) var(--spacing-5) var(--spacing-0);
+  box-sizing: border-box;
+}
+
+.echoTitle {
+  width: 100%;
+  margin: 0;
+  color: var(--text-base-primary);
+  font-size: var(--eds-title-size);
+  font-weight: var(--eds-title-weight);
+  line-height: var(--eds-title-line-height);
+  word-break: break-word;
+}
+
+.echoSecondary {
+  width: 100%;
+  margin: 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-bar-size);
+  font-weight: var(--eds-bar-weight);
+  line-height: var(--eds-bar-line-height);
+  word-break: break-word;
 }
 
 .echoBody {
   width: 100%;
-  padding: var(--spacing-0) var(--spacing-4);
+  min-height: 90px;
+  padding: var(--spacing-4) var(--spacing-5);
+  box-sizing: border-box;
+}
+
+.echoToolbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 100%;
+  border-bottom-right-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+  background: var(--box-page);
+  transition: var(--motion-recipe-scroll-fade-background);
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "./base.schema.json",
   "$figma": "https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2008-41",
-  "$description": "Color System base palette (基色). eds-popup: box-flotation, eds-popup-box. eds-flotation: eds-flotation-box (typically @ 60% in semantic).",
+  "$description": "Color System base palette (基色). eds-popup: box-flotation, effect-popup-box. eds-flotation: effect-flotation-box (typically @ 60% in semantic).",
   "light": {
     "eds-brand": { "hex": "#006d41", "displayP3": [0, 0.4275, 0.2549] },
     "eds-match": { "hex": "#003a6d", "displayP3": [0, 0.2275, 0.4275] },

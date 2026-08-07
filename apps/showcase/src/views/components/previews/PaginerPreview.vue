@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { EgIcon, EgPaginer, EgPaginationItem } from '@eds/desktop-components';
+import { EgIcon, EgPaginer } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import styles from './InputPreview.module.css';
@@ -20,6 +20,7 @@ import {
   readPaginerPaginationItem,
   type PaginerPaginationSlotKey,
 } from './buttonDocCustomize';
+import PaginerPaginationItemPreview from './PaginerPaginationItemPreview.vue';
 import {
   buildManyPageItems,
   computeManyNextKeepWindow,
@@ -210,6 +211,7 @@ function trackPaginerPagination(prefix: PaginerPaginationSlotKey) {
   void customize[`${prefix}Tone` as keyof typeof customize];
   void customize[`${prefix}Label` as keyof typeof customize];
   void customize[`${prefix}Disabled` as keyof typeof customize];
+  void customize[`${prefix}Event` as keyof typeof customize];
 }
 
 function paginerPagination(prefix: PaginerPaginationSlotKey) {
@@ -254,38 +256,34 @@ const lastPagination = computed(() => paginerPagination('last'));
           :settings-level-labels="settingsLevelLabels"
           @settings-jump="onSettingsJump"
         >
-          <EgPaginationItem
-            :kind="firstPagination.kind"
-            :tone="firstPagination.tone"
+          <PaginerPaginationItemPreview
+            :pagination="firstPagination"
             :disabled="prevNavDisabled || firstPagination.disabled"
             @click="goFirstPage"
           >
             <EgIcon name="eds-arrow-go-first" fit />
-          </EgPaginationItem>
-          <EgPaginationItem
-            :kind="prevPagination.kind"
-            :tone="prevPagination.tone"
+          </PaginerPaginationItemPreview>
+          <PaginerPaginationItemPreview
+            :pagination="prevPagination"
             :disabled="prevNavDisabled || prevPagination.disabled"
             @click="goPrevPage"
           >
             <EgIcon name="eds-arrow-left-mini-ios" fit />
-          </EgPaginationItem>
+          </PaginerPaginationItemPreview>
 
           <template v-if="!isManyDataVolume">
-            <EgPaginationItem
-              :kind="pagePagination.kind"
-              :tone="pagePagination.tone"
+            <PaginerPaginationItemPreview
+              :pagination="pagePagination"
               selected
               :disabled="pagePagination.disabled"
               :label="String(customize.currentPage)"
             />
           </template>
           <template v-else>
-            <EgPaginationItem
+            <PaginerPaginationItemPreview
               v-for="(item, index) in manyPageItems"
               :key="`${item.kind}-${item.label}-${index}`"
-              :kind="pagePagination.kind"
-              :tone="pagePagination.tone"
+              :pagination="pagePagination"
               :interactive="item.kind !== 'ellipsis'"
               :selected="isManyPageSelected(item, index)"
               :disabled="pagePagination.disabled"
@@ -294,22 +292,20 @@ const lastPagination = computed(() => paginerPagination('last'));
             />
           </template>
 
-          <EgPaginationItem
-            :kind="nextPagination.kind"
-            :tone="nextPagination.tone"
+          <PaginerPaginationItemPreview
+            :pagination="nextPagination"
             :disabled="nextNavDisabled || nextPagination.disabled"
             @click="goNextPage"
           >
             <EgIcon name="eds-arrow-right-mini-ios" fit />
-          </EgPaginationItem>
-          <EgPaginationItem
-            :kind="lastPagination.kind"
-            :tone="lastPagination.tone"
+          </PaginerPaginationItemPreview>
+          <PaginerPaginationItemPreview
+            :pagination="lastPagination"
             :disabled="nextNavDisabled || lastPagination.disabled"
             @click="goLastPage"
           >
             <EgIcon name="eds-arrow-go-last" fit />
-          </EgPaginationItem>
+          </PaginerPaginationItemPreview>
         </EgPaginer>
       </template>
 

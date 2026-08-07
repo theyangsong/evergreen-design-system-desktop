@@ -5,7 +5,7 @@
     "colorfulLight": "2933:9342",
     "colorfulDark": "2933:9009"
   },
-  "$description": "Tag Status / Colorful fill + text (Figma hard-coded). Built into --eds-tag-* base + --tag-* semantic.",
+  "$description": "Tag Status / Colorful / Custom fill + text (Figma hard-coded). Built into dist/css/color/tag/ (--eds-tag-* base + --tag-* semantic), separate from Color System semantic.",
   "status": {
     "danger": {
       "light": { "bg": "#ffcdd2", "text": "#7c0b17" },

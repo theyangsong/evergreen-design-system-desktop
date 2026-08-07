@@ -27,6 +27,8 @@ const wide = useNavBarWide();
 
 const isFocused = computed(() => moduleFocus?.focusedId.value === itemId);
 
+const itemMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-hover'));
+
 onMounted(() => {
   moduleFocus?.register(itemId, 'module');
 });
@@ -45,7 +47,11 @@ function onModuleButtonClick(event: MouseEvent) {
     <button
       v-if="wide"
       type="button"
-      :class="[styles.moduleRowButton, isFocused && styles.moduleRowButtonFocused]"
+      :class="[
+        styles.moduleRowButton,
+        itemMotionClass,
+        isFocused && styles.moduleRowButtonFocused,
+      ]"
       :aria-label="label"
       :aria-current="active ? 'page' : undefined"
       :aria-pressed="isFocused"
@@ -54,6 +60,7 @@ function onModuleButtonClick(event: MouseEvent) {
       <span
         :class="[
           styles.moduleRowIcon,
+          !appEntry && itemMotionClass,
           slots.focusIcon && !appEntry && styles.moduleIconGlyphWithFocus,
           appEntry && styles.moduleIconGlyphAppEntry,
         ]"
@@ -72,7 +79,11 @@ function onModuleButtonClick(event: MouseEvent) {
       <div :class="styles.moduleIconHost">
         <button
           type="button"
-          :class="[styles.moduleIconButton, isFocused && styles.moduleIconButtonFocused]"
+          :class="[
+            styles.moduleIconButton,
+            itemMotionClass,
+            isFocused && styles.moduleIconButtonFocused,
+          ]"
           :aria-label="label"
           :aria-current="active ? 'page' : undefined"
           :aria-pressed="isFocused"
@@ -81,6 +92,7 @@ function onModuleButtonClick(event: MouseEvent) {
           <span
             :class="[
               styles.moduleIconGlyph,
+              !appEntry && itemMotionClass,
               slots.focusIcon && !appEntry && styles.moduleIconGlyphWithFocus,
               appEntry && styles.moduleIconGlyphAppEntry,
             ]"

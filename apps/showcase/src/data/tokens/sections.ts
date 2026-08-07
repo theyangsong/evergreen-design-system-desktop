@@ -17,7 +17,8 @@ export const tokenAnchorItems: AnchorItem[] = [
   { id: 'typography-semantic', label: 'Typography Semantic' },
   { id: 'text-style', label: 'Text Style' },
   { id: 'motion-base', label: 'Motion Base' },
+  { id: 'motion-recipe', label: 'Motion Recipe' },
   { id: 'motion-semantic', label: 'Motion Semantic' },
-  { id: 'eds-base', label: 'EDS Base' },
-  { id: 'eds-semantic', label: 'EDS Semantic' },
+  { id: 'effect-base', label: 'Effect Base' },
+  { id: 'effect-semantic', label: 'Effect Semantic' },
 ];

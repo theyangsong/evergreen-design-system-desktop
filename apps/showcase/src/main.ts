@@ -5,6 +5,7 @@ import App from './App.vue';
 import { router } from './router';
 import { installGlobalWheelScrollContainment } from './composables/scrollContainment';
 import './styles/global.css';
+import './styles/desktop-motion-global.css';
 import './styles/desktop-token-scope.css';
 
 installGlobalWheelScrollContainment();

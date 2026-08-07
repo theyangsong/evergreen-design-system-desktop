@@ -92,9 +92,10 @@ export const showcaseIconShapeLabels = {
 } as const;
 
 export const showcasePaginationKindLabels = {
-  number: tokenLabel('数字', 'number'),
-  symbol: tokenLabel('符号', 'symbol'),
-  button: tokenLabel('按钮', 'button'),
+  number: '分页器-数字',
+  symbol: '分页器-符号',
+  button: '分页器-填充箭头',
+  borderArrow: '工具栏-边框箭头',
 } as const;
 
 export const showcaseInputTypeLabels = {
@@ -515,7 +516,7 @@ export const linkToneRows = propLabelRows(['brand', 'theme'] as const, showcaseL
 export const linkSizeRows = propLabelRows(['lg', 'md', 'sm'] as const, showcaseLinkSizeLabels);
 
 export const paginationKindRows = propLabelRows(
-  ['number', 'symbol', 'button'] as const,
+  ['number', 'symbol', 'button', 'borderArrow'] as const,
   showcasePaginationKindLabels,
 );
 

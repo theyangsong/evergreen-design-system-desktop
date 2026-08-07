@@ -25,7 +25,7 @@
   min-width: 0;
   min-height: 0;
   background: var(--box-page);
-  transition: flex var(--motion-duration-shift) var(--motion-easing-standard);
+  transition: var(--motion-recipe-shift);
 }
 
 .mainSkidOpen {
@@ -72,9 +72,7 @@
   overflow: hidden;
   pointer-events: none;
   background: var(--box-page);
-  transition:
-    max-width var(--motion-duration-shift) var(--motion-easing-standard),
-    width var(--motion-duration-shift) var(--motion-easing-standard);
+  transition: var(--motion-recipe-shift);
 }
 
 .skidVisible {

@@ -51,13 +51,13 @@
 .menuListScrollFadeTop {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-2));
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-2));
-  transition: var(--motion-transition-scroll-fade);
+  transition: var(--motion-recipe-scroll-fade);
 }
 
 .menuListScrollFadeBottom {
   -webkit-mask-image: linear-gradient(to top, transparent 0, #000 var(--spacing-2));
   mask-image: linear-gradient(to top, transparent 0, #000 var(--spacing-2));
-  transition: var(--motion-transition-scroll-fade);
+  transition: var(--motion-recipe-scroll-fade);
 }
 
 .menuListScrollFadeTop.menuListScrollFadeBottom {
@@ -137,7 +137,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .addRow:hover {
@@ -212,7 +212,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .triggerWidthAdaptive {
@@ -413,7 +413,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .boxRoot:hover:not(:disabled):not(.boxFocused) {

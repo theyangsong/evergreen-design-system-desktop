@@ -18,11 +18,13 @@ import {
 } from '@/data/showcasePropLabels';
 import {
   showcaseArrowIconSnippet,
+  showcaseBorderArrowIconSnippet,
   showcaseChevronIconSnippet,
   showcaseDefaultIconName,
   showcaseEgIconSnippet,
 } from '@/views/shared/showcaseIcons';
 import { iconButtonEventRows } from './iconButtonDocPreview';
+import { readBorderArrowDocEvent, type BorderArrowDocEvent } from './borderArrowDocPreview';
 
 export const buttonTextImportCode = `import { EgButton, EgIcon } from '@eds/desktop-components';`;
 
@@ -488,6 +490,7 @@ export function buildLinkUsageSnippet(state: Record<string, unknown>): string {
 
 export const paginationCustomizeDefaults = {
   kind: 'button',
+  event: 'full' as BorderArrowDocEvent,
   tone: 'brand',
   label: '0',
   disabled: false,
@@ -502,9 +505,17 @@ export const paginationCustomizeControls: DocCustomizeControl[] = [
   },
   {
     kind: 'select',
+    key: 'event',
+    label: '交互',
+    options: iconButtonEventRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (s) => s.kind === 'borderArrow',
+  },
+  {
+    kind: 'select',
     key: 'tone',
     label: showcaseButtonCustomizeFieldLabels.tone,
     options: paginationToneRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (s) => s.kind !== 'borderArrow',
   },
   {
     kind: 'text',
@@ -519,16 +530,20 @@ export function buildPaginationUsageSnippet(state: Record<string, unknown>): str
   if (state.kind === 'number') {
     return buildVueSelfClosingSnippet('EgPaginationItem', state, {
       defaults: paginationCustomizeDefaults,
-      omitKeys: ['type'],
+      omitKeys: ['type', 'event'],
     });
   }
 
   const icon =
-    state.kind === 'symbol' ? showcaseChevronIconSnippet : showcaseArrowIconSnippet;
+    state.kind === 'borderArrow'
+      ? showcaseBorderArrowIconSnippet
+      : state.kind === 'symbol'
+        ? showcaseChevronIconSnippet
+        : showcaseArrowIconSnippet;
   const iconLines = icon.replace(/\n/g, '\n  ');
   return buildVueDefaultSlotSnippet('EgPaginationItem', state, iconLines, {
     defaults: paginationCustomizeDefaults,
-    omitKeys: ['label', 'type'],
+    omitKeys: ['label', 'type', 'event'],
   });
 }
 
@@ -551,10 +566,11 @@ export const paginerPaginationButtonOptions = [
 ];
 
 type PaginerPaginationSeed = {
-  kind?: 'number' | 'symbol' | 'button';
+  kind?: 'number' | 'symbol' | 'button' | 'borderArrow';
   tone?: 'brand' | 'decor';
   label?: string;
   disabled?: boolean;
+  event?: BorderArrowDocEvent;
 };
 
 function paginerPaginationItemSeed(
@@ -565,6 +581,7 @@ function paginerPaginationItemSeed(
     tone: seed.tone ?? 'decor',
     label: seed.label ?? '1',
     disabled: seed.disabled ?? false,
+    event: seed.event ?? 'full',
   };
 }
 
@@ -578,6 +595,7 @@ export function paginerPaginationItemDefaults(
     [`${prefix}Tone`]: defaults.tone,
     [`${prefix}Label`]: defaults.label,
     [`${prefix}Disabled`]: defaults.disabled,
+    [`${prefix}Event`]: defaults.event,
   };
 }
 
@@ -635,10 +653,11 @@ export function buildPaginerPaginationCustomizeControls(
 }
 
 export type PaginerPaginationItemState = {
-  kind: 'number' | 'symbol' | 'button';
+  kind: 'number' | 'symbol' | 'button' | 'borderArrow';
   tone: 'brand' | 'decor';
   label: string;
   disabled: boolean;
+  event: BorderArrowDocEvent;
 };
 
 export function readPaginerPaginationItem(
@@ -650,10 +669,16 @@ export function readPaginerPaginationItem(
 
   return {
     kind:
-      kind === 'number' || kind === 'button' || kind === 'symbol' ? kind : 'symbol',
+      kind === 'number' ||
+      kind === 'button' ||
+      kind === 'symbol' ||
+      kind === 'borderArrow'
+        ? kind
+        : 'symbol',
     tone: tone === 'brand' || tone === 'decor' ? tone : 'decor',
     label: String(state[`${prefix}Label`] ?? '1'),
     disabled: Boolean(state[`${prefix}Disabled`]),
+    event: readBorderArrowDocEvent(state[`${prefix}Event`]),
   };
 }
 

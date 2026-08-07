@@ -9,9 +9,9 @@
 }
 
 /*
- * macOS 一体 Popover：Shape（absolute 背景）+ Content（relative 文档流）同壳。
- * - .content：箭头侧 padding + motion-flotation，与 glass 同步进出场
- * - .contentBody：插槽包裹层，padding 0，由 slot 根节点自定布局
+ * macOS Popover — 视觉对齐 effect-popover-box（自定义 clip-path 箭头）。
+ * - .shapeSurface：backdrop-filter（effect 玻璃栈；无 filter 祖先）
+ * - .outline：SVG 复刻 effect 填充 + SVG 专用 drop-shadow（勿绑 eds-shadow-light；无边框）
  */
 .shell {
   position: relative;
@@ -19,12 +19,9 @@
   width: fit-content;
   height: fit-content;
   overflow: visible;
-  filter:
-    drop-shadow(0 0 0.5px var(--stroke-outline-shallow))
-    drop-shadow(0 var(--depth-shallow) var(--blur-shallow) var(--eds-vulvar-shadow));
 }
 
-:global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box) {
+:global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-popover-box) {
   display: block;
   position: absolute;
   inset: 0;
@@ -39,17 +36,21 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
+  background: transparent;
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
   pointer-events: none;
 }
 
-:global(html[data-theme='light']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box),
-:global(html[data-theme='dark']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box) {
+:global(html[data-theme='light']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-popover-box),
+:global(html[data-theme='dark']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-popover-box) {
   width: 100% !important;
   height: 100% !important;
   min-width: 100%;
   min-height: 100%;
 }
 
+/* Popover SVG 专用投影（drop-shadow 与矩形 box-shadow 表现不同，勿绑 eds-shadow-light） */
 .outline {
   position: absolute;
   inset: 0;
@@ -59,30 +60,24 @@
   height: 100%;
   overflow: visible;
   pointer-events: none;
-  color: var(--material-same-white-quaternary);
   transform-origin: center center;
+  filter:
+    drop-shadow(0 0 0.5px var(--stroke-base-tertiary))
+    drop-shadow(0 var(--depth-shallow) var(--blur-shallow) var(--effect-vulvar-shadow-deep));
 }
 
+/* 底层填充：effect-popover-box（eds-popup @ 85%） */
 .shapeFill {
-  fill: var(--eds-flotation);
-  fill-opacity: 0.6;
+  fill: var(--effect-popover-box);
   stroke: none;
   shape-rendering: geometricPrecision;
 }
 
+/* effect background 第 1 层 + luminosity（对齐 semantic background-blend-mode） */
 .shapeTint {
-  fill: var(--eds-same-white);
-  fill-opacity: 0.4;
+  fill: var(--material-same-white-quaternary);
+  mix-blend-mode: luminosity;
   stroke: none;
-  shape-rendering: geometricPrecision;
-}
-
-.shapeStroke {
-  fill: none;
-  stroke: var(--eds-same-white);
-  stroke-opacity: 0.4;
-  stroke-width: var(--stroke-xs);
-  vector-effect: non-scaling-stroke;
   shape-rendering: geometricPrecision;
 }
 

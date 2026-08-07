@@ -5,6 +5,7 @@ import { EgTooltip } from '../../molecules/tooltip';
 import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../../molecules/flotation';
 import type { TooltipAlign, TooltipPlacement } from '../../molecules/tooltip';
 import BatchBarActionItem from './BatchBarActionItem.vue';
+import BatchBarLabelPopover from './BatchBarLabelPopover.vue';
 import styles from './BatchBar.module.css';
 
 const props = withDefaults(
@@ -17,6 +18,8 @@ const props = withDefaults(
     labels?: string[];
     /** 与 labels 等长；为 true 时该项 Text 使用 --text-danger-primary。 */
     labelDanger?: boolean[];
+    /** 与 labels 等长；为 true 时点击打开 Popover，确认后再 label-click。 */
+    labelPopover?: boolean[];
     moreLabel?: string;
     /** 超过该数量时折叠为 collapsedVisibleCount + More。 */
     collapseThreshold?: number;
@@ -28,6 +31,8 @@ const props = withDefaults(
     moreAlign?: TooltipAlign;
     /** 正在加载的 Label 全局 index；overflow 项加载时 More 按钮展示 spinner。 */
     loadingLabelIndex?: number | null;
+    /** Popover Label 打开前回调；慢于 500ms 时由 BatchBarLabelPopover 展示 Loading。 */
+    onLabelBeforeOpen?: (label: string, index: number) => void | Promise<void>;
   }>(),
   {
     selectedCount: '0',
@@ -47,6 +52,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   dismiss: [];
   'label-click': [label: string, index: number];
+  'label-popover-dismiss': [label: string, index: number];
   more: [];
 }>();
 
@@ -101,6 +107,10 @@ function isLabelDanger(index: number) {
   return Boolean(props.labelDanger?.[index]);
 }
 
+function isLabelPopover(index: number) {
+  return Boolean(props.labelPopover?.[index]);
+}
+
 function onLabelClick(label: string, index: number) {
   if (actionsDisabled.value) return;
   emit('label-click', label, index);
@@ -113,6 +123,10 @@ function onOverflowLabelClick(
 ) {
   onLabelClick(label, index);
   close();
+}
+
+function onDismiss() {
+  emit('dismiss');
 }
 </script>
 
@@ -128,7 +142,7 @@ function onOverflowLabelClick(
       :scrollable="false"
     >
       <slot name="leading">
-        <BatchBarActionItem type="symbol" @click="emit('dismiss')" />
+        <BatchBarActionItem type="symbol" @click="onDismiss" />
       </slot>
 
       <EgDivider :class="styles.divider" type="page" direction="vertical" />
@@ -149,7 +163,27 @@ function onOverflowLabelClick(
       <template v-else>
         <template v-for="(label, index) in visibleLabels" :key="`${label}-${index}`">
           <EgDivider :class="styles.divider" type="page" direction="vertical" />
+          <BatchBarLabelPopover
+            v-if="isLabelPopover(index)"
+            :label="label"
+            :loading="isLabelLoading(index)"
+            :danger="isLabelDanger(index)"
+            :disabled="actionsDisabled"
+            :on-before-open="() => onLabelBeforeOpen?.(label, index)"
+            @confirm="onLabelClick(label, index)"
+            @dismiss="emit('label-popover-dismiss', label, index)"
+          >
+            <template #default="popoverSlot">
+              <slot
+                name="label-popover"
+                :label="label"
+                :index="index"
+                v-bind="popoverSlot"
+              />
+            </template>
+          </BatchBarLabelPopover>
           <BatchBarActionItem
+            v-else
             type="text"
             :label="label"
             :loading="isLabelLoading(index)"

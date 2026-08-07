@@ -7,7 +7,7 @@
   min-width: var(--scale-30);
   padding: var(--spacing-8) var(--spacing-4);
   border-radius: var(--radius-md);
-  background: var(--eds-prompt);
+  background: var(--effect-prompt);
   color: var(--text-same-white-primary);
   font-size: var(--eds-body-medium-strong-size);
   line-height: var(--eds-body-medium-strong-line-height);
@@ -25,7 +25,10 @@
   background: var(--material-brand-primary);
   color: var(--material-same-white-primary);
   transform: scale(0);
-  animation: eds-end-feedback-circle var(--motion-duration-feedback) var(--motion-easing-spring) forwards;
+  animation-duration: var(--motion-duration-feedback); animation-timing-function: var(--motion-easing-spring);
+  
+  animation-name: eds-end-feedback-circle;
+  animation-fill-mode: forwards;
 }
 
 .stateIcon :global(.eds-icon svg),
@@ -35,13 +38,17 @@
   overflow: visible;
 }
 
-.stateIcon :global(path) {
-  fill: var(--material-same-white-primary);
-  transform-box: fill-box;
-  transform-origin: center;
+.stateIconTick {
+  display: inline-flex;
   transform: scale(0);
   opacity: 0;
-  animation: eds-end-feedback-tick var(--motion-duration-emphasis) var(--motion-easing-spring-emphasis) var(--motion-delay-feedback-tick) forwards;
+  animation-duration: var(--motion-duration-emphasis); animation-timing-function: var(--motion-easing-spring-emphasis); animation-delay: var(--motion-delay-feedback-tick);
+  animation-name: eds-end-feedback-tick;
+  animation-fill-mode: forwards;
+}
+
+.stateIconTick :global(path) {
+  fill: var(--material-same-white-primary);
 }
 
 @keyframes eds-end-feedback-circle {
@@ -73,7 +80,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stateIcon,
-  .stateIcon :global(path) {
+  .stateIconTick {
     animation: none;
     transform: none;
     opacity: 1;

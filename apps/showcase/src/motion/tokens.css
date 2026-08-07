@@ -37,8 +37,9 @@
   --showcase-doc-preview-height-tag: 480px;
   --showcase-doc-preview-bg: #E8F0FC;
   --showcase-doc-preview-bg-organism: var(--showcase-doc-preview-bg);
-  /** Data List 文档 previewShell（与 organism 预览区同高）。 */
-  --showcase-data-list-preview-height: var(--showcase-doc-preview-height-organism);
+  /** Popup 文档 inner 组件画布（客户端默认视口 1280×800）。 */
+  --showcase-popup-preview-width: 1280px;
+  --showcase-popup-preview-height: var(--showcase-organism-page-height-fixed);
   /** Data List 文档页 inner Page 区。 */
   --showcase-data-list-page-height-fixed: var(--showcase-organism-page-height-fixed);
   --showcase-data-list-page-height-min: var(--showcase-organism-page-height-min);

@@ -41,7 +41,7 @@
   color: var(--text-base-primary);
   white-space: nowrap;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .action:hover:not(:disabled) {
@@ -67,7 +67,7 @@
   font-size: var(--eds-body-small-strong-size);
   font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .actionTextBody {
@@ -118,7 +118,10 @@
 
 .actionLoadingSpin {
   color: var(--stroke-base-secondary);
-  animation: eds-batch-bar-spin var(--motion-duration-spin-slow) var(--motion-easing-linear) infinite;
+  animation-duration: var(--motion-duration-spin-slow); animation-timing-function: var(--motion-easing-linear);
+  
+  animation-name: eds-batch-bar-spin;
+  animation-iteration-count: infinite;
 }
 
 @keyframes eds-batch-bar-spin {
@@ -164,7 +167,7 @@
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
-  transition: var(--motion-transition-stat-width);
+  transition: width var(--motion-duration-shift) var(--motion-easing-exit);
 }
 
 .statPrimary {

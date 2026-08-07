@@ -1,11 +1,9 @@
 /**
- * 文本 Tooltip 触发器 — motion-interactive 分层（入场 + 离场）：
- * - __target 文案：var(--motion-transition-hover)（color 300ms）
- * - ::after 虚线：var(--motion-transition-fade)（opacity 150ms）
+ * 文本 Tooltip 触发器 — Semantic + recipe glue：
+ * - __target 文案：`.motion-ease.is-hover`（focus：`.motion-ease.is-focus`）
+ * - ::after 虚线：recipe fade（由 markup 挂 motion-ease + state modifier）
  *
  * 结构：.eds-hover-tooltip-trigger > .eds-hover-tooltip-trigger__target
- * 聚焦模式：根节点 .eds-hover-tooltip-trigger--focus，__target tabindex="0"
- * 浮层打开：祖先 [data-eds-tooltip-open]（EgAnchoredTooltip 写入）
  */
 .eds-hover-tooltip-trigger {
   cursor: default;
@@ -15,7 +13,6 @@
 .eds-hover-tooltip-trigger__target {
   position: relative;
   color: var(--text-base-secondary);
-  transition: var(--motion-transition-hover);
 }
 
 .eds-hover-tooltip-trigger__target::after {
@@ -26,10 +23,9 @@
   border-bottom: var(--stroke-sm) dashed var(--event-hover-brand-weaken);
   opacity: 0;
   pointer-events: none;
-  transition: var(--motion-transition-fade);
+  transition: var(--motion-recipe-fade);
 }
 
-/* Hover — 文案 + 虚线入场/离场（trigger 或 target 任一 hover 即可） */
 .eds-hover-tooltip-trigger:hover .eds-hover-tooltip-trigger__target,
 .eds-hover-tooltip-trigger__target:hover {
   color: var(--event-hover-brand);
@@ -40,7 +36,6 @@
   opacity: 1;
 }
 
-/* 浮层已开、鼠标离开 __target（移向 panel 或离场）— 保持品牌色，虚线隐藏 */
 [data-eds-tooltip-open] .eds-hover-tooltip-trigger__target:not(:hover) {
   color: var(--event-hover-brand);
 }
@@ -49,7 +44,6 @@
   opacity: 0;
 }
 
-/* Focus 模式 — 同 motion-interactive 分层 */
 .eds-hover-tooltip-trigger--focus {
   outline: none;
 }
@@ -62,7 +56,6 @@
   opacity: 1;
 }
 
-/* Primary 行（List Field 主文本等）— 默认 text-base-primary；hover / 浮层打开 / focus 时为品牌色 */
 .eds-hover-tooltip-trigger__target--primary {
   color: var(--text-base-primary);
 }
@@ -80,7 +73,6 @@
   opacity: 1;
 }
 
-/* Secondary 行（List Field 副文本 / footnote）— 默认 text-base-secondary；hover / 浮层打开 / focus 时为品牌色 */
 .eds-hover-tooltip-trigger__target--secondary {
   color: var(--text-base-secondary);
 }
@@ -98,7 +90,6 @@
   opacity: 1;
 }
 
-/* 保留语义色（如 Status Tag），hover 时仍走品牌色 + 虚线 */
 .eds-hover-tooltip-trigger__target--inherit {
   color: inherit;
 }
@@ -109,21 +100,13 @@
 }
 
 [data-eds-tooltip-open] .eds-hover-tooltip-trigger__target--inherit:not(:hover) {
-  color: inherit;
-}
-
-.eds-hover-tooltip-trigger--focus:focus-within .eds-hover-tooltip-trigger__target--inherit {
   color: var(--event-hover-brand);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .eds-hover-tooltip-trigger__target,
-  .eds-hover-tooltip-trigger__target::after {
-    transition: none;
-  }
+[data-eds-tooltip-open] .eds-hover-tooltip-trigger__target--inherit:not(:hover)::after {
+  opacity: 0;
 }
 
-/* 只读文本 overflow tooltip 面板：默认指针、禁止选中/复制 */
 :global(.eds-overflow-text-tooltip) :global(.eds-tooltip-panel) {
   cursor: default;
   user-select: none;

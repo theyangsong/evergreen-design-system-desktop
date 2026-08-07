@@ -1,11 +1,11 @@
 export type PopoverPlacement = 'top' | 'bottom' | 'left' | 'right';
 export type PopoverAlign = 'start' | 'center' | 'end';
 
-/** 默认面板尺寸（340×490 + eds-popovers-triangle 37×11 箭头）。 */
-export const POPOVER_PANEL_W = 340;
+/** 默认面板尺寸（336×adaptive + eds-popovers-triangle 37×11 箭头）。 */
+export const POPOVER_PANEL_W = 336;
 export const POPOVER_PANEL_H = 490;
 
-/** adaptive / SVG 面板区最小尺寸（不含箭头）。 */
+/** adaptive / SVG 面板区最小尺寸（不含箭头；fixed 默认宽见 POPOVER_PANEL_W）。 */
 export const POPOVER_PANEL_MIN_W = 168;
 export const POPOVER_PANEL_MIN_H = 88;
 
@@ -87,7 +87,7 @@ function mirrorArrowY(y: number): number {
   return POPOVER_ARROW_H - y;
 }
 
-/** 沿 arrowUp 开放路径 Y 镜像（尖端朝下）：(37,0) → 尖端 → (0,0)。 */
+/** 沿 arrowUp 开放路径 Y 镜像（尖端朝下）：(0,0) → 尖端 → (37,0)。 */
 function arrowDownCurveOpen(pt: PtFn): string {
   const m = (x: number, y: number) => pt(x, mirrorArrowY(y));
   return [
@@ -98,6 +98,20 @@ function arrowDownCurveOpen(pt: PtFn): string {
     `C ${m(19.287176, 0)} ${m(20.196185, 0.407249)} ${m(20.866071, 1.132037)}`,
     `C ${m(24.122024, 4.377346)} ${m(26.166667, 6.333333)} ${m(27, 7)}`,
     `C ${m(28.25, 8)} ${m(32, 11)} ${m(37, 11)}`,
+  ].join(' ');
+}
+
+/** 开放路径反向：(37,0) → 尖端 → (0,0)（Y 镜像后用于 top 底边）。 */
+function arrowDownCurveOpenReverse(pt: PtFn): string {
+  const m = (x: number, y: number) => pt(x, mirrorArrowY(y));
+  return [
+    `C ${m(32, 11)} ${m(28.25, 8)} ${m(27, 7)}`,
+    `C ${m(26.166667, 6.333333)} ${m(24.122024, 4.377346)} ${m(20.866071, 1.132037)}`,
+    `C ${m(20.196185, 0.407249)} ${m(19.287176, 0)} ${m(18.339286, 0)}`,
+    `C ${m(17.391396, 0)} ${m(16.482387, 0.407249)} ${m(15.8125, 1.132037)}`,
+    `L ${m(15.8125, 1.170635)}`,
+    `C ${m(12.627976, 4.676649)} ${m(11.25, 6)} ${m(10, 7)}`,
+    `C ${m(8.75, 8)} ${m(5, 11)} ${m(0, 11)}`,
   ].join(' ');
 }
 
@@ -113,7 +127,7 @@ function arrowContourUp(tx: number, baseY: number): string {
 /** placement top：当前点在箭头右底角 (tx+37, baseY)，经尖端回到左底角。 */
 function arrowContourDownReverse(tx: number, baseY: number): string {
   const pt: PtFn = (x, y) => fmt(tx + x, baseY + y);
-  return arrowDownCurveOpen(pt);
+  return arrowDownCurveOpenReverse(pt);
 }
 
 /** placement left：当前点在箭头顶部 (baseX, ty)；结束于 (baseX, ty+37)。 */

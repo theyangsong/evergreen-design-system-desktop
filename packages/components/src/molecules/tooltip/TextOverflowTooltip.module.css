@@ -13,6 +13,14 @@
   overflow: visible;
 }
 
+.targetShellHoverMotion {
+  composes: motion-ease is-hover from global;
+}
+
+.targetShellFocusMotion {
+  composes: motion-ease is-focus from global;
+}
+
 .measure {
   display: inline-block;
   box-sizing: border-box;

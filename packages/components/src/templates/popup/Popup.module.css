@@ -1,29 +1,161 @@
+/**
+ * Popup（Figma 2181:741 / Reminder 2769:8357）
+ *
+ * - detail：880×620 Popup Box（effect-popup-box）+ 默认插槽放内容（如 EgDetail）
+ * - reminder / verify：Popup Box 固定宽（Info 280 / Echo 460）、高度随内容
+ */
 .root {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
-  min-height: var(--scale-30);
-  padding: var(--spacing-4);
+  height: 100%;
+  min-height: 0;
+  overflow: clip;
+  /* Detail 进出场 — 组件侧时长（略长于 semantic 默认；不改 motion token） */
+  --eds-popup-detail-motion-ms: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    --eds-popup-detail-motion-ms: 0ms;
+  }
+}
+
+.alertShell:global(.motion-layout) {
+  transition:
+    opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-enter),
+    transform var(--eds-popup-detail-motion-ms) var(--motion-easing-enter);
 }
 
 .backdrop {
   position: absolute;
   inset: 0;
-  background: var(--material-base-quaternary);
+  border-radius: var(--radius-lg);
+  background: var(--effect-popup-background);
+  cursor: default;
 }
 
-.panel {
+.stage {
   position: relative;
   z-index: 1;
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  align-items: stretch;
+  min-height: 0;
+}
+
+.stageScrim {
+  background: var(--effect-popup-background);
+}
+
+/* Detail + microFloat：遮罩 opacity 缓入缓出（与面板 motion-layout 同步 active） */
+.stageDetailAnimatedScrim.stageScrim {
+  background: transparent;
+}
+
+.stageDetailAnimatedScrim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--effect-popup-background);
+  opacity: var(--motion-opacity-hidden);
+  transition: opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-standard);
+  pointer-events: none;
+}
+
+.stageDetailAnimatedScrim.stageDetailScrimVisible::before {
+  opacity: var(--motion-opacity-visible);
+}
+
+.stageDetailAnimatedScrim > :global(*) {
+  position: relative;
+  z-index: 1;
+}
+
+:global(.popupDetailScrimMotionProbe) {
+  transition: opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-standard);
+}
+
+:global(.popupDetailPanelMotionProbe) {
+  transition:
+    opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-enter),
+    transform var(--eds-popup-detail-motion-ms) var(--motion-easing-enter);
+}
+
+.stageDetail {
+  align-items: center;
+  justify-content: center;
+  padding-block: calc(var(--scale-20) + var(--scale-2-5));
+}
+
+.stageAlert {
+  align-items: center;
+  justify-content: flex-start;
+  overflow: auto;
+}
+
+.stageAlert::before,
+.stageAlert::after {
+  content: '';
+  flex: 0 0 auto;
   width: 100%;
-  max-width: var(--scale-40);
-  min-height: var(--scale-30);
-  border-radius: var(--radius-md);
-  background: var(--box-page);
-  overflow: hidden;
+  height: var(--padding-top-lg);
+}
+
+:global(.desktopTokens.effect-popup-box).detailShell,
+.detailShell:global(.effect-popup-box) {
+  align-items: stretch !important;
+}
+
+.detailShell {
+  flex-shrink: 0;
+}
+
+.detailShell:global(.motion-layout) {
+  transition:
+    opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-enter),
+    transform var(--eds-popup-detail-motion-ms) var(--motion-easing-enter);
+}
+
+.detailShell :global(.eds-tooltip-panel) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.detailShell :global(.eds-detail) {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.alertShell {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: calc(100% - 2 * var(--spacing-4));
+  height: auto;
+  padding: 0;
+  overflow: clip;
+  align-items: stretch !important;
+}
+
+.alertShellInner {
+  width: 100%;
+}
+
+.alertShellInner :global(.eds-reminder) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.verifyShell :global(.eds-reminder[data-reminder-type='info']) :global(.eds-reminder-symbol),
+.verifyShell :global(.eds-reminder[data-reminder-type='info']) :global(.eds-reminder-info-copy),
+.verifyShell :global(.eds-reminder[data-reminder-type='info']) :global(.eds-reminder-info-actions) {
+  opacity: 0;
+  pointer-events: none;
 }

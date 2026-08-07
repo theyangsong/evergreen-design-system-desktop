@@ -44,7 +44,7 @@
 }
 
 .segmentThumbReady {
-  transition: var(--motion-transition-control);
+  composes: motion-deform from global;
 }
 
 .square .segmentThumb {
@@ -61,9 +61,12 @@
   border: none;
   background: transparent;
   color: var(--text-base-primary);
-  font-weight: var(--eds-footnote-strong-weight);
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
+}
+
+:global(.eds-segmented-control) .item {
+  font-weight: var(--eds-footnote-strong-weight);
 }
 
 .itemSelected {
@@ -111,9 +114,12 @@
   cursor: default;
   font-size: var(--eds-body-small-strong-size);
   line-height: var(--eds-body-small-strong-line-height);
-  font-weight: var(--eds-body-small-strong-weight);
   color: var(--text-base-primary);
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
+}
+
+.tabItem:global(.eds-tab) {
+  font-weight: var(--eds-body-small-strong-weight);
 }
 
 .tabItemSelected {
@@ -136,7 +142,7 @@
 }
 
 .tabsSlideIndicatorReady {
-  transition: var(--motion-transition-control);
+  composes: motion-deform from global;
 }
 
 .tabs {

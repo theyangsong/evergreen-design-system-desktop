@@ -9,6 +9,7 @@ import {
 } from '../../molecules/feedback';
 import { MESSAGE_PARENT_FOCUSED_KEY } from '../../molecules/feedback/messageFocusContext';
 import { useModuleMenuItemFocus } from './moduleMenuItemFocus';
+import { MODULE_MENU_ITEM_MOTION } from './moduleMenuMotion';
 import styles from './ModuleMenu.module.css';
 
 /** @deprecated 使用 subitem + tier */
@@ -118,7 +119,7 @@ const hasAccessory = computed(
 
 const itemClass = computed(() => [
   styles.item,
-  styles.itemHover,
+  MODULE_MENU_ITEM_MOTION,
   isSubitem.value && styles.itemLevel1,
   isFocused.value && styles.itemFocused,
 ]);

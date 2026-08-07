@@ -16,6 +16,7 @@
     "./fonts": "./dist/css/typography/fonts.css",
     "./motion": "./dist/css/motion/index.css",
     "./motion/base": "./dist/css/motion/base.css",
+    "./motion/recipe": "./dist/css/motion/recipe.css",
     "./motion/semantic": "./dist/css/motion/semantic.css",
     "./motion/utilities": "./dist/css/motion/utilities.css",
     "./effect": "./dist/css/effect/index.css",
@@ -27,6 +28,9 @@
     "./color": "./dist/css/color/index.css",
     "./color/light": "./dist/css/color/themes/light.css",
     "./color/dark": "./dist/css/color/themes/dark.css",
+    "./tag": "./dist/css/color/tag/index.css",
+    "./tag/light": "./dist/css/color/tag/themes/light.css",
+    "./tag/dark": "./dist/css/color/tag/themes/dark.css",
     "./json": "./dist/json/tokens.json"
   },
   "files": [

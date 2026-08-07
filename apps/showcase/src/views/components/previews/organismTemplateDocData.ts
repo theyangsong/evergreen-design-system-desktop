@@ -73,6 +73,8 @@ export const ORGANISM_IMPORT = `import {
   EgContainer,
   EgLayout,
   EgPopup,
+  EgPopupDetail,
+  EgDetail,
   EgSkid,
   EgIcon,
   EgAvatar,
@@ -1739,19 +1741,54 @@ export const popupFigmaNode = '2170:3023';
 
 export const popupCustomizeDefaults = {
   uses: 'reminder' as 'detail' | 'reminder' | 'verify',
+  reminderType: 'info' as 'info' | 'echo',
+};
+
+export const popupUsesCustomizeControl: DocCustomizeControl = {
+  kind: 'select',
+  key: 'uses',
+  label: '用途',
+  options: propLabelSelectOptions(['detail', 'reminder', 'verify'] as const, showcasePopupUsesLabels),
+};
+
+export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
+  kind: 'select',
+  key: 'reminderType',
+  label: 'Popup Box 宽度',
+  options: propLabelSelectOptions(['info', 'echo'] as const, showcaseReminderTypeLabels),
+  visibleWhen: (state) => state.uses === 'reminder' || state.uses === 'verify',
 };
 
 export const popupCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'uses',
-    label: '用途',
-    options: propLabelSelectOptions(['detail', 'reminder', 'verify'] as const, showcasePopupUsesLabels),
-  },
+  popupUsesCustomizeControl,
+  popupReminderTypeCustomizeControl,
 ];
 
 export const popupPropRows: OrganismPropRow[] = [
-  { name: 'uses', type: "'detail' | 'reminder' | 'verify'", defaultValue: "'reminder'", description: 'Popup 用途（data-uses）。' },
+  {
+    name: 'open (v-model)',
+    type: 'boolean',
+    defaultValue: 'true',
+    description: 'Popup 是否打开；关闭时先播放 shell 出场（`.motion-layout`），再卸载。',
+  },
+  {
+    name: 'uses',
+    type: "'detail' | 'reminder' | 'verify'",
+    defaultValue: "'reminder'",
+    description: 'Popup 外壳用途。Detail 880×620；Reminder / Verify 为 Popup Box + 默认插槽内容（内容由 EgDetail / EgReminder 等各自文档页定制）。',
+  },
+  {
+    name: 'reminderType',
+    type: "'info' | 'echo'",
+    defaultValue: "'info'",
+    description: 'uses=reminder|verify 时 Popup Box 固定宽度（Info 280 / Echo 460）。',
+  },
+  {
+    name: 'microFloat',
+    type: 'boolean',
+    defaultValue: 'true',
+    description: 'Shell 进出场动效（`.motion-layout` + host active）。',
+  },
 ];
 
 export const skidFigmaNode = '2260:3822';

@@ -1,0 +1,10 @@
+/**
+ * Motion 场景 class（.motion-ease / .motion-flotation 等）须全局可用：
+ * - Teleport 浮层在 body 下，不能依赖 .desktopTokens 前缀
+ * - Module Menu / NavBar item 直接挂 motion modifier
+ * 勿放入 desktop-token-scope.css（会被 postcss-prefix 加 .desktopTokens 前缀）。
+ */
+@import '@eds/desktop-tokens/motion/base';
+@import '@eds/desktop-tokens/motion/recipe';
+@import '@eds/desktop-tokens/motion/semantic';
+@import '@eds/desktop-tokens/motion/utilities';

@@ -3,6 +3,7 @@ import {
   computed,
   nextTick,
   onBeforeUnmount,
+  onMounted,
   provide,
   ref,
   useId,
@@ -23,6 +24,7 @@ import {
 } from '../../shared/cssSpacingTokens';
 import '../../styles/overlayGlassMicroFloat.module.css';
 import styles from './AnchoredTooltip.module.css';
+import { registerAnchoredTooltipClose, setClickAnchoredTooltipOpen } from './anchoredTooltipManager';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -82,6 +84,8 @@ const props = withDefaults(
     boundaryMargin?: number;
     /** @deprecated 微浮动已默认启用；所有 EgTooltip 浮层均挂 `.motion-flotation`。 */
     microFloat?: boolean;
+    /** trigger=click 时，再次点击 trigger 是否 toggle 关闭；Popover 场景应 false。 */
+    clickToggle?: boolean;
   }>(),
   {
     placement: 'bottom',
@@ -103,6 +107,7 @@ const props = withDefaults(
     flip: false,
     boundaryMargin: 8,
     microFloat: false,
+    clickToggle: true,
   },
 );
 
@@ -330,6 +335,9 @@ function onTriggerClick(event: MouseEvent) {
   }
   event.preventDefault();
   event.stopPropagation();
+  if (!props.clickToggle && open.value) {
+    return;
+  }
   toggleOpen();
 }
 
@@ -339,6 +347,9 @@ function onTriggerKeydown(event: KeyboardEvent) {
   }
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
+    if (!props.clickToggle && open.value) {
+      return;
+    }
     toggleOpen();
   }
 }
@@ -365,6 +376,15 @@ function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape' && open.value) {
     closeNow();
   }
+}
+
+function onWindowEscapeKeydown(event: KeyboardEvent) {
+  if (props.trigger !== 'click' || event.key !== 'Escape' || !open.value) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  closeNow();
 }
 
 const OPPOSITE_PLACEMENT: Record<TooltipPlacement, TooltipPlacement> = {
@@ -526,6 +546,32 @@ function resolveCrossAxisGap(): number {
   return resolveCrossAxisOffsetFromAlign(props.align, edgeInsetPx.value);
 }
 
+/** fixed 若落在 filter/transform 祖先内，坐标系相对该祖先而非 viewport。 */
+function createsFixedContainingBlock(el: HTMLElement): boolean {
+  const style = getComputedStyle(el);
+  const filter = style.filter;
+  const backdropFilter = style.backdropFilter || (style as CSSStyleDeclaration & { webkitBackdropFilter?: string }).webkitBackdropFilter;
+  return (
+    style.transform !== 'none' ||
+    style.perspective !== 'none' ||
+    style.contain === 'paint' ||
+    Boolean(filter && filter !== 'none') ||
+    Boolean(backdropFilter && backdropFilter !== 'none')
+  );
+}
+
+function resolveFixedPositionOffset(floating: HTMLElement): { top: number; left: number } {
+  let el: HTMLElement | null = floating.parentElement;
+  while (el) {
+    if (createsFixedContainingBlock(el)) {
+      const rect = el.getBoundingClientRect();
+      return { top: rect.top, left: rect.left };
+    }
+    el = el.parentElement;
+  }
+  return { top: 0, left: 0 };
+}
+
 function updatePosition() {
   const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
   const floating = floatingRef.value;
@@ -563,10 +609,12 @@ function updatePosition() {
 
   resolvedPlacement.value = placement;
 
+  const fixedOffset = resolveFixedPositionOffset(floating);
+
   // 不 round：等宽+左右 inset 8 时 round 会导致左右不对称
   floatingStyle.value = {
-    top: `${coords.top}px`,
-    left: `${coords.left}px`,
+    top: `${coords.top - fixedOffset.top}px`,
+    left: `${coords.left - fixedOffset.left}px`,
   };
 }
 
@@ -633,6 +681,7 @@ function bindOpenSideEffects() {
   if (props.trigger === 'click') {
     requestAnimationFrame(() => {
       document.addEventListener('pointerdown', onDocumentPointerDown, true);
+      window.addEventListener('keydown', onWindowEscapeKeydown, { capture: true });
     });
   }
 }
@@ -641,6 +690,7 @@ function unbindOpenSideEffects() {
   unbindFloatingResizeObserver();
   unbindWindowListeners();
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+  window.removeEventListener('keydown', onWindowEscapeKeydown, { capture: true });
 }
 
 watch(
@@ -652,16 +702,51 @@ watch(
 
 watch(open, (isOpen) => {
   syncPopoverMotion(isOpen);
+  if (props.trigger === 'click') {
+    setClickAnchoredTooltipOpen(isOpen);
+  }
+});
+
+watch(popoverMotionActive, (active) => {
+  if (active && open.value) {
+    nextTick(() => {
+      updatePosition();
+      requestAnimationFrame(() => updatePosition());
+    });
+  }
+});
+
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (disabled) {
+      closeNow();
+    }
+  },
+);
+
+let unregisterTooltipClose: (() => void) | undefined;
+
+onMounted(() => {
+  unregisterTooltipClose = registerAnchoredTooltipClose(closeNow, {
+    dismissOnBarInteract: props.trigger !== 'click',
+  });
 });
 
 onBeforeUnmount(() => {
+  if (props.trigger === 'click' && open.value) {
+    setClickAnchoredTooltipOpen(false);
+  }
   clearTimers();
   unbindOpenSideEffects();
+  unregisterTooltipClose?.();
 });
 
 defineExpose({
   open,
   close: closeNow,
+  toggle: toggleOpen,
+  openPanel: openNow,
   updatePosition,
   getTriggerElement: () => resolveTriggerMetricsEl() ?? triggerRef.value,
   getTriggerWidth: () => {
@@ -728,6 +813,7 @@ defineExpose({
           <div
             :class="[
               styles.floatingInner,
+              !open && styles.floatingInnerPassThrough,
               usesMicroFloat && 'glassMicroFloatHost',
               usesMicroFloat && popoverMotionActive && 'glassMicroFloatHostActive',
             ]"

@@ -218,6 +218,7 @@ onBeforeUnmount(() => {
               primaryAlias && styles.cryptoAddressLineAlias,
               'eds-hover-tooltip-trigger__target',
               'eds-hover-tooltip-trigger__target--secondary',
+              tooltipTrigger === 'focus' ? ['motion-ease', 'is-focus'] : ['motion-ease', 'is-hover'],
             ]"
             :tabindex="tooltipTrigger === 'focus' ? 0 : undefined"
           >

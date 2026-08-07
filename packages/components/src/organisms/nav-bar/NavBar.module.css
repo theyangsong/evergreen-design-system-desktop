@@ -85,7 +85,7 @@
   background: var(--event-hover);
   opacity: 0;
   pointer-events: none;
-  transition: var(--motion-transition-fade);
+  transition: var(--motion-recipe-fade);
 }
 
 .corporationWideButton:hover:not(:disabled):not(.corporationWideButtonFocused)::before {
@@ -99,7 +99,6 @@
 
 .corporationWideButtonFocused::before {
   opacity: 0;
-  transition: none;
 }
 
 .corporationWideButton:focus {
@@ -132,7 +131,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .corporationWideButton::before {
-    transition: none;
   }
 }
 
@@ -262,7 +260,6 @@
 }
 
 .moduleRowButton:not(.moduleRowButtonFocused) {
-  transition: var(--motion-transition-hover);
 }
 
 @media (hover: hover) {
@@ -274,7 +271,6 @@
 .moduleRowButtonFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
-  transition: none;
 }
 
 .moduleRowIcon {
@@ -328,7 +324,6 @@
 
 .moduleRowButton:not(.moduleRowButtonFocused) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
   color: var(--stroke-base-secondary);
-  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .moduleRowButton:hover:not(:disabled):not(.moduleRowButtonFocused)
@@ -338,11 +333,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .moduleRowButton:not(.moduleRowButtonFocused) {
-    transition: none;
   }
 
   .moduleRowButton:not(.moduleRowButtonFocused) .moduleRowIcon:not(.moduleIconGlyphAppEntry) {
-    transition: none;
   }
 }
 
@@ -375,10 +368,10 @@
   border-top: var(--stroke-xs) solid var(--stroke-outline-shallow);
   background: linear-gradient(
     to bottom,
-    color-mix(in display-p3, var(--eds-shadow-shallow) 70%, transparent),
+    color-mix(in display-p3, var(--effect-shadow-shallow) 70%, transparent),
     transparent
   );
-  transition: var(--motion-transition-scroll-fade);
+  transition: var(--motion-recipe-scroll-fade);
 }
 
 .corporationOverflow::after {
@@ -450,10 +443,10 @@
   border-bottom: var(--stroke-xs) solid var(--stroke-outline-shallow);
   background: linear-gradient(
     to top,
-    color-mix(in display-p3, var(--eds-shadow-shallow) 70%, transparent),
+    color-mix(in display-p3, var(--effect-shadow-shallow) 70%, transparent),
     transparent
   );
-  transition: var(--motion-transition-scroll-fade);
+  transition: var(--motion-recipe-scroll-fade);
 }
 
 .individualsOverflow::after {
@@ -524,7 +517,6 @@
   opacity: 0;
   line-height: 0;
   pointer-events: none;
-  transition: var(--motion-transition-hover);
 }
 
 .trafficGlyph :global(.eds-icon) {
@@ -555,7 +547,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .trafficGlyph {
-    transition: none;
   }
 }
 
@@ -575,7 +566,6 @@
   line-height: var(--scale-10);
   text-align: center;
   cursor: default;
-  transition: var(--motion-transition-hover);
 }
 
 .corporationMark:hover:not(:disabled):not(.corporationMarkFocused) {
@@ -719,7 +709,6 @@
 }
 
 .moduleIconButton:not(.moduleIconButtonFocused) {
-  transition: var(--motion-transition-hover);
 }
 
 @media (hover: hover) {
@@ -731,16 +720,13 @@
 .moduleIconButtonFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
-  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .moduleIconButton:not(.moduleIconButtonFocused) {
-    transition: none;
   }
 
   .moduleIconButton:not(.moduleIconButtonFocused) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
-    transition: none;
   }
 }
 
@@ -791,7 +777,6 @@
 }
 
 .moduleIconButton:not(.moduleIconButtonFocused) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
-  transition: color var(--motion-duration-hover) var(--motion-easing-standard);
 }
 
 .moduleIconGlyph:not(.moduleIconGlyphAppEntry) :global(.eds-i-f) {
@@ -805,7 +790,6 @@
 
 .moduleIconButtonFocused:not(:disabled) .moduleIconGlyph:not(.moduleIconGlyphAppEntry) {
   color: var(--material-brand-primary);
-  transition: none;
 }
 
 /* 应用入口：库内 icon 原样渲染，不参与 Nav Bar token 换色 */
@@ -826,7 +810,6 @@
 }
 
 .bottomIconHost:not(.bottomIconHostFocused) {
-  transition: var(--motion-transition-hover);
 }
 
 .bottomIconHost:hover:not(:disabled):not(.bottomIconHostFocused) {
@@ -836,7 +819,6 @@
 .bottomIconHostFocused:not(:disabled) {
   background-color: var(--event-focus);
   outline: none;
-  transition: none;
 }
 
 .bottomIconHost:focus {
@@ -861,7 +843,6 @@
 }
 
 .bottomIconHost:not(.bottomIconHostFocused) .bottomIconGlyph {
-  transition: var(--motion-transition-hover);
 }
 
 .bottomIconDefault,
@@ -895,7 +876,6 @@
 
 .bottomIconHostFocused:not(:disabled) .bottomIconGlyph {
   color: var(--material-brand-primary);
-  transition: none;
 }
 
 .avatarHost {
@@ -908,7 +888,6 @@
   border-radius: var(--radius-full);
   background: none;
   cursor: default;
-  transition: var(--motion-transition-hover);
 }
 
 .avatarHost:hover:not(:disabled):not(.avatarHostFocused) {

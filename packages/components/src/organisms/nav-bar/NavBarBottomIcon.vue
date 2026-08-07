@@ -18,6 +18,8 @@ const navFocus = useNavBarModuleFocus();
 
 const isFocused = computed(() => navFocus?.focusedId.value === itemId);
 
+const iconMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-hover'));
+
 onMounted(() => {
   navFocus?.register(itemId, 'chrome');
 });
@@ -35,7 +37,11 @@ function onBottomIconClick(event: MouseEvent) {
   <button
     type="button"
     class="eds-nav-bar-bottom-icon"
-    :class="[styles.bottomIconHost, isFocused && styles.bottomIconHostFocused]"
+    :class="[
+      styles.bottomIconHost,
+      iconMotionClass,
+      isFocused && styles.bottomIconHostFocused,
+    ]"
     :aria-label="label"
     :aria-pressed="isFocused"
     @click="onBottomIconClick"
@@ -43,6 +49,7 @@ function onBottomIconClick(event: MouseEvent) {
     <span
       :class="[
         styles.bottomIconGlyph,
+        iconMotionClass,
         slots.focusIcon && styles.bottomIconGlyphWithFocus,
       ]"
     >

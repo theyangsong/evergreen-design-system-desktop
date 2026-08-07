@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import styles from './IconButton.module.css';
 
 /** Figma Type */
 export type IconButtonShape = 'rectangular' | 'square' | 'round';
 export type IconButtonSize = 'lg' | 'md' | 'sm' | 'xs';
+export type IconButtonMotion = 'ease' | 'asym' | 'none';
 
 const props = withDefaults(
   defineProps<{
@@ -12,6 +14,8 @@ const props = withDefaults(
     label: string;
     disabled?: boolean;
     type?: 'button' | 'submit' | 'reset';
+    /** Motion semantic 场景；默认缓入缓出。 */
+    motion?: IconButtonMotion;
     /**
      * Use `span` when nested inside another control (e.g. EgIconButtonPro)
      * to avoid invalid button-in-button markup.
@@ -24,8 +28,15 @@ const props = withDefaults(
     disabled: false,
     type: 'button',
     as: 'button',
+    motion: 'ease',
   },
 );
+
+const motionClass = computed(() => {
+  if (props.motion === 'asym') return 'motion-ease is-asym';
+  if (props.motion === 'none') return 'motion-none';
+  return 'motion-ease is-hover';
+});
 </script>
 
 <template>
@@ -34,6 +45,7 @@ const props = withDefaults(
     :class="[
       'eds-icon-button',
       styles.button,
+      motionClass,
       styles[props.shape],
       styles[props.size],
       as === 'span' && styles.decor,
@@ -45,7 +57,7 @@ const props = withDefaults(
     :aria-disabled="as === 'span' && disabled ? true : undefined"
     :aria-hidden="as === 'span' ? true : undefined"
   >
-    <span :class="styles.symbol">
+    <span :class="[styles.symbol, motionClass]">
       <slot name="symbol">
         <slot />
       </slot>

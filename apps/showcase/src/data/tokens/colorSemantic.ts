@@ -5,8 +5,28 @@
  * Renamed/removed vs legacy: event-hover/focus *-primary|secondary|tertiary → event-* set;
  * text-match/success/warning/danger-* → status-* + text-hide; stroke-color-*-active/table-hover removed.
  */
+/** Color semantic → 特效色 order (matches color/themes/{light,dark}/semantic.css). */
+export const effectColorTokenOrder = [
+  'effect-vulvar-shadow',
+  'effect-vulvar-shadow-deep',
+  'effect-vulvar-shadow-subtle',
+  'effect-shadow-shallow',
+  'effect-vulvar-shadow-glow',
+  'effect-inner-shadow',
+  'effect-inner-shadow-glow',
+  'effect-popup-background',
+  'effect-popup-box',
+  'effect-flotation-box',
+  'effect-popover-box',
+  'effect-mask',
+  'effect-prompt',
+] as const;
+
+const effectColorTokenNames = new Set<string>(effectColorTokenOrder);
+
 export function colorSemanticGroupKey(name: string): string {
   if (name.startsWith('data-table-')) return 'data-table';
+  if (effectColorTokenNames.has(name) || name.startsWith('effect-')) return 'effect';
   if (name.startsWith('eds-')) return 'eds';
   return name.split('-')[0];
 }
@@ -19,7 +39,7 @@ export const colorSemanticGroupOrder = [
   'text',
   'material',
   'data-table',
-  'eds',
+  'effect',
 ] as const;
 
 export const colorSemanticGroupLabels: Record<string, string> = {
@@ -30,7 +50,7 @@ export const colorSemanticGroupLabels: Record<string, string> = {
   text: 'Text',
   material: 'Material',
   'data-table': 'Data Table',
-  eds: 'EDS Effect',
+  effect: '特效',
 };
 
 /** Figma Color System → Box variable order. */
@@ -138,21 +158,6 @@ export const dataTableColorTokenOrder = [
   'data-table-scroll-bar-indicator-hover',
 ] as const;
 
-/** Figma Color System → Effect variable order. */
-export const effectColorTokenOrder = [
-  'eds-vulvar-shadow',
-  'eds-vulvar-shadow-subtle',
-  'eds-shadow-shallow',
-  'eds-vulvar-shadow-glow',
-  'eds-inner-shadow',
-  'eds-inner-shadow-glow',
-  'eds-popup-background',
-  'eds-popup-box',
-  'eds-flotation-box',
-  'eds-mask',
-  'eds-prompt',
-] as const;
-
 /** Figma Color System → Stroke variable order. */
 export const strokeColorTokenOrder = [
   'stroke-hide',
@@ -186,7 +191,7 @@ const colorTokenOrderByGroup: Record<string, readonly string[]> = {
   text: textColorTokenOrder,
   material: materialColorTokenOrder,
   'data-table': dataTableColorTokenOrder,
-  eds: effectColorTokenOrder,
+  effect: effectColorTokenOrder,
 };
 
 export function sortColorSemanticItems<T extends { name: string }>(

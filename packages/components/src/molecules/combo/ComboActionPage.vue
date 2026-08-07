@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { EgButton } from '../button';
+import { EgDivider } from '../../atoms/divider';
 import styles from './ComboAction.module.css';
 
 export type ComboActionPageTone = 'brand' | 'decor';
@@ -34,10 +35,15 @@ const emit = defineEmits<{
       direction === 'left' ? styles.pageRootAlignStart : styles.pageRootAlignEnd,
     ]"
   >
-    <div
-      :class="[styles.divider, !divider && styles.dividerHidden]"
-      role="separator"
-      :aria-hidden="!divider || undefined"
+    <EgDivider
+      :class="[
+        styles.divider,
+        styles.dividerAnimated,
+        !divider && styles.dividerAnimatedHidden,
+      ]"
+      type="module"
+      direction="horizontal"
+      :hide="!divider"
     />
     <div
       :class="[

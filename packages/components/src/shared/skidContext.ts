@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue';
 
-/** 与 Layout Skid 推动动效 `--motion-duration-shift` 对齐。 */
+/** Layout Skid 动效 — DS 内部用 recipe shift duration + `--motion-recipe-shift` 属性子集。 */
 export const SKID_PUSH_TRANSITION_MS = 300;
 
 /**

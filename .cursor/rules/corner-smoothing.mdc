@@ -34,7 +34,7 @@ Every rounded corner in this project uses **Figma/iOS squircle** at **60%** smoo
 
 ## Effect boxes
 
-- Apply smoothing on elements with `border-radius` except `.effect-container-box` / `.effect-flotation-box` / `.effect-popup-box` (clip-path would clip their `box-shadow`).
+- Apply smoothing on elements with `border-radius` except `.effect-container-box` / `.effect-flotation-box` / `.effect-popover-box` / `.effect-popup-box` (clip-path would clip their `box-shadow`).
 - Do not duplicate `clip-path` on effect sub-layers.
 
 ## Dynamic UI (Teleport / v-if)

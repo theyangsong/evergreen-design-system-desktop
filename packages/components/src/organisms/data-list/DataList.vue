@@ -13,7 +13,6 @@ import {
   type VNode,
 } from 'vue';
 import { EgIcon } from '../../atoms/icons';
-import { EgToast } from '../../molecules/feedback';
 import { EgBatchBar } from '../batch-bar';
 import DataListHeaderCell from './DataListHeaderCell.vue';
 import DataListColumn from './DataListColumn.vue';
@@ -32,6 +31,11 @@ import {
 } from './useResponsiveColumns';
 import { useVirtualRows } from './useVirtualRows';
 import { SKID_AFFECTING_MAIN_KEY } from '../../shared/skidContext';
+import {
+  closeAllAnchoredTooltips,
+  closeBarBlockingAnchoredTooltips,
+  hasOpenClickAnchoredTooltip,
+} from '../../molecules/tooltip/anchoredTooltipManager';
 
 const RenderVNodes = defineComponent({
   name: 'EgDataListRenderVNodes',
@@ -53,7 +57,6 @@ const SELECT_COLUMN_ANIM_MS = 300;
 const SELECT_CONTENT_SLIDE_ENTER_PX = 16;
 const SELECT_CONTENT_SLIDE_EXIT_PX = 32;
 const RESIZE_DEBOUNCE_MS = 100;
-const BATCH_TOAST_VISIBLE_MS = 3000;
 const SCROLL_EDGE_EPSILON = 2;
 
 const props = withDefaults(
@@ -70,6 +73,11 @@ const props = withDefaults(
     skidOpen?: boolean;
     batchActions?: DataListBatchAction[];
     onBatchAction?: (
+      key: string,
+      rows: Array<DataListItem & { _index: number }>,
+    ) => void | Promise<void>;
+    /** Popover 批操作项：点击后、开层前的准备逻辑（失败则不打开 Popover）。 */
+    onBatchLabelBeforeOpen?: (
       key: string,
       rows: Array<DataListItem & { _index: number }>,
     ) => void | Promise<void>;
@@ -97,6 +105,7 @@ const emit = defineEmits<{
   'update:pagination-locked': [locked: boolean];
   'batch-action': [key: string, rows: Array<DataListItem & { _index: number }>];
   'batch-error': [message: string];
+  'batch-popover-dismiss': [label: string, index: number];
   'primary-action': [row: DataListItem, rowIndex: number];
   'more-action': [key: string, row: DataListItem, rowIndex: number];
 }>();
@@ -127,10 +136,6 @@ const dataColumnWidthsFullPx = ref<number[]>([]);
 const selectedList = ref<Array<DataListItem & { _index: number }>>([]);
 const scrollTop = ref(0);
 const batchLoadingKey = ref<string | null>(null);
-const batchToastText = ref('');
-const batchToastType = ref<'result' | 'danger'>('danger');
-const showBatchToast = ref(false);
-let batchToastTimer: ReturnType<typeof setTimeout> | undefined;
 let resizeDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
@@ -149,6 +154,7 @@ watch(selectMode, async (enabled) => {
   emit('update:pagination-locked', enabled);
   syncColumnWidthSnapshots();
   if (enabled) {
+    closeAllAnchoredTooltips();
     selectColumnInDom.value = true;
     selectOffsetPx.value = 0;
     await nextTick();
@@ -327,6 +333,8 @@ const blankRowCount = computed(() =>
 const batchActionLabels = computed(() => props.batchActions.map((action) => action.label));
 
 const batchActionDanger = computed(() => props.batchActions.map((action) => Boolean(action.danger)));
+
+const batchActionPopover = computed(() => props.batchActions.map((action) => Boolean(action.popover)));
 
 const batchLoadingLabelIndex = computed(() => {
   const key = batchLoadingKey.value;
@@ -697,6 +705,10 @@ function onRowClick(row: DataListItem, index: number) {
     toggleRowSelect(index);
     return;
   }
+  if (props.primaryAction) {
+    emit('primary-action', row, index);
+    return;
+  }
   emit('row-click', row);
 }
 
@@ -767,8 +779,27 @@ function openSelect() {
   setSelectMode(true);
 }
 
+/** Batch Bar 在 DataList 内，hover tooltip 在 .app-preview（z-index:1000）；交互前关闭避免挡点击。 */
+function onOperationBarInteract() {
+  closeBarBlockingAnchoredTooltips();
+}
+
 function closeSelect() {
+  if (!selectMode.value) {
+    if (props.selectMode) {
+      emit('update:select-mode', false);
+    }
+    return;
+  }
   setSelectMode(false);
+}
+
+function onSelectModeEscape(event: KeyboardEvent) {
+  if (event.key !== 'Escape' || !selectMode.value) return;
+  if (hasOpenClickAnchoredTooltip()) return;
+  event.preventDefault();
+  event.stopPropagation();
+  closeSelect();
 }
 
 defineExpose({ openSelect, closeSelect });
@@ -833,6 +864,7 @@ function onViewportResize() {
 onMounted(() => {
   syncClientViewportWidth();
   window.addEventListener('resize', onViewportResize, { passive: true });
+  window.addEventListener('keydown', onSelectModeEscape, { capture: true });
 
   if (!tableWrapperRef.value) return;
   resizeObserver = new ResizeObserver((entries) => {
@@ -863,13 +895,13 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onViewportResize);
+  window.removeEventListener('keydown', onSelectModeEscape, { capture: true });
   unbindTableContentWheelListener();
   if (viewportResizeTimer !== undefined) clearTimeout(viewportResizeTimer);
   resizeObserver?.disconnect();
   stopSelectAnim();
   if (initingTimer !== undefined) clearTimeout(initingTimer);
   if (loadingTimer !== undefined) clearTimeout(loadingTimer);
-  if (batchToastTimer !== undefined) clearTimeout(batchToastTimer);
   if (resizeDebounceTimer !== undefined) clearTimeout(resizeDebounceTimer);
   clearLoadingLeaveTimer();
 });
@@ -899,15 +931,28 @@ function isRowSelected(index: number) {
 }
 
 function showBatchError(message: string) {
-  batchToastText.value = message;
-  batchToastType.value = 'danger';
-  showBatchToast.value = true;
-  if (batchToastTimer !== undefined) clearTimeout(batchToastTimer);
-  batchToastTimer = window.setTimeout(() => {
-    showBatchToast.value = false;
-    batchToastTimer = undefined;
-  }, BATCH_TOAST_VISIBLE_MS);
   emit('batch-error', message);
+}
+
+async function onBatchLabelBeforeOpen(_label: string, index: number) {
+  const action = props.batchActions[index];
+  if (!action || batchLoadingKey.value || selectedList.value.length === 0) {
+    throw new Error('batch-before-open-blocked');
+  }
+
+  try {
+    if (props.onBatchLabelBeforeOpen) {
+      await props.onBatchLabelBeforeOpen(action.key, selectedList.value);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === 'batch-before-open-blocked') {
+      throw error;
+    }
+    const message =
+      error instanceof Error && error.message ? error.message : 'Batch action failed';
+    showBatchError(message);
+    throw error;
+  }
 }
 
 async function onBatchLabelClick(_label: string, index: number) {
@@ -980,16 +1025,32 @@ function onTableScroll(event: Event) {
       :leave-from-class="styles.operationBarLeaveFrom"
       :leave-to-class="styles.operationBarLeaveTo"
     >
-      <div v-if="selectMode" :class="styles.operationBar">
+      <div
+        v-if="selectMode"
+        :class="styles.operationBar"
+        @pointerenter="onOperationBarInteract"
+        @pointerdown.capture="onOperationBarInteract"
+      >
         <EgBatchBar
           :selected-count="selectedList.length"
           count-suffix="selected"
           :labels="useBuiltinBatchBar ? batchActionLabels : undefined"
           :label-danger="useBuiltinBatchBar ? batchActionDanger : undefined"
+          :label-popover="useBuiltinBatchBar ? batchActionPopover : undefined"
           :loading-label-index="useBuiltinBatchBar ? batchLoadingLabelIndex : null"
+          :on-label-before-open="onBatchLabelBeforeOpen"
           @dismiss="closeSelect"
           @label-click="onBatchLabelClick"
+          @label-popover-dismiss="(label, index) => emit('batch-popover-dismiss', label, index)"
         >
+          <template v-if="useBuiltinBatchBar && $slots['batch-popover']" #label-popover="slotProps">
+            <slot
+              name="batch-popover"
+              :action="batchActions[slotProps.index]"
+              :selected-count="selectedList.length"
+              v-bind="slotProps"
+            />
+          </template>
           <template v-if="!useBuiltinBatchBar && $slots.operation" #actions>
             <slot name="operation" />
           </template>
@@ -1106,6 +1167,7 @@ function onTableScroll(event: Event) {
           <tr
             v-for="rowIndex in renderedRowIndices"
             :key="rowIndex"
+            class="motion-ease is-hover"
             :style="rowStyle()"
             @click="onRowClick(dataList[rowIndex], rowIndex)"
           >
@@ -1170,10 +1232,6 @@ function onTableScroll(event: Event) {
           </div>
         </slot>
       </div>
-    </div>
-
-    <div v-if="showBatchToast" :class="styles.batchToastHost">
-      <EgToast :type="batchToastType" :text="batchToastText" />
     </div>
   </div>
 </template>

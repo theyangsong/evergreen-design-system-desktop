@@ -6,17 +6,17 @@ import styles from './NavBar.module.css';
 <template>
   <div class="eds-nav-bar-system-buttons" :class="styles.systemButtons" aria-hidden="true">
     <button type="button" tabindex="-1" :class="[styles.trafficDot, styles.trafficClose]">
-      <span :class="styles.trafficGlyph">
+      <span :class="[styles.trafficGlyph, 'motion-ease is-hover']">
         <EgIcon name="eds-close-mini" fit />
       </span>
     </button>
     <button type="button" tabindex="-1" :class="[styles.trafficDot, styles.trafficMinimize]">
-      <span :class="styles.trafficGlyph">
+      <span :class="[styles.trafficGlyph, 'motion-ease is-hover']">
         <EgIcon name="eds-reduction-mini" fit />
       </span>
     </button>
     <button type="button" tabindex="-1" :class="[styles.trafficDot, styles.trafficExpand]">
-      <span :class="styles.trafficGlyph">
+      <span :class="[styles.trafficGlyph, 'motion-ease is-hover']">
         <EgIcon name="eds-add-mini" fit />
       </span>
     </button>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
-import { EgPopup, EgReminder } from '@eds/desktop-components';
+import { reactive, ref } from 'vue';
+import { EgDetail, EgPopup, EgReminder } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
@@ -14,7 +14,14 @@ import {
 const customize = reactive({
   ...popupCustomizeDefaults,
   uses: popupCustomizeDefaults.uses as 'detail' | 'reminder' | 'verify',
+  reminderType: popupCustomizeDefaults.reminderType as 'info' | 'echo',
 });
+
+const popupOpen = ref(true);
+
+function closePopup() {
+  popupOpen.value = false;
+}
 </script>
 
 <template>
@@ -32,20 +39,41 @@ const customize = reactive({
       tall-preview
     >
       <template #preview>
-        <div class="desktopTokens" :class="organismStyles.previewOrganismPopupHost">
-          <EgPopup :uses="customize.uses">
-            <EgReminder v-if="customize.uses === 'reminder'" type="info" />
-            <div
-              v-else
-              :style="{
-                minHeight: 'var(--scale-30)',
-                padding: 'var(--spacing-4)',
-                color: 'var(--text-base-secondary)',
-                fontSize: 'var(--eds-body-small-size)',
-              }"
+        <div
+          class="desktopTokens"
+          :class="organismStyles.previewOrganismPopupHost"
+          @click.self="!popupOpen && (popupOpen = true)"
+        >
+          <EgPopup
+            v-model:open="popupOpen"
+            :uses="customize.uses as 'detail' | 'reminder' | 'verify'"
+            :reminder-type="customize.reminderType as 'info' | 'echo'"
+          >
+            <EgDetail
+              v-if="customize.uses === 'detail'"
+              @close="closePopup"
+            />
+            <EgReminder
+              v-else-if="customize.uses === 'reminder'"
+              :type="customize.reminderType as 'info' | 'echo'"
+              @cancel="closePopup"
+              @confirm="closePopup"
             >
-              {{ customize.uses }} 内容槽
-            </div>
+              <template v-if="customize.reminderType === 'echo'" #default>
+                <div style="white-space: pre-line">
+                  Echo slot content
+
+                  Scroll to preview frosted toolbar blur.
+                </div>
+              </template>
+            </EgReminder>
+            <EgReminder
+              v-else
+              type="info"
+              :action-count="1"
+              @cancel="closePopup"
+              @confirm="closePopup"
+            />
           </EgPopup>
         </div>
       </template>

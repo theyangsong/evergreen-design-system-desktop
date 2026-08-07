@@ -16,26 +16,24 @@ export function formatStyleLabel(key: string): string {
 
 function resolveTypographyToken(
   value: string,
+  typographySemantic: Record<string, string>,
   typographyBase: Record<string, string>,
 ): string {
   const match = value.match(/^var\(--([^)]+)\)$/);
   if (!match) return value;
-  const resolved = typographyBase[match[1]];
+  const tokenName = match[1];
+  const resolved = typographySemantic[tokenName] ?? typographyBase[tokenName];
   if (!resolved) return value;
-  return resolveTypographyToken(resolved, typographyBase);
+  return resolveTypographyToken(resolved, typographySemantic, typographyBase);
 }
 
 export function formatTextStyleMetrics(
-  key: string,
+  style: { 'font-size': string; 'line-height': string },
   typographySemantic: Record<string, string>,
   typographyBase: Record<string, string>,
 ): string {
-  const sizeRaw = typographySemantic[`${key}-size`] ?? '';
-  const lineHeightRaw = typographySemantic[`${key}-line-height`] ?? '';
-  const size = sizeRaw ? resolveTypographyToken(sizeRaw, typographyBase) : '';
-  const lineHeight = lineHeightRaw
-    ? resolveTypographyToken(lineHeightRaw, typographyBase)
-    : '';
+  const size = resolveTypographyToken(style['font-size'], typographySemantic, typographyBase);
+  const lineHeight = resolveTypographyToken(style['line-height'], typographySemantic, typographyBase);
   return `${size} / ${lineHeight}`;
 }
 

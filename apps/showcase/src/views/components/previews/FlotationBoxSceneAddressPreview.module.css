@@ -21,7 +21,7 @@
       var(--material-same-white-quaternary) 0%,
       var(--material-same-white-quaternary) 100%
     ),
-    var(--eds-flotation-box);
+    var(--effect-flotation-box);
   background-blend-mode: normal, luminosity;
   backdrop-filter: var(--eds-blur-bg);
   -webkit-backdrop-filter: var(--eds-blur-bg);
@@ -54,7 +54,7 @@
   line-height: var(--eds-footnote-strong-line-height);
   white-space: nowrap;
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .filterItem:hover {

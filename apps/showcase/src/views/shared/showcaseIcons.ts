@@ -9,6 +9,8 @@ export const showcasePaginationSymbolIconName = 'eds-arrow-left-mini-ios' as con
 
 export const showcasePaginationButtonIconName = 'eds-arrow-right' as const;
 
+export const showcasePaginationBorderArrowIconName = 'eds-arrow-left' as const;
+
 export function showcaseEgIconSnippet(
   name: string,
   options?: { fit?: boolean; size?: 'sm' | 'md' | 'lg' },
@@ -30,5 +32,10 @@ export const showcaseChevronIconSnippet = showcaseEgIconSnippet(
 
 export const showcaseArrowIconSnippet = showcaseEgIconSnippet(
   showcasePaginationButtonIconName,
+  { fit: true },
+);
+
+export const showcaseBorderArrowIconSnippet = showcaseEgIconSnippet(
+  showcasePaginationBorderArrowIconName,
   { fit: true },
 );

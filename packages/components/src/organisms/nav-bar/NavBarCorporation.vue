@@ -21,6 +21,10 @@ const wide = useNavBarWide();
 
 const isFocused = computed(() => navFocus?.focusedId.value === itemId);
 
+const corporationMotionClass = computed(() =>
+  isFocused.value ? 'motion-none' : undefined,
+);
+
 const showMeta = computed(
   () =>
     Boolean(String(props.title ?? '').trim()) || Boolean(String(props.subtitle ?? '').trim()),
@@ -70,6 +74,7 @@ function onCorporationClick(event: MouseEvent) {
       class="eds-nav-bar-corporation"
       :class="[
         styles.corporationWideButton,
+        corporationMotionClass,
         isFocused && styles.corporationWideButtonFocused,
       ]"
       :aria-label="corporationAriaLabel"
@@ -89,7 +94,11 @@ function onCorporationClick(event: MouseEvent) {
     v-else
     type="button"
     class="eds-nav-bar-corporation"
-    :class="[styles.corporationMark, isFocused && styles.corporationMarkFocused]"
+    :class="[
+      styles.corporationMark,
+      isFocused ? 'motion-none' : 'motion-ease is-hover',
+      isFocused && styles.corporationMarkFocused,
+    ]"
     :aria-label="corporationAriaLabel"
     :aria-pressed="isFocused"
     @click="onCorporationClick"

@@ -36,8 +36,13 @@ const isDisabled = computed(() => props.disabled || props.loading);
 const formattedCount = computed(() => formatGroupedNumber(props.count));
 
 const emit = defineEmits<{
-  click: [];
+  click: [event: MouseEvent];
 }>();
+
+function onClick(event: MouseEvent) {
+  event.stopPropagation();
+  emit('click', event);
+}
 
 const countRef = ref<HTMLElement | null>(null);
 const countWidthPx = ref<number | null>(null);
@@ -91,6 +96,7 @@ onBeforeUnmount(() => {
   <button
     type="button"
     class="eds-batch-bar-action-item"
+    data-no-corner-smoothing
     :class="[
       styles.action,
       type === 'text' && styles.actionText,
@@ -102,7 +108,8 @@ onBeforeUnmount(() => {
     ]"
     :disabled="isDisabled"
     :aria-busy="loading || undefined"
-    @click="emit('click')"
+    :aria-label="type === 'symbol' ? 'Close selection' : undefined"
+    @click="onClick"
   >
     <template v-if="type === 'symbol'">
       <slot name="icon">

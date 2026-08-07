@@ -34,6 +34,11 @@
   pointer-events: auto;
 }
 
+/** 关闭/离场动画期间仍挂载 DOM 时，避免 z-index:1000 浮层挡住 Batch Bar 等下层交互。 */
+.floatingInnerPassThrough {
+  pointer-events: none;
+}
+
 .floatingEnterActive {
   transition: var(--motion-recipe-enter);
 }

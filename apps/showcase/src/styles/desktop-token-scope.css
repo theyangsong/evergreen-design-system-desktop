@@ -1,5 +1,8 @@
-@import '@eds/desktop-tokens';
-@import '@eds/desktop-tokens/motion/utilities';
+/* Desktop tokens（scoped → .desktopTokens）；motion 见 desktop-motion-global.css */
+@import '@eds/desktop-tokens/scale';
+@import '@eds/desktop-tokens/typography';
+@import '@eds/desktop-tokens/color';
+@import '@eds/desktop-tokens/effect';
 
 /*
  * Desktop 预览 subtree 须自带排版基线，勿继承 Showcase Website body（--eds-body-medium-size = 18px）。

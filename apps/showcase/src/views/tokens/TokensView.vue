@@ -111,15 +111,24 @@ const textStyleItems = textStyleOrder
   .map((key) => ({
     key,
     label: formatStyleLabel(key),
-    metrics: formatTextStyleMetrics(key, typographySemantic, typographyBase),
+    metrics: formatTextStyleMetrics(textStyles[key], typographySemantic, typographyBase),
   }));
+
+const motionRecipeRows = computed(() =>
+  entriesToRows(tokens.motionRecipe as Record<string, string>),
+);
 
 const motionBaseRows = computed(() =>
   entriesToRows(tokens.motionBase as Record<string, string>),
 );
 
 const motionSemanticRows = computed(() =>
-  entriesToRows(tokens.motionSemantic as Record<string, string>),
+  Object.entries(tokens.motionSemantic as Record<string, Record<string, string>>).map(
+    ([name, value]) => ({
+      name: `.${name}`,
+      value: formatEffectSemantic(value),
+    }),
+  ),
 );
 
 const motionUtilityRows = computed(() =>
@@ -138,7 +147,7 @@ const effectBaseRows = computed(() =>
 const effectSemanticRows = computed(() =>
   Object.entries(tokens.effectSemantic as Record<string, Record<string, string>>).map(
     ([name, value]) => ({
-      name,
+      name: `.${name}`,
       value: formatEffectSemantic(value),
     }),
   ),
@@ -229,6 +238,11 @@ const effectSemanticRows = computed(() =>
         <TokenParamRows :rows="motionBaseRows" />
       </section>
 
+      <section id="motion-recipe" :class="shared.section">
+        <h2 :class="shared.sectionTitle">Motion Recipe</h2>
+        <TokenParamRows :rows="motionRecipeRows" />
+      </section>
+
       <section id="motion-semantic" :class="shared.section">
         <h2 :class="shared.sectionTitle">Motion Semantic</h2>
         <TokenParamRows :rows="motionSemanticRows" />
@@ -236,13 +250,13 @@ const effectSemanticRows = computed(() =>
         <TokenParamRows :rows="motionUtilityRows" />
       </section>
 
-      <section id="eds-base" :class="shared.section">
-        <h2 :class="shared.sectionTitle">EDS Base</h2>
+      <section id="effect-base" :class="shared.section">
+        <h2 :class="shared.sectionTitle">Effect Base</h2>
         <TokenParamRows :rows="effectBaseRows" />
       </section>
 
-      <section id="eds-semantic" :class="shared.section">
-        <h2 :class="shared.sectionTitle">EDS Semantic</h2>
+      <section id="effect-semantic" :class="shared.section">
+        <h2 :class="shared.sectionTitle">Effect Semantic</h2>
         <TokenParamRows :rows="effectSemanticRows" />
       </section>
     </div>

@@ -345,7 +345,7 @@ onBeforeUnmount(() => {
       <div
         :class="[
           styles.shapeSurface,
-          'effect-flotation-box',
+          'effect-popover-box',
           motionClass,
         ]"
         :style="clipPathStyle"
@@ -361,7 +361,6 @@ onBeforeUnmount(() => {
       >
         <path :class="styles.shapeFill" :d="outlinePath" />
         <path :class="styles.shapeTint" :d="outlinePath" />
-        <path :class="styles.shapeStroke" :d="outlinePath" />
       </svg>
 
       <div :class="contentHostClass" :style="contentHostStyle">

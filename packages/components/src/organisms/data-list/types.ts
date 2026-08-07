@@ -10,6 +10,8 @@ export type DataListBatchAction = {
   key: string;
   label: string;
   danger?: boolean;
+  /** true 时点击打开 Popover（EgAnchoredTooltip + EgPopover），确认后再触发 batch-action。 */
+  popover?: boolean;
 };
 
 export type DataListRowAction = {

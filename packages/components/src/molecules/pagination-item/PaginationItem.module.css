@@ -12,11 +12,12 @@
   padding: 0;
   background-color: var(--material-hide);
   cursor: default;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .number:hover:not(:disabled),
-.symbol:hover:not(:disabled) {
+.symbol:hover:not(:disabled),
+.borderArrow:hover:not(:disabled) {
   background-color: var(--event-hover);
 }
 
@@ -55,7 +56,7 @@
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
   color: var(--text-base-secondary);
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .item:hover:not(:disabled) .label {
@@ -71,7 +72,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  transition: var(--motion-transition-hover);
+  composes: motion-ease is-hover from global;
 }
 
 .icon :global(svg) {
@@ -79,18 +80,18 @@
   height: 100%;
 }
 
-/* 按下 / 选中 / 聚焦：即时切换；hover 入场离场保留 transition（写在基类上） */
-.item:focus-visible:not(:disabled),
-.item:active:not(:disabled),
+/* 按下 / 选中 / 聚焦：即时切换 */
+.item:focus-visible:not(:disabled):not(.borderArrow),
+.item:active:not(:disabled):not(.borderArrow),
 .number.selected {
   transition: none;
 }
 
-.item:focus-visible:not(:disabled) .label,
-.item:active:not(:disabled) .label,
+.item:focus-visible:not(:disabled):not(.borderArrow) .label,
+.item:active:not(:disabled):not(.borderArrow) .label,
 .number.selected .label,
-.item:focus-visible:not(:disabled) .icon,
-.item:active:not(:disabled) .icon,
+.item:focus-visible:not(:disabled):not(.borderArrow) .icon,
+.item:active:not(:disabled):not(.borderArrow) .icon,
 .number.selected .icon {
   transition: none;
 }
@@ -191,5 +192,57 @@
 
 .button.decor:active:not(:disabled),
 .button.brand:active:not(:disabled) {
-  transition: none;
+  /* motion-none via itemMotionClass when needed */
+}
+
+/* ── Border arrow（Figma：32px 描边圆 + spacing-2 内边距 + eds-arrow-left 16px）── */
+
+.borderArrow {
+  width: var(--scale-8);
+  height: var(--scale-8);
+  min-width: var(--scale-8);
+  min-height: var(--scale-8);
+  border: var(--stroke-xs) solid var(--stroke-outline-deep);
+  padding: var(--spacing-2);
+  composes: motion-ease is-hover from global;
+}
+
+.borderArrow .icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--stroke-base-primary);
+}
+
+.borderArrow:hover:not(:disabled) {
+  background-color: var(--event-hover);
+  border-color: var(--stroke-hide);
+}
+
+.borderArrow:active:not(:disabled),
+.borderArrow.visualActive:not(:disabled) {
+  background-color: var(--event-hover);
+  border-color: var(--stroke-hide);
+}
+
+.borderArrow:active:not(:disabled) .icon,
+.borderArrow.visualActive:not(:disabled) .icon {
+  color: var(--stroke-base-secondary);
+}
+
+.borderArrow:focus-visible:not(:disabled) {
+  background-color: var(--event-hover);
+  border-color: var(--stroke-hide);
+  outline: none;
+}
+
+.borderArrow:focus-visible:not(:disabled) .icon {
+  color: var(--stroke-base-primary);
+}
+
+.borderArrow:disabled {
+  border-color: var(--stroke-base-quaternary);
+}
+
+.borderArrow:disabled .icon {
+  color: var(--stroke-base-quaternary);
 }

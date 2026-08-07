@@ -1,6 +1,6 @@
 {
   "$figma": "https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2536-5814",
-  "$description": "Color System semantic colors (语义色). box-flotation → eds-popup (Figma Box/Flotation); box-page → eds-page. eds-popup-box → eds-popup; eds-flotation-box → eds-flotation @ 60%.",
+  "$description": "Color System semantic colors (语义色). box-flotation → eds-popup (Figma Box/Flotation); box-page → eds-page. effect-popup-box → eds-popup; effect-flotation-box → eds-flotation @ 60%.",
   "tokens": [
     {
       "name": "box-container",
@@ -513,57 +513,67 @@
       "dark": "color(var(--eds-base) / .2)"
     },
     {
-      "name": "eds-vulvar-shadow",
+      "name": "effect-vulvar-shadow",
       "light": "color(var(--eds-same-black) / .25)",
       "dark": "color(var(--eds-same-black) / .6)"
     },
     {
-      "name": "eds-vulvar-shadow-subtle",
+      "name": "effect-vulvar-shadow-deep",
+      "light": "color(var(--eds-same-black) / .5)",
+      "dark": "color(var(--eds-same-black) / .8)"
+    },
+    {
+      "name": "effect-vulvar-shadow-subtle",
       "light": "color(var(--eds-same-black) / .03)",
       "dark": "color(var(--eds-same-black) / .2)"
     },
     {
-      "name": "eds-shadow-shallow",
+      "name": "effect-shadow-shallow",
       "light": "color(var(--eds-same-black) / .06)",
       "dark": "color(var(--eds-same-black) / .25)"
     },
     {
-      "name": "eds-vulvar-shadow-glow",
+      "name": "effect-vulvar-shadow-glow",
       "light": "color(var(--eds-vulvar-glow) / 1)",
       "dark": "color(var(--eds-vulvar-glow) / 1)"
     },
     {
-      "name": "eds-inner-shadow",
+      "name": "effect-inner-shadow",
       "light": "color(var(--eds-same-black) / 1)",
       "dark": "color(var(--eds-same-black) / 1)"
     },
     {
-      "name": "eds-inner-shadow-glow",
+      "name": "effect-inner-shadow-glow",
       "light": "color(var(--eds-inner-glow) / 1)",
       "dark": "color(var(--eds-inner-glow) / 1)"
     },
     {
-      "name": "eds-popup-background",
+      "name": "effect-popup-background",
       "light": "color(var(--eds-same-black) / .5)",
       "dark": "color(var(--eds-same-black) / .5)"
     },
     {
-      "name": "eds-popup-box",
+      "name": "effect-popup-box",
       "light": "color(var(--eds-popup) / 1)",
       "dark": "color(var(--eds-popup) / 1)"
     },
     {
-      "name": "eds-flotation-box",
+      "name": "effect-flotation-box",
       "light": "color(var(--eds-flotation) / .6)",
       "dark": "color(var(--eds-flotation) / .6)"
     },
     {
-      "name": "eds-mask",
+      "name": "effect-popover-box",
+      "light": "color(var(--eds-popup) / .85)",
+      "dark": "color(var(--eds-popup) / .85)"
+    },
+    {
+      "name": "effect-mask",
       "light": "color(var(--eds-page) / .6)",
       "dark": "color(var(--eds-page) / .6)"
     },
     {
-      "name": "eds-prompt",
+      "name": "effect-prompt",
       "light": "color(var(--eds-base) / .9)",
       "dark": "color(var(--eds-base) / .2)"
     }

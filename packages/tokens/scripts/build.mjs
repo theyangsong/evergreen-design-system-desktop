@@ -40,51 +40,60 @@ function appendCssCommentBlock(lines, commentLines, indent = '  ') {
 const COLOR_SEMANTIC_GROUP_ORDER = [
   { prefix: 'box', comment: 'Box（容器 / 背景）' },
   { prefix: 'event', comment: 'Event（交互状态）' },
-  { prefix: 'tag', comment: 'Tag（Status / Colorful 色板）' },
   { prefix: 'status', comment: 'Status' },
   { prefix: 'stroke', comment: 'Stroke（描边 / 分割线）' },
   { prefix: 'text', comment: 'Text（文本色）' },
   { prefix: 'material', comment: 'Material（材质 / 填充）' },
   { prefix: 'data-table', comment: 'Data Table（表格）' },
-  { prefix: 'eds-vulvar', comment: 'EDS（特效色 — vulvar shadow）' },
-  { prefix: 'eds-shadow', comment: 'EDS（特效色 — shadow color）' },
-  { prefix: 'eds-inner', comment: 'EDS（特效色 — inner shadow）' },
-  { prefix: 'eds-popup', comment: 'EDS（特效色 — popup）' },
-  { prefix: 'eds-flotation', comment: 'EDS（特效色 — flotation）' },
-  { prefix: 'eds-mask', comment: 'EDS（特效色 — mask）' },
-  { prefix: 'eds-prompt', comment: 'EDS（特效色 — prompt）' },
+  { prefix: 'effect', comment: null },
 ];
 
-function groupColorSemanticTokens(tokens) {
+const TAG_SEMANTIC_GROUP_ORDER = [
+  { prefix: 'tag-status', comment: 'Tag Status' },
+  { prefix: 'tag-colorful', comment: 'Tag Colorful' },
+  { prefix: 'tag-custom', comment: 'Tag Custom' },
+];
+
+function groupTagSemanticTokens(tokens) {
+  return groupColorSemanticTokensWithOrder(tokens, TAG_SEMANTIC_GROUP_ORDER, 'Tag');
+}
+
+function groupColorSemanticTokensWithOrder(tokens, groupOrder, remainingComment = 'Status') {
   const assigned = new Set();
 
-  const groups = COLOR_SEMANTIC_GROUP_ORDER.map(({ prefix, comment }) => {
-    const groupTokens = tokens.filter((token) => {
-      if (assigned.has(token.name)) {
-        return false;
-      }
+  const groups = groupOrder
+    .map(({ prefix, comment }) => {
+      const groupTokens = tokens.filter((token) => {
+        if (assigned.has(token.name)) {
+          return false;
+        }
 
-      const matches =
-        prefix === 'data-table'
-          ? token.name.startsWith('data-table')
-          : token.name.startsWith(`${prefix}-`);
+        const matches =
+          prefix === 'data-table'
+            ? token.name.startsWith('data-table')
+            : token.name.startsWith(`${prefix}-`);
 
-      if (matches) {
-        assigned.add(token.name);
-      }
+        if (matches) {
+          assigned.add(token.name);
+        }
 
-      return matches;
-    });
+        return matches;
+      });
 
-    return { comment, tokens: groupTokens };
-  }).filter((group) => group.tokens.length > 0);
+      return { comment, tokens: groupTokens };
+    })
+    .filter((group) => group.tokens.length > 0);
 
   const remaining = tokens.filter((token) => !assigned.has(token.name));
   if (remaining.length > 0) {
-    groups.push({ comment: 'Status', tokens: remaining });
+    groups.push({ comment: remainingComment, tokens: remaining });
   }
 
   return groups;
+}
+
+function groupColorSemanticTokens(tokens) {
+  return groupColorSemanticTokensWithOrder(tokens, COLOR_SEMANTIC_GROUP_ORDER);
 }
 
 function flattenScaleSemanticTokens(semanticSpec) {
@@ -852,9 +861,9 @@ function resolveColorBaseEntry(entry) {
   return entry;
 }
 
-function mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette) {
-  const light = { ...baseSpec.light };
-  const dark = { ...baseSpec.dark };
+function buildTagBaseSpec(tagPalette) {
+  const light = {};
+  const dark = {};
 
   for (const groupKey of ['status', 'colorful', 'custom']) {
     for (const [key, themeValues] of Object.entries(tagPalette[groupKey] ?? {})) {
@@ -973,8 +982,14 @@ function writeColorSemanticCssFile(destination, selector, groups, themeName, hea
   ];
 
   for (const group of groups) {
+    if (group.tokens.length === 0) {
+      continue;
+    }
+
     lines.push('');
-    lines.push(`  /* ${group.comment} */`);
+    if (group.comment) {
+      lines.push(`  /* ${group.comment} */`);
+    }
     for (const token of group.tokens) {
       const comment = token.comment ? ` /* ${token.comment} */` : '';
       const mappedValue = mapColorTokenValue(token[themeName]);
@@ -1096,6 +1111,16 @@ function buildTypographyFonts() {
   writeFileSync(join(cssDir, 'typography/fonts.css'), `${lines.join('\n')}\n`, 'utf-8');
 }
 
+function formatMotionSemanticLine(token) {
+  const declaration = `  --${token.name}: ${token.value};`;
+  if (!token.comment) {
+    return declaration;
+  }
+
+  const padding = Math.max(1, 34 - declaration.length);
+  return `${declaration}${' '.repeat(padding)}/* ${token.comment} */`;
+}
+
 function writeMotionBaseCssFile(destination, selector, baseSpec, headerLines = []) {
   const lines = [
     '/**',
@@ -1109,8 +1134,14 @@ function writeMotionBaseCssFile(destination, selector, baseSpec, headerLines = [
   for (const group of baseSpec.groups) {
     lines.push('');
     lines.push(`  /* ${group.comment} */`);
-    for (const [name, value] of Object.entries(group.tokens)) {
-      lines.push(`  --${name}: ${value};`);
+    if (group.tokenList?.length) {
+      for (const token of group.tokenList) {
+        lines.push(formatMotionSemanticLine(token));
+      }
+    } else if (group.tokens) {
+      for (const [name, value] of Object.entries(group.tokens)) {
+        lines.push(`  --${name}: ${value};`);
+      }
     }
     if (group.usageNotes?.length) {
       appendCssCommentBlock(lines, group.usageNotes);
@@ -1119,46 +1150,10 @@ function writeMotionBaseCssFile(destination, selector, baseSpec, headerLines = [
 
   lines.push('}', '');
 
-  mkdirSync(dirname(destination), { recursive: true });
-  writeFileSync(destination, lines.join('\n'));
-}
-
-function formatMotionSemanticLine(token) {
-  const declaration = `  --${token.name}: ${token.value};`;
-  if (!token.comment) {
-    return declaration;
-  }
-
-  const padding = Math.max(1, 34 - declaration.length);
-  return `${declaration}${' '.repeat(padding)}/* ${token.comment} */`;
-}
-
-function writeMotionSemanticCssFile(destination, selector, semanticSpec, headerLines = []) {
-  const lines = [
-    '/**',
-    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
-    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
-    ' */',
-    '',
-    `${selector} {`,
-    '',
-    '  /* ---- Semantic role tokens (语义角色 → base) ---- */',
-  ];
-
-  for (const group of semanticSpec.groups) {
-    lines.push(`  /* ${group.comment} */`);
-    for (const token of group.tokens) {
-      lines.push(formatMotionSemanticLine(token));
-    }
-    lines.push('');
-  }
-
-  lines.push('}', '');
-
-  if (semanticSpec.reducedMotionOverrides?.length) {
+  if (baseSpec.reducedMotionOverrides?.length) {
     lines.push('@media (prefers-reduced-motion: reduce) {');
     lines.push(`  ${selector} {`);
-    for (const token of semanticSpec.reducedMotionOverrides) {
+    for (const token of baseSpec.reducedMotionOverrides) {
       lines.push(`    --${token.name}: ${token.value};`);
     }
     lines.push('  }');
@@ -1169,8 +1164,119 @@ function writeMotionSemanticCssFile(destination, selector, semanticSpec, headerL
   writeFileSync(destination, lines.join('\n'));
 }
 
+function appendMotionStyleBlock(lines, className, properties, notes = []) {
+  for (const note of notes) {
+    lines.push(`/* ${note} */`);
+  }
+  lines.push(`.${className} {`);
+  for (const [property, value] of Object.entries(properties)) {
+    lines.push(`  ${property}: ${value};`);
+  }
+  lines.push('}', '');
+}
+
+function appendMotionActiveStateBlock(lines, style) {
+  if (!style.activeState || !Object.keys(style.activeState).length) {
+    return;
+  }
+
+  const modifier = style.activeModifier ?? 'is-active';
+  const selectors = [
+    `.${style.className}.${modifier}`,
+    ...(style.parentActiveSelectors ?? []).map((parentSelector) => `${parentSelector} .${style.className}`),
+    ...(style.selfActiveSelectors ?? []).map((selfSelector) => `${selfSelector}.${style.className}`),
+  ].join(',\n');
+
+  lines.push(`${selectors} {`);
+  for (const [property, value] of Object.entries(style.activeState)) {
+    lines.push(`  ${property}: ${value};`);
+  }
+  lines.push('}', '');
+}
+
+function writeMotionSemanticCssFile(destination, semanticSpec, headerLines = []) {
+  const lines = [
+    '/**',
+    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
+    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
+    ' * Motion semantic — Ease / Layout / Flotation / Deform / Page (.motion-ease + state · .motion-layout · .motion-flotation · .motion-deform · .motion-page).',
+    ' * Recipes: @eds/desktop-tokens/motion/recipe',
+    ' */',
+    '',
+  ];
+
+  for (const group of semanticSpec.groups ?? []) {
+    lines.push('/* ========================================');
+    lines.push(`   ${group.comment}`);
+    lines.push('   ======================================== */');
+    lines.push('');
+
+    for (const style of group.styles ?? []) {
+      if (style.title) {
+        lines.push(`/* ${style.title} */`);
+      }
+
+      appendMotionStyleBlock(lines, style.className, style.properties ?? {}, style.notes ?? []);
+
+      for (const pseudo of style.pseudoStyles ?? []) {
+        const selectors = pseudo.selector
+          .split(',')
+          .map((part) => `.${style.className}${part.trim()}`)
+          .join(',\n');
+        lines.push(`${selectors} {`);
+        for (const [property, value] of Object.entries(pseudo.properties)) {
+          lines.push(`  ${property}: ${value};`);
+        }
+        lines.push('}', '');
+      }
+
+      appendMotionActiveStateBlock(lines, style);
+
+      for (const stateStyle of style.stateStyles ?? []) {
+        if (stateStyle.title) {
+          lines.push(`/* ${stateStyle.title} */`);
+        }
+
+        appendMotionStyleBlock(
+          lines,
+          stateStyle.hostClass,
+          stateStyle.properties ?? {},
+          stateStyle.notes ?? [],
+        );
+
+        for (const pseudo of stateStyle.pseudoStyles ?? []) {
+          const selectors = pseudo.selector
+            .split(',')
+            .map((part) => `.${stateStyle.hostClass}${part.trim()}`)
+            .join(',\n');
+          lines.push(`${selectors} {`);
+          for (const [property, value] of Object.entries(pseudo.properties)) {
+            lines.push(`  ${property}: ${value};`);
+          }
+          lines.push('}', '');
+        }
+      }
+    }
+  }
+
+  const reducedClasses = semanticSpec.reducedMotionScenarioClasses ?? [];
+  if (reducedClasses.length) {
+    lines.push('/* ========================================');
+    lines.push('   Reduced Motion');
+    lines.push('   ======================================== */');
+    lines.push('');
+    lines.push('@media (prefers-reduced-motion: reduce) {');
+    lines.push(`  ${reducedClasses.map((className) => `.${className}`).join(',\n  ')} {`);
+    lines.push('    transition: none !important;');
+    lines.push('  }');
+    lines.push('}', '');
+  }
+
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, lines.join('\n'));
+}
+
 function writeMotionUtilitiesCssFile(destination, semanticSpec, headerLines = []) {
-  const composeHostClass = semanticSpec.composeHost?.className ?? 'motion-compose';
   const lines = [
     '/**',
     ' * Do not edit directly, this file was auto-generated from Figma tokens.',
@@ -1183,27 +1289,6 @@ function writeMotionUtilitiesCssFile(destination, semanticSpec, headerLines = []
     '',
   ];
 
-  if (semanticSpec.composeHost) {
-    const { composeHost } = semanticSpec;
-    if (composeHost.title) {
-      lines.push(`/* ${composeHost.title} */`);
-    }
-    for (const note of composeHost.notes ?? []) {
-      lines.push(`/* ${note} */`);
-    }
-    lines.push(`.${composeHost.className} {`);
-    lines.push('  transition:');
-    for (const layer of composeHost.layers) {
-      lines.push(`    var(--${layer.layerVar},)`);
-    }
-    lines.push('}', '');
-    for (const layer of composeHost.layers) {
-      lines.push(`.${composeHost.className}.${layer.modifier} {`);
-      lines.push(`  --${layer.layerVar}: var(--${layer.presetVar});`);
-      lines.push('}', '');
-    }
-  }
-
   for (const utility of semanticSpec.utilityClasses ?? []) {
     if (utility.title) {
       lines.push(`/* ${utility.title} */`);
@@ -1211,35 +1296,9 @@ function writeMotionUtilitiesCssFile(destination, semanticSpec, headerLines = []
     for (const note of utility.notes ?? []) {
       lines.push(`/* ${note} */`);
     }
-
-    if (utility.composeLayer && utility.composePreset) {
-      lines.push(`.${utility.className}:not(.${composeHostClass}) {`);
-      lines.push(`  transition: ${utility.standaloneTransition};`);
-      lines.push('}', '');
-    } else {
-      lines.push(`.${utility.className} {`);
-      lines.push(`  transition: ${utility.standaloneTransition ?? 'none'};`);
-      lines.push('}', '');
-    }
-  }
-
-  for (const combo of semanticSpec.presetCombos ?? []) {
-    if (combo.title) {
-      lines.push(`/* ${combo.title} */`);
-    }
-    for (const note of combo.notes ?? []) {
-      lines.push(`/* ${note} */`);
-    }
-    lines.push(`.${combo.className}:not(.${composeHostClass}) {`);
-    lines.push(`  transition: ${combo.transition};`);
+    lines.push(`.${utility.className} {`);
+    lines.push(`  transition: ${utility.standaloneTransition ?? 'none'};`);
     lines.push('}', '');
-    if (combo.composeLayers?.length && combo.composePresets?.length) {
-      lines.push(`.${composeHostClass}.${combo.className} {`);
-      combo.composeLayers.forEach((layerVar, index) => {
-        lines.push(`  --${layerVar}: var(--${combo.composePresets[index]});`);
-      });
-      lines.push('}', '');
-    }
   }
 
   mkdirSync(dirname(destination), { recursive: true });
@@ -1248,27 +1307,33 @@ function writeMotionUtilitiesCssFile(destination, semanticSpec, headerLines = []
 
 function buildMotionSystem() {
   const baseSpec = loadJson('motion/base.json');
+  const recipeSpec = loadJson('motion/recipe.json');
   const semanticSpec = loadJson('motion/semantic.json');
   const selector = ':root, .desktopTokens';
 
   writeMotionBaseCssFile(join(cssDir, 'motion/base.css'), selector, baseSpec, [
-    ' * Motion System — base primitives (duration & easing).',
+    ' * Motion System — base primitives (duration, easing, physical state).',
     ' * Source: spec/motion/base.json',
   ]);
 
-  writeMotionSemanticCssFile(join(cssDir, 'motion/semantic.css'), selector, semanticSpec, [
-    ' * Motion System — semantic role variables only.',
+  writeMotionBaseCssFile(join(cssDir, 'motion/recipe.css'), selector, recipeSpec, [
+    ' * Motion System — recipes (duration + easing + property).',
+    ' * Source: spec/motion/recipe.json',
+  ]);
+
+  writeMotionSemanticCssFile(join(cssDir, 'motion/semantic.css'), semanticSpec, [
+    ' * Motion System — semantic scenario classes.',
     ' * Source: spec/motion/semantic.json',
   ]);
 
   writeMotionUtilitiesCssFile(join(cssDir, 'motion/utilities.css'), semanticSpec, [
-    ' * Motion System — utility classes (standalone & compose).',
+    ' * Motion System — utility classes.',
     ' * Source: spec/motion/semantic.json',
   ]);
 
   writeImportAggregator(
     join(cssDir, 'motion/index.css'),
-    ['./base.css', './semantic.css', './utilities.css'],
+    ['./base.css', './recipe.css', './semantic.css', './utilities.css'],
     'Motion System entry',
   );
 }
@@ -1364,26 +1429,22 @@ function buildEffectSystem() {
 
 function buildColorSystem() {
   const baseSpec = loadJson('color/base.json');
-  const tagPalette = loadJson('color/tag-palette.json');
   const semanticSpec = loadJson('color/semantic.json');
-  const mergedBaseSpec = mergeTagPaletteIntoBaseSpec(baseSpec, tagPalette);
-  const mergedSemanticTokens = [...semanticSpec.tokens, ...expandTagPaletteSemanticTokens(tagPalette)];
+  const semanticGroups = groupColorSemanticTokens(semanticSpec.tokens);
 
   for (const themeName of ['light', 'dark']) {
     const selector = themeSelector(themeName);
     const themeDir = join(cssDir, 'color/themes', themeName);
 
-    const semanticGroups = groupColorSemanticTokens(mergedSemanticTokens);
-
-    writeColorBaseCssFile(join(themeDir, 'base.css'), selector, themeName, mergedBaseSpec, [
+    writeColorBaseCssFile(join(themeDir, 'base.css'), selector, themeName, baseSpec, [
       ` * Color System — base palette (${themeName}).`,
-      ' * Source: spec/color/base.json + spec/color/tag-palette.json',
-      ' * Figma: node 2008:41 (Primitives@Cregis); tag nodes in tag-palette.json',
+      ' * Source: spec/color/base.json',
+      ' * Figma: node 2008:41 (Primitives@Cregis)',
     ]);
 
     writeColorSemanticCssFile(join(themeDir, 'semantic.css'), selector, semanticGroups, themeName, [
       ` * Color System — semantic colors referencing base (${themeName}).`,
-      ' * Source: spec/color/semantic.json + tag-palette.json',
+      ' * Source: spec/color/semantic.json',
       ' * Figma: node 2536:5814 (Variable Name column)',
     ]);
 
@@ -1396,8 +1457,43 @@ function buildColorSystem() {
 
   writeImportAggregator(
     join(cssDir, 'color/index.css'),
-    ['./themes/light.css', './themes/dark.css'],
+    ['./themes/light.css', './themes/dark.css', './tag/index.css'],
     'Color System entry (all themes)',
+  );
+}
+
+function buildTagColorSystem() {
+  const tagPalette = loadJson('color/tag-palette.json');
+  const tagBaseSpec = buildTagBaseSpec(tagPalette);
+  const tagSemanticTokens = expandTagPaletteSemanticTokens(tagPalette);
+  const semanticGroups = groupTagSemanticTokens(tagSemanticTokens);
+
+  for (const themeName of ['light', 'dark']) {
+    const selector = themeSelector(themeName);
+    const themeDir = join(cssDir, 'color/tag/themes', themeName);
+
+    writeColorBaseCssFile(join(themeDir, 'base.css'), selector, themeName, tagBaseSpec, [
+      ` * Tag Color System — base palette (${themeName}).`,
+      ' * Source: spec/color/tag-palette.json',
+      ' * Figma: Status / Colorful / Custom tag nodes in tag-palette.json',
+    ]);
+
+    writeColorSemanticCssFile(join(themeDir, 'semantic.css'), selector, semanticGroups, themeName, [
+      ` * Tag Color System — semantic colors referencing tag base (${themeName}).`,
+      ' * Source: spec/color/tag-palette.json',
+    ]);
+
+    writeImportAggregator(
+      join(cssDir, 'color/tag/themes', `${themeName}.css`),
+      [`./${themeName}/base.css`, `./${themeName}/semantic.css`],
+      `Tag Color System entry (${themeName})`,
+    );
+  }
+
+  writeImportAggregator(
+    join(cssDir, 'color/tag/index.css'),
+    ['./themes/light.css', './themes/dark.css'],
+    'Tag Color System entry (all themes)',
   );
 }
 
@@ -1424,6 +1520,7 @@ function buildJsonExport() {
   const effectBaseSpec = loadJson('effect/base.json');
   const effectSemanticSpec = loadJson('effect/semantic.json');
   const motionBaseSpec = loadJson('motion/base.json');
+  const motionRecipeSpec = loadJson('motion/recipe.json');
   const motionSemanticSpec = loadJson('motion/semantic.json');
 
   const scaleUnit = resolveScaleBaseUnit(scaleBaseSpec);
@@ -1499,36 +1596,47 @@ function buildJsonExport() {
       ),
     ),
     motionBase: Object.fromEntries(
-      motionBaseSpec.groups.flatMap((group) => Object.entries(group.tokens)),
+      motionBaseSpec.groups.flatMap((group) => {
+        if (group.tokenList?.length) {
+          return group.tokenList.map((token) => [token.name, token.value]);
+        }
+        if (group.tokens) {
+          return Object.entries(group.tokens);
+        }
+        return [];
+      }),
+    ),
+    motionRecipe: Object.fromEntries(
+      motionRecipeSpec.groups.flatMap((group) => {
+        if (group.tokenList?.length) {
+          return group.tokenList.map((token) => [token.name, token.value]);
+        }
+        return [];
+      }),
     ),
     motionSemantic: Object.fromEntries(
       motionSemanticSpec.groups.flatMap((group) =>
-        group.tokens.map((token) => [token.name, token.value]),
+        (group.styles ?? []).flatMap((style) => {
+          const entries = [];
+          if (style.properties !== undefined) {
+            entries.push([style.className, style.properties]);
+          }
+          for (const stateStyle of style.stateStyles ?? []) {
+            entries.push([stateStyle.hostClass, stateStyle.properties ?? {}]);
+          }
+          if (style.activeState) {
+            entries.push([`${style.className}.${style.activeModifier ?? 'is-active'}`, style.activeState]);
+          }
+          return entries;
+        }),
       ),
     ),
-    motionUtilities: Object.fromEntries([
-      ...(motionSemanticSpec.utilityClasses ?? []).map((utility) => [
+    motionUtilities: Object.fromEntries(
+      (motionSemanticSpec.utilityClasses ?? []).map((utility) => [
         utility.className,
-        {
-          transition: utility.standaloneTransition ?? utility.properties?.transition ?? 'none',
-        },
+        { transition: utility.standaloneTransition ?? 'none' },
       ]),
-      ...(motionSemanticSpec.presetCombos ?? []).map((combo) => [
-        combo.className,
-        { transition: combo.transition },
-      ]),
-      ...(motionSemanticSpec.composeHost
-        ? [
-            [
-              motionSemanticSpec.composeHost.className,
-              {
-                transition:
-                  'compose — var(--motion-layer-*) layers; pair with motion-hover / shift / fade / enter',
-              },
-            ],
-          ]
-        : []),
-    ]),
+    ),
   };
 
   const baseSpec = loadJson('color/base.json');
@@ -1554,6 +1662,7 @@ async function buildAll() {
   buildMotionSystem();
   buildEffectSystem();
   buildColorSystem();
+  buildTagColorSystem();
   buildRootIndex();
   buildJsonExport();
   await buildCornerSmoothingAssets();

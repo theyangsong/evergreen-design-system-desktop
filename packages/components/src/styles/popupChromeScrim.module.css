@@ -1,0 +1,29 @@
+/**
+ * Popup Detail / Reminder Echo · sticky 工具栏毛玻璃（Figma effect-mask + eds-blur-bg）
+ */
+.root {
+  position: relative;
+  isolation: isolate;
+}
+
+.active {
+  background: transparent;
+}
+
+.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  background: var(--effect-mask);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
