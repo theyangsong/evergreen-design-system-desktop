@@ -55,7 +55,7 @@ export const componentCatalog: CatalogSection[] = [
           { id: 'button-icon', label: 'iCons Container Simple', standalonePage: true },
           { id: 'button-icon-pro', label: 'iCons Container Professional', standalonePage: true },
           { id: 'button-link', label: 'Link', standalonePage: true },
-          { id: 'button-pagination', label: 'Pagination', standalonePage: true },
+          { id: 'button-pagination', label: 'Custom', standalonePage: true },
           { id: 'button-combo', label: 'Combo', standalonePage: true },
         ],
       },
@@ -135,7 +135,7 @@ export const componentCatalog: CatalogSection[] = [
         name: 'Popovers',
         slug: 'popovers',
         description: 'Anchored overlays for menus and lightweight panels.',
-        status: 'placeholder',
+        status: 'implemented',
       },
       {
         name: 'Countdown',
@@ -193,8 +193,8 @@ export const componentCatalog: CatalogSection[] = [
       {
         name: 'Detail',
         slug: 'detail',
-        description: 'Detail page layout for entity inspection.',
-        status: 'placeholder',
+        description: 'Popup detail layout for entity inspection (880px).',
+        status: 'implemented',
       },
       {
         name: 'Data Table View',

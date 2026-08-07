@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import {
   computed,
+  nextTick,
   onBeforeUnmount,
+  provide,
   ref,
   useId,
   watch,
 } from 'vue';
 import EgTooltip, { type TooltipHeightMode, type TooltipWidthMode } from './Tooltip.vue';
 import type { TooltipPanelKind, TooltipPanelRadiusToken } from './tooltipPanelRadius';
+import { POPOVER_MOTION_ACTIVE_KEY } from '../popovers/popoverMotion';
 import {
   FALLBACK_EDGE_INSET_PX,
   FALLBACK_MAIN_AXIS_PX,
+  FALLBACK_MAIN_AXIS_POPOVER_PX,
   readCssTokenLength,
   resolveCrossAxisOffsetFromAlign,
   SPACING_EDGE_INSET,
   SPACING_MAIN_AXIS,
+  SPACING_MAIN_AXIS_POPOVER,
 } from '../../shared/cssSpacingTokens';
+import '../../styles/overlayGlassMicroFloat.module.css';
 import styles from './AnchoredTooltip.module.css';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -37,7 +43,7 @@ const props = withDefaults(
     align?: TooltipAlign;
     content?: string;
     disabled?: boolean;
-    /** 主轴间距（px）；未传时使用 --spacing-025。 */
+    /** 主轴间距（px）；未传时 tooltip 用 --spacing-025，popover（wrap-tooltip=false）用 --spacing-05。 */
     offset?: number;
     /**
      * 交叉轴额外位移（px）。
@@ -74,6 +80,8 @@ const props = withDefaults(
     boundarySelector?: string;
     /** 边界内边距（px）。 */
     boundaryMargin?: number;
+    /** @deprecated 微浮动已默认启用；所有 EgTooltip 浮层均挂 `.motion-flotation`。 */
+    microFloat?: boolean;
   }>(),
   {
     placement: 'bottom',
@@ -94,6 +102,7 @@ const props = withDefaults(
     closeOnScroll: false,
     flip: false,
     boundaryMargin: 8,
+    microFloat: false,
   },
 );
 
@@ -113,8 +122,66 @@ const edgeInsetPx = ref(FALLBACK_EDGE_INSET_PX);
 const tooltipId = useId();
 const describedById = computed(() => `eds-tooltip-${tooltipId}`);
 
-/** 浮动层 enter/leave 仅 hover 触发；click / focus 瞬时切换（§ motion-interactive）。 */
-const floatingMotionEnabled = computed(() => props.trigger === 'hover');
+const popoverMotionActive = ref(false);
+const floatingKeepMounted = ref(false);
+let popoverMotionLeaveTimer: ReturnType<typeof setTimeout> | undefined;
+
+provide(POPOVER_MOTION_ACTIVE_KEY, popoverMotionActive);
+
+function readMicroFloatLeaveMs(el: HTMLElement): number {
+  const probe = document.createElement('div');
+  probe.className = 'motion-flotation';
+  el.appendChild(probe);
+  const seconds = Number.parseFloat(getComputedStyle(probe).transitionDuration);
+  el.removeChild(probe);
+  return Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds * 1000) : 300;
+}
+
+function clearPopoverMotionLeaveTimer() {
+  if (popoverMotionLeaveTimer !== undefined) {
+    clearTimeout(popoverMotionLeaveTimer);
+    popoverMotionLeaveTimer = undefined;
+  }
+}
+
+function syncPopoverMotion(isOpen: boolean) {
+  if (!usesMicroFloat.value) {
+    return;
+  }
+  clearPopoverMotionLeaveTimer();
+  if (isOpen) {
+    floatingKeepMounted.value = true;
+    popoverMotionActive.value = false;
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        if (open.value) {
+          popoverMotionActive.value = true;
+        }
+      });
+    });
+    return;
+  }
+  popoverMotionActive.value = false;
+  const anchor = resolveTriggerMetricsEl() ?? triggerRef.value;
+  const leaveMs = anchor ? readMicroFloatLeaveMs(anchor) : 300;
+  popoverMotionLeaveTimer = setTimeout(() => {
+    if (!open.value) {
+      floatingKeepMounted.value = false;
+    }
+    popoverMotionLeaveTimer = undefined;
+  }, leaveMs);
+}
+
+const usesMicroFloat = computed(() => true);
+
+const floatingRendered = computed(() =>
+  usesMicroFloat.value ? floatingKeepMounted.value : open.value,
+);
+
+/** 旧 hover Transition 仅用于未启用 microFloat 的 EgTooltip 壳。 */
+const floatingMotionEnabled = computed(
+  () => props.trigger === 'hover' && props.wrapTooltip && !usesMicroFloat.value,
+);
 
 const floatingMotionEnterFromClass = computed(() => {
   switch (resolvedPlacement.value) {
@@ -164,6 +231,7 @@ function clearTimers() {
     clearTimeout(closeTimer);
     closeTimer = undefined;
   }
+  clearPopoverMotionLeaveTimer();
 }
 
 function openNow() {
@@ -439,7 +507,11 @@ function clampToBoundary(
 function resolveSpacingTokens() {
   const trigger = resolveTriggerMetricsEl() ?? triggerRef.value;
   if (!trigger) return;
-  mainAxisGapPx.value = readCssTokenLength(trigger, SPACING_MAIN_AXIS, FALLBACK_MAIN_AXIS_PX);
+  const mainAxisToken = props.wrapTooltip ? SPACING_MAIN_AXIS : SPACING_MAIN_AXIS_POPOVER;
+  const mainAxisFallback = props.wrapTooltip
+    ? FALLBACK_MAIN_AXIS_PX
+    : FALLBACK_MAIN_AXIS_POPOVER_PX;
+  mainAxisGapPx.value = readCssTokenLength(trigger, mainAxisToken, mainAxisFallback);
   edgeInsetPx.value = readCssTokenLength(trigger, SPACING_EDGE_INSET, FALLBACK_EDGE_INSET_PX);
 }
 
@@ -578,6 +650,10 @@ watch(
   },
 );
 
+watch(open, (isOpen) => {
+  syncPopoverMotion(isOpen);
+});
+
 onBeforeUnmount(() => {
   clearTimers();
   unbindOpenSideEffects();
@@ -640,7 +716,7 @@ defineExpose({
         @after-leave="unbindOpenSideEffects"
       >
         <div
-          v-if="open"
+          v-if="floatingRendered"
           ref="floatingRef"
           :id="describedById"
           :class="[styles.floating, tokenScopeClass]"
@@ -649,11 +725,18 @@ defineExpose({
           @mouseleave="trigger === 'hover' ? onFloatingLeave() : undefined"
           @contextmenu.prevent
         >
-          <div :class="styles.floatingInner">
+          <div
+            :class="[
+              styles.floatingInner,
+              usesMicroFloat && 'glassMicroFloatHost',
+              usesMicroFloat && popoverMotionActive && 'glassMicroFloatHostActive',
+            ]"
+          >
             <EgTooltip
               v-if="wrapTooltip"
               :panel-kind="panelKind"
               :panel-radius="panelRadius"
+              :panel-micro-float="usesMicroFloat"
               :width-mode="widthMode"
               :width="width"
               :max-width="maxWidth"

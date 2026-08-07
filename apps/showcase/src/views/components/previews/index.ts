@@ -41,7 +41,9 @@ import BatchBarPreview from './BatchBarPreview.vue';
 import DataListPreview from './DataListPreview.vue';
 import ContainerPreview from './ContainerPreview.vue';
 import LayoutPreview from './LayoutPreview.vue';
+import DetailPreview from './DetailPreview.vue';
 import PopupPreview from './PopupPreview.vue';
+import PopoversPreview from './PopoversPreview.vue';
 import SkidPreview from './SkidPreview.vue';
 
 export type ComponentPreviewEntry = {
@@ -116,7 +118,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'button-icon', title: 'iCons Container Simple', component: ButtonIconPreview, usesComponentDocHeader: true },
   { slug: 'button-icon-pro', title: 'iCons Container Professional', component: ButtonIconProPreview, usesComponentDocHeader: true },
   { slug: 'button-link', title: 'Link', component: ButtonLinkPreview, usesComponentDocHeader: true },
-  { slug: 'button-pagination', title: 'Pagination', component: ButtonPaginationPreview, usesComponentDocHeader: true },
+  { slug: 'button-pagination', title: 'Custom', component: ButtonPaginationPreview, usesComponentDocHeader: true },
   { slug: 'button-combo', title: 'Combo', component: ButtonComboPreview, usesComponentDocHeader: true },
   { slug: 'divider', title: 'Divider', component: DividerPreview, usesComponentDocHeader: true },
   { slug: 'avatar', title: 'Avatar', component: AvatarPreview, usesComponentDocHeader: true },
@@ -159,7 +161,9 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'batch-bar', title: 'Batch Bar', component: BatchBarPreview, usesComponentDocHeader: true },
   { slug: 'container', title: 'Container', component: ContainerPreview, usesComponentDocHeader: true },
   { slug: 'layout', title: 'Layout', component: LayoutPreview, usesComponentDocHeader: true },
+  { slug: 'detail', title: 'Detail', component: DetailPreview, usesComponentDocHeader: true },
   { slug: 'popup', title: 'Popup', component: PopupPreview, usesComponentDocHeader: true },
+  { slug: 'popovers', title: 'Popovers', component: PopoversPreview, usesComponentDocHeader: true },
   { slug: 'skid', title: 'Skid', component: SkidPreview, usesComponentDocHeader: true },
   { slug: 'icons', title: 'Icon', component: IconPreview },
   { slug: 'crypto', title: 'Crypto', component: CryptoPreview },

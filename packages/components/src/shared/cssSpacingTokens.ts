@@ -1,9 +1,11 @@
 type TooltipAlign = 'start' | 'center' | 'end';
 
-/** 主轴间距：--spacing-025；交叉轴 inset：--spacing-2 */
+/** 主轴间距：tooltip --spacing-025；popover（wrap-tooltip=false）--spacing-05；交叉轴 inset：--spacing-2 */
 export const SPACING_MAIN_AXIS = '--spacing-025';
+export const SPACING_MAIN_AXIS_POPOVER = '--spacing-05';
 export const SPACING_EDGE_INSET = '--spacing-2';
 export const FALLBACK_MAIN_AXIS_PX = 1;
+export const FALLBACK_MAIN_AXIS_POPOVER_PX = 2;
 export const FALLBACK_EDGE_INSET_PX = 8;
 
 export function readCssTokenLength(

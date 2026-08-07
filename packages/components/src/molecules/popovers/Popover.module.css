@@ -1,0 +1,113 @@
+.root {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  height: fit-content;
+  flex: none;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/*
+ * macOS 一体 Popover：Shape（absolute 背景）+ Content（relative 文档流）同壳。
+ * - .content：箭头侧 padding + motion-flotation，与 glass 同步进出场
+ * - .contentBody：插槽包裹层，padding 0，由 slot 根节点自定布局
+ */
+.shell {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  height: fit-content;
+  overflow: visible;
+  filter:
+    drop-shadow(0 0 0.5px var(--stroke-outline-shallow))
+    drop-shadow(0 var(--depth-shallow) var(--blur-shallow) var(--eds-vulvar-shadow));
+}
+
+:global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box) {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+:global(html[data-theme='light']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box),
+:global(html[data-theme='dark']) :global(.eds-popover.desktopTokens) .shapeSurface:global(.effect-flotation-box) {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.outline {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--material-same-white-quaternary);
+  transform-origin: center center;
+}
+
+.shapeFill {
+  fill: var(--eds-flotation);
+  fill-opacity: 0.6;
+  stroke: none;
+  shape-rendering: geometricPrecision;
+}
+
+.shapeTint {
+  fill: var(--eds-same-white);
+  fill-opacity: 0.4;
+  stroke: none;
+  shape-rendering: geometricPrecision;
+}
+
+.shapeStroke {
+  fill: none;
+  stroke: var(--eds-same-white);
+  stroke-opacity: 0.4;
+  stroke-width: var(--stroke-xs);
+  vector-effect: non-scaling-stroke;
+  shape-rendering: geometricPrecision;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  overflow: visible;
+  transform-origin: center center;
+}
+
+.contentConstrained {
+  overflow: auto;
+}
+
+.contentBody {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.contentBodyAdaptiveWidth {
+  display: block;
+  width: fit-content;
+}
+
+.contentBodyAdaptiveHeight {
+  height: fit-content;
+}

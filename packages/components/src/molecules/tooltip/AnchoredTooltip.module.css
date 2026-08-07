@@ -35,45 +35,39 @@
 }
 
 .floatingEnterActive {
-  transition: var(--motion-transition-enter);
+  transition: var(--motion-recipe-enter);
 }
 
 .floatingLeaveActive {
-  transition:
-    opacity var(--motion-duration-enter) var(--motion-easing-exit),
-    transform var(--motion-duration-enter) var(--motion-easing-exit);
+  transition: var(--motion-recipe-exit);
 }
 
 .floatingEnterTo,
 .floatingLeaveFrom {
-  opacity: 1;
+  opacity: var(--motion-opacity-visible);
   transform: translate(0, 0);
 }
 
-/* bottom：入场自下而上，离场自上而下 */
 .floatingEnterFromBottom,
 .floatingLeaveToBottom {
-  opacity: 0;
-  transform: translateY(var(--spacing-2));
+  opacity: var(--motion-opacity-hidden);
+  transform: var(--motion-displace-from-bottom);
 }
 
-/* top：入场自上而下，离场自下而上 */
 .floatingEnterFromTop,
 .floatingLeaveToTop {
-  opacity: 0;
-  transform: translateY(calc(-1 * var(--spacing-2)));
+  opacity: var(--motion-opacity-hidden);
+  transform: var(--motion-displace-from-top);
 }
 
-/* left：自左向右 */
 .floatingEnterFromLeft,
 .floatingLeaveToLeft {
-  opacity: 0;
-  transform: translateX(calc(-1 * var(--spacing-2)));
+  opacity: var(--motion-opacity-hidden);
+  transform: var(--motion-displace-from-left);
 }
 
-/* right：自右向左 */
 .floatingEnterFromRight,
 .floatingLeaveToRight {
-  opacity: 0;
-  transform: translateX(var(--spacing-2));
+  opacity: var(--motion-opacity-hidden);
+  transform: var(--motion-displace-from-right);
 }
