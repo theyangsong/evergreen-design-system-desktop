@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { EgLink } from '../link';
 import styles from './Textarea.module.css';
 
@@ -71,12 +71,27 @@ async function onPasteClick(event: MouseEvent) {
 
   try {
     const text = await navigator.clipboard.readText();
+    const el = textareaRef.value;
+
     if (!text) {
+      el?.focus();
       return;
     }
 
-    emit('update:modelValue', props.modelValue + text);
-    textareaRef.value?.focus();
+    if (!el) {
+      emit('update:modelValue', text);
+      return;
+    }
+
+    const start = el.selectionStart ?? props.modelValue.length;
+    const end = el.selectionEnd ?? props.modelValue.length;
+    const nextValue = props.modelValue.slice(0, start) + text + props.modelValue.slice(end);
+    emit('update:modelValue', nextValue);
+
+    await nextTick();
+    const cursor = start + text.length;
+    el.setSelectionRange(cursor, cursor);
+    el.focus();
   } catch {
     textareaRef.value?.focus();
   }

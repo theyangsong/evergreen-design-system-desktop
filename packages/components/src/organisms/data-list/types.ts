@@ -12,6 +12,13 @@ export type DataListBatchAction = {
   danger?: boolean;
   /** true 时点击打开 Popover（EgAnchoredTooltip + EgPopover），确认后再触发 batch-action。 */
   popover?: boolean;
+  /** Popover 顶部工具条标题；省略时使用 DataList 的 batchPopoverTopToolTitle。 */
+  popoverTitle?: string;
+};
+
+/** onBatchAction 返回值；多步批处理（如 Remark → Verify）可保留勾选至流程结束。 */
+export type DataListBatchActionResult = {
+  preserveSelection?: boolean;
 };
 
 export type DataListRowAction = {

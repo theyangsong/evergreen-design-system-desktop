@@ -2,17 +2,16 @@
 import { computed, reactive, watch } from 'vue';
 import { EgComboInputItem, EgFlotationTrigger, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
   buildFlotationTriggerUsageSnippet,
-  flotationTriggerCustomizeControls,
   flotationTriggerCustomizeDefaults,
   flotationTriggerImportCode,
   flotationTriggerKindCustomizeControls,
   flotationTriggerModuleMenuCustomizeControls,
   flotationTriggerModuleMenuDefaults,
+  flotationTriggerPageCustomizeControls,
   flotationTriggerPropRows,
   flotationTriggerSlotRows,
   isFlotationTriggerModuleMenuKind,
@@ -34,6 +33,7 @@ const customize = reactive({
     | 'invalid',
   messageType: flotationTriggerCustomizeDefaults.messageType as 'subtle' | 'brand' | 'danger',
   type: flotationTriggerCustomizeDefaults.type as 'notes' | 'danger' | 'success',
+  symbolPosition: flotationTriggerCustomizeDefaults.symbolPosition as 'leading' | 'trailing',
 });
 
 watch(
@@ -49,17 +49,17 @@ watch(
 
 const isModuleMenuKind = computed(() => isFlotationTriggerModuleMenuKind(customize));
 
-const triggerKindPanelTitle = computed(() =>
-  isModuleMenuKind.value ? '模块菜单' : '标准下拉框',
-);
+const pageCustomizeControls = computed(() => {
+  if (isModuleMenuKind.value) {
+    return [
+      ...flotationTriggerKindCustomizeControls,
+      ...flotationTriggerModuleMenuCustomizeControls,
+    ];
+  }
+  return flotationTriggerPageCustomizeControls;
+});
 
-const triggerKindPanelControls = computed(() =>
-  isModuleMenuKind.value
-    ? flotationTriggerModuleMenuCustomizeControls
-    : flotationTriggerCustomizeControls,
-);
-
-const triggerKindRowColumns = computed(() => (isModuleMenuKind.value ? 4 : 5));
+const customizeRowColumns = computed(() => (isModuleMenuKind.value ? 4 : 5));
 
 const usageSnippet = computed(() => buildFlotationTriggerUsageSnippet(customize));
 
@@ -96,6 +96,8 @@ const triggerProps = computed(() => {
     disabled: Boolean(customize.disabled),
     showSymbol: Boolean(customize.showSymbol),
     symbolIcon: String(customize.symbolIcon),
+    symbolPosition:
+      customize.symbolPosition === 'trailing' ? ('trailing' as const) : ('leading' as const),
     showTag: Boolean(customize.showTag),
     tagText: String(customize.tagText),
     tagStatus: customize.tagStatus,
@@ -118,8 +120,10 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
       :show-doc-title="false"
       component-tag="EgFlotationTrigger"
       :import-code="flotationTriggerImportCode"
-      :customize-controls="flotationTriggerKindCustomizeControls"
+      :customize-controls="pageCustomizeControls"
       :customize-defaults="{ ...flotationTriggerCustomizeDefaults }"
+      customize-sequential
+      :customize-row-columns="customizeRowColumns"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationTriggerPropRows"
       :slot-rows="flotationTriggerSlotRows"
@@ -145,20 +149,6 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
             </EgComboInputItem>
             <EgFlotationTrigger v-else v-bind="triggerProps" />
           </div>
-        </div>
-      </template>
-
-      <template #customize-extra>
-        <div :class="docStyles.customizeExtraStack">
-          <CustomizePanel
-            v-model="customize"
-            :title="triggerKindPanelTitle"
-            nested
-            embedded
-            sequential
-            :row-columns="triggerKindRowColumns"
-            :controls="triggerKindPanelControls"
-          />
         </div>
       </template>
     </ComponentDocLayout>

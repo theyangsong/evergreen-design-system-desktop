@@ -40,6 +40,7 @@ import {
 } from './inputPreviewWidth';
 
 const comboInputValue = ref('');
+const comboTextareaValue = ref('');
 
 const comboInputCustomize = reactive({
   ...comboInputItemCustomizeDefaults,
@@ -105,6 +106,7 @@ const comboInputUsageSnippet = computed(() => {
 const comboTextareaUsageSnippet = computed(() => {
   const openTag = buildVueSelfClosingSnippet('EgComboTextareaItem', comboTextareaCustomize, {
     defaults: comboTextareaItemCustomizeDefaults,
+    vModel: 'value',
   })
     .replace(/\s*\/>$/, '')
     .trim();
@@ -207,6 +209,7 @@ const comboTextareaUsageSnippet = computed(() => {
         <template #preview>
           <div class="desktopTokens" :class="docStyles.previewInputHost">
             <EgComboTextareaItem
+              v-model="comboTextareaValue"
               :label="String(comboTextareaCustomize.label)"
               :feedback="Boolean(comboTextareaCustomize.feedback)"
               :placeholder="String(comboTextareaCustomize.placeholder)"

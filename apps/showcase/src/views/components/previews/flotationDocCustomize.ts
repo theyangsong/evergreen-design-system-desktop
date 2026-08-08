@@ -26,6 +26,15 @@ import {
 } from '@/data/showcasePropLabels';
 import { formSubmissionCustomizeDefaults } from './feedbackDocCustomize';
 
+const flotationSymbolPositionInlineSelect = {
+  key: 'symbolPosition',
+  label: '图标位置',
+  options: [
+    { value: 'leading', label: '左' },
+    { value: 'trailing', label: '右' },
+  ],
+};
+
 export const flotationImportCode = `import {
   EgFlotation,
   EgFlotationTrigger,
@@ -270,6 +279,7 @@ export const flotationCustomizeDefaults = {
   showReddot: false,
   showSymbol: false,
   symbolIcon: 'eds-coin-btc',
+  symbolPosition: 'leading',
   showTag: false,
   tagText: 'Tag',
   tagStatus: 'danger',
@@ -310,7 +320,7 @@ export const flotationTriggerOverviewBodyControls: DocCustomizeControl[] = [
   },
   { kind: 'text', key: 'triggerLabel', label: '文案', row: 0 },
   { kind: 'boolean', key: 'disabled', label: '禁用', row: 0 },
-  { kind: 'boolean', key: 'showSymbol', label: '显示图标', row: 1 },
+  { kind: 'boolean', key: 'showSymbol', label: '显示图标', row: 1, inlineSelect: flotationSymbolPositionInlineSelect },
   {
     kind: 'text',
     key: 'symbolIcon',
@@ -610,6 +620,7 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
     disabled: state.disabled,
     showSymbol: state.showSymbol,
     symbolIcon: state.symbolIcon,
+    symbolPosition: state.symbolPosition ?? 'leading',
     showTag: state.showTag,
     tagText: state.tagText,
     tagStatus: state.tagStatus,
@@ -644,6 +655,7 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
       'triggerSize',
       'showSymbol',
       'symbolIcon',
+      'symbolPosition',
       'showTag',
       'tagText',
       'tagStatus',
@@ -667,6 +679,7 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
       disabled: flotationCustomizeDefaults.disabled,
       showSymbol: flotationCustomizeDefaults.showSymbol,
       symbolIcon: flotationCustomizeDefaults.symbolIcon,
+      symbolPosition: flotationCustomizeDefaults.symbolPosition,
       showTag: flotationCustomizeDefaults.showTag,
       tagText: flotationCustomizeDefaults.tagText,
       tagStatus: flotationCustomizeDefaults.tagStatus,
@@ -678,7 +691,7 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
       heightMode: flotationCustomizeDefaults.heightMode,
       height: Number.parseInt(flotationCustomizeDefaults.height, 10),
     },
-    omitKeys: ['itemCount', 'editBoxIndex', ...(isFlotationTriggerModuleMenuKind(state) ? ['triggerLabel', 'triggerStyle', 'triggerSize', 'showSymbol', 'symbolIcon', 'showTag', 'tagText', 'tagStatus', 'showMessage', 'messageText', 'messageType'] : [])],
+    omitKeys: ['itemCount', 'editBoxIndex', ...(isFlotationTriggerModuleMenuKind(state) ? ['triggerLabel', 'triggerStyle', 'triggerSize', 'showSymbol', 'symbolIcon', 'symbolPosition', 'showTag', 'tagText', 'tagStatus', 'showMessage', 'messageText', 'messageType'] : [])],
   });
 
   if (isFlotationTriggerModuleMenuKind(state)) {
@@ -714,10 +727,11 @@ export const flotationPropRows: DocPropRow[] = [
     description: '交叉轴偏移（px）；未传时默认 -spacing-2。',
   },
   {
-    name: 'triggerLabel / triggerStyle / triggerSize / showSymbol / showTag / showMessage',
+    name: 'triggerLabel / triggerStyle / triggerSize / showSymbol / symbolIcon / symbolPosition / showTag / showMessage',
     type: '…',
-    defaultValue: 'Trigger / subtle / lg / false…',
-    description: '无 #trigger 时的 EgFlotationTrigger 预置（见「触发器 Trigger」定制）。',
+    defaultValue: 'Trigger / subtle / lg / false / eds-coin-btc / leading…',
+    description:
+      '无 #trigger 时的 EgFlotationTrigger 预置（见「触发器 Trigger」定制）。showSymbol + symbolIcon + symbolPosition（leading | trailing）控制 #symbol 左/右。',
   },
   {
     name: 'widthMode / width / align / heightMode / height / maxHeight',
@@ -862,6 +876,7 @@ export function resolveFlotationComboTriggerProps(
     disabled: Boolean(state.disabled),
     showSymbol: Boolean(state.showSymbol),
     symbolIcon: String(state.symbolIcon ?? 'eds-coin-btc'),
+    symbolPosition: state.symbolPosition === 'trailing' ? 'trailing' : 'leading',
     showTag: selectedItem ? Boolean(selectedItem.showTag) : Boolean(state.showTag),
     tagText: selectedItem?.tag ?? String(state.tagText ?? 'Tag'),
     tagStatus: selectedItem?.tagStatus ?? state.tagStatus ?? 'danger',
@@ -1078,6 +1093,7 @@ export const flotationTriggerCustomizeDefaults = {
   expanded: false,
   showSymbol: false,
   symbolIcon: 'eds-coin-btc',
+  symbolPosition: 'leading',
   showTag: false,
   tagText: 'Tag',
   tagStatus: 'danger',
@@ -1092,6 +1108,7 @@ export const flotationTriggerKindCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'triggerKind',
     label: '触发器',
+    row: 0,
     options: flotationTriggerKindOptions,
   },
 ];
@@ -1188,51 +1205,51 @@ export const flotationTriggerBodyCustomizeControls: DocCustomizeControl[] = [
   },
   { kind: 'text', key: 'label', label: '文案', row: 2 },
   { kind: 'boolean', key: 'disabled', label: '禁用', row: 3 },
-  { kind: 'boolean', key: 'showSymbol', label: '显示图标', row: 4 },
+  { kind: 'boolean', key: 'showSymbol', label: '显示图标', row: 4, inlineSelect: flotationSymbolPositionInlineSelect },
   {
     kind: 'text',
     key: 'symbolIcon',
     label: '图标名',
-    row: 4,
+    row: 5,
     visibleWhen: (s) => Boolean(s.showSymbol),
   },
 ];
 
 /** 下拉选项 · 标准下拉框：Tag / Message / 展开箭头 */
 export const flotationTriggerDropdownCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'boolean', key: 'showTag', label: '显示标签', row: 5 },
+  { kind: 'boolean', key: 'showTag', label: '显示标签', row: 6 },
   {
     kind: 'text',
     key: 'tagText',
     label: '标签文案',
-    row: 5,
+    row: 6,
     visibleWhen: (s) => Boolean(s.showTag),
   },
   {
     kind: 'select',
     key: 'tagStatus',
     label: '标签状态',
-    row: 5,
+    row: 6,
     options: [...flotationTagStatusOptions],
     visibleWhen: (s) => Boolean(s.showTag),
   },
-  { kind: 'boolean', key: 'showMessage', label: '显示消息', row: 6 },
+  { kind: 'boolean', key: 'showMessage', label: '显示消息', row: 7 },
   {
     kind: 'text',
     key: 'messageText',
     label: '消息文案',
-    row: 6,
+    row: 7,
     visibleWhen: (s) => Boolean(s.showMessage),
   },
   {
     kind: 'select',
     key: 'messageType',
     label: '消息类型',
-    row: 6,
+    row: 7,
     options: [...flotationMessageTypeOptions],
     visibleWhen: (s) => Boolean(s.showMessage),
   },
-  { kind: 'boolean', key: 'expanded', label: '展开态', row: 7 },
+  { kind: 'boolean', key: 'expanded', label: '展开态', row: 8 },
 ];
 
 /** 模块菜单 · Figma TriggerComboModuleTitle（2090:2655） */
@@ -1247,6 +1264,12 @@ export const flotationTriggerCustomizeControls: DocCustomizeControl[] = [
   ...flotationTriggerShellCustomizeControls,
   ...flotationTriggerBodyCustomizeControls,
   ...flotationTriggerDropdownCustomizeControls,
+];
+
+/** Trigger 文档页 — 主定制区（触发器类型 + 标准下拉框） */
+export const flotationTriggerPageCustomizeControls: DocCustomizeControl[] = [
+  ...flotationTriggerKindCustomizeControls,
+  ...flotationTriggerCustomizeControls,
 ];
 
 /** 纵览页 EgFlotation：触发器预置（标准下拉框） */
@@ -1385,17 +1408,35 @@ export const flotationTriggerPropRows: DocPropRow[] = [
       'Figma TriggerComboModuleTitle（2090:2655）。Module Menu 标题区 text 触发器：Body Large Strong + spacing-1-5/spacing-2 内边距；可选 EgReddot。',
   },
   {
-    name: 'showSymbol / symbolIcon / showTag / tagText / tagStatus / showMessage / messageType',
-    type: 'boolean / string / … / TagStatus / boolean / MessageType',
-    defaultValue: 'false / eds-coin-btc / false / Tag / danger / false / brand',
+    name: 'showSymbol',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: '展示 #symbol 预置 EgIcon（币种 / 头像）。',
+  },
+  {
+    name: 'symbolIcon',
+    type: 'string',
+    defaultValue: "'eds-coin-btc'",
+    description: 'showSymbol 为 true 时的 EgIcon 名称。',
+  },
+  {
+    name: 'symbolPosition',
+    type: "'leading' | 'trailing'",
+    defaultValue: "'leading'",
     description:
-      '币种 Icon（#symbol）、EgTag Status sm（#tag）、Message（#message，type：subtle | brand | danger）。',
+      'showSymbol 为 true 时图标位置：leading 文案左侧；trailing 文案右侧（下拉箭头前）。',
+  },
+  {
+    name: 'showTag / tagText / tagStatus / showMessage / messageType',
+    type: 'boolean / string / TagStatus / boolean / MessageType',
+    defaultValue: 'false / Tag / danger / false / brand',
+    description: 'EgTag Status sm（#tag）、Message（#message，type：subtle | brand | danger）。',
   },
 ];
 
 export const flotationTriggerSlotRows: DocPropRow[] = [
   { name: 'default', type: '—', defaultValue: '—', description: '触发器文案。' },
-  { name: 'symbol', type: '—', defaultValue: '—', description: '左侧币种 / 头像。' },
+  { name: 'symbol', type: '—', defaultValue: '—', description: '币种 / 头像；symbolPosition 控制左/右。' },
   { name: 'tag', type: '—', defaultValue: '—', description: 'EgTag Status sm。' },
   { name: 'message', type: '—', defaultValue: '—', description: '右侧 Message。' },
   { name: 'reddot', type: '—', defaultValue: '—', description: 'Module Menu 标题旁 EgReddot。' },

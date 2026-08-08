@@ -66,10 +66,22 @@ function patchKey(key: string, value: unknown) {
   if (!current || typeof current !== 'object') return;
   current[key] = value;
 
-  if (value !== true) return;
   const control = customizeControls.value.find((item) => item.key === key);
+  if (control?.kind === 'boolean' && value === true && control.inlineSelect) {
+    const inlineKey = control.inlineSelect.key;
+    if (current[inlineKey] == null || current[inlineKey] === '') {
+      current[inlineKey] = control.inlineSelect.options[0]?.value ?? 'leading';
+    }
+  }
+
+  if (value !== true) return;
   if (control?.kind !== 'boolean' || !control.exclusiveKey) return;
   current[control.exclusiveKey] = false;
+}
+
+function patchInlineSelect(control: DocCustomizeControl, value: unknown) {
+  if (control.kind !== 'boolean' || !control.inlineSelect) return;
+  patchKey(control.inlineSelect.key, value);
 }
 </script>
 
@@ -111,7 +123,13 @@ function patchKey(key: string, value: unknown) {
             v-else
             :control="control"
             :value="state[control.key]"
+            :inline-select-value="
+              control.kind === 'boolean' && control.inlineSelect
+                ? state[control.inlineSelect.key]
+                : undefined
+            "
             @update="patchKey(control.key, $event)"
+            @inline-select-update="patchInlineSelect(control, $event)"
           />
         </template>
       </div>
@@ -125,7 +143,13 @@ function patchKey(key: string, value: unknown) {
         :key="control.key"
         :control="control"
         :value="state[control.key]"
+        :inline-select-value="
+          control.kind === 'boolean' && control.inlineSelect
+            ? state[control.inlineSelect.key]
+            : undefined
+        "
         @update="patchKey(control.key, $event)"
+        @inline-select-update="patchInlineSelect(control, $event)"
       />
     </div>
     <slot name="extra" />

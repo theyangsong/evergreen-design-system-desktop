@@ -7,6 +7,8 @@ export type ButtonVariant = 'solid' | 'outline' | 'text';
 /** Figma tone sets (Brand / Danger / Decor / Subtle / Same White) */
 export type ButtonTone = 'brand' | 'danger' | 'decor' | 'subtle' | 'sameWhite';
 export type ButtonSize = 'lg' | 'md' | 'sm' | 'xs';
+/** #icon 相对文案：leading 在左，trailing 在右。 */
+export type ButtonIconPosition = 'leading' | 'trailing';
 
 /** @deprecated Use `solid` */
 export type LegacyButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -21,6 +23,8 @@ const props = withDefaults(
     loading?: boolean;
     /** 菜单展开等选中态（Figma Active）；背景 `--event-focus`。 */
     active?: boolean;
+    /** #icon 在文案 leading（左）或 trailing（右）。 */
+    iconPosition?: ButtonIconPosition;
     type?: 'button' | 'submit' | 'reset';
   }>(),
   {
@@ -30,6 +34,7 @@ const props = withDefaults(
     disabled: false,
     loading: false,
     active: false,
+    iconPosition: 'leading',
     type: 'button',
   },
 );
@@ -79,11 +84,14 @@ const isDisabled = computed(() => props.disabled || props.loading);
     </span>
 
     <template v-else>
-      <span v-if="slots.icon" :class="styles.icon">
+      <span v-if="slots.icon && props.iconPosition === 'leading'" :class="styles.icon">
         <slot name="icon" />
       </span>
       <span :class="styles.label">
         <slot />
+      </span>
+      <span v-if="slots.icon && props.iconPosition === 'trailing'" :class="styles.icon">
+        <slot name="icon" />
       </span>
     </template>
   </button>

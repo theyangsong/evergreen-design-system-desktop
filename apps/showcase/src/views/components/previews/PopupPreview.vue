@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { EgDetail, EgPopup, EgReminder } from '@eds/desktop-components';
+import { computed, reactive, ref, watch } from 'vue';
+import {
+  EgDetail,
+  EgPopup,
+  EgReminder,
+  EgVerify,
+  type VerifyType,
+} from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
@@ -11,13 +17,38 @@ import {
   popupPropRows,
 } from './organismTemplateDocData';
 
+type PopupUses = 'detail' | 'reminder' | 'verify' | 'custom';
+
 const customize = reactive({
   ...popupCustomizeDefaults,
-  uses: popupCustomizeDefaults.uses as 'detail' | 'reminder' | 'verify',
+  uses: popupCustomizeDefaults.uses as PopupUses,
+  alertVerticalAlign: popupCustomizeDefaults.alertVerticalAlign as 'center' | 'padding-top-md',
   reminderType: popupCustomizeDefaults.reminderType as 'info' | 'echo',
+  verifyType: popupCustomizeDefaults.verifyType as VerifyType,
 });
 
 const popupOpen = ref(true);
+
+watch(
+  () => customize.uses,
+  (uses) => {
+    if (uses === 'reminder' || uses === 'verify') {
+      customize.alertVerticalAlign = 'padding-top-md';
+    }
+  },
+);
+
+const verifyType = computed(() => customize.verifyType as VerifyType);
+
+const customBoxWidth = computed(() => {
+  const parsed = Number.parseInt(String(customize.boxWidth), 10);
+  return Number.isFinite(parsed) ? parsed : 328;
+});
+
+const customBoxHeight = computed(() => {
+  const parsed = Number.parseInt(String(customize.boxHeight), 10);
+  return Number.isFinite(parsed) ? parsed : 436;
+});
 
 function closePopup() {
   popupOpen.value = false;
@@ -46,8 +77,12 @@ function closePopup() {
         >
           <EgPopup
             v-model:open="popupOpen"
-            :uses="customize.uses as 'detail' | 'reminder' | 'verify'"
+            :uses="customize.uses as PopupUses"
+            :alert-vertical-align="customize.alertVerticalAlign as 'center' | 'padding-top-md'"
             :reminder-type="customize.reminderType as 'info' | 'echo'"
+            :verify-type="verifyType"
+            :box-width="customBoxWidth"
+            :box-height="customBoxHeight"
           >
             <EgDetail
               v-if="customize.uses === 'detail'"
@@ -67,13 +102,17 @@ function closePopup() {
                 </div>
               </template>
             </EgReminder>
-            <EgReminder
-              v-else
-              type="info"
-              :action-count="1"
-              @cancel="closePopup"
-              @confirm="closePopup"
+            <EgVerify
+              v-else-if="customize.uses === 'verify'"
+              :type="verifyType"
+              @switch="closePopup"
             />
+            <div
+              v-else
+              :class="organismStyles.previewOrganismPopupBoxPlaceholder"
+            >
+              Popup Box 默认插槽
+            </div>
           </EgPopup>
         </div>
       </template>

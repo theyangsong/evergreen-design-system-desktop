@@ -2,6 +2,8 @@
 import { EgTextarea } from '../textarea';
 import fieldStyles from './ComboField.module.css';
 
+const modelValue = defineModel<string>({ default: '' });
+
 withDefaults(
   defineProps<{
     label?: string;
@@ -23,7 +25,7 @@ withDefaults(
         <span :class="fieldStyles.label">{{ label }}</span>
         <div :class="fieldStyles.control">
           <slot>
-            <EgTextarea :placeholder="placeholder" width-mode="full" />
+            <EgTextarea v-model="modelValue" :placeholder="placeholder" width-mode="full" />
           </slot>
         </div>
       </div>
@@ -35,7 +37,7 @@ withDefaults(
       <span :class="fieldStyles.label">{{ label }}</span>
       <div :class="fieldStyles.control">
         <slot>
-          <EgTextarea :placeholder="placeholder" width-mode="full" />
+          <EgTextarea v-model="modelValue" :placeholder="placeholder" width-mode="full" />
         </slot>
       </div>
     </template>

@@ -301,9 +301,16 @@
 .customizeControlSlot {
   display: flex;
   align-items: center;
+  gap: var(--spacing-2);
   width: 100%;
   height: var(--scale-4-5);
   min-height: var(--scale-4-5);
+}
+
+.customizeControlSlotWithInline {
+  height: auto;
+  min-height: var(--scale-4-5);
+  overflow: visible;
 }
 
 .customizeControl {
@@ -327,6 +334,30 @@
 
 .customizeWebsiteCheckbox {
   flex-shrink: 0;
+}
+
+.customizeInlineSelectGroup {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: calc(var(--scale-14) + var(--spacing-6));
+}
+
+.customizeInlineSelectLabel {
+  flex-shrink: 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-weight);
+  line-height: var(--eds-footnote-line-height);
+  white-space: nowrap;
+}
+
+.customizeInlineSelect {
+  flex: 0 0 auto;
+  width: var(--scale-14);
+  min-width: var(--scale-14);
+  height: var(--scale-4-5);
 }
 
 .customizeWebsiteInput {

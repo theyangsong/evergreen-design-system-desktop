@@ -28,6 +28,12 @@ export const componentCatalog: CatalogSection[] = [
         description: 'Horizontal and vertical content dividers.',
         status: 'implemented',
       },
+      {
+        name: 'ScensMotion',
+        slug: 'scens-motion',
+        description: 'Scenario-based motion previews for Desktop components.',
+        status: 'implemented',
+      },
     ],
   },
   {
@@ -41,7 +47,7 @@ export const componentCatalog: CatalogSection[] = [
         children: [
           { id: 'input-input', label: 'Input', standalonePage: true },
           { id: 'input-textarea', label: 'Textarea', standalonePage: true },
-          { id: 'input-search', label: 'Search', standalonePage: true },
+          { id: 'input-search', label: 'Scens', standalonePage: true },
           { id: 'input-combo', label: 'Combo', standalonePage: true },
         ],
       },
@@ -55,7 +61,7 @@ export const componentCatalog: CatalogSection[] = [
           { id: 'button-icon', label: 'iCons Container Simple', standalonePage: true },
           { id: 'button-icon-pro', label: 'iCons Container Professional', standalonePage: true },
           { id: 'button-link', label: 'Link', standalonePage: true },
-          { id: 'button-pagination', label: 'Custom', standalonePage: true },
+          { id: 'button-pagination', label: 'Scens', standalonePage: true },
           { id: 'button-combo', label: 'Combo', standalonePage: true },
         ],
       },
@@ -224,7 +230,7 @@ export const componentCatalog: CatalogSection[] = [
         name: 'Verify',
         slug: 'verify',
         description: 'Verification step flow for security checks.',
-        status: 'placeholder',
+        status: 'implemented',
       },
       {
         name: 'Filter',

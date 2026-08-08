@@ -47,6 +47,11 @@ const previewHostClass = computed(() =>
             :size="buttonCustomize.size as 'lg' | 'md' | 'sm' | 'xs'"
             :disabled="Boolean(buttonCustomize.disabled)"
             :loading="Boolean(buttonCustomize.loading)"
+            :icon-position="
+              buttonCustomize.showIcon
+                ? (buttonCustomize.iconPosition as 'leading' | 'trailing')
+                : undefined
+            "
           >
             <template v-if="buttonCustomize.showIcon" #icon>
               <EgIcon

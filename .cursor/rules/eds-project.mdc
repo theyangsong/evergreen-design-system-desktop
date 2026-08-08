@@ -7,7 +7,7 @@ alwaysApply: false
 # EDS Desktop — 项目约定
 
 > 专项规则：`display-p3-color-usage.mdc`（颜色）、`corner-smoothing.mdc`（圆角）、`stroke-svg-scaling.mdc`（SVG 描边）。
-> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR · **§6** 滚动边界 · **§7** Organism · **§8** 同步。
+> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR · **§6** 滚动边界 · **§7** Organism（含 Popup/Popover/Detail/Reminder 边界）· **§8** 同步。
 
 ## 0. Agent 执行范围
 
@@ -41,7 +41,11 @@ alwaysApply: false
 
 - **核心**：`opacity` / `transform` 必须与 `backdrop-filter` 同在 **glass 自身**（`.effect-flotation-box` / `.effect-popup-box`），**禁止**挂在 glass 的父级（含 `.floatingInner`、`.eds-popover` 根、`.motion-micro-float` 包一层 children）。
 - **实现**：组件内 overlay glue 用 `overlayGlassMicroFloat.module.css`（recipe/base 变量 + host active）；业务侧挂 semantic `.motion-flotation`（host `.is-active` / `.glassMicroFloatHostActive`）。
-- **Popover** `.shapeSurface`：`backdrop-filter`（`--eds-blur-bg`）；SVG 填充/描边复刻 effect；**SVG `.outline` 专用 `drop-shadow`**（`stroke-base-tertiary` + `effect-popup-background`，与 `eds-shadow-light` 无关）；**禁止** `.shell` 挂 `filter`。
+- **Popover（EgPopover）— 视觉锁死**
+  - 默认宽 `POPOVER_PANEL_W = 336`（`popoverShape.ts`），高度自适应；用户只说改 shadow/颜色时 **禁止**动 layout / Vue / ResizeObserver。
+  - `.shapeSurface`：挂 `effect-popover-box` + `backdrop-filter`（`--eds-blur-bg`）；**禁止**用 `effect-flotation-box`。
+  - SVG 填充复刻 popover 栈：`.shapeFill` → `var(--effect-popover-box)`；`.shapeTint` → luminosity（`material-same-white-quaternary`）。
+  - **阴影只挂 SVG `.outline` 的 `filter`**（避免左右分裂）：`drop-shadow(… stroke-base-tertiary)` + `drop-shadow(… --effect-vulvar-shadow-deep)`；**禁止**绑 `eds-shadow-light` / `effect-popup-background`；**禁止** `.shell` 挂 `filter`。
 - **Flotation / List Field**：`EgAnchoredTooltip` microFloat 常驻 Teleport；入场 `visibility:hidden` 定位后再 reveal；离场不卸载 DOM、不用 `visibility:hidden` 收尾。
 - **禁止**：为修闪烁去掉 opacity 动画；microFloat 路径每次 hover `v-if` 销毁 Teleport；改 `packages/tokens/spec/motion` 的 microFloat 参数（除非用户明确要求）。
 - **详案**：`packages/components/docs/overlay-microfloat-flash-fix.md`。
@@ -122,11 +126,34 @@ alwaysApply: false
 
 **EgMessage 嵌套**：`provide(MESSAGE_PARENT_FOCUSED_KEY)`；`focusBackground: inherit|same-white`；Bar 11px 用 sizer/paint，不用 barTextSubpixel composes。
 
-**EgPopup — 覆盖整个客户端窗口**
+**EgPopup — 外壳 vs 内容（锁死）**
 
-- **遮罩范围**：Popup 须铺满 **NavBar + 侧栏 + 主内容** 整块客户端，不是仅列表/主内容区。
-- **原因**：`EgPopup` 根为 `width/height: 100%`，只填满**直接父容器**；父级若是 DataList 页内 div，遮罩就被限制在该区域。
-- **挂载**：业务 Popup host（如 ApprovalFlowHost、Detail/Reminder 流程）放在**客户端 shell**（与 Layout 同级或 shell Teleport 目标），**禁止**挂在列表页、ModuleMenu 内容区等业务 subtree 内。
+```text
+EgPopup 外壳
+├── 遮罩（Reminder/Verify：仅 .backdrop；Detail：.stageScrim + animated scrim）
+├── 点击空白关闭 / Esc 关闭
+├── 容器进出场（.motion-layout + shellKeepMounted / shellMotionActive，出场后再卸载）
+└── 默认插槽 ← Detail / Reminder / Verify 等内容
+```
+
+- **外壳只做**：全窗遮罩、空白/Esc 关闭、进出场动效、按 `uses` 选容器尺寸（detail 880×620；reminder/verify 按 Info/Echo 宽）。**不做**标题/副文案/符号/按钮等内容定制。
+- **内容各自负责**：`EgDetail` / `EgReminder` / `EgVerify` 在各自组件与文档页配置；Popup 页 **禁止**编辑内容文案或 Reminder 定制控件。
+- **遮罩范围**：须铺满 **NavBar + 侧栏 + 主内容** 整块客户端。根为 `width/height: 100%`，只填满直接父容器——挂在列表页 subtree 会被裁切。
+- **挂载**：业务 Popup host 放在**客户端 shell**（与 Layout 同级或 shell Teleport 目标）；**禁止**挂在列表页、ModuleMenu 内容区等业务 subtree。
+- **Alert 舞台顶边距**：`--padding-top-lg`（30% flex 占位，§1「顶边距 %」）。
+- **Showcase 职责对照**（定制控件只放对应页）：
+
+| 页面 | 定制范围 |
+|------|----------|
+| `/components/popup` | 用途（detail/reminder/verify）、Popup Box 宽度（info/echo）、开关闭演示 |
+| `/components/detail` | Detail 全文案、Tab、Section、Apply_Item 等 |
+| `/components/reminder` | 类型、标题、副文案、符号、符号背景色、按钮区 |
+| `/components/verify` | 验证方式（单/双/锁定）、状态、标题、副文案、倒计时、切换文案 |
+| `/components/popovers` | placement/align 等；`:wrap-tooltip="false"` 须布尔（勿传 truthy 字符串） |
+| `/tokens` | 与 spec/dist 1:1 的 token 展示 |
+
+- **EgReminder**：Info / Echo；符号区 56px 圆 + `EgIcon size="lg"`；可用 `--eds-reminder-symbol-bg` / `--eds-reminder-symbol-color` 覆盖。危险/成功背景用 `--status-danger` / `--status-success`，图标 `--stroke-same-white-primary`。
+- **EgVerify**：Popup Box 固定宽高随 `type`（邮箱 328×436、Google 328×412、交易/登录/锁定 328×416、PassKey 328×406、2FA 358×459），不可改；Showcase 仅切换验证方式。
 - **Showcase**：文档预览可用静态 Popup Box 壳（无全屏 scrim）；完整 `EgPopup` 行为见 `PopupPreview.vue`。
 
 **Flotation Combo — 必须用 `EgFlotation`**
@@ -205,6 +232,8 @@ createDetailApplyItemRow('receiver', { value: addr, tag: alias })
 
 ## 9. 变更记录
 
+- 2026-08-08：§1 Popover — `effect-popover-box` 填充栈；`.outline` shadow 用 `--effect-vulvar-shadow-deep`；禁误动 layout。
+- 2026-08-08：§7 EgPopup — 外壳 vs 内容锁死；Showcase popup/detail/reminder/popovers 职责对照；Reminder 符号 token。
 - 2026-08-07：§7 EgDetail Apply_Item — 变体 catalog + `createDetailApplyItemRow` 业务契约。
 - 2026-08-07：§1 Motion 四层 — base primitive / recipe / semantic（is-active）/ utilities。
 - 2026-08-07：§1 增补 Overlay microFloat 毛玻璃动效约束；共享 `overlayGlassMicroFloat.module.css`。

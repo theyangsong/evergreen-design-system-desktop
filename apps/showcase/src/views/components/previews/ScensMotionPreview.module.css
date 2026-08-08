@@ -1,0 +1,70 @@
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--showcase-doc-preview-height-compact, 280px);
+}
+
+.symbolHost {
+  --verify-ring-size: 74px;
+  width: var(--verify-ring-size);
+  height: var(--verify-ring-size);
+}
+
+.symbolRing {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.symbolRingDots {
+  --verify-ring-dot-color: var(--material-brand-quaternary);
+}
+
+.symbolRingDotsActive {
+  --verify-ring-dot-color: var(--material-brand-primary);
+}
+
+.symbolInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-4);
+  border-radius: var(--radius-full);
+  background: var(--material-brand-quaternary);
+  color: var(--material-brand-primary);
+  --done-tick-color: var(--material-brand-primary);
+}
+
+.symbolInner > span {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+}
+
+.symbolInner > :global(.eds-done-tick) {
+  flex-shrink: 0;
+}
+
+.doneTickHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doneTickToneSuccess {
+  --done-tick-color: var(--status-success);
+}
+
+.doneTickToneBrand {
+  --done-tick-color: var(--material-brand-primary);
+}

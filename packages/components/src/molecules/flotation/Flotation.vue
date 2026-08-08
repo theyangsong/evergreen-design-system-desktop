@@ -21,6 +21,7 @@ import FlotationMenuItem from './FlotationMenuItem.vue';
 import FlotationTrigger, {
   type FlotationTriggerSize,
   type FlotationTriggerStyle,
+  type FlotationTriggerSymbolPosition,
 } from './FlotationTrigger.vue';
 import type { TagStatus } from '../tag';
 import type { MessageType } from '../feedback';
@@ -38,7 +39,7 @@ import {
 } from '../../shared/cssSpacingTokens';
 
 export type { FlotationMenuItemPreset } from './flotationPresets';
-export type { FlotationTriggerSize, FlotationTriggerStyle } from './FlotationTrigger.vue';
+export type { FlotationTriggerSize, FlotationTriggerStyle, FlotationTriggerSymbolPosition } from './FlotationTrigger.vue';
 export type { FlotationBoxType } from './FlotationMenuItem.vue';
 
 /** Menu 宽度：跟触发器 / 自定义 px / 随内容 */
@@ -70,6 +71,8 @@ const props = withDefaults(
     triggerSize?: FlotationTriggerSize;
     showSymbol?: boolean;
     symbolIcon?: string;
+    /** 预置 Trigger 的 #symbol 位置；透传 EgFlotationTrigger.symbolPosition。 */
+    symbolPosition?: FlotationTriggerSymbolPosition;
     showTag?: boolean;
     tagText?: string;
     tagStatus?: TagStatus;
@@ -105,6 +108,7 @@ const props = withDefaults(
     triggerSize: 'lg',
     showSymbol: false,
     symbolIcon: 'eds-coin-btc',
+    symbolPosition: 'leading',
     showTag: false,
     tagText: 'Tag',
     tagStatus: 'danger',
@@ -406,6 +410,7 @@ onBeforeUnmount(() => {
         :disabled="disabled"
         :show-symbol="showSymbol"
         :symbol-icon="symbolIcon"
+        :symbol-position="symbolPosition"
         :show-tag="displayShowTag"
         :tag-text="displayTagText"
         :tag-status="displayTagStatus"

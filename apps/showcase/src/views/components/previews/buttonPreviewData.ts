@@ -49,6 +49,12 @@ export const buttonPropRows: ButtonPropRow[] = [
     defaultValue: 'false',
     description: '是否显示 loading；为 true 时自动禁用。',
   },
+  {
+    name: 'iconPosition',
+    type: "'leading' | 'trailing'",
+    defaultValue: "'leading'",
+    description: '#icon 相对文案：leading 在左，trailing 在右。',
+  },
 ];
 
 export const buttonSlotRows: ButtonPropRow[] = [
@@ -62,6 +68,6 @@ export const buttonSlotRows: ButtonPropRow[] = [
     name: 'icon',
     type: 'slot',
     defaultValue: '-',
-    description: '可选 leading 图标，对应 Figma showSymbol。',
+    description: '可选图标；配合 iconPosition 置于文案左或右，对应 Figma showSymbol。',
   },
 ];

@@ -17,6 +17,11 @@ import type { CryptoAddressSideTags } from '../crypto-combo/cryptoAddressTypes';
 import { hasAddressTags } from '../crypto-combo/cryptoAddressTagUtils';
 import cryptoComboStyles from '../crypto-combo/CryptoCombo.module.css';
 import { copyToClipboard } from '../../utils/copyToClipboard';
+import {
+  clearLayoutSettleTimer,
+  scheduleOverflowMeasureAfterLayoutSettle,
+  type LayoutSettleTimerRef,
+} from '../../utils/overflowMeasureDuringLayout';
 import EgAnchoredTooltip, { type TooltipTrigger } from './AnchoredTooltip.vue';
 import styles from './TextOverflowTooltip.module.css';
 import {
@@ -83,6 +88,7 @@ const resolvedTooltipText = ref('');
 const tooltipCopied = ref(false);
 let resizeObserver: ResizeObserver | null = null;
 let tooltipCopiedResetTimer: ReturnType<typeof setTimeout> | undefined;
+const layoutSettleRef: LayoutSettleTimerRef = {};
 
 const hasMenuAlias = computed(() => Boolean(props.menuAlias?.trim()));
 
@@ -210,10 +216,18 @@ function measureOverflow() {
   overflowing.value = false;
 }
 
+function requestOverflowMeasure() {
+  scheduleOverflowMeasureAfterLayoutSettle(
+    hostRef.value ?? measureRef.value,
+    () => measureOverflow(),
+    layoutSettleRef,
+  );
+}
+
 function bindResizeObserver() {
   resizeObserver?.disconnect();
   resizeObserver = null;
-  resizeObserver = new ResizeObserver(() => measureOverflow());
+  resizeObserver = new ResizeObserver(() => requestOverflowMeasure());
   if (measureRef.value) {
     resizeObserver.observe(measureRef.value);
   }
@@ -224,7 +238,7 @@ function bindResizeObserver() {
 
 function scheduleOverflowMeasure() {
   nextTick(() => {
-    measureOverflow();
+    requestOverflowMeasure();
     bindResizeObserver();
   });
 }
@@ -241,11 +255,12 @@ onMounted(() => {
 });
 
 onUpdated(() => {
-  measureOverflow();
+  requestOverflowMeasure();
 });
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
+  clearLayoutSettleTimer(layoutSettleRef);
   if (tooltipCopiedResetTimer) clearTimeout(tooltipCopiedResetTimer);
 });
 

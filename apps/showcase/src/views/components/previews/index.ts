@@ -16,6 +16,7 @@ import ButtonLinkPreview from './ButtonLinkPreview.vue';
 import ButtonPaginationPreview from './ButtonPaginationPreview.vue';
 import ButtonComboPreview from './ButtonComboPreview.vue';
 import DividerPreview from './DividerPreview.vue';
+import ScensMotionPreview from './ScensMotionPreview.vue';
 import AvatarPreview from './AvatarPreview.vue';
 import TagSystemPreview from './TagSystemPreview.vue';
 import TagStatusPreview from './TagStatusPreview.vue';
@@ -37,6 +38,7 @@ import ModuleMenuPreview from './ModuleMenuPreview.vue';
 import ToolBarPreview from './ToolBarPreview.vue';
 import PaginerPreview from './PaginerPreview.vue';
 import ReminderPreview from './ReminderPreview.vue';
+import VerifyPreview from './VerifyPreview.vue';
 import BatchBarPreview from './BatchBarPreview.vue';
 import DataListPreview from './DataListPreview.vue';
 import ContainerPreview from './ContainerPreview.vue';
@@ -89,6 +91,7 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'feedback-reddot',
   'feedback-form-submission',
   'avatar',
+  'scens-motion',
   'tool-bar',
   'paginer',
 ]);
@@ -112,15 +115,21 @@ export function usesTagComponentPreview(slug: string): boolean {
 export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'input-input', title: 'Input', component: InputInputPreview, usesComponentDocHeader: true },
   { slug: 'input-textarea', title: 'Textarea', component: InputTextareaPreview, usesComponentDocHeader: true },
-  { slug: 'input-search', title: 'Search', component: InputSearchPreview, usesComponentDocHeader: true },
+  { slug: 'input-search', title: 'Scens', component: InputSearchPreview, usesComponentDocHeader: true },
   { slug: 'input-combo', title: 'Combo', component: InputComboPreview, usesComponentDocHeader: true },
   { slug: 'button-text', title: 'Button', component: ButtonTextPreview, usesComponentDocHeader: true },
   { slug: 'button-icon', title: 'iCons Container Simple', component: ButtonIconPreview, usesComponentDocHeader: true },
   { slug: 'button-icon-pro', title: 'iCons Container Professional', component: ButtonIconProPreview, usesComponentDocHeader: true },
   { slug: 'button-link', title: 'Link', component: ButtonLinkPreview, usesComponentDocHeader: true },
-  { slug: 'button-pagination', title: 'Custom', component: ButtonPaginationPreview, usesComponentDocHeader: true },
+  { slug: 'button-pagination', title: 'Scens', component: ButtonPaginationPreview, usesComponentDocHeader: true },
   { slug: 'button-combo', title: 'Combo', component: ButtonComboPreview, usesComponentDocHeader: true },
   { slug: 'divider', title: 'Divider', component: DividerPreview, usesComponentDocHeader: true },
+  {
+    slug: 'scens-motion',
+    title: 'ScensMotion',
+    component: ScensMotionPreview,
+    usesComponentDocHeader: true,
+  },
   { slug: 'avatar', title: 'Avatar', component: AvatarPreview, usesComponentDocHeader: true },
   { slug: 'tag-system', title: 'System', component: TagSystemPreview, usesComponentDocHeader: true },
   { slug: 'tag-status', title: 'Status', component: TagStatusPreview, usesComponentDocHeader: true },
@@ -158,6 +167,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'paginer', title: 'Paginer', component: PaginerPreview, usesComponentDocHeader: true },
   { slug: 'data-list', title: 'Data List', component: DataListPreview, usesComponentDocHeader: true },
   { slug: 'reminder', title: 'Reminder', component: ReminderPreview, usesComponentDocHeader: true },
+  { slug: 'verify', title: 'Verify', component: VerifyPreview, usesComponentDocHeader: true },
   { slug: 'batch-bar', title: 'Batch Bar', component: BatchBarPreview, usesComponentDocHeader: true },
   { slug: 'container', title: 'Container', component: ContainerPreview, usesComponentDocHeader: true },
   { slug: 'layout', title: 'Layout', component: LayoutPreview, usesComponentDocHeader: true },

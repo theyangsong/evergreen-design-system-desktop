@@ -19,6 +19,7 @@ import DataListColumn from './DataListColumn.vue';
 import styles from './DataList.module.css';
 import type {
   DataListBatchAction,
+  DataListBatchActionResult,
   DataListItem,
   DataListPrimaryAction,
   DataListRowAction,
@@ -36,6 +37,7 @@ import {
   closeBarBlockingAnchoredTooltips,
   hasOpenClickAnchoredTooltip,
 } from '../../molecules/tooltip/anchoredTooltipManager';
+import type { PopoverWidthMode } from '../../molecules/popovers';
 
 const RenderVNodes = defineComponent({
   name: 'EgDataListRenderVNodes',
@@ -75,12 +77,20 @@ const props = withDefaults(
     onBatchAction?: (
       key: string,
       rows: Array<DataListItem & { _index: number }>,
-    ) => void | Promise<void>;
+    ) => void | DataListBatchActionResult | Promise<void | DataListBatchActionResult>;
     /** Popover 批操作项：点击后、开层前的准备逻辑（失败则不打开 Popover）。 */
     onBatchLabelBeforeOpen?: (
       key: string,
       rows: Array<DataListItem & { _index: number }>,
     ) => void | Promise<void>;
+    /** BatchBar Label Popover 面板宽度模式（如批处理 Remark fixed 256）。 */
+    batchPopoverWidthMode?: PopoverWidthMode;
+    /** widthMode=fixed 时面板区宽度（px）。 */
+    batchPopoverWidth?: number;
+    /** placement=top 时 Popover 顶部工具条（如批处理 Remark）。 */
+    batchPopoverTopTool?: boolean;
+    batchPopoverTopToolTitle?: string;
+    batchPopoverTopToolClosable?: boolean;
     primaryAction?: DataListPrimaryAction;
     moreActions?: DataListRowAction[];
   }>(),
@@ -335,6 +345,12 @@ const batchActionLabels = computed(() => props.batchActions.map((action) => acti
 const batchActionDanger = computed(() => props.batchActions.map((action) => Boolean(action.danger)));
 
 const batchActionPopover = computed(() => props.batchActions.map((action) => Boolean(action.popover)));
+
+const batchActionPopoverTitles = computed(() =>
+  props.batchActions.map(
+    (action) => action.popoverTitle ?? props.batchPopoverTopToolTitle ?? '',
+  ),
+);
 
 const batchLoadingLabelIndex = computed(() => {
   const key = batchLoadingKey.value;
@@ -963,12 +979,16 @@ async function onBatchLabelClick(_label: string, index: number) {
   emit('batch-action', action.key, selectedList.value);
 
   try {
+    let preserveSelection = false;
     if (props.onBatchAction) {
-      await props.onBatchAction(action.key, selectedList.value);
+      const result = await props.onBatchAction(action.key, selectedList.value);
+      preserveSelection = result?.preserveSelection === true;
     }
-    selectedList.value = [];
-    emit('update:selected-list', []);
-    emit('selected-change', []);
+    if (!preserveSelection) {
+      selectedList.value = [];
+      emit('update:selected-list', []);
+      emit('selected-change', []);
+    }
   } catch (error) {
     const message =
       error instanceof Error && error.message ? error.message : 'Batch action failed';
@@ -998,6 +1018,7 @@ function onTableScroll(event: Event) {
     ref="tableWrapperRef"
     class="eds-data-list"
     :class="[styles.root, selectMode && styles.rootSelectMode]"
+    :data-eds-data-list-layout-animating="selectAnimating || undefined"
     :style="{
       '--eds-data-list-row-height': `${columnHeight}px`,
       '--eds-data-list-header-height': headerHeightCss,
@@ -1037,6 +1058,12 @@ function onTableScroll(event: Event) {
           :labels="useBuiltinBatchBar ? batchActionLabels : undefined"
           :label-danger="useBuiltinBatchBar ? batchActionDanger : undefined"
           :label-popover="useBuiltinBatchBar ? batchActionPopover : undefined"
+          :label-popover-width-mode="batchPopoverWidthMode"
+          :label-popover-width="batchPopoverWidth"
+          :label-popover-top-tool="batchPopoverTopTool"
+          :label-popover-top-tool-title="batchPopoverTopToolTitle"
+          :label-popover-top-tool-titles="batchActionPopoverTitles"
+          :label-popover-top-tool-closable="batchPopoverTopToolClosable"
           :loading-label-index="useBuiltinBatchBar ? batchLoadingLabelIndex : null"
           :on-label-before-open="onBatchLabelBeforeOpen"
           @dismiss="closeSelect"

@@ -1,8 +1,10 @@
 import type { DocCustomizeControl } from '@/views/shared/componentDoc/types';
 import {
+  propLabelSelectOptions,
   showcaseInputCustomizeFieldLabels,
   showcaseInputSizeLabels,
   showcaseInputTypeLabels,
+  showcaseSearchScenarioLabels,
   showcaseWidthModeLabels,
 } from '@/data/showcasePropLabels';
 
@@ -10,7 +12,7 @@ export const inputImportCode = `import { EgInput } from '@eds/desktop-components
 
 export const textareaImportCode = `import { EgTextarea } from '@eds/desktop-components';`;
 
-export const searchImportCode = `import { EgSearch } from '@eds/desktop-components';`;
+export const searchImportCode = `import { EgSearch, EgVerifyInput } from '@eds/desktop-components';`;
 
 export const comboImportCode = `import {
   EgComboInputItem,
@@ -118,6 +120,7 @@ export const textareaCustomizeControls: DocCustomizeControl[] = [
 ];
 
 export const searchCustomizeDefaults = {
+  scenario: 'search' as 'search' | 'verify-input',
   placeholder: 'Search',
   widthMode: 'full',
   fixedWidth: '319',
@@ -126,7 +129,21 @@ export const searchCustomizeDefaults = {
 } as const;
 
 export const searchCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
+  {
+    kind: 'select',
+    key: 'scenario',
+    label: showcaseInputCustomizeFieldLabels.scenario,
+    options: propLabelSelectOptions(
+      ['search', 'verify-input'] as const,
+      showcaseSearchScenarioLabels,
+    ),
+  },
+  {
+    kind: 'text',
+    key: 'placeholder',
+    label: showcaseInputCustomizeFieldLabels.placeholder,
+    visibleWhen: (state) => state.scenario === 'search',
+  },
   {
     kind: 'select',
     key: 'widthMode',

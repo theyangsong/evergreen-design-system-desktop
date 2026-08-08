@@ -4,5 +4,6 @@ export type {
   ButtonVariant,
   ButtonVariantInput,
   ButtonSize,
+  ButtonIconPosition,
   LegacyButtonVariant,
 } from './Button.vue';

@@ -31,6 +31,25 @@ export const searchEventRows: InputPropRow[] = [
   { name: 'clear', type: '() => void', defaultValue: '-', description: '点击清空时触发。' },
 ];
 
+export const verifyInputHeroCode = `<EgVerifyInput v-model="code" width-mode="full" />`;
+
+export const verifyInputPropRows: InputPropRow[] = [
+  { name: 'modelValue', type: 'string', defaultValue: "''", description: '验证码字符串（仅数字）。' },
+  { name: 'codeLength', type: 'number', defaultValue: '6', description: '验证码位数。' },
+  { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '是否禁用。' },
+  { name: 'readonly', type: 'boolean', defaultValue: 'false', description: '是否只读。' },
+  { name: 'widthMode', type: "'fixed' | 'full'", defaultValue: "'fixed'", description: '宽度模式。' },
+  { name: 'state', type: "'idle' | 'verifying' | 'error'", defaultValue: "'idle'", description: 'idle 默认字色；verifying 次要字色；error 危险背景 + 轻晃。' },
+  { name: 'pasteLabel', type: 'string', defaultValue: "'粘贴'", description: '粘贴链接文案。' },
+  { name: 'showPaste', type: 'boolean', defaultValue: 'true', description: '是否展示粘贴操作。' },
+];
+
+export const verifyInputEventRows: InputPropRow[] = [
+  { name: 'update:modelValue', type: '(value: string) => void', defaultValue: '-', description: '值变化时触发。' },
+  { name: 'complete', type: '(code: string) => void', defaultValue: '-', description: '输满 codeLength 时触发。' },
+  { name: 'paste', type: '() => void', defaultValue: '-', description: '点击粘贴时触发。' },
+];
+
 export const comboInputItemFigmaNode = '2404:5584';
 export const comboTextareaItemFigmaNode = '2404:5602';
 
@@ -46,6 +65,7 @@ export const comboInputItemPropRows: InputPropRow[] = [
 ];
 
 export const comboTextareaItemPropRows: InputPropRow[] = [
+  { name: 'modelValue', type: 'string', defaultValue: "''", description: '受控文本；默认 slot 内置 EgTextarea 绑定。' },
   { name: 'label', type: 'string', defaultValue: "'Label'", description: '字段标题。Figma 2404:5602。' },
   {
     name: 'feedback',
@@ -84,9 +104,9 @@ export const comboInputItemFeedbackCode = `<EgComboInputItem label="Label" feedb
   <EgInput v-model="value" placeholder="请输入" width-mode="full" />
 </EgComboInputItem>`;
 
-export const comboTextareaItemHeroCode = `<EgComboTextareaItem label="Label" placeholder="请输入" />`;
+export const comboTextareaItemHeroCode = `<EgComboTextareaItem v-model="value" label="Label" placeholder="请输入" />`;
 
-export const comboTextareaItemFeedbackCode = `<EgComboTextareaItem label="Label" feedback placeholder="请输入" />`;
+export const comboTextareaItemFeedbackCode = `<EgComboTextareaItem v-model="value" label="Label" feedback placeholder="请输入" />`;
 
 export const comboMenuCode = `<EgComboInputItem label="Label">
   <EgInput placeholder="请输入" width-mode="full" />

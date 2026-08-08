@@ -12,6 +12,8 @@ export type FlotationTriggerSize = 'lg' | 'md' | 'sm' | 'xs';
 
 /** 触发器在父级内的宽度：内容 hug / 撑满 / 固定 px */
 export type FlotationTriggerWidthMode = 'trigger' | 'adaptive' | 'fixed';
+/** #symbol 相对文案区：leading 在左，trailing 在右（箭头前）。 */
+export type FlotationTriggerSymbolPosition = 'leading' | 'trailing';
 
 const props = withDefaults(
   defineProps<{
@@ -27,6 +29,8 @@ const props = withDefaults(
     showSymbol?: boolean;
     /** #symbol 预置 EgIcon 名称 */
     symbolIcon?: string;
+    /** showSymbol 时 #symbol 在文案 leading（左）或 trailing（右，箭头前）。 */
+    symbolPosition?: FlotationTriggerSymbolPosition;
     /** 展示 Tag（#tag）；预置为 EgTag Status sm */
     showTag?: boolean;
     tagText?: string;
@@ -52,6 +56,7 @@ const props = withDefaults(
     label: 'Trigger',
     showSymbol: false,
     symbolIcon: 'eds-coin-btc',
+    symbolPosition: 'leading',
     showTag: false,
     tagText: 'Tag',
     tagStatus: 'danger',
@@ -95,6 +100,18 @@ const rootStyle = computed(() => {
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
+
+const showSymbolBlock = computed(
+  () => Boolean(props.showSymbol || slots.symbol),
+);
+
+const symbolLeading = computed(
+  () => showSymbolBlock.value && props.symbolPosition === 'leading',
+);
+
+const symbolTrailing = computed(
+  () => showSymbolBlock.value && props.symbolPosition === 'trailing',
+);
 </script>
 
 <template>
@@ -106,7 +123,7 @@ function capitalize(value: string): string {
     :disabled="disabled"
     :aria-expanded="expanded"
   >
-    <span v-if="showSymbol || slots.symbol" :class="styles.triggerSymbol">
+    <span v-if="symbolLeading" :class="styles.triggerSymbol">
       <slot name="symbol">
         <EgIcon :name="symbolIcon" :size="iconSize" fit />
       </slot>
@@ -134,6 +151,12 @@ function capitalize(value: string): string {
     <span v-if="showMessage || slots.message" :class="styles.triggerMessage">
       <slot name="message">
         <EgMessage :type="messageType" :text="messageText" />
+      </slot>
+    </span>
+
+    <span v-if="symbolTrailing" :class="styles.triggerSymbol">
+      <slot name="symbol">
+        <EgIcon :name="symbolIcon" :size="iconSize" fit />
       </slot>
     </span>
 

@@ -20,6 +20,7 @@ export type { FlotationMenuItemPreset } from './flotationPresets';
 export type {
   FlotationTriggerSize,
   FlotationTriggerStyle,
+  FlotationTriggerSymbolPosition,
   FlotationTriggerWidthMode,
 } from './FlotationTrigger.vue';
 export type { FlotationBoxType } from './FlotationMenuItem.vue';

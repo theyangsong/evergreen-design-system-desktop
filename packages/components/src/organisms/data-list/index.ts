@@ -7,6 +7,7 @@ export type {
   DataListSelectAllMode,
   DataListSortOrder,
   DataListBatchAction,
+  DataListBatchActionResult,
   DataListRowAction,
   DataListPrimaryAction,
 } from './types';

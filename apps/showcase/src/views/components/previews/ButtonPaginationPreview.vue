@@ -28,7 +28,7 @@ const isBorderArrow = computed(() => String(paginationCustomize.kind) === 'borde
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="paginationCustomize"
-      title="Custom"
+      title="Scens"
       :show-doc-title="false"
       component-tag="EgPaginationItem"
       :import-code="paginationImportCode"

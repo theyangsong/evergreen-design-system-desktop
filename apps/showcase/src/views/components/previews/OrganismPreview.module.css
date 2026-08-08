@@ -93,7 +93,7 @@
   align-items: stretch !important;
 }
 
-.previewOrganismPopupBoxHost :global(.eds-tooltip-panel) {
+.previewOrganismPopupBoxHost :global(.eds-tooltip-panel:not(.eds-verify)) {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -116,13 +116,34 @@
   justify-content: center;
 }
 
+/** Verify — Popup Box 固定宽 328、高度随内容 */
+.previewOrganismVerifyBoxHost {
+  composes: previewOrganismReminderBoxHost;
+}
+
+.previewOrganismVerifyBoxHost :global(.effect-popup-box) {
+  flex-shrink: 0;
+  height: auto;
+  align-items: stretch !important;
+}
+
+.previewOrganismVerifyBoxHost :global(.eds-tooltip-panel.eds-verify) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
 .previewOrganismReminderBoxHost :global(.effect-popup-box) {
   flex-shrink: 0;
   height: auto;
   align-items: stretch !important;
 }
 
-.previewOrganismReminderBoxHost :global(.eds-tooltip-panel) {
+.previewOrganismReminderBoxHost :global(.eds-tooltip-panel:not(.eds-verify)) {
   display: flex;
   flex-direction: column;
   height: auto;
@@ -139,4 +160,21 @@
 
 .previewOrganismReminderBoxHost :global(.eds-reminder.echo .echoScroll) {
   max-height: inherit;
+}
+
+.previewOrganismPopupBoxPlaceholder {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: var(--spacing-4);
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  text-align: center;
 }

@@ -2,11 +2,19 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { EgTooltip } from '../../molecules/tooltip';
 import { resolveReminderPanelWidthPx } from '../../organisms/reminder/reminderPanelWidths';
+import {
+  resolveVerifyPanelHeightPx,
+  resolveVerifyPanelWidthPx,
+  type VerifyType,
+} from '../../organisms/verify';
 import type { ReminderType } from '../../organisms/reminder';
 import '../../styles/overlayGlassMicroFloat.module.css';
 import styles from './Popup.module.css';
 
-export type PopupUses = 'detail' | 'reminder' | 'verify';
+export type PopupUses = 'detail' | 'reminder' | 'verify' | 'custom';
+
+/** Alert 舞台垂直对齐：居中，或顶边距百分比占位（`--padding-top-md`）。 */
+export type PopupAlertVerticalAlign = 'center' | 'padding-top-md';
 
 /** Figma Popup Detail 面板固定尺寸 */
 const DETAIL_PANEL_WIDTH = 880;
@@ -23,14 +31,25 @@ const DETAIL_PANEL_HEIGHT = 620;
 const props = withDefaults(
   defineProps<{
     uses?: PopupUses;
-    /** Reminder / Verify 内容类型，决定 Popup Box 固定宽度（Info 280 / Echo 460）。 */
+    /** Reminder 内容类型，决定 Popup Box 固定宽度（Info 280 / Echo 460）。 */
     reminderType?: ReminderType;
+    /** Verify 场景类型，决定 Popup Box 固定宽高（见 VERIFY_TYPE_PRESETS）。 */
+    verifyType?: VerifyType;
+    /** uses=custom 时 Popup Box 宽度（px）。 */
+    boxWidth?: number;
+    /** uses=custom 时 Popup Box 高度（px）。 */
+    boxHeight?: number;
+    /** Alert 舞台垂直对齐（Detail 忽略）。center：几何居中；padding-top-md：顶边距 22%。 */
+    alertVerticalAlign?: PopupAlertVerticalAlign;
     /** 面板进出场（`.motion-layout` + host active）。 */
     microFloat?: boolean;
   }>(),
   {
     uses: 'reminder',
     reminderType: 'info',
+    verifyType: 'single-email',
+    boxWidth: 328,
+    boxHeight: 436,
     microFloat: true,
   },
 );
@@ -48,18 +67,53 @@ let shellLeaveTimer: ReturnType<typeof setTimeout> | undefined;
 let closing = false;
 
 const isDetail = computed(() => props.uses === 'detail');
-const isAlert = computed(() => !isDetail.value);
 
-const showScrim = computed(() => {
-  if (isDetail.value) {
-    return open.value || shellKeepMounted.value;
+const showScrim = computed(() => open.value || shellKeepMounted.value);
+
+const isVerify = computed(() => props.uses === 'verify');
+const isCustom = computed(() => props.uses === 'custom');
+const isReminder = computed(() => props.uses === 'reminder');
+
+const resolvedAlertVerticalAlign = computed((): PopupAlertVerticalAlign => {
+  if (props.alertVerticalAlign != null) {
+    return props.alertVerticalAlign;
   }
-  return shellKeepMounted.value;
+  if (isReminder.value || isVerify.value) {
+    return 'padding-top-md';
+  }
+  return 'center';
 });
 
-const alertPanelWidthPx = computed(() =>
-  resolveReminderPanelWidthPx(props.reminderType),
+const usesAlertPaddingTop = computed(
+  () => !isDetail.value && resolvedAlertVerticalAlign.value === 'padding-top-md',
 );
+
+const alertPanelWidthPx = computed(() => {
+  if (isVerify.value) {
+    return resolveVerifyPanelWidthPx(props.verifyType);
+  }
+  if (isCustom.value) {
+    return props.boxWidth;
+  }
+  return resolveReminderPanelWidthPx(props.reminderType);
+});
+
+const alertHeightMode = computed((): 'fixed' | 'adaptive' => {
+  if (isVerify.value || isCustom.value) {
+    return 'fixed';
+  }
+  return 'adaptive';
+});
+
+const alertPanelHeightPx = computed(() => {
+  if (isVerify.value) {
+    return resolveVerifyPanelHeightPx(props.verifyType);
+  }
+  if (isCustom.value) {
+    return props.boxHeight;
+  }
+  return undefined;
+});
 
 function readMotionLeaveMs(el: HTMLElement, motionClass: string): number {
   const probe = document.createElement('div');
@@ -71,13 +125,10 @@ function readMotionLeaveMs(el: HTMLElement, motionClass: string): number {
 }
 
 function readShellLeaveMs(el: HTMLElement): number {
-  if (isDetail.value) {
-    return Math.max(
-      readMotionLeaveMs(el, 'popupDetailPanelMotionProbe'),
-      readMotionLeaveMs(el, 'popupDetailScrimMotionProbe'),
-    );
-  }
-  return readMotionLeaveMs(el, 'popupDetailPanelMotionProbe');
+  return Math.max(
+    readMotionLeaveMs(el, 'popupDetailPanelMotionProbe'),
+    readMotionLeaveMs(el, 'popupDetailScrimMotionProbe'),
+  );
 }
 
 function clearShellLeaveTimer() {
@@ -137,12 +188,6 @@ function requestClose() {
   open.value = false;
 }
 
-function onBackdropClick() {
-  if (open.value) {
-    requestClose();
-  }
-}
-
 function onStageSelfClick() {
   if (open.value) {
     requestClose();
@@ -181,12 +226,12 @@ onMounted(() => {
     shellKeepMounted.value = true;
     syncShellMotionEnter();
   }
-  document.addEventListener('keydown', onKeydown);
+  document.addEventListener('keydown', onKeydown, { capture: true });
 });
 
 onBeforeUnmount(() => {
   clearShellLeaveTimer();
-  document.removeEventListener('keydown', onKeydown);
+  document.removeEventListener('keydown', onKeydown, { capture: true });
 });
 </script>
 
@@ -199,22 +244,32 @@ onBeforeUnmount(() => {
     role="presentation"
   >
     <div
-      v-if="isAlert && showScrim"
-      :class="styles.backdrop"
-      aria-hidden="true"
-      @click="onBackdropClick"
-    />
-
-    <div
       :class="[
         styles.stage,
         isDetail ? styles.stageDetail : styles.stageAlert,
-        isDetail && showScrim && styles.stageScrim,
-        isDetail && microFloat && showScrim && styles.stageDetailAnimatedScrim,
-        isDetail && microFloat && showScrim && shellMotionActive && styles.stageDetailScrimVisible,
+        !isDetail && usesAlertPaddingTop && styles.stageAlertPaddingTop,
+        showScrim && styles.stageScrim,
+        microFloat && showScrim && styles.stageScrimAnimated,
       ]"
       @click.self="onStageSelfClick"
     >
+      <div
+        v-if="microFloat && showScrim"
+        :class="[
+          styles.stageScrimOverlay,
+          shellMotionActive && styles.stageScrimOverlayVisible,
+        ]"
+        aria-hidden="true"
+        @click="onStageSelfClick"
+      />
+
+      <div
+        v-if="usesAlertPaddingTop"
+        :class="styles.stageAlertTopSpacer"
+        aria-hidden="true"
+      />
+
+      <div :class="styles.stagePanel">
       <EgTooltip
         v-if="isDetail"
         :class="[
@@ -239,20 +294,26 @@ onBeforeUnmount(() => {
       <div
         v-else
         :class="[
-          'desktopTokens',
-          'effect-popup-box',
           styles.alertShell,
-          microFloat && 'motion-layout',
-          microFloat && shellMotionActive && 'is-active',
+          isCustom && styles.alertShellSlotCenter,
           microFloat && 'glassMicroFloatHost',
           microFloat && shellMotionActive && 'glassMicroFloatHostActive',
-          uses === 'verify' && styles.verifyShell,
         ]"
-        :style="{ width: `${alertPanelWidthPx}px` }"
       >
-        <div :class="styles.alertShellInner">
+        <EgTooltip
+          panel-kind="popup"
+          panel-radius="radius-lg"
+          :panel-layout-motion="microFloat"
+          panel-flush
+          width-mode="fixed"
+          :width="alertPanelWidthPx"
+          :height-mode="alertHeightMode"
+          :height="alertPanelHeightPx"
+          :scrollable="false"
+        >
           <slot />
-        </div>
+        </EgTooltip>
+      </div>
       </div>
     </div>
   </div>

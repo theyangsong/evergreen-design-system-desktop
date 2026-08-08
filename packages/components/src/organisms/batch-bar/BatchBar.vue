@@ -4,6 +4,7 @@ import { EgDivider } from '../../atoms/divider';
 import { EgTooltip } from '../../molecules/tooltip';
 import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../../molecules/flotation';
 import type { TooltipAlign, TooltipPlacement } from '../../molecules/tooltip';
+import type { PopoverWidthMode } from '../../molecules/popovers';
 import BatchBarActionItem from './BatchBarActionItem.vue';
 import BatchBarLabelPopover from './BatchBarLabelPopover.vue';
 import styles from './BatchBar.module.css';
@@ -33,6 +34,16 @@ const props = withDefaults(
     loadingLabelIndex?: number | null;
     /** Popover Label 打开前回调；慢于 500ms 时由 BatchBarLabelPopover 展示 Loading。 */
     onLabelBeforeOpen?: (label: string, index: number) => void | Promise<void>;
+    /** Label Popover 面板宽度模式（如批处理 Remark fixed 256）。 */
+    labelPopoverWidthMode?: PopoverWidthMode;
+    /** widthMode=fixed 时面板区宽度（px）。 */
+    labelPopoverWidth?: number;
+    /** placement=top 时 Popover 顶部工具条。 */
+    labelPopoverTopTool?: boolean;
+    labelPopoverTopToolTitle?: string;
+    /** 与 labels 等长；优先于 labelPopoverTopToolTitle。 */
+    labelPopoverTopToolTitles?: string[];
+    labelPopoverTopToolClosable?: boolean;
   }>(),
   {
     selectedCount: '0',
@@ -111,6 +122,14 @@ function isLabelPopover(index: number) {
   return Boolean(props.labelPopover?.[index]);
 }
 
+function labelPopoverTopToolTitleAt(index: number) {
+  const titled = props.labelPopoverTopToolTitles?.[index];
+  if (titled) {
+    return titled;
+  }
+  return props.labelPopoverTopToolTitle;
+}
+
 function onLabelClick(label: string, index: number) {
   if (actionsDisabled.value) return;
   emit('label-click', label, index);
@@ -169,6 +188,11 @@ function onDismiss() {
             :loading="isLabelLoading(index)"
             :danger="isLabelDanger(index)"
             :disabled="actionsDisabled"
+            :popover-width-mode="labelPopoverWidthMode"
+            :popover-width="labelPopoverWidth"
+            :popover-top-tool="labelPopoverTopTool"
+            :popover-top-tool-title="labelPopoverTopToolTitleAt(index)"
+            :popover-top-tool-closable="labelPopoverTopToolClosable"
             :on-before-open="() => onLabelBeforeOpen?.(label, index)"
             @confirm="onLabelClick(label, index)"
             @dismiss="emit('label-popover-dismiss', label, index)"

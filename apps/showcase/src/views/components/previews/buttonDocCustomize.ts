@@ -14,6 +14,7 @@ import {
   paginationToneRows,
   showcaseButtonCustomizeFieldLabels,
   showcaseComboPopupCountLabels,
+  showcaseInputCustomizeFieldLabels,
   directionLeftRightRows,
 } from '@/data/showcasePropLabels';
 import {
@@ -51,6 +52,15 @@ export const comboActionFlotationImportCode = `import { EgComboActionFlotation }
 
 export const comboActionPageImportCode = `import { EgComboActionPage } from '@eds/desktop-components';`;
 
+const buttonIconPositionInlineSelect = {
+  key: 'iconPosition',
+  label: '图标位置',
+  options: [
+    { value: 'leading', label: '左' },
+    { value: 'trailing', label: '右' },
+  ],
+};
+
 export const buttonCustomizeDefaults = {
   tone: 'brand',
   variant: 'solid',
@@ -59,6 +69,7 @@ export const buttonCustomizeDefaults = {
   loading: false,
   label: 'Button',
   showIcon: false,
+  iconPosition: 'leading',
   iconName: showcaseDefaultIconName,
 } as const;
 
@@ -84,7 +95,12 @@ export const buttonCustomizeControls: DocCustomizeControl[] = [
   { kind: 'boolean', key: 'disabled', label: showcaseButtonCustomizeFieldLabels.disabled },
   { kind: 'boolean', key: 'loading', label: showcaseButtonCustomizeFieldLabels.loading },
   { kind: 'text', key: 'label', label: showcaseButtonCustomizeFieldLabels.label },
-  { kind: 'boolean', key: 'showIcon', label: showcaseButtonCustomizeFieldLabels.showIcon },
+  {
+    kind: 'boolean',
+    key: 'showIcon',
+    label: showcaseButtonCustomizeFieldLabels.showIcon,
+    inlineSelect: buttonIconPositionInlineSelect,
+  },
   {
     kind: 'text',
     key: 'iconName',
@@ -500,7 +516,7 @@ export const paginationCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'kind',
-    label: showcaseButtonCustomizeFieldLabels.kind,
+    label: showcaseInputCustomizeFieldLabels.scenario,
     options: paginationKindRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {

@@ -6,7 +6,6 @@ import {
   placementRows,
   showcaseTooltipCustomizeFieldLabels,
   triggerRows,
-  widthModeAdaptiveFixedRows,
 } from '@/data/showcasePropLabels';
 
 export const popoversImportCode = `import {
@@ -36,21 +35,53 @@ export const popoversCustomizeDefaults = {
   disabled: false,
   triggerLabel: '悬浮我',
   widthMode: 'fixed',
+  presetWidth: '336',
   heightMode: 'adaptive',
   width: '336',
   height: '490',
   maxWidth: '',
   maxHeight: '',
+  topTool: true,
+  topToolTitle: 'Title',
+  topToolClosable: true,
 } as const;
 
+export const popoverWidthModeOptions = [
+  { value: 'adaptive', label: '自适应 adaptive' },
+  { value: 'fixed', label: '固定 fixed' },
+  { value: 'preset', label: '预置宽度 preset' },
+] as const;
+
+export const popoverPresetWidthOptions = [
+  { value: '256', label: '256（引导）' },
+  { value: '336', label: '336（基础业务）' },
+  { value: '460', label: '460（复杂业务）' },
+] as const;
+
 const L = showcaseTooltipCustomizeFieldLabels;
+
+function isPopoverWidthPreset(state: Record<string, unknown>): boolean {
+  return String(state.widthMode ?? popoversCustomizeDefaults.widthMode) === 'preset';
+}
 
 function isPopoverWidthFixed(state: Record<string, unknown>): boolean {
   return String(state.widthMode ?? popoversCustomizeDefaults.widthMode) === 'fixed';
 }
 
+function isPopoverWidthFixedOrPreset(state: Record<string, unknown>): boolean {
+  return isPopoverWidthFixed(state) || isPopoverWidthPreset(state);
+}
+
 function isPopoverHeightFixed(state: Record<string, unknown>): boolean {
   return String(state.heightMode ?? popoversCustomizeDefaults.heightMode) === 'fixed';
+}
+
+function isPopoverPlacementTop(state: Record<string, unknown>): boolean {
+  return String(state.placement ?? popoversCustomizeDefaults.placement) === 'top';
+}
+
+function isPopoverTopToolEnabled(state: Record<string, unknown>): boolean {
+  return isPopoverPlacementTop(state) && Boolean(state.topTool);
 }
 
 export const popoversCustomizeControls: DocCustomizeControl[] = [
@@ -76,7 +107,14 @@ export const popoversCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'widthMode',
     label: L.widthMode,
-    options: widthModeAdaptiveFixedRows.map((row) => ({ value: row.key, label: row.label })),
+    options: popoverWidthModeOptions.map((row) => ({ value: row.value, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'presetWidth',
+    label: '预置宽度',
+    options: popoverPresetWidthOptions.map((row) => ({ value: row.value, label: row.label })),
+    visibleWhen: isPopoverWidthPreset,
   },
   {
     kind: 'text',
@@ -88,7 +126,7 @@ export const popoversCustomizeControls: DocCustomizeControl[] = [
     kind: 'text',
     key: 'maxWidth',
     label: '最大宽度',
-    visibleWhen: (state) => !isPopoverWidthFixed(state),
+    visibleWhen: (state) => !isPopoverWidthFixedOrPreset(state),
   },
   {
     kind: 'select',
@@ -110,13 +148,21 @@ export const popoversCustomizeControls: DocCustomizeControl[] = [
   },
   {
     kind: 'boolean',
-    key: 'disabled',
-    label: L.disabled,
+    key: 'topTool',
+    label: 'TopTool',
+    visibleWhen: isPopoverPlacementTop,
   },
   {
     kind: 'text',
-    key: 'triggerLabel',
-    label: L.triggerLabel,
+    key: 'topToolTitle',
+    label: '标题',
+    visibleWhen: isPopoverTopToolEnabled,
+  },
+  {
+    kind: 'boolean',
+    key: 'topToolClosable',
+    label: '可关闭',
+    visibleWhen: isPopoverTopToolEnabled,
   },
 ];
 
@@ -130,23 +176,33 @@ function parseOptionalPx(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function resolvePopoverWidthPx(state: Record<string, unknown>): number | undefined {
+  if (isPopoverWidthPreset(state)) {
+    return parseOptionalPx(state.presetWidth ?? popoversCustomizeDefaults.presetWidth);
+  }
+  if (isPopoverWidthFixed(state)) {
+    return parseOptionalPx(state.width);
+  }
+  return undefined;
+}
+
 function buildPopoverProps(state: Record<string, unknown>): Record<string, unknown> {
   const props: Record<string, unknown> = {
     placement: state.placement,
     align: state.align,
-    widthMode: state.widthMode,
+    widthMode: isPopoverWidthFixedOrPreset(state) ? 'fixed' : state.widthMode,
     heightMode: state.heightMode,
   };
 
-  const width = parseOptionalPx(state.width);
+  const width = resolvePopoverWidthPx(state);
   const height = parseOptionalPx(state.height);
   const maxWidth = parseOptionalPx(state.maxWidth);
   const maxHeight = parseOptionalPx(state.maxHeight);
 
-  if (isPopoverWidthFixed(state) && width != null) {
+  if (isPopoverWidthFixedOrPreset(state) && width != null) {
     props.width = width;
   }
-  if (!isPopoverWidthFixed(state) && maxWidth != null) {
+  if (!isPopoverWidthFixedOrPreset(state) && maxWidth != null) {
     props.maxWidth = maxWidth;
   }
   if (isPopoverHeightFixed(state) && height != null) {
@@ -154,6 +210,14 @@ function buildPopoverProps(state: Record<string, unknown>): Record<string, unkno
   }
   if (!isPopoverHeightFixed(state) && maxHeight != null) {
     props.maxHeight = maxHeight;
+  }
+
+  if (String(state.placement) === 'top') {
+    props.topTool = Boolean(state.topTool);
+    if (props.topTool) {
+      props.topToolTitle = String(state.topToolTitle ?? popoversCustomizeDefaults.topToolTitle);
+      props.topToolClosable = Boolean(state.topToolClosable);
+    }
   }
 
   return props;
@@ -195,9 +259,8 @@ export function buildPopoversUsageSnippet(state: Record<string, unknown>): strin
   <EgButton variant="outline">${label}</EgButton>
   <template #content>
     ${popoverOpen}
-      <div style="padding: var(--spacing-1)">
-        <!-- 插槽内容：与 Popover 面板同容器，adaptive 时随内容撑开 -->
-      </div>
+      <!-- 插槽内容：bottom/left/right 默认四周 spacing-4；top 默认上 0、左右/下 spacing-4 -->
+      <div><!-- … --></div>
     </EgPopover>
   </template>
 </EgAnchoredTooltip>`;
@@ -220,13 +283,14 @@ export const popoverPropRows: DocPropRow[] = [
     name: 'widthMode',
     type: "'fixed' | 'adaptive'",
     defaultValue: "'fixed'",
-    description: '面板宽度模式：fixed 使用 width（默认 336）；adaptive 随 slot 内容（受 maxWidth 约束）。',
+    description:
+      '面板宽度模式：fixed 使用 width（默认 336）；adaptive 随 slot 内容（受 maxWidth 约束）。Showcase 另有 preset（256/336/460 预置宽，映射为 fixed + width）。',
   },
   {
     name: 'width',
     type: 'number',
     defaultValue: '336',
-    description: 'widthMode=fixed 时面板区宽度（px，不含箭头）。',
+    description: 'widthMode=fixed 时面板区宽度（px，不含箭头）。预置宽见 Showcase presetWidth。',
   },
   {
     name: 'maxWidth',
@@ -253,6 +317,42 @@ export const popoverPropRows: DocPropRow[] = [
     description: 'heightMode=adaptive 时面板区最大高度（px）。',
   },
   {
+    name: 'topTool',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: 'placement=top 时顶部工具条（标题 + 可选关闭）。',
+  },
+  {
+    name: 'topToolTitle',
+    type: 'string',
+    defaultValue: "'Title'",
+    description: 'topTool 标题文案。',
+  },
+  {
+    name: 'topToolClosable',
+    type: 'boolean',
+    defaultValue: 'true',
+    description: 'topTool 显示关闭按钮；点击 emit topToolClose。',
+  },
+  {
+    name: 'contentPaddingTop',
+    type: 'number',
+    defaultValue: 'placement 默认',
+    description: '插槽区内边距上（px）。未传：placement=top 为 0；bottom/left/right 为 spacing-4。',
+  },
+  {
+    name: 'contentPaddingInline',
+    type: 'number',
+    defaultValue: 'spacing-4',
+    description: '插槽区内边距左右（px）；未传时使用 spacing-4。',
+  },
+  {
+    name: 'contentPaddingBottom',
+    type: 'number',
+    defaultValue: 'spacing-4',
+    description: '插槽区内边距下（px）；未传时使用 spacing-4。',
+  },
+  {
     name: 'microFloat',
     type: 'boolean',
     defaultValue: 'true',
@@ -265,7 +365,8 @@ export const popoverSlotRows: DocPropRow[] = [
     name: 'default',
     type: 'slot',
     defaultValue: '-',
-    description: '弹出层内容；渲染在 `.eds-popover-content` 插槽框内（与 shell 同层），padding/布局由 slot 根节点自定。',
+    description:
+      '弹出层内容；默认内边距：placement=top 为上 0 / 左右下 spacing-4；bottom/left/right 为四周 spacing-4。可用 contentPadding* props 覆盖。',
   },
 ];
 
@@ -273,4 +374,4 @@ export const POPOVER_PLACEMENTS = ['top', 'bottom', 'left', 'right'] as const sa
 
 export const POPOVER_ALIGNS = ['start', 'center', 'end'] as const satisfies readonly PopoverAlign[];
 
-export { buildPopoverProps, isPopoverHeightFixed, isPopoverWidthFixed };
+export { buildPopoverProps, isPopoverHeightFixed, isPopoverWidthFixed, isPopoverWidthPreset };

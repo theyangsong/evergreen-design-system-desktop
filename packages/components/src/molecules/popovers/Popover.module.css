@@ -106,3 +106,87 @@
 .contentBodyAdaptiveHeight {
   height: fit-content;
 }
+
+.contentBodyWithTopTool {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.topTool {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.topToolTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  text-align: left;
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-strong-size);
+  font-weight: var(--eds-body-medium-strong-weight);
+  line-height: var(--eds-body-medium-strong-line-height);
+  word-break: break-word;
+}
+
+.topToolTitleWithClose {
+  padding-right: calc(var(--spacing-1) * 2 + var(--icon-md) + var(--spacing-4));
+}
+
+.topToolClose {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  z-index: 1;
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: var(--spacing-0);
+  cursor: pointer;
+}
+
+.topToolClose :global(.eds-icon-button) {
+  background-color: var(--material-hide);
+}
+
+.topToolClose :global(.eds-icon-button > span) {
+  color: var(--material-base-tertiary);
+}
+
+.topToolClose :global(.eds-icon-button:hover:not(:disabled):not(.isDisabled)),
+.topToolClose :global(.eds-icon-button:focus-visible:not(:disabled):not(.isDisabled)),
+.topToolClose :global(.eds-icon-button:active:not(:disabled):not(.isDisabled)) {
+  background-color: var(--event-hover);
+}
+
+.topToolClose :global(.eds-icon-button:hover:not(:disabled):not(.isDisabled) > span),
+.topToolClose :global(.eds-icon-button:focus-visible:not(:disabled):not(.isDisabled) > span),
+.topToolClose :global(.eds-icon-button:active:not(:disabled):not(.isDisabled) > span) {
+  color: var(--material-base-secondary);
+}
+
+.contentSlot {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.contentSlotPaddingSide {
+  padding: var(--spacing-4);
+}
+
+.contentSlotPaddingTop {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+}
+
+.contentSlotWithTopTool {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

@@ -5,6 +5,11 @@ export type PopoverAlign = 'start' | 'center' | 'end';
 export const POPOVER_PANEL_W = 336;
 export const POPOVER_PANEL_H = 490;
 
+/** Showcase 预置宽（fixed widthMode）：256 引导 / 336 基础 / 460 复杂。 */
+export const POPOVER_PRESET_WIDTH_GUIDE = 256;
+export const POPOVER_PRESET_WIDTH_BASE = 336;
+export const POPOVER_PRESET_WIDTH_COMPLEX = 460;
+
 /** adaptive / SVG 面板区最小尺寸（不含箭头；fixed 默认宽见 POPOVER_PANEL_W）。 */
 export const POPOVER_PANEL_MIN_W = 168;
 export const POPOVER_PANEL_MIN_H = 88;

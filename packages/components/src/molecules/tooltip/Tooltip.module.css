@@ -27,6 +27,13 @@
   min-height: 0;
 }
 
+/* Fixed-height flush popup (Verify / Detail): panelStatic 默认 flex:none 会塌成内容高，需铺满 shell */
+.panelFlush:global(.effect-popup-box) :global(.eds-tooltip-panel) {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
 /* Popup Box 内容插槽区 */
 :global(.eds-popup-box-content) {
   display: flex;

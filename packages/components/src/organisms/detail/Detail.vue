@@ -110,6 +110,8 @@ const props = withDefaults(
     showToolbarNav?: boolean;
     toolbarCurrent?: string | number;
     toolbarTotal?: string | number;
+    /** motion-page 切换 key；省略时用 toolbarCurrent（同序号换条目时需传唯一值）。 */
+    toolbarPageKey?: string | number;
     toolbarPrevDisabled?: boolean;
     toolbarNextDisabled?: boolean;
     toolbarTone?: ComboActionPageTone;
@@ -183,7 +185,9 @@ let toolbarNavFlashTimer: ReturnType<typeof setTimeout> | undefined;
 
 const TOOLBAR_NAV_FLASH_MS = 300;
 
-const toolbarPageKey = computed(() => String(props.toolbarCurrent));
+const resolvedToolbarPageKey = computed(() =>
+  props.toolbarPageKey != null ? String(props.toolbarPageKey) : String(props.toolbarCurrent),
+);
 
 const contentPageStackDirection = computed((): 'forward' | 'backward' | 'none' => {
   if (!props.showToolbarNav) return 'none';
@@ -358,15 +362,22 @@ watch(scrollContentRef, () => {
 });
 
 watch(
-  () => props.toolbarCurrent,
-  (next, prev) => {
-    if (!props.showToolbarNav || prev === undefined) return;
-    if (next === prev) return;
+  () => [props.toolbarCurrent, resolvedToolbarPageKey.value] as const,
+  ([nextCurrent, nextKey], [prevCurrent, prevKey]) => {
+    if (!props.showToolbarNav || prevCurrent === undefined) return;
 
-    const nextNum = Number(next);
-    const prevNum = Number(prev);
-    if (Number.isFinite(nextNum) && Number.isFinite(prevNum) && nextNum !== prevNum) {
-      contentNavDirection.value = nextNum > prevNum ? 'next' : 'prev';
+    const currentChanged = nextCurrent !== prevCurrent;
+    const keyChanged = nextKey !== prevKey;
+    if (!currentChanged && !keyChanged) return;
+
+    if (currentChanged) {
+      const nextNum = Number(nextCurrent);
+      const prevNum = Number(prevCurrent);
+      if (Number.isFinite(nextNum) && Number.isFinite(prevNum) && nextNum !== prevNum) {
+        contentNavDirection.value = nextNum > prevNum ? 'next' : 'prev';
+      }
+    } else if (keyChanged) {
+      contentNavDirection.value = 'next';
     }
 
     scrollRef.value?.scrollTo({ top: 0, behavior: 'instant' });
@@ -433,7 +444,7 @@ onBeforeUnmount(() => {
         :data-page-direction="contentPageStackDirection"
       >
         <Transition name="motion-page">
-          <div :key="toolbarPageKey" :class="['motion-page', styles.scrollBody]">
+          <div :key="resolvedToolbarPageKey" :class="['motion-page', styles.scrollBody]">
       <slot name="body">
           <header :class="styles.headline">
             <span v-if="showEyebrow" :class="styles.eyebrow">{{ eyebrow }}</span>

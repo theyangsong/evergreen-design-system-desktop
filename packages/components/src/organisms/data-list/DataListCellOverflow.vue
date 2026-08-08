@@ -6,6 +6,11 @@ import {
   EgAnchoredTooltip,
   type TooltipPlacement,
 } from '../../molecules/tooltip';
+import {
+  clearLayoutSettleTimer,
+  scheduleOverflowMeasureAfterLayoutSettle,
+  type LayoutSettleTimerRef,
+} from '../../utils/overflowMeasureDuringLayout';
 import styles from './DataList.module.css';
 
 const props = withDefaults(
@@ -32,6 +37,7 @@ const contentRef = ref<HTMLElement | null>(null);
 const overflowing = ref(false);
 const tooltipText = ref('');
 let resizeObserver: ResizeObserver | null = null;
+const layoutSettleRef: LayoutSettleTimerRef = {};
 
 const resolvedContentClass = computed(() => props.contentClass ?? styles.cellText);
 
@@ -95,6 +101,14 @@ function measureOverflow() {
   overflowing.value = false;
 }
 
+function requestOverflowMeasure() {
+  scheduleOverflowMeasureAfterLayoutSettle(
+    wrapRef.value ?? contentRef.value,
+    () => measureOverflow(),
+    layoutSettleRef,
+  );
+}
+
 watch(
   () => props.text,
   () => {
@@ -104,7 +118,7 @@ watch(
 
 function bindResizeObserver() {
   resizeObserver?.disconnect();
-  resizeObserver = new ResizeObserver(() => measureOverflow());
+  resizeObserver = new ResizeObserver(() => requestOverflowMeasure());
   if (contentRef.value) {
     resizeObserver.observe(contentRef.value);
   }
@@ -124,11 +138,12 @@ onMounted(() => {
 });
 
 onUpdated(() => {
-  nextTick(measureOverflow);
+  nextTick(requestOverflowMeasure);
 });
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
+  clearLayoutSettleTimer(layoutSettleRef);
 });
 </script>
 

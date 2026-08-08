@@ -31,16 +31,23 @@ const customize = reactive({
   placement: popoversCustomizeDefaults.placement as PopoverPlacement,
   align: popoversCustomizeDefaults.align as PopoverAlign,
   trigger: popoversCustomizeDefaults.trigger as 'click' | 'hover',
-  widthMode: popoversCustomizeDefaults.widthMode as 'fixed' | 'adaptive',
+  widthMode: popoversCustomizeDefaults.widthMode as 'fixed' | 'adaptive' | 'preset',
   heightMode: popoversCustomizeDefaults.heightMode as 'fixed' | 'adaptive',
 });
 
 const previewSlotContent = ref('Popover 内容');
+const anchoredRef = ref<{ close: () => void } | null>(null);
 
 const popoverPreviewProps = computed(() => buildPopoverProps(customize));
 
+function onTopToolClose() {
+  anchoredRef.value?.close();
+}
+
 const slotDemoUsesFill = computed(
-  () => customize.widthMode === 'fixed' && customize.heightMode === 'fixed',
+  () =>
+    (customize.widthMode === 'fixed' || customize.widthMode === 'preset') &&
+    customize.heightMode === 'fixed',
 );
 
 const usageSnippet = computed(() => buildPopoversUsageSnippet(customize));
@@ -104,6 +111,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
           ]"
         >
           <EgAnchoredTooltip
+            ref="anchoredRef"
             :placement="customize.placement"
             :align="customize.align"
             :trigger="customize.trigger"
@@ -112,7 +120,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
           >
             <EgButton variant="outline">{{ customize.triggerLabel }}</EgButton>
             <template #content>
-              <EgPopover v-bind="popoverPreviewProps">
+              <EgPopover v-bind="popoverPreviewProps" @top-tool-close="onTopToolClose">
                 <div
                   :class="[
                     matrixStyles.slotDemo,

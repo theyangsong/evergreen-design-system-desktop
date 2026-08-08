@@ -307,6 +307,17 @@ export const showcasePopupUsesLabels = {
   detail: tokenLabel('详情', 'detail'),
   reminder: tokenLabel('提醒', 'reminder'),
   verify: tokenLabel('验证', 'verify'),
+  custom: tokenLabel('自定义', 'custom'),
+} as const;
+
+export const showcasePopupAlertVerticalAlignLabels = {
+  center: tokenLabel('居中', 'center'),
+  'padding-top-md': tokenLabel('百分比', 'padding-top-md'),
+} as const;
+
+export const showcaseSearchScenarioLabels = {
+  search: tokenLabel('搜索', 'search'),
+  'verify-input': tokenLabel('验证输入', 'verify-input'),
 } as const;
 
 export const showcaseReminderTypeLabels = {
@@ -392,6 +403,7 @@ export const showcaseButtonCustomizeFieldLabels = {
   loading: '加载',
   label: '文案',
   showIcon: '显示图标',
+  iconPosition: '图标位置',
   iconName: '图标名',
   symbol: '图标',
   shape: '形状',
@@ -415,6 +427,7 @@ export const showcaseInputCustomizeFieldLabels = {
   widthMode: '宽度模式',
   fixedWidth: '固定宽度',
   placeholder: '占位符',
+  scenario: '场景化',
   disabled: '禁用',
   readonly: '只读',
   unit: '单位',
@@ -445,6 +458,7 @@ export const showcaseFlotationCustomizeFieldLabels = {
   disabled: '禁用',
   showSymbol: '显示图标',
   symbolIcon: '图标名',
+  symbolPosition: '图标位置',
   showTag: '显示标签',
   tagText: '标签文案',
   tagStatus: '标签状态',

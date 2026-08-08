@@ -28,6 +28,15 @@ const props = withDefaults(
     closeOnScroll?: boolean;
     widthMode?: PopoverWidthMode;
     heightMode?: PopoverHeightMode;
+    /** widthMode=fixed 时面板区宽度（px）；预置宽见 POPOVER_PRESET_WIDTH_*。 */
+    width?: number;
+    maxWidth?: number;
+    height?: number;
+    maxHeight?: number;
+    /** placement=top 时顶部工具条（标题 + 可选关闭）。 */
+    topTool?: boolean;
+    topToolTitle?: string;
+    topToolClosable?: boolean;
   }>(),
   {
     placement: 'top',
@@ -136,6 +145,14 @@ defineExpose({
         :align="align"
         :width-mode="widthMode"
         :height-mode="heightMode"
+        :width="width"
+        :max-width="maxWidth"
+        :height="height"
+        :max-height="maxHeight"
+        :top-tool="topTool"
+        :top-tool-title="topToolTitle"
+        :top-tool-closable="topToolClosable"
+        @top-tool-close="closePopover"
       >
         <slot :close="closePopover" :active="expanded" />
       </EgPopover>

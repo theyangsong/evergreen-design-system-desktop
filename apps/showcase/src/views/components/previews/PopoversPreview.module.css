@@ -56,7 +56,6 @@
 
 .slotDemo {
   box-sizing: border-box;
-  padding: var(--spacing-1);
 }
 
 .slotDemoFixed {

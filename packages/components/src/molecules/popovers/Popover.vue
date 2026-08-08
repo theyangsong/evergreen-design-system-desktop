@@ -11,6 +11,9 @@ import {
   type Ref,
 } from 'vue';
 import { POPOVER_MOTION_ACTIVE_KEY } from './popoverMotion';
+import { EgDivider } from '../../atoms/divider';
+import { EgIcon } from '../../atoms/icons';
+import { EgIconButton } from '../icon-button';
 import {
   buildPopoverOutlinePath,
   DEFAULT_POPOVER_PANEL,
@@ -52,6 +55,15 @@ const props = withDefaults(
     microFloat?: boolean;
     /** 显式 active；未传且非 AnchoredTooltip 注入时，挂载后自动入场。 */
     active?: boolean;
+    /** placement=top 时顶部工具条（标题 + 可选关闭）。 */
+    topTool?: boolean;
+    topToolTitle?: string;
+    /** 显示关闭按钮；点击 emit topToolClose。 */
+    topToolClosable?: boolean;
+    /** 插槽区内边距（px）；未传时按 placement 使用 CSS 默认（top：上 0；bottom/left/right：四周 spacing-4）。 */
+    contentPaddingTop?: number;
+    contentPaddingInline?: number;
+    contentPaddingBottom?: number;
   }>(),
   {
     placement: 'bottom',
@@ -59,13 +71,24 @@ const props = withDefaults(
     widthMode: 'adaptive',
     heightMode: 'adaptive',
     microFloat: true,
+    topTool: false,
+    topToolTitle: 'Title',
+    topToolClosable: true,
   },
 );
 
+const emit = defineEmits<{
+  topToolClose: [];
+}>();
+
 const injectedMotionActive = inject(POPOVER_MOTION_ACTIVE_KEY, null);
 const localMotionActive = ref(false);
+const CONTENT_OVERFLOW_EPSILON = 2;
+
 const shellRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
+const contentSlotRef = ref<HTMLElement | null>(null);
+const contentSlotOverflow = ref(false);
 const measuredPanel = ref<PopoverPanelDimensions>({
   panelW: POPOVER_PANEL_MIN_W,
   panelH: POPOVER_PANEL_MIN_H,
@@ -133,11 +156,20 @@ const motionClass = computed(() => (props.microFloat ? 'motion-flotation' : null
 const contentHostClass = computed(() => [
   styles.content,
   motionClass.value,
-  (props.maxWidth != null || props.maxHeight != null) && styles.contentConstrained,
+  (props.maxWidth != null || props.maxHeight != null) &&
+    !showTopTool.value &&
+    styles.contentConstrained,
 ]);
+
+const showTopTool = computed(
+  () => props.placement === 'top' && Boolean(props.topTool),
+);
+
+const usesTopPlacementSlotPadding = computed(() => props.placement === 'top');
 
 const contentBodyClass = computed(() => [
   styles.contentBody,
+  showTopTool.value && styles.contentBodyWithTopTool,
   usesAdaptiveWidth.value && styles.contentBodyAdaptiveWidth,
   usesAdaptiveHeight.value && styles.contentBodyAdaptiveHeight,
 ]);
@@ -193,9 +225,72 @@ const contentBodyStyle = computed((): CSSProperties => {
   return style;
 });
 
+const contentSlotStyle = computed((): CSSProperties => {
+  const style: CSSProperties = {};
+
+  if (props.contentPaddingTop != null) {
+    style.paddingTop = `${props.contentPaddingTop}px`;
+  }
+  if (props.contentPaddingInline != null) {
+    style.paddingLeft = `${props.contentPaddingInline}px`;
+    style.paddingRight = `${props.contentPaddingInline}px`;
+  }
+  if (props.contentPaddingBottom != null) {
+    style.paddingBottom = `${props.contentPaddingBottom}px`;
+  }
+
+  return style;
+});
+
 let contentObserver: ResizeObserver | undefined;
 let contentMutationObserver: MutationObserver | undefined;
+let slotOverflowObserver: ResizeObserver | undefined;
+let slotOverflowMutationObserver: MutationObserver | undefined;
 let measureFrame = 0;
+
+function updateContentSlotOverflow() {
+  const element = contentSlotRef.value;
+
+  if (!element || !showTopTool.value) {
+    contentSlotOverflow.value = false;
+    return;
+  }
+
+  contentSlotOverflow.value =
+    element.scrollHeight - element.clientHeight > CONTENT_OVERFLOW_EPSILON;
+}
+
+function bindSlotOverflowObserver() {
+  slotOverflowObserver?.disconnect();
+  slotOverflowObserver = undefined;
+  slotOverflowMutationObserver?.disconnect();
+  slotOverflowMutationObserver = undefined;
+
+  updateContentSlotOverflow();
+
+  if (!showTopTool.value) {
+    return;
+  }
+
+  const element = contentSlotRef.value;
+  if (!element) {
+    return;
+  }
+
+  slotOverflowObserver = new ResizeObserver(() => {
+    updateContentSlotOverflow();
+  });
+  slotOverflowObserver.observe(element);
+
+  slotOverflowMutationObserver = new MutationObserver(() => {
+    updateContentSlotOverflow();
+  });
+  slotOverflowMutationObserver.observe(element, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+}
 
 function readPanelSizeFromShell(shell: HTMLElement): PopoverPanelDimensions {
   const rect = shell.getBoundingClientRect();
@@ -294,9 +389,16 @@ watch(
 watch(
   () => [props.widthMode, props.heightMode, props.width, props.height, props.maxWidth, props.maxHeight],
   () => {
-    nextTick(() => bindContentObserver());
+    nextTick(() => {
+      bindContentObserver();
+      bindSlotOverflowObserver();
+    });
   },
 );
+
+watch(showTopTool, () => {
+  nextTick(() => bindSlotOverflowObserver());
+});
 
 const injectedMotionActiveRef = injectedMotionActive as Ref<boolean> | null;
 if (injectedMotionActiveRef) {
@@ -308,6 +410,7 @@ if (injectedMotionActiveRef) {
       }
       nextTick(() => {
         bindContentObserver();
+        bindSlotOverflowObserver();
         scheduleMeasureContentPanel();
       });
     },
@@ -315,7 +418,10 @@ if (injectedMotionActiveRef) {
 }
 
 onMounted(() => {
-  nextTick(() => bindContentObserver());
+  nextTick(() => {
+    bindContentObserver();
+    bindSlotOverflowObserver();
+  });
 
   if (!props.microFloat || injectedMotionActive || props.active !== undefined) {
     return;
@@ -329,6 +435,8 @@ onBeforeUnmount(() => {
   cancelAnimationFrame(measureFrame);
   contentObserver?.disconnect();
   contentMutationObserver?.disconnect();
+  slotOverflowObserver?.disconnect();
+  slotOverflowMutationObserver?.disconnect();
 });
 </script>
 
@@ -370,7 +478,46 @@ onBeforeUnmount(() => {
           :class="contentBodyClass"
           :style="contentBodyStyle"
         >
-          <slot />
+          <div v-if="showTopTool" :class="styles.topTool">
+            <p
+              :class="[
+                styles.topToolTitle,
+                topToolClosable && styles.topToolTitleWithClose,
+              ]"
+            >
+              {{ topToolTitle }}
+            </p>
+            <div v-if="topToolClosable" :class="styles.topToolClose">
+              <EgIconButton
+                shape="square"
+                size="sm"
+                label="关闭"
+                motion="asym"
+                @click="emit('topToolClose')"
+              >
+                <EgIcon name="eds-close-circle-fill" fit />
+              </EgIconButton>
+            </div>
+          </div>
+          <EgDivider
+            v-if="showTopTool"
+            type="page"
+            direction="horizontal"
+            :hide="!contentSlotOverflow"
+          />
+          <div
+            ref="contentSlotRef"
+            :class="[
+              styles.contentSlot,
+              usesTopPlacementSlotPadding
+                ? styles.contentSlotPaddingTop
+                : styles.contentSlotPaddingSide,
+              showTopTool && styles.contentSlotWithTopTool,
+            ]"
+            :style="contentSlotStyle"
+          >
+            <slot />
+          </div>
         </div>
       </div>
     </div>

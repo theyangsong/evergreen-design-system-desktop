@@ -19,6 +19,7 @@ import {
   showcasePageBgLabels,
   showcasePaginerDataVolumeLabels,
   showcasePopupUsesLabels,
+  showcasePopupAlertVerticalAlignLabels,
   showcaseReminderTypeLabels,
   showcaseYesNoLabels,
   tokenLabel,
@@ -47,6 +48,7 @@ import {
   dataListColumnSettingDefaults,
   dataListColumnSettingLabel,
 } from './dataListPagePreviewData';
+import { popupVerifyCustomizeControls, popupVerifyCustomizeDefaults } from './verifyDocCustomize';
 
 export const ORGANISM_IMPORT = `import {
   EgNavBar,
@@ -1740,15 +1742,47 @@ export function buildLayoutUsageSnippet(
 export const popupFigmaNode = '2170:3023';
 
 export const popupCustomizeDefaults = {
-  uses: 'reminder' as 'detail' | 'reminder' | 'verify',
+  uses: 'reminder' as 'detail' | 'reminder' | 'verify' | 'custom',
+  alertVerticalAlign: 'padding-top-md' as 'center' | 'padding-top-md',
   reminderType: 'info' as 'info' | 'echo',
+  boxWidth: '328',
+  boxHeight: '436',
+  ...popupVerifyCustomizeDefaults,
 };
 
 export const popupUsesCustomizeControl: DocCustomizeControl = {
   kind: 'select',
   key: 'uses',
-  label: '用途',
-  options: propLabelSelectOptions(['detail', 'reminder', 'verify'] as const, showcasePopupUsesLabels),
+  label: '场景化',
+  options: propLabelSelectOptions(
+    ['detail', 'reminder', 'verify', 'custom'] as const,
+    showcasePopupUsesLabels,
+  ),
+};
+
+export const popupAlertVerticalAlignCustomizeControl: DocCustomizeControl = {
+  kind: 'select',
+  key: 'alertVerticalAlign',
+  label: '垂直对齐方式',
+  options: propLabelSelectOptions(
+    ['center', 'padding-top-md'] as const,
+    showcasePopupAlertVerticalAlignLabels,
+  ),
+  visibleWhen: (state) => state.uses !== 'detail',
+};
+
+export const popupCustomBoxWidthControl: DocCustomizeControl = {
+  kind: 'text',
+  key: 'boxWidth',
+  label: 'Popup Box 宽度',
+  visibleWhen: (state) => state.uses === 'custom',
+};
+
+export const popupCustomBoxHeightControl: DocCustomizeControl = {
+  kind: 'text',
+  key: 'boxHeight',
+  label: 'Popup Box 高度',
+  visibleWhen: (state) => state.uses === 'custom',
 };
 
 export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
@@ -1756,12 +1790,16 @@ export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
   key: 'reminderType',
   label: 'Popup Box 宽度',
   options: propLabelSelectOptions(['info', 'echo'] as const, showcaseReminderTypeLabels),
-  visibleWhen: (state) => state.uses === 'reminder' || state.uses === 'verify',
+  visibleWhen: (state) => state.uses === 'reminder',
 };
 
 export const popupCustomizeControls: DocCustomizeControl[] = [
   popupUsesCustomizeControl,
+  popupAlertVerticalAlignCustomizeControl,
   popupReminderTypeCustomizeControl,
+  ...popupVerifyCustomizeControls,
+  popupCustomBoxWidthControl,
+  popupCustomBoxHeightControl,
 ];
 
 export const popupPropRows: OrganismPropRow[] = [
@@ -1773,15 +1811,42 @@ export const popupPropRows: OrganismPropRow[] = [
   },
   {
     name: 'uses',
-    type: "'detail' | 'reminder' | 'verify'",
+    type: "'detail' | 'reminder' | 'verify' | 'custom'",
     defaultValue: "'reminder'",
-    description: 'Popup 外壳用途。Detail 880×620；Reminder / Verify 为 Popup Box + 默认插槽内容（内容由 EgDetail / EgReminder 等各自文档页定制）。',
+    description:
+      'Popup 场景化。Detail 880×620；Reminder / Verify 为固定 Popup Box + 内容 organism；Custom 为可配置宽高的 Popup Box + 默认插槽。',
+  },
+  {
+    name: 'alertVerticalAlign',
+    type: "'center' | 'padding-top-md'",
+    defaultValue: 'reminder / verify → padding-top-md；custom → center',
+    description:
+      'Alert 舞台垂直对齐（Detail 忽略）。未传时 reminder / verify 默认 padding-top-md（`--padding-top-md`，22%）；custom 默认 center。',
+  },
+  {
+    name: 'boxWidth',
+    type: 'number',
+    defaultValue: '328',
+    description: 'uses=custom 时 Popup Box 宽度（px）。',
+  },
+  {
+    name: 'boxHeight',
+    type: 'number',
+    defaultValue: '436',
+    description: 'uses=custom 时 Popup Box 高度（px）。',
+  },
+  {
+    name: 'verifyType',
+    type: 'VerifyType',
+    defaultValue: "'single-email'",
+    description:
+      'uses=verify 时内容场景与 Popup Box 固定尺寸（邮箱 328×436、Google 328×412、交易/登录/锁定 328×416、PassKey 328×406、2FA 358×459）。',
   },
   {
     name: 'reminderType',
     type: "'info' | 'echo'",
     defaultValue: "'info'",
-    description: 'uses=reminder|verify 时 Popup Box 固定宽度（Info 280 / Echo 460）。',
+    description: 'uses=reminder 时 Popup Box 固定宽度（Info 280 / Echo 460）。',
   },
   {
     name: 'microFloat',

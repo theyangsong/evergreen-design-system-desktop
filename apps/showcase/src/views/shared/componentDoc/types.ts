@@ -23,6 +23,12 @@ export type DocCustomizeBooleanControl = {
   visibleWhen?: (state: Record<string, unknown>) => boolean;
   /** 勾选为 true 时，将对应 key 置为 false（如角标 / 红点互斥）。 */
   exclusiveKey?: string;
+  /** 勾选后在同一控件槽右侧展示的下拉（如显示图标 → 图标位置）。 */
+  inlineSelect?: {
+    key: string;
+    label: string;
+    options: { value: string; label: string }[];
+  };
 };
 
 export type DocCustomizeTextControl = {

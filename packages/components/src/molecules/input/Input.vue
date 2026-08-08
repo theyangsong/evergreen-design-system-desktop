@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useSlots, watch } from 'vue';
+import { EgIcon } from '../../atoms/icons';
 import { EgButton, type ButtonSize } from '../button';
+import { EgIconButton } from '../icon-button';
 import styles from './Input.module.css';
 
 export type InputType = 'standard' | 'amount';
@@ -19,6 +21,7 @@ const props = withDefaults(
     readonly?: boolean;
     unit?: string;
     clearable?: boolean;
+    secure?: boolean;
     showMax?: boolean;
     maxLabel?: string;
     inputmode?: 'text' | 'decimal' | 'numeric';
@@ -33,6 +36,7 @@ const props = withDefaults(
     disabled: false,
     readonly: false,
     clearable: true,
+    secure: false,
     showMax: false,
     maxLabel: 'Max',
     inputmode: undefined,
@@ -50,6 +54,7 @@ const emit = defineEmits<{
 const slots = useSlots();
 const inputRef = ref<HTMLInputElement | null>(null);
 const focused = ref(false);
+const passwordVisible = ref(false);
 const unitLeftPx = ref(0);
 const valueWidthPx = ref(0);
 const unitWidthPx = ref(0);
@@ -90,8 +95,18 @@ const resolvedPlaceholder = computed(() => {
   return isAmount.value ? props.amountPlaceholder : props.placeholder;
 });
 
+const resolvedInputType = computed(() => {
+  if (!props.secure) {
+    return 'text';
+  }
+  return passwordVisible.value ? 'text' : 'password';
+});
+
+const showSecureToggle = computed(() => props.secure && !slots.suffix);
+
 const showClear = computed(
   () =>
+    !props.secure &&
     props.clearable &&
     focused.value &&
     !props.disabled &&
@@ -118,7 +133,8 @@ const showDefaultSuffix = computed(
   () =>
     showClear.value ||
     reserveClearSpace.value ||
-    showInlineUnit.value,
+    showInlineUnit.value ||
+    showSecureToggle.value,
 );
 
 const showSuffix = computed(
@@ -246,6 +262,18 @@ function onMax() {
   emit('max');
 }
 
+function togglePasswordVisible() {
+  passwordVisible.value = !passwordVisible.value;
+}
+
+function focusInput() {
+  inputRef.value?.focus();
+}
+
+defineExpose({
+  focus: focusInput,
+});
+
 function onFieldClick(event: MouseEvent) {
   if (props.disabled || props.readonly) {
     return;
@@ -316,7 +344,7 @@ onMounted(() => {
                 ]"
                 :style="[inputRenderStyle, shrinkInputStyle]"
                 :value="modelValue"
-                type="text"
+                :type="resolvedInputType"
                 :inputmode="resolvedInputMode"
                 :placeholder="resolvedPlaceholder"
                 :disabled="disabled"
@@ -375,6 +403,22 @@ onMounted(() => {
             >
               {{ unit }}
             </span>
+
+            <EgIconButton
+              v-if="showSecureToggle"
+              size="sm"
+              shape="square"
+              :label="passwordVisible ? '隐藏密码' : '显示密码'"
+              :disabled="disabled || readonly"
+              @mousedown.prevent
+              @click.stop="togglePasswordVisible"
+            >
+              <EgIcon
+                :name="passwordVisible ? 'eds-eye' : 'eds-uneye'"
+                fit
+                size="md"
+              />
+            </EgIconButton>
           </slot>
         </div>
       </div>
