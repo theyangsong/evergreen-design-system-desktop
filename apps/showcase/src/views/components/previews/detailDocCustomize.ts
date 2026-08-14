@@ -1,5 +1,11 @@
-import type { DetailSectionData } from '@eds/desktop-components';
-import { createDefaultDetailSections, cryptoNames, getProcessedCrypto } from '@eds/desktop-components';
+import {
+  buildDetailAddressApplyItemRow,
+  createDefaultDetailSections,
+  cryptoNames,
+  getProcessedCrypto,
+  type DetailAddressLayout,
+  type DetailSectionData,
+} from '@eds/desktop-components';
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import {
   buttonToneRows,
@@ -8,7 +14,7 @@ import {
   showcaseButtonCustomizeFieldLabels,
 } from '@/data/showcasePropLabels';
 import { tagStatusStyleOptions } from './tagDocCustomize';
-import { resolveTabLabels, tabsCustomizeDefaults } from './tabDocCustomize';
+import { resolveTabLabels, tabsCustomizeDefaults, tabsSpacingSizeOptions } from './tabDocCustomize';
 import {
   detailApplyItemDataSourceOptions,
   detailApplyItemPresets,
@@ -44,7 +50,8 @@ export function detailSectionItemKey(
     | 'ShowValueCopy'
     | 'ShowValueAddressBook'
     | 'ShowValueAmlSearch'
-    | 'ShowValueBrowser',
+    | 'ShowValueBrowser'
+    | 'AddressLayout',
   itemIndex: number,
 ): string {
   return `section${sectionNum}Item${itemIndex}${field}`;
@@ -79,6 +86,7 @@ export function createDetailSectionItemDefaults(
     out[detailSectionItemKey(sectionNum, 'ShowValueAddressBook', itemIndex)] = false;
     out[detailSectionItemKey(sectionNum, 'ShowValueAmlSearch', itemIndex)] = false;
     out[detailSectionItemKey(sectionNum, 'ShowValueBrowser', itemIndex)] = false;
+    out[detailSectionItemKey(sectionNum, 'AddressLayout', itemIndex)] = 'single';
   }
 
   return out;
@@ -94,6 +102,9 @@ export function createDetailApplyItemShowcaseSectionDefaults(
     const itemIndex = index + 1;
     if (itemIndex > DETAIL_SECTION_MAX_ITEMS) return;
     out[detailSectionItemKey(sectionNum, 'DataSource', itemIndex)] = preset.id;
+    if (isDetailAddressPresetDataSource(preset.id)) {
+      out[detailSectionItemKey(sectionNum, 'AddressLayout', itemIndex)] = 'multi-collapsed';
+    }
   });
 
   return out;
@@ -112,6 +123,35 @@ export function resetDetailSectionItemCustomizeFields(
     target[key] = value;
   }
 }
+
+export function isDetailAddressPresetDataSource(dataSource: string): dataSource is 'sender' | 'receiver' {
+  return dataSource === 'sender' || dataSource === 'receiver';
+}
+
+function parseDetailAddressLayout(
+  state: Record<string, unknown>,
+  sectionNum: 1 | 2,
+  itemIndex: number,
+): DetailAddressLayout {
+  const raw = String(
+    state[detailSectionItemKey(sectionNum, 'AddressLayout', itemIndex)] ?? 'single',
+  );
+  if (
+    raw === 'multi-collapsed'
+    || raw === 'multi-expanded'
+    || raw === 'multi-orders'
+  ) {
+    return raw;
+  }
+  return 'single';
+}
+
+const detailAddressLayoutOptions = [
+  { value: 'single', label: '单地址' },
+  { value: 'multi-collapsed', label: '多地址默认' },
+  { value: 'multi-orders', label: '数量' },
+  { value: 'multi-expanded', label: '多地址展开' },
+] as const;
 
 export function isDetailItemPresetDataSource(
   state: Record<string, unknown>,
@@ -135,6 +175,8 @@ export const detailCustomizeDefaults = {
   showTabs: true,
   tabCount: tabsCustomizeDefaults.count,
   tabLabels: tabsCustomizeDefaults.labels,
+  tabHorizontalGap: tabsCustomizeDefaults.horizontalGap,
+  tabVerticalGap: tabsCustomizeDefaults.verticalGap,
   activeTab: '0',
   section1ShowTitle: true,
   section1Title: 'Section',
@@ -153,6 +195,7 @@ export const detailCustomizeDefaults = {
   section2EditItemIndex: '1',
   showToolbar: true,
   showToolbarNav: true,
+  toolbarDividerPinned: true,
   toolbarCurrent: '12',
   toolbarTotal: '1000',
   toolbarTone: 'decor',
@@ -214,6 +257,20 @@ export function buildDetailTabsCustomizeControls(
       label: '标签名',
       row: 0,
       placeholder: '用空格分隔，如 Overview Assets History',
+    },
+    {
+      kind: 'select',
+      key: 'tabHorizontalGap',
+      label: '水平间距',
+      row: 0,
+      options: tabsSpacingSizeOptions.map((option) => ({ ...option })),
+    },
+    {
+      kind: 'select',
+      key: 'tabVerticalGap',
+      label: '垂直间距',
+      row: 0,
+      options: tabsSpacingSizeOptions.map((option) => ({ ...option })),
     },
     {
       kind: 'select',
@@ -314,6 +371,19 @@ function buildDetailSectionItemRowControls(
       row: editItemRow,
       visibleWhen,
       options: detailApplyItemDataSourceOptions,
+    },
+    {
+      kind: 'select',
+      key: detailSectionItemKey(sectionNum, 'AddressLayout', editIndex),
+      label: '地址形态',
+      row: editItemRow,
+      visibleWhen: (s) => {
+        const source = String(
+          s[detailSectionItemKey(sectionNum, 'DataSource', editIndex)] ?? 'custom',
+        );
+        return visibleWhen(s) && isDetailAddressPresetDataSource(source);
+      },
+      options: detailAddressLayoutOptions.map((option) => ({ ...option })),
     },
     {
       kind: 'text',
@@ -511,6 +581,12 @@ export const detailToolbarCustomizeControls: DocCustomizeControl[] = [
   { kind: 'boolean', key: 'showToolbar', label: '显示工具栏' },
   {
     kind: 'boolean',
+    key: 'toolbarDividerPinned',
+    label: '分割线常驻',
+    visibleWhen: (state) => Boolean(state.showToolbar),
+  },
+  {
+    kind: 'boolean',
     key: 'showToolbarNav',
     label: '翻页导航',
     visibleWhen: (state) => Boolean(state.showToolbar),
@@ -588,6 +664,17 @@ function resolveDetailItemFromCustomize(
   );
 
   if (dataSource !== 'custom') {
+    if (isDetailAddressPresetDataSource(dataSource)) {
+      const layout = parseDetailAddressLayout(state, sectionNum, itemIndex);
+      const presetItem = buildDetailAddressApplyItemRow(dataSource, layout, {
+        key: itemKey,
+        ...(layout === 'multi-collapsed' || layout === 'multi-orders'
+          ? { addressCount: 16 }
+          : {}),
+      });
+      return applyDetailSectionTitleIconVisibility(presetItem, sectionNum, state);
+    }
+
     const presetItem = resolveDetailItemFromApplyPreset(itemKey, dataSource);
     if (presetItem) {
       /** Apply_Item 挂件锁死；仅 section 级 Title 图标开关可覆盖 titleIcon 显隐。 */
@@ -680,6 +767,19 @@ export function buildDetailSectionsFromCustomize(
   return sections;
 }
 
+export function findDetailItemByKey(
+  sections: DetailSectionData[],
+  key: string,
+): DetailSectionData['items'][number] | undefined {
+  for (const section of sections) {
+    const item = section.items.find((row) => (row.key ?? '') === key);
+    if (item) {
+      return item;
+    }
+  }
+  return undefined;
+}
+
 export function buildDetailUsageSnippet(state: Record<string, unknown>): string {
   const lines = [
     '<EgDetail',
@@ -699,11 +799,21 @@ export function buildDetailUsageSnippet(state: Record<string, unknown>): string 
       `  :tab-labels="[${labels.map((label) => `'${label.replace(/'/g, "\\'")}'`).join(', ')}]"`,
       `  v-model:active-tab="${resolveDetailActiveTab(state)}"`,
     );
+    if (state.tabHorizontalGap !== 'xl') {
+      lines.push(`  tab-horizontal-gap="${String(state.tabHorizontalGap)}"`);
+    }
+    if (state.tabVerticalGap !== 'xl') {
+      lines.push(`  tab-vertical-gap="${String(state.tabVerticalGap)}"`);
+    }
   }
 
   lines.push(
     `  :show-toolbar="${Boolean(state.showToolbar)}"`,
   );
+
+  if (state.showToolbar && state.toolbarDividerPinned) {
+    lines.push('  :toolbar-divider-pinned="true"');
+  }
 
   if (state.showToolbar && state.showToolbarNav) {
     lines.push(
@@ -735,9 +845,22 @@ export const detailPropRows: DocPropRow[] = [
   { name: 'showStatusTag', type: 'boolean', defaultValue: 'true', description: '是否渲染 Status Tag。' },
   { name: 'showTabs', type: 'boolean', defaultValue: 'true', description: 'Headline 下 EgTabs + Page Divider。' },
   { name: 'tabLabels', type: 'string[]', defaultValue: "['Tab', …]", description: 'Tabs 标签文案。' },
+  {
+    name: 'tabHorizontalGap',
+    type: "'xl' | 'md' | 'sm' | 'xs'",
+    defaultValue: "'xl'",
+    description: 'EgTabs horizontalGap：xl → gap var(--spacing-5)；md → spacing-4；sm → spacing-3；xs → spacing-2。',
+  },
+  {
+    name: 'tabVerticalGap',
+    type: "'xl' | 'md' | 'sm' | 'xs'",
+    defaultValue: "'xl'",
+    description: 'EgTabs verticalGap（padding-bottom + stroke-xl）：xl → spacing-2-5；md → spacing-2；sm → spacing-1-5；xs → spacing-1。',
+  },
   { name: 'sections', type: 'DetailSectionData[]', defaultValue: 'createDefaultDetailSections()', description: '内容区 Section / Item 数据。' },
   { name: 'activeTab', type: 'number', defaultValue: '0', description: 'v-model:activeTab — Headline Tabs 选中索引。' },
   { name: 'showToolbar', type: 'boolean', defaultValue: 'true', description: '底部工具栏（翻页 + Cancel / Confirm）。' },
+  { name: 'toolbarDividerPinned', type: 'boolean', defaultValue: 'false', description: '工具栏顶部分割线常驻；false 时仅在底部仍有内容被裁切时显示。' },
   { name: 'showToolbarNav', type: 'boolean', defaultValue: 'true', description: '工具栏左侧 EgPaginationItem borderArrow 与序号计数。' },
   { name: 'toolbarCurrent', type: 'string | number', defaultValue: '12', description: '当前序号（千分位格式化）。' },
   { name: 'toolbarTotal', type: 'string | number', defaultValue: '1000', description: '总条数（千分位格式化）。' },
@@ -748,6 +871,10 @@ export const detailPropRows: DocPropRow[] = [
   { name: 'toolbarDirection', type: "'left' | 'right'", defaultValue: "'right'", description: '无翻页导航时 Cancel / Confirm 对齐。' },
   { name: 'toolbarConfirmLabel', type: 'string', defaultValue: "'Confirm'", description: '确认按钮文案。' },
   { name: 'toolbarCancelLabel', type: 'string', defaultValue: "'Cancel'", description: '取消按钮文案。' },
+  { name: 'addressLayout', type: "'single' | 'multi-collapsed' | 'multi-expanded' | 'multi-orders'", defaultValue: "'single'", description: 'Sender / Receiver 地址展示形态（Figma 2267:11822 / 2267:11830）；multi-orders 为数量 Orders 链。' },
+  { name: 'valueEntries', type: 'DetailItemValueEntry[]', defaultValue: '-', description: '多地址条目；与 addressCount / addressLayout 配合。' },
+  { name: 'addressCount', type: 'number', defaultValue: '-', description: '多地址默认态计数。' },
+  { name: 'addressViewMoreLabel', type: 'string', defaultValue: '-', description: '多地址默认态「查看更多」链文案。' },
 ];
 
 export const detailEventRows: DocPropRow[] = [
@@ -756,7 +883,7 @@ export const detailEventRows: DocPropRow[] = [
   { name: 'toolbarNext', type: '[]', defaultValue: '-', description: '工具栏下一项 borderArrow。' },
   { name: 'toolbarConfirm', type: '[]', defaultValue: '-', description: '工具栏确认按钮。' },
   { name: 'toolbarCancel', type: '[]', defaultValue: '-', description: '工具栏取消按钮。' },
-  { name: 'itemValueLinkClick', type: '[key: string]', defaultValue: '-', description: 'Item 行尾 EgLink（showValueLink）点击；payload 为 item.key 或 `${sectionIndex}-${itemIndex}`。' },
+  { name: 'itemValueLinkClick', type: '[key: string]', defaultValue: '-', description: 'Item 行尾 EgLink（showValueLink / 多地址 Expand·Orders 链）点击；payload 为 item.key 或 `${sectionIndex}-${itemIndex}`。' },
 ];
 
 export const detailSlotRows: DocPropRow[] = [

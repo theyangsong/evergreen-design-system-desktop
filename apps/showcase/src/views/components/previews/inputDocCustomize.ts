@@ -7,6 +7,10 @@ import {
   showcaseSearchScenarioLabels,
   showcaseWidthModeLabels,
 } from '@/data/showcasePropLabels';
+import {
+  INPUT_DOC_EVENTS,
+  inputInteractionLabels,
+} from './inputDocPreview';
 
 export const inputImportCode = `import { EgInput } from '@eds/desktop-components';`;
 
@@ -22,6 +26,7 @@ export const comboImportCode = `import {
 
 export const inputCustomizeDefaults = {
   type: 'standard',
+  interaction: 'full',
   size: 'md',
   widthMode: 'full',
   fixedWidth: '319',
@@ -43,6 +48,12 @@ export const inputCustomizeControls: DocCustomizeControl[] = [
       { value: 'standard', label: showcaseInputTypeLabels.standard },
       { value: 'amount', label: showcaseInputTypeLabels.amount },
     ],
+  },
+  {
+    kind: 'select',
+    key: 'interaction',
+    label: showcaseInputCustomizeFieldLabels.interaction,
+    options: propLabelSelectOptions(INPUT_DOC_EVENTS, inputInteractionLabels),
   },
   {
     kind: 'select',
@@ -71,8 +82,18 @@ export const inputCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (s) => s.widthMode === 'fixed',
   },
   { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
-  { kind: 'boolean', key: 'disabled', label: showcaseInputCustomizeFieldLabels.disabled },
-  { kind: 'boolean', key: 'readonly', label: showcaseInputCustomizeFieldLabels.readonly },
+  {
+    kind: 'boolean',
+    key: 'disabled',
+    label: showcaseInputCustomizeFieldLabels.disabled,
+    visibleWhen: (s) => s.interaction === 'full',
+  },
+  {
+    kind: 'boolean',
+    key: 'readonly',
+    label: showcaseInputCustomizeFieldLabels.readonly,
+    visibleWhen: (s) => s.interaction === 'full',
+  },
   { kind: 'text', key: 'unit', label: showcaseInputCustomizeFieldLabels.unit },
   { kind: 'boolean', key: 'clearable', label: showcaseInputCustomizeFieldLabels.clearable },
   {
@@ -95,10 +116,14 @@ export const textareaCustomizeDefaults = {
   fixedWidth: '319',
   disabled: false,
   readonly: false,
+  pasteLabel: 'Paste',
+  clearLabel: 'Clear',
 } as const;
 
 export const textareaCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
+  { kind: 'text', key: 'pasteLabel', label: showcaseInputCustomizeFieldLabels.pasteLabel },
+  { kind: 'text', key: 'clearLabel', label: showcaseInputCustomizeFieldLabels.clearLabel },
   {
     kind: 'select',
     key: 'widthMode',
@@ -173,7 +198,7 @@ export const comboInputItemCustomizeDefaults = {
 export const comboInputItemCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label },
   { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback },
-  ...inputCustomizeControls,
+  ...inputCustomizeControls.filter((control) => control.key !== 'interaction'),
 ];
 
 const comboInputItemShellKeys = ['label', 'feedback'] as const;

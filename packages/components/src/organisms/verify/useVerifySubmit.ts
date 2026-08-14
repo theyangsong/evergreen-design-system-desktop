@@ -1,8 +1,10 @@
-import { computed, reactive, type ComputedRef } from 'vue';
+import { computed, onScopeDispose, reactive, type ComputedRef } from 'vue';
 import type { VerifyState } from './Verify.vue';
 
-const VERIFY_VERIFYING_MS = 300;
-const VERIFY_SUCCESS_MS = 200;
+/** 校验中最短停留（ms）— 输入完成后立即进入 verifying，至少停留此时长再进入 success / error。 */
+export const VERIFY_SUBMIT_VERIFYING_MS = 1800;
+/** 校验成功停留（ms）— success 展示此时长后触发 requestClose。 */
+export const VERIFY_SUBMIT_SUCCESS_MS = 1300;
 
 export type UseVerifySubmitOptions = {
   submit: (code: string) => boolean | Promise<boolean>;
@@ -70,7 +72,7 @@ export function useVerifySubmit(options: UseVerifySubmitOptions): UseVerifySubmi
     const verifyingStarted = Date.now();
 
     const ok = await Promise.resolve(options.submit(submittedCode));
-    const verifyingRemain = Math.max(0, VERIFY_VERIFYING_MS - (Date.now() - verifyingStarted));
+    const verifyingRemain = Math.max(0, VERIFY_SUBMIT_VERIFYING_MS - (Date.now() - verifyingStarted));
 
     await delay(verifyingRemain);
 
@@ -84,7 +86,7 @@ export function useVerifySubmit(options: UseVerifySubmitOptions): UseVerifySubmi
     verify.state = 'success';
     accepted = true;
 
-    await delay(VERIFY_SUCCESS_MS);
+    await delay(VERIFY_SUBMIT_SUCCESS_MS);
     options.requestClose();
   }
 
@@ -99,6 +101,10 @@ export function useVerifySubmit(options: UseVerifySubmitOptions): UseVerifySubmi
   function wasAccepted() {
     return accepted;
   }
+
+  onScopeDispose(() => {
+    clearSettleTimer();
+  });
 
   return {
     verify,

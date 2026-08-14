@@ -2,6 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, provide, useId, useSlots, watch } from 'vue';
 import { EgIcon } from '../../atoms/icons';
 import {
+  MOTION_HOVER_ENTER_ONLY,
+  MOTION_HOVER_ENTER_SUPPRESSED,
+} from '../../atoms/motion-hover-enter';
+import {
   EgMessage,
   EgReddot,
   type MessageFocusBackground,
@@ -9,7 +13,6 @@ import {
 } from '../../molecules/feedback';
 import { MESSAGE_PARENT_FOCUSED_KEY } from '../../molecules/feedback/messageFocusContext';
 import { useModuleMenuItemFocus } from './moduleMenuItemFocus';
-import { MODULE_MENU_ITEM_MOTION } from './moduleMenuMotion';
 import styles from './ModuleMenu.module.css';
 
 /** @deprecated 使用 subitem + tier */
@@ -119,9 +122,10 @@ const hasAccessory = computed(
 
 const itemClass = computed(() => [
   styles.item,
-  MODULE_MENU_ITEM_MOTION,
+  MOTION_HOVER_ENTER_ONLY,
   isSubitem.value && styles.itemLevel1,
   isFocused.value && styles.itemFocused,
+  isFocused.value && MOTION_HOVER_ENTER_SUPPRESSED,
 ]);
 
 function onBranchClick(event: MouseEvent) {

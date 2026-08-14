@@ -87,7 +87,7 @@ const rootClass = computed(() => [
 
 const iconSize = computed(() => {
   if (props.moduleMenuTitle) return 'sm';
-  return props.size === 'xs' || props.size === 'sm' ? 'sm' : 'md';
+  return props.size === 'xs' ? 'sm' : 'md';
 });
 
 const rootStyle = computed(() => {

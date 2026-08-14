@@ -19,6 +19,9 @@
         { "name": "motion-duration-scroll-fade", "value": "var(--eds-motion-6)", "comment": "Nav 滚动遮罩" },
         { "name": "motion-duration-spin", "value": "var(--eds-motion-10)", "comment": "Button spinner" },
         { "name": "motion-duration-spin-slow", "value": "var(--eds-motion-11)", "comment": "DataList spinner" },
+        { "name": "motion-duration-layout-deform", "value": "var(--eds-motion-9)", "comment": "350ms · Layout Deform shell（height / max-height）" },
+        { "name": "motion-duration-layout-deform-content", "value": "var(--eds-motion-12)", "comment": "180ms · Layout Deform 内容 crossfade" },
+        { "name": "motion-delay-layout-deform-content-swap", "value": "120ms", "comment": "内容淡出中途换页（与 shell morph 并行）" },
         { "name": "motion-delay-feedback-tick", "value": "var(--eds-motion-3)", "comment": "EndFeedback 勾号延迟" }
       ]
     },
@@ -114,6 +117,14 @@
         {
           "name": "motion-recipe-page-push",
           "value": "opacity var(--motion-duration-page) var(--motion-easing-enter), transform var(--motion-duration-page) var(--motion-easing-enter)"
+        },
+        {
+          "name": "motion-recipe-layout-deform-shell",
+          "value": "height var(--motion-duration-layout-deform) var(--motion-easing-float), max-height var(--motion-duration-layout-deform) var(--motion-easing-float), width var(--motion-duration-layout-deform) var(--motion-easing-float), max-width var(--motion-duration-layout-deform) var(--motion-easing-float)"
+        },
+        {
+          "name": "motion-recipe-layout-deform-content",
+          "value": "opacity var(--motion-duration-layout-deform-content) ease, transform var(--motion-duration-layout-deform) var(--motion-easing-float)"
         }
       ]
     },
@@ -142,6 +153,8 @@
     { "name": "motion-duration-scroll-fade", "value": "var(--eds-motion-0)" },
     { "name": "motion-duration-spin", "value": "var(--eds-motion-0)" },
     { "name": "motion-duration-spin-slow", "value": "var(--eds-motion-0)" },
+    { "name": "motion-duration-layout-deform", "value": "var(--eds-motion-0)" },
+    { "name": "motion-duration-layout-deform-content", "value": "var(--eds-motion-0)" },
     { "name": "motion-delay-feedback-tick", "value": "var(--eds-motion-0)" }
   ]
 }

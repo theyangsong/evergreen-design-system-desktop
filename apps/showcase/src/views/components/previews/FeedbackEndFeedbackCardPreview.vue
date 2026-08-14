@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { EgEndFeedbackCard } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
@@ -13,6 +14,12 @@ import {
 
 const customize = reactive({ ...endFeedbackCardCustomizeDefaults });
 const previewKey = ref(0);
+
+const usageSnippet = computed(() =>
+  buildVueSelfClosingSnippet('EgEndFeedbackCard', customize, {
+    defaults: endFeedbackCardCustomizeDefaults,
+  }),
+);
 
 function onResetPreview() {
   previewKey.value += 1;
@@ -27,6 +34,8 @@ function onResetPreview() {
       :show-doc-title="false"
       component-tag="EgEndFeedbackCard"
       :import-code="endFeedbackCardImportCode"
+      :usage-snippet-override="usageSnippet"
+      v-model-key=""
       :customize-controls="endFeedbackCardCustomizeControls"
       :customize-defaults="endFeedbackCardCustomizeDefaults"
       :prop-rows="endFeedbackCardPropRows"

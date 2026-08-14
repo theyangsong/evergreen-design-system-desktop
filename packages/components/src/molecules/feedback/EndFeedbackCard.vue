@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EgIcon } from '../../atoms/icons';
+import { EgDoneTick } from '../done-tick';
 import styles from './Feedback.module.css';
 
 withDefaults(
@@ -16,7 +16,7 @@ withDefaults(
   <div class="eds-end-feedback-card" :class="styles.endCard" role="status">
     <span :class="styles.stateIcon">
       <span :class="styles.stateIconTick">
-        <EgIcon name="eds-tick-strong-fill" size="sm" />
+        <EgDoneTick />
       </span>
     </span>
     <span>{{ text }}</span>

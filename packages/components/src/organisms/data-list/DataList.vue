@@ -91,6 +91,8 @@ const props = withDefaults(
     batchPopoverTopTool?: boolean;
     batchPopoverTopToolTitle?: string;
     batchPopoverTopToolClosable?: boolean;
+    /** BatchBar 统计后缀（如 selected / 已选择）。 */
+    batchCountSuffix?: string;
     primaryAction?: DataListPrimaryAction;
     moreActions?: DataListRowAction[];
   }>(),
@@ -103,6 +105,7 @@ const props = withDefaults(
     emptyText: 'No data',
     skidOpen: false,
     batchActions: () => [],
+    batchCountSuffix: 'selected',
     moreActions: () => [],
   },
 );
@@ -808,6 +811,12 @@ function closeSelect() {
     return;
   }
   setSelectMode(false);
+  void nextTick(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  });
 }
 
 function onSelectModeEscape(event: KeyboardEvent) {
@@ -1054,7 +1063,7 @@ function onTableScroll(event: Event) {
       >
         <EgBatchBar
           :selected-count="selectedList.length"
-          count-suffix="selected"
+          :count-suffix="batchCountSuffix"
           :labels="useBuiltinBatchBar ? batchActionLabels : undefined"
           :label-danger="useBuiltinBatchBar ? batchActionDanger : undefined"
           :label-popover="useBuiltinBatchBar ? batchActionPopover : undefined"

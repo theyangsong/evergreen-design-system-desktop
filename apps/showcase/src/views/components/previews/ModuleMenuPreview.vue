@@ -50,6 +50,8 @@ import {
   moduleMenuGroupSortKey,
   moduleMenuGroupTitleKey,
   moduleMenuPropRows,
+  moduleMenuGroupPropRows,
+  moduleMenuItemPropRows,
   moduleMenuTitleCustomizeControls,
   isModuleMenuTitlePresetKind,
   type ModuleMenuScenario,
@@ -131,6 +133,8 @@ const docPropRows = computed(() => {
   if (isDsScenario.value) return moduleMenuPropRows;
   return businessScenario.value === 'udun' ? udunModuleMenuPropRows : cregisModuleMenuPropRows;
 });
+
+const moduleMenuSlotRows = [...moduleMenuGroupPropRows, ...moduleMenuItemPropRows];
 
 const docUsageSnippet = computed(() => {
   void customize.scenario;
@@ -330,6 +334,7 @@ const previewGroups = computed((): PreviewGroup[] => {
       :customize-defaults="buildModuleMenuCustomizeDefaults()"
       :usage-snippet-override="docUsageSnippet"
       :prop-rows="docPropRows"
+      :slot-rows="moduleMenuSlotRows"
       props-section-id="module-menu-props"
     >
       <template #preview>
@@ -422,7 +427,7 @@ const previewGroups = computed((): PreviewGroup[] => {
                       <EgAvatar
                         v-if="item.avatar"
                         :name="item.avatar.name"
-                        :size="item.avatar.size ?? 'sm'"
+                        :size="item.avatar.size ?? 'xs'"
                         :color-index="item.avatar.colorIndex"
                       />
                       <EgIcon v-else :name="item.icon" size="sm" />

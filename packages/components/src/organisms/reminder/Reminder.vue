@@ -143,6 +143,7 @@ watch(
         <footer
           :class="[
             styles.echoToolbar,
+            !scrollOverflows && styles.echoToolbarSolid,
             chromeScrimStyles.root,
             scrollOverflows && chromeScrimStyles.active,
           ]"

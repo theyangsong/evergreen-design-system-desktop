@@ -15,12 +15,14 @@
         "eds-motion-8": "250ms",
         "eds-motion-9": "350ms",
         "eds-motion-10": "800ms",
-        "eds-motion-11": "2000ms"
+        "eds-motion-11": "2000ms",
+        "eds-motion-12": "180ms"
       },
       "usageNotes": [
         "0 = instant / focus / reduced-motion",
         "4 = 默认 hover（300ms）",
         "8 = Toggle / Tab 滑块（250ms）",
+        "12 = Layout Deform 内容 crossfade",
         "10–11 = Spinner 周期"
       ]
     },
@@ -52,7 +54,8 @@
         { "name": "motion-offset-small", "value": "var(--spacing-2)", "comment": "8px · shift" },
         { "name": "motion-offset-nudge-y", "value": "calc(-1 * var(--spacing-1-5))", "comment": "-6px · nudge（legacy）" },
         { "name": "motion-offset-flotation-y", "value": "calc(-1 * var(--spacing-2-5))", "comment": "-10px · Flotation 入场" },
-        { "name": "motion-offset-page-push", "value": "50%", "comment": "页面推动位移（相对容器宽度）" }
+        { "name": "motion-offset-page-push", "value": "30%", "comment": "页面推动位移（相对容器宽度）" },
+        { "name": "motion-offset-layout-deform-y", "value": "var(--spacing-2-5)", "comment": "10px · Layout Deform 内容 vertical nudge（Popover crossfade）" }
       ]
     }
   ]

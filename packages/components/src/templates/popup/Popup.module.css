@@ -15,6 +15,8 @@
   overflow: clip;
   /* Detail 进出场 — 组件侧时长（略长于 semantic 默认；不改 motion token） */
   --eds-popup-detail-motion-ms: 300ms;
+  /* Alert 偏上对齐 — 顶边距固定 px（非视口百分比） */
+  --eds-popup-alert-offset-top: 168px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -82,22 +84,26 @@
 }
 
 .stageDetail {
+  /* 与 Alert 共用 stageDetail 进出场；Detail 顶底 inset 见 stageDetailInsets */
+}
+
+.stageDetailInsets {
   padding-block: calc(var(--scale-20) + var(--scale-2-5));
 }
 
 .stageAlert {
-  overflow: hidden;
+  /* Alert 舞台勿继承 Detail inset，避免 offset-top 叠加（168 + 90 ≈ 258） */
 }
 
-.stageAlertPaddingTop {
+.stageAlertOffsetTop {
   justify-content: flex-start;
 }
 
-/* Alert 舞台顶边距 — §1 顶边距 %：height 占位，禁止 padding-top % */
+/* Alert 舞台顶边距 — flex spacer 占位，禁止 padding-top % */
 .stageAlertTopSpacer {
   flex: 0 0 auto;
   width: 100%;
-  height: var(--padding-top-md);
+  height: var(--eds-popup-alert-offset-top);
   pointer-events: none;
 }
 
@@ -110,7 +116,8 @@
   flex-shrink: 0;
 }
 
-.detailShell:global(.motion-layout) {
+.detailShell:global(.effect-popup-box.motion-layout),
+.alertPanelShell:global(.effect-popup-box.motion-layout) {
   transition:
     opacity var(--eds-popup-detail-motion-ms) var(--motion-easing-enter),
     transform var(--eds-popup-detail-motion-ms) var(--motion-easing-enter);
@@ -130,16 +137,12 @@
   min-height: 0;
 }
 
-.alertShell {
+.alertPanelShell {
   flex-shrink: 0;
   max-width: calc(100% - 2 * var(--spacing-4));
 }
 
-.alertShell :global(.effect-popup-box) {
-  max-width: 100%;
-}
-
-.alertShell :global(.eds-tooltip-panel) {
+.alertPanelShell :global(.eds-tooltip-panel) {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -147,16 +150,16 @@
   min-height: 0;
 }
 
-.alertShell :global(.eds-tooltip-panel:not(.eds-verify)) {
+.alertPanelShell :global(.eds-tooltip-panel:not(.eds-verify)) {
   padding: 0;
 }
 
-.alertShell :global(.eds-reminder) {
+.alertPanelShell :global(.eds-reminder) {
   width: 100%;
   max-width: 100%;
 }
 
-.alertShell :global(.eds-verify) {
+.alertPanelShell :global(.eds-verify) {
   flex: 1 1 auto;
   width: 100%;
   max-width: 100%;
@@ -164,16 +167,42 @@
   min-height: 100%;
 }
 
-.alertShellSlotCenter :global(.effect-popup-box.panelFlush) {
+.alertPanelShellCenter:global(.effect-popup-box.panelFlush) {
   align-items: center !important;
 }
 
-.alertShellSlotCenter :global(.eds-popup-box-content) {
+.alertPanelShellCenter :global(.eds-popup-box-content) {
   align-items: center;
   justify-content: center;
 }
 
-.alertShell :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-reminder)) {
+/* uses=custom：默认插槽根节点须铺满 Popup Box（强制 stretch，勿居中收缩） */
+:global(.desktopTokens.effect-popup-box).alertPanelShellCustom,
+.alertPanelShellCustom:global(.effect-popup-box) {
+  align-items: stretch !important;
+}
+
+.alertPanelShellCustom :global(.eds-tooltip-panel) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.alertPanelShellCustom :global(.eds-popup-box-content) {
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.alertPanelShellCustom :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-reminder)) {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  align-self: stretch;
+}
+
+.alertPanelShell :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-reminder)) {
   display: flex;
   flex: 1 1 auto;
   align-items: center;

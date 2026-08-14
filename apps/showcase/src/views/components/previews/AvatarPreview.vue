@@ -15,7 +15,7 @@ import {
 
 const avatarCustomize = reactive({
   ...avatarCustomizeDefaults,
-  size: avatarCustomizeDefaults.size as 'sm' | 'md' | 'lg' | 'xl',
+  size: avatarCustomizeDefaults.size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
   variant: avatarCustomizeDefaults.variant as 'initials' | 'robot',
 });
 

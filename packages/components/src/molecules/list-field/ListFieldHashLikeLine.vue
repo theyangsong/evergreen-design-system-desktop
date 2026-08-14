@@ -64,7 +64,6 @@ async function onCopy(event: Event) {
       :trigger="tooltipTrigger"
       :target-tone="targetTone"
       :typography-class="lineTypographyClass"
-      :menu-text-class="props.variant === 'primary' ? styles.menuPrimary : styles.menuSecondary"
       :copy-label="copyLabel"
       show-tooltip-copy
       boundary-selector=".eds-data-list"

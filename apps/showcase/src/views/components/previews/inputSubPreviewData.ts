@@ -8,6 +8,8 @@ export const textareaPropRows: InputPropRow[] = [
   { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '是否禁用。' },
   { name: 'readonly', type: 'boolean', defaultValue: 'false', description: '是否只读。' },
   { name: 'widthMode', type: "'fixed' | 'full'", defaultValue: "'fixed'", description: '宽度模式。' },
+  { name: 'pasteLabel', type: 'string', defaultValue: "'Paste'", description: 'Paste 链接文案；中文传「粘贴」。' },
+  { name: 'clearLabel', type: 'string', defaultValue: "'Clear'", description: 'Clear 链接文案；中文传「清空」。' },
 ];
 
 export const textareaEventRows: InputPropRow[] = [

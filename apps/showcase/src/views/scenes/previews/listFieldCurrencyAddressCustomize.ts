@@ -19,6 +19,33 @@ import {
 
 const currencyAddressCountOptions = countSelectOptions(MAX_CURRENCY_ADDRESS_COUNT);
 
+export function currencySideVisibleKey(prefix: 'from' | 'to'): string {
+  return `${prefix}SideVisible`;
+}
+
+export function resolveCurrencySideVisible(
+  prefix: 'from' | 'to',
+  state: Record<string, unknown>,
+): boolean {
+  return state[currencySideVisibleKey(prefix)] !== false;
+}
+
+export function appendCurrencySideVisibilityProps(
+  props: Record<string, unknown>,
+  state: Record<string, unknown>,
+): void {
+  if (!resolveCurrencySideVisible('from', state)) {
+    props['show-from'] = false;
+  }
+  if (!resolveCurrencySideVisible('to', state)) {
+    props['show-to'] = false;
+  }
+}
+
+function sidePanelVisible(prefix: 'from' | 'to') {
+  return (state: Record<string, unknown>) => resolveCurrencySideVisible(prefix, state);
+}
+
 function resolveDefaultSideAddress(
   symbol: string,
   prefix: 'from' | 'to',
@@ -29,6 +56,7 @@ function resolveDefaultSideAddress(
 
 function sideAddressItemVisible(prefix: 'from' | 'to', index: number) {
   return (state: Record<string, unknown>) => {
+    if (!resolveCurrencySideVisible(prefix, state)) return false;
     const count = parseCurrencyAddressCount(state[`${prefix}AddressCount`]);
     return index <= count;
   };
@@ -82,17 +110,42 @@ function appendTagControlsForAddress(
   return row;
 }
 
+export function buildCurrencyAddressTagOnlyControls(
+  prefix: 'from' | 'to',
+  addressIndex: number,
+  state: Record<string, unknown>,
+): DocCustomizeControl[] {
+  const controls: DocCustomizeControl[] = [
+    {
+      kind: 'boolean',
+      key: currencyAddressTagsEnabledKey(prefix, addressIndex),
+      label: '标签',
+      row: 0,
+    },
+  ];
+
+  appendTagControlsForAddress(controls, prefix, addressIndex, state, 1);
+  return controls;
+}
+
 export function buildCurrencySideAddressControls(
   prefix: 'from' | 'to',
   state: Record<string, unknown>,
 ): DocCustomizeControl[] {
   const controls: DocCustomizeControl[] = [
     {
+      kind: 'boolean',
+      key: currencySideVisibleKey(prefix),
+      label: prefix === 'from' ? '显示发送方' : '显示接收方',
+      row: 0,
+    },
+    {
       kind: 'select',
       key: `${prefix}AddressCount`,
       label: '地址数',
       options: currencyAddressCountOptions,
       row: 0,
+      visibleWhen: sidePanelVisible(prefix),
     },
   ];
 
@@ -136,6 +189,7 @@ export function currencySideAddressDefaults(
   symbol = 'ZEC',
 ): Record<string, string | boolean> {
   const defaults: Record<string, string | boolean> = {
+    [currencySideVisibleKey(prefix)]: true,
     [`${prefix}AddressCount`]: '1',
   };
 

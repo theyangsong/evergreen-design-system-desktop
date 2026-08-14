@@ -3,7 +3,7 @@
  *
  * EgCryptoCombo
  *   ├ CryptoSymbol
- *   │    ├ EgCrypto（32px）
+ *   │    ├ EgCrypto（--avatar-md / 32px）
  *   │    └ CryptoItem（entry badge，Style=Suffix）
  *   └ Body
  *        ├ Title（symbol + chain Tag / suffix）
@@ -25,22 +25,22 @@
 
 .cryptoSymbolPlain {
   overflow: clip;
-  width: var(--scale-8);
-  height: var(--scale-8);
+  width: var(--avatar-md);
+  height: var(--avatar-md);
 }
 
 .cryptoSymbolWithBadge {
   overflow: visible;
-  width: calc(var(--scale-8) + var(--scale-1) + var(--stroke-xl));
-  height: calc(var(--scale-8) + var(--stroke-xl));
+  width: calc(var(--avatar-md) + var(--scale-1) + var(--stroke-xl));
+  height: calc(var(--avatar-md) + var(--stroke-xl));
 }
 
 .cryptoSymbolIcon {
   position: absolute;
   left: 0;
   top: 0;
-  width: var(--scale-8);
-  height: var(--scale-8);
+  width: var(--avatar-md);
+  height: var(--avatar-md);
 }
 
 .cryptoSymbolBadge {
@@ -378,10 +378,7 @@
 }
 
 .menuAddressLine {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--spacing-1);
+  display: inline;
   min-width: 0;
   max-width: 100%;
 }
@@ -421,6 +418,19 @@
   gap: var(--spacing-1);
   width: 100%;
   min-width: 0;
+}
+
+.menuRowSecondary {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+  font-weight: var(--eds-footnote-weight);
+  color: var(--text-base-secondary);
 }
 
 .menuRowTags :global(.eds-tag) {

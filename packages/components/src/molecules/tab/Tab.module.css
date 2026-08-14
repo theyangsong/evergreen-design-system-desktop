@@ -69,6 +69,13 @@
   font-weight: var(--eds-footnote-strong-weight);
 }
 
+:global(.desktopTokens) :global(.eds-segmented-control) .itemLg,
+:global(.desktopTokens) :global(.eds-segmented-control) .itemMd,
+:global(.desktopTokens) :global(.eds-segmented-control) .itemSm {
+  font-size: var(--eds-footnote-strong-size);
+  line-height: var(--eds-footnote-strong-line-height);
+}
+
 .itemSelected {
   color: var(--text-base-primary);
 }
@@ -118,7 +125,9 @@
   composes: motion-ease is-hover from global;
 }
 
-.tabItem:global(.eds-tab) {
+:global(.desktopTokens) .tabItem:global(.eds-tab) {
+  font-size: var(--eds-body-small-strong-size);
+  line-height: var(--eds-body-small-strong-line-height);
   font-weight: var(--eds-body-small-strong-weight);
 }
 
@@ -148,6 +157,36 @@
 .tabs {
   display: inline-flex;
   align-items: flex-start;
+}
+
+.tabsHorizontalGapXl {
   gap: var(--spacing-5);
+}
+
+.tabsHorizontalGapMd {
+  gap: var(--spacing-4);
+}
+
+.tabsHorizontalGapSm {
+  gap: var(--spacing-3);
+}
+
+.tabsHorizontalGapXs {
+  gap: var(--spacing-2);
+}
+
+.tabsVerticalGapXl {
   padding-bottom: calc(var(--stroke-xl) + var(--spacing-2-5));
+}
+
+.tabsVerticalGapMd {
+  padding-bottom: calc(var(--stroke-xl) + var(--spacing-2));
+}
+
+.tabsVerticalGapSm {
+  padding-bottom: calc(var(--stroke-xl) + var(--spacing-1-5));
+}
+
+.tabsVerticalGapXs {
+  padding-bottom: calc(var(--stroke-xl) + var(--spacing-1));
 }

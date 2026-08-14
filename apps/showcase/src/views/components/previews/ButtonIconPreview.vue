@@ -28,6 +28,7 @@ const iconButtonProps = computed(() => ({
   size: iconButtonCustomize.size as 'lg' | 'md' | 'sm' | 'xs',
   label: String(iconButtonCustomize.label),
   disabled: Boolean(iconButtonCustomize.disabled),
+  motion: iconButtonCustomize.motion as 'ease' | 'hover-enter-only' | 'asym' | 'none',
 }));
 </script>
 

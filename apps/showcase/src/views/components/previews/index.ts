@@ -33,6 +33,8 @@ import FeedbackToastPreview from './FeedbackToastPreview.vue';
 import FeedbackMessagePreview from './FeedbackMessagePreview.vue';
 import FeedbackReddotPreview from './FeedbackReddotPreview.vue';
 import FeedbackFormSubmissionPreview from './FeedbackFormSubmissionPreview.vue';
+import FeedbackStreamerPreview from './FeedbackStreamerPreview.vue';
+import ProgressPreview from './ProgressPreview.vue';
 import NavBarPreview from './NavBarPreview.vue';
 import ModuleMenuPreview from './ModuleMenuPreview.vue';
 import ToolBarPreview from './ToolBarPreview.vue';
@@ -45,8 +47,10 @@ import ContainerPreview from './ContainerPreview.vue';
 import LayoutPreview from './LayoutPreview.vue';
 import DetailPreview from './DetailPreview.vue';
 import PopupPreview from './PopupPreview.vue';
-import PopoversPreview from './PopoversPreview.vue';
+import PopoversPopoverPreview from './PopoversPopoverPreview.vue';
+import PopoversScensPreview from './PopoversScensPreview.vue';
 import SkidPreview from './SkidPreview.vue';
+import LayoutDeformDemoPreview from './LayoutDeformDemoPreview.vue';
 
 export type ComponentPreviewEntry = {
   slug: string;
@@ -90,8 +94,12 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'feedback-message',
   'feedback-reddot',
   'feedback-form-submission',
+  'feedback-streamer',
+  'popovers-popover',
+  'popovers-scens',
   'avatar',
   'scens-motion',
+  'upload',
   'tool-bar',
   'paginer',
 ]);
@@ -161,6 +169,13 @@ export const componentPreviews: ComponentPreviewEntry[] = [
     component: FeedbackFormSubmissionPreview,
     usesComponentDocHeader: true,
   },
+  {
+    slug: 'feedback-streamer',
+    title: 'Streamer',
+    component: FeedbackStreamerPreview,
+    usesComponentDocHeader: true,
+  },
+  { slug: 'progress', title: 'Progress', component: ProgressPreview, usesComponentDocHeader: true },
   { slug: 'nav-bar', title: 'Nav Bar', component: NavBarPreview, usesComponentDocHeader: true },
   { slug: 'module-menu', title: 'Module Menu', component: ModuleMenuPreview, usesComponentDocHeader: true },
   { slug: 'tool-bar', title: 'Tool Bar', component: ToolBarPreview, usesComponentDocHeader: true },
@@ -173,8 +188,15 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'layout', title: 'Layout', component: LayoutPreview, usesComponentDocHeader: true },
   { slug: 'detail', title: 'Detail', component: DetailPreview, usesComponentDocHeader: true },
   { slug: 'popup', title: 'Popup', component: PopupPreview, usesComponentDocHeader: true },
-  { slug: 'popovers', title: 'Popovers', component: PopoversPreview, usesComponentDocHeader: true },
+  { slug: 'popovers-popover', title: 'Popover', component: PopoversPopoverPreview, usesComponentDocHeader: true },
+  { slug: 'popovers-scens', title: 'Scens', component: PopoversScensPreview, usesComponentDocHeader: true },
   { slug: 'skid', title: 'Skid', component: SkidPreview, usesComponentDocHeader: true },
+  {
+    slug: 'upload',
+    title: 'Layout Deform Demo',
+    component: LayoutDeformDemoPreview,
+    usesComponentDocHeader: true,
+  },
   { slug: 'icons', title: 'Icon', component: IconPreview },
   { slug: 'crypto', title: 'Crypto', component: CryptoPreview },
   ...([

@@ -7,6 +7,11 @@
   border-radius: var(--radius-full);
 }
 
+.xs {
+  width: var(--avatar-xs);
+  height: var(--avatar-xs);
+}
+
 .sm {
   width: var(--avatar-sm);
   height: var(--avatar-sm);
@@ -61,13 +66,14 @@
 
 /*
  * 首字字号硬编码（2× + scale(0.5)）；不继承 --eds-bar-* 文本 token。
- * sm/md → 16px（视觉 8px）；lg/xl → 24px（视觉 12px）。
+ * xs/sm → 16px（视觉 8px）；md/lg/xl → 24px（视觉 12px）。
  */
-.sm .initialsLabel,
-.md .initialsLabel {
+.xs .initialsLabel,
+.sm .initialsLabel {
   font-size: 16px;
 }
 
+.md .initialsLabel,
 .lg .initialsLabel,
 .xl .initialsLabel {
   font-size: 24px;

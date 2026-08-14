@@ -5,7 +5,7 @@
       "comment": "1 · Ease（缓入缓出 · 挂状态 modifier）",
       "styles": [
         {
-          "title": "Ease — 基类（与 .is-focus / .is-hover / .is-asym 组合）",
+          "title": "Ease — 基类（与 .is-focus / .is-hover / .is-hover-enter-only / .is-asym 组合）",
           "className": "motion-ease",
           "properties": {},
           "stateStyles": [
@@ -23,8 +23,32 @@
               "properties": { "transition": "var(--motion-recipe-hover)" }
             },
             {
+              "hostClass": "motion-ease.is-hover-enter-only",
+              "title": "c · 悬浮入",
+              "properties": {
+                "transition": "var(--motion-recipe-hover-asym)",
+                "transition-duration": "0ms"
+              },
+              "pseudoStyles": [
+                {
+                  "selector": ":focus, :focus-visible, :active",
+                  "properties": { "transition": "none" }
+                },
+                {
+                  "selector": ":hover:not(:active):not(:focus-visible)",
+                  "properties": {
+                    "transition-duration": "var(--motion-duration-hover-asym)",
+                    "transition-timing-function": "var(--motion-easing-enter)"
+                  }
+                }
+              ],
+              "notes": [
+                "EgMotionHoverEnter · 仅 hover 入场 600ms；mouseleave / focus / active / 点按 无过渡"
+              ]
+            },
+            {
               "hostClass": "motion-ease.is-asym",
-              "title": "c · 悬浮入场（非对称 enter/exit）",
+              "title": "d · 悬浮入场（非对称 enter/exit）",
               "properties": { "transition": "var(--motion-recipe-hover-asym)" },
               "pseudoStyles": [
                 {
@@ -105,6 +129,23 @@
           "notes": ["Detail / 列表详情等前后页切换"]
         }
       ]
+    },
+    {
+      "comment": "6 · Layout Deform（布局形态 · 浮层容器尺寸 morph）",
+      "styles": [
+        {
+          "title": "布局形态 · Tooltip / Popover 多页容器尺寸变化",
+          "className": "motion-layout-deform",
+          "properties": {
+            "overflow": "hidden",
+            "transition": "var(--motion-recipe-layout-deform-shell)"
+          },
+          "notes": [
+            "浮层 shell：固定宽 + overflow hidden；A↔B 宽/高 morph 350ms · ease-8",
+            "内容：`.motion-layout-deform-content` + to-smaller/to-larger · 变矮下→上 · 变高上→下"
+          ]
+        }
+      ]
     }
   ],
   "utilityClasses": [
@@ -118,10 +159,12 @@
   "reducedMotionScenarioClasses": [
     "motion-ease.is-focus",
     "motion-ease.is-hover",
+    "motion-ease.is-hover-enter-only",
     "motion-ease.is-asym",
     "motion-layout",
     "motion-flotation",
     "motion-deform",
-    "motion-page"
+    "motion-page",
+    "motion-layout-deform"
   ]
 }

@@ -159,6 +159,11 @@
   color: var(--material-base-tertiary);
 }
 
+.topToolClose :global(.eds-icon-button .eds-icon .eds-i-f),
+.topToolClose :global(.eds-icon-button .eds-icon path) {
+  fill: currentColor;
+}
+
 .topToolClose :global(.eds-icon-button:hover:not(:disabled):not(.isDisabled)),
 .topToolClose :global(.eds-icon-button:focus-visible:not(:disabled):not(.isDisabled)),
 .topToolClose :global(.eds-icon-button:active:not(:disabled):not(.isDisabled)) {
@@ -166,9 +171,12 @@
 }
 
 .topToolClose :global(.eds-icon-button:hover:not(:disabled):not(.isDisabled) > span),
-.topToolClose :global(.eds-icon-button:focus-visible:not(:disabled):not(.isDisabled) > span),
-.topToolClose :global(.eds-icon-button:active:not(:disabled):not(.isDisabled) > span) {
+.topToolClose :global(.eds-icon-button:focus-visible:not(:disabled):not(.isDisabled) > span) {
   color: var(--material-base-secondary);
+}
+
+.topToolClose :global(.eds-icon-button:active:not(:disabled):not(.isDisabled) > span) {
+  color: var(--material-base-tertiary);
 }
 
 .contentSlot {

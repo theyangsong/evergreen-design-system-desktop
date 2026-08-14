@@ -6,8 +6,8 @@ alwaysApply: false
 
 # EDS Desktop — 项目约定
 
-> 专项规则：`display-p3-color-usage.mdc`（颜色）、`corner-smoothing.mdc`（圆角）、`stroke-svg-scaling.mdc`（SVG 描边）。
-> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR · **§6** 滚动边界 · **§7** Organism（含 Popup/Popover/Detail/Reminder 边界）· **§8** 同步。
+> 专项规则：`display-p3-color-usage.mdc`（颜色）、`corner-smoothing.mdc`（圆角）、`stroke-svg-scaling.mdc`（SVG 描边）、`top&botton-mask.mdc`（滚动顶底毛玻璃遮罩）。
+> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR/native reset · **§6** 滚动边界 · **§7** Organism（含 Popup/Popover/Scens/Detail/Reminder 边界）· **§8** 同步。
 
 ## 0. Agent 执行范围
 
@@ -31,11 +31,11 @@ alwaysApply: false
 3. **Motion**（Base → Recipe → Semantic → DS glue）：
    - **base**（`@eds/desktop-tokens/motion/base`）：primitive only（`--eds-motion-*`、opacity/scale/offset 物理量）。**禁止**场景名。
    - **recipe**（`@eds/desktop-tokens/motion/recipe`）：duration role + easing + property 组合（`--motion-recipe-*`）。**仅 DS glue**；业务用 semantic。
-   - **semantic**（`@eds/desktop-tokens/motion/semantic`）：**一个完整场景的默认动效组合** — **Ease**、**Layout**、**Flotation**、**Deform**、**Page**（如 `.motion-page { transition: var(--motion-recipe-page-push) }`）。只回答「这类场景用什么动效」，不回答「框架里怎么切页」。
+   - **semantic**（`@eds/desktop-tokens/motion/semantic`）：**一个完整场景的默认动效组合** — **Ease**、**Layout**、**Flotation**、**Deform**、**Page**、**Layout Deform**（如 `.motion-page`、`.motion-layout-deform`）。只回答「这类场景用什么动效」，不回答「框架里怎么切页」。
    - **utilities**：`.motion-none`（focus/selected）。
    - **DS glue**（`packages/components/src/styles/*` 等）：框架 lifecycle（Vue `enter-from` / `leave-to`）、叠层布局、方向状态、`host` marker。**禁止**写入 `spec/motion/semantic.json`。
    - **Semantic 禁止**：`enter-from` / `leave-to` / `enter-active`、`host*`、direction modifier（`is-next` 等）、任何框架 lifecycle class名。
-   - DS glue 示例：`overlayGlassMicroFloat.module.css`、`motionPageTransition.module.css`（`.motion-page-stack` + `data-page-direction` + Transition `name="motion-page"`）。
+   - DS glue 示例：`overlayGlassMicroFloat.module.css`、`motionPageTransition.module.css`（`.motion-page-stack` + `data-page-direction` + Transition `name="motion-page"`）、`motionLayoutDeformTransition.module.css`（`.motion-layout-deform` shell + `.motion-layout-deform-content` + `useMotionLayoutDeformPageSwitch` · 内容位移 **+offset→0**，见 `packages/components/docs/layout-deform-page-switch.md`）。
 
 **Overlay 微浮动（microFloat）— 毛玻璃不失效**
 
@@ -49,7 +49,8 @@ alwaysApply: false
 - **Flotation / List Field**：`EgAnchoredTooltip` microFloat 常驻 Teleport；入场 `visibility:hidden` 定位后再 reveal；离场不卸载 DOM、不用 `visibility:hidden` 收尾。
 - **禁止**：为修闪烁去掉 opacity 动画；microFloat 路径每次 hover `v-if` 销毁 Teleport；改 `packages/tokens/spec/motion` 的 microFloat 参数（除非用户明确要求）。
 - **详案**：`packages/components/docs/overlay-microfloat-flash-fix.md`。
-4. **Typography**：整组角色 token（size+weight+line-height）；`font-family` 仅在 `global.css` 的 `body`/`.desktopTokens`；组件只绑 size/weight/line-height。
+- **滚动顶底毛玻璃（Top & Bottom Mask）**：单滚动容器 + sticky 顶/底 + `effect-mask` + `eds-blur-bg`；状态机见 `top&botton-mask.mdc`；优先 `EgSkid` / `EgToolBar` / Paginer，禁止业务手搓 sticky header。
+4. **Typography**：整组角色 token（size+weight+line-height）；`font-family` 仅在 `global.css` 的 `body`/`.desktopTokens`；组件只绑 size/weight/line-height。native 控件 reset 见 **§5.1**。
 5. **Bar 11px**：`.eds-bar-text-subpixel` 或 2×+scale；NavBar 用 `.moduleLabel`/`.moduleLabelPaint`/`.moduleLabelSizer`（§7）。
 6. **顶边距 %**：`height: var(--padding-top-*)` 或 flex 占位；**禁止** `padding-top: …%`。
 7. **数字展示**：`formatGroupedNumber()`（展示层）；动态数字区加 `tabular-nums`。不适用：输入态、纯文案。
@@ -102,7 +103,15 @@ alwaysApply: false
 
 未生效时：查 HMR、token 是否在 dist、specificity、硬刷新；勿先说「要 build」。仅 build：用户要求 / 验 dist / consumer / HMR 失败。
 
-**HMR 陷阱**：`.desktopTokens button { font: inherit }` → 字重须 `.md:global(.eds-button)`；子组件类名是哈希 → 用 `:global(.eds-icon-button > span)` 等。
+**Native reset / 特异性（锁死）**
+
+Showcase PostCSS 把 `global.css` 的 `button { … }` 提升为 `.desktopTokens button`（0,1,1），盖过 CSS Module 单 class。
+
+- **禁止**对 native 控件用 `font: inherit` 简写（会重置 size/weight）；只用 `font-family: inherit`。
+- **禁止**用 `button:not(.eds-xxx)` 抬高特异性「救」单个组件（会牵连 Tab / Segmented Control）。
+- 组件 typography 须 `.class:global(.eds-*)` 或 `:global(.desktopTokens) .class`（见 `Flotation.module.css`、`Tab.module.css`）。
+- `textarea` reset 须排除 `.eds-textarea-control`。
+- 再动 native reset 前先查 Showcase PostCSS 提升规则，勿打地鼠式 whitelist。
 
 ### 5.2 `.desktopTokens` DOM
 
@@ -149,12 +158,48 @@ EgPopup 外壳
 | `/components/detail` | Detail 全文案、Tab、Section、Apply_Item 等 |
 | `/components/reminder` | 类型、标题、副文案、符号、符号背景色、按钮区 |
 | `/components/verify` | 验证方式（单/双/锁定）、状态、标题、副文案、倒计时、切换文案 |
-| `/components/popovers` | placement/align 等；`:wrap-tooltip="false"` 须布尔（勿传 truthy 字符串） |
+| `/components/popovers-popover` | EgPopover 本体 + 全部方向矩阵；`:wrap-tooltip="false"` 须布尔（勿传 truthy 字符串） |
+| `/components/popovers-scens` | 场景：引导 / 备注 / 矿工费（Bitcoin / Ethereum / TON / Tron） |
+| `/components/upload` | 临时 Layout Deform demo（`LayoutDeformDemoPreview.vue`）；验证后删除 |
 | `/tokens` | 与 spec/dist 1:1 的 token 展示 |
 
 - **EgReminder**：Info / Echo；符号区 56px 圆 + `EgIcon size="lg"`；可用 `--eds-reminder-symbol-bg` / `--eds-reminder-symbol-color` 覆盖。危险/成功背景用 `--status-danger` / `--status-success`，图标 `--stroke-same-white-primary`。
 - **EgVerify**：Popup Box 固定宽高随 `type`（邮箱 328×436、Google 328×412、交易/登录/锁定 328×416、PassKey 328×406、2FA 358×459），不可改；Showcase 仅切换验证方式。
 - **Showcase**：文档预览可用静态 Popup Box 壳（无全屏 scrim）；完整 `EgPopup` 行为见 `PopupPreview.vue`。
+- **`/components/popovers` 重定向**到 `popovers-popover`（与 Input 子页拆分同模式）。
+
+**Popovers Scens（锁死）**
+
+- **引导**：`.popoversGuideHost` **必须包裹** `EgPopover`（不能反过来）；match-primary 样式只挂 host（`PopoversPreview.module.css`）。
+- **备注**：`EgRemarkPopover`；Showcase 预览 `teleport-to="body"`，避免 preview host 钳制定位。`EgAnchoredTooltip` 在 `placement` / `align` 变化时须 `updatePosition()`。
+- **矿工费 DOM 标记**（Footer 样式按标记区分，禁止一套规则打四网络）：
+
+| 标记 | 网络 | Footer 左右 padding |
+|------|------|---------------------|
+| `data-miner-fee-popover` | EVM / BTC | 保留 `--spacing-3` |
+| `data-miner-fee-ton-like` | TON | 无左右缩进（铺满 contentSlot） |
+| `data-miner-fee-tron` | Tron | 无左右缩进（铺满 contentSlot） |
+
+**Layout Deform — Popover / Tooltip 多页切换（锁死 — 详案 `packages/components/docs/layout-deform-page-switch.md`）**
+
+适用：同一 Popover 内 A↔B 子页 — 固定宽 + shell 高度 morph + 内容 crossfade。**禁止**用 `.motion-page` / `.motion-flotation` / Vue `<Transition mode="out-in">` 替代。
+
+```text
+.motion-layout-deform（shell · height morph 350ms）
+└── .motion-layout-deform-content（单 wrapper）
+    ├── is-exiting   → translateY(+offset) + 淡出
+    ├── 120ms 换页（activePage）
+    └── is-entering → 保持 +offset → rAF 后淡入到 0
+```
+
+| 角色 | 必须 | 禁止 |
+|------|------|------|
+| **业务** | `useMotionLayoutDeformPageSwitch`；shell/content 结构锁死；`switchTo` 前量好各页 `shellHeight`；layout 样式绑 **`activePage`** | 只绑 `is-exiting`；写死高度；点击瞬间切 padding/标题/Teleport；自写反向 transform |
+| **DS** | glue + composable；内容位移统一 **+offset→0** | semantic 写 enter-from / direction lifecycle |
+
+- **Composable**：`useMotionLayoutDeformPageSwitch` + `MOTION_LAYOUT_DEFORM_CONTENT` / `_EXITING` / `_ENTERING`
+- **参考**：Showcase `LayoutDeformDemoPreview.vue`；业务 `work-cregis-desktop` → `ApprovalRemarkPopoverPanel.vue`（离屏预测量 + `activePage` 绑 `data-miner-fee-screen`）
+- **Token**：`--motion-recipe-layout-deform-shell`（350ms）、`--motion-recipe-layout-deform-content`（180ms fade + 350ms transform）、`--motion-offset-layout-deform-y`（10px）、swap **120ms**
 
 **Flotation Combo — 必须用 `EgFlotation`**
 
@@ -182,11 +227,15 @@ EgFlotation → #trigger (EgFlotationTrigger) + Menu props + items/#content → 
 
 **Module Menu 场景化**：Cregis / UDun **独立** preset；其余回退 `moduleMenuComponentDefaultPresetGroups`；默认 `moduleBusinessTitle: Wallet`。标题：text / EgFlotation trigger（module-menu）/ Cregis WaaS·Payment Engine 浮层 — 见原表逻辑，preset 在 `presets/module-menu/`。
 
-**EgModuleMenuItem 动效（锁死 — `moduleMenuMotion.ts` + `ModuleMenu.module.css`）**：**始终**挂 `.motion-ease.is-asym`（600ms 仅 `--motion-duration-hover-asym` / `eds-motion-5`）。悬浮入场有过渡、离场无；点击/聚焦/选中无过渡（CSS hover-only，不用 `motion-none`）。禁止 NavBar `is-hover` / `is-focus`。
+**EgModuleMenuItem 动效（锁死）**：Item 挂 `.motion-ease.is-hover-enter-only`（token semantic · 悬浮入）。禁止 NavBar `is-hover` / `is-focus`。
 
 **Data List 空态**：`eds-business-7`；不用 @cregis `EdsNoData`。
 
 **EgDetail · Apply_Item（强约束 — 详案 `packages/components/docs/detail-apply-item.md`）**
+
+**工具栏分割线**：`toolbarDividerPinned` — `true` 时 module 分割线常驻；`false`（默认）时仅底部仍有内容被裁切时显示。业务 Detail Popup 须传 `toolbar-divider-pinned`，禁止 CSS 强写 divider。
+
+**Sender / Receiver 多地址**：`addressLayout: 'multi-collapsed'` + `addressCount` + `valueEntries` + `addressViewMoreLabel`（Figma 2267:11822）；数量态 `multi-orders`（`{count} Orders` 链，点击唤起业务 Popup）；展开态 `multi-expanded`（2267:11830）。禁止手拼 `value: address (N)`。
 
 Figma **Apply_Item@Cregis**（`2267:11092`）。标准 Detail 行 = **变体 id + 展示字段**；挂件（符号 / Tag / Link / Copy / 地址簿 / AML / 浏览器 / Title 图标组合等）由 DS catalog **锁死**。
 
@@ -211,7 +260,7 @@ createDetailApplyItemRow('receiver', { value: addr, tag: alias })
 { title: 'Receiver', value: addr, showValueCopy: false }
 ```
 
-**参考文件**：`FlotationBoxPreview.vue`、`flotationBoxSceneAddressCustomize.ts`、`NavBarPreview.vue`、`moduleMenuPreviewCustomize.ts`、`detail-apply-item.md`、`applyItemPresets.ts`。
+**参考文件**：`FlotationBoxPreview.vue`、`flotationBoxSceneAddressCustomize.ts`、`NavBarPreview.vue`、`moduleMenuPreviewCustomize.ts`、`detail-apply-item.md`、`applyItemPresets.ts`、`layout-deform-page-switch.md`。
 
 ## 8. 本地同步
 
@@ -232,6 +281,8 @@ createDetailApplyItemRow('receiver', { value: addr, tag: alias })
 
 ## 9. 变更记录
 
+- 2026-08-13：§5.1 native reset — 禁止 `font: inherit` 简写；组件 typography 用 `:global(.desktopTokens)`。§7 Popovers 拆 `popovers-popover` / `popovers-scens`；矿工费 Footer 按 DOM 标记区分左右 padding。
+- 2026-08-08：§7 Layout Deform — Popover 多页切换契约（`layout-deform-page-switch.md`）；内容位移 +offset→0；业务须绑齐 exiting/entering、高度预测量、layout 跟 activePage。
 - 2026-08-08：§1 Popover — `effect-popover-box` 填充栈；`.outline` shadow 用 `--effect-vulvar-shadow-deep`；禁误动 layout。
 - 2026-08-08：§7 EgPopup — 外壳 vs 内容锁死；Showcase popup/detail/reminder/popovers 职责对照；Reminder 符号 token。
 - 2026-08-07：§7 EgDetail Apply_Item — 变体 catalog + `createDetailApplyItemRow` 业务契约。

@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import {
   EgTooltip,
   EgVerify,
   resolveVerifyPanelHeightPx,
   resolveVerifyPanelWidthPx,
+  useVerifySubmit,
   type VerifyType,
 } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import {
@@ -24,9 +26,16 @@ const verifyType = computed(() => customize.type as VerifyType);
 const panelWidthPx = computed(() => resolveVerifyPanelWidthPx(verifyType.value));
 const panelHeightPx = computed(() => resolveVerifyPanelHeightPx(verifyType.value));
 
-const verifyState = computed(
-  () => customize.state as 'idle' | 'verifying' | 'success' | 'error',
-);
+const panelMotionActive = ref(false);
+
+const { verify, onComplete, onRecover, reset } = useVerifySubmit({
+  submit: () => true,
+  requestClose: () => {
+    reset();
+  },
+});
+
+let syncingCustomizeState = false;
 
 const countdownSeconds = computed(() => {
   if (
@@ -36,55 +45,79 @@ const countdownSeconds = computed(() => {
   ) {
     return null;
   }
+  if (verify.state === 'error') {
+    return null;
+  }
   const parsed = Number.parseInt(String(customize.countdownSeconds), 10);
   return Number.isFinite(parsed) ? parsed : null;
 });
-
-const usesCodeInput = computed(
-  () =>
-    verifyType.value !== 'single-trade-password'
-    && verifyType.value !== 'single-login-password'
-    && verifyType.value !== 'locked',
-);
-
-const demoCode = computed({
-  get() {
-    if (
-      usesCodeInput.value
-      && (customize.state === 'verifying' || customize.state === 'success')
-      && !customize.demoCode
-    ) {
-      return '852777';
-    }
-    return String(customize.demoCode);
-  },
-  set(value: string) {
-    customize.demoCode = value;
-  },
-});
-
-function onRecover() {
-  if (customize.state === 'error') {
-    customize.state = 'idle';
-    customize.switchDisabled = false;
-  }
-}
 
 watch(
   () => customize.type,
   (type) => {
     applyVerifyTypePresetToState(customize, type as VerifyType);
+    reset();
+    syncingCustomizeState = true;
+    customize.state = 'idle';
+    syncingCustomizeState = false;
   },
 );
 
 watch(
   () => customize.state,
   (state) => {
+    if (syncingCustomizeState || verify.state === state) {
+      return;
+    }
+    reset();
+    verify.state = state;
+    if (state === 'idle') {
+      verify.code = '';
+      verify.switchDisabled = false;
+      return;
+    }
+    if (state === 'error') {
+      verify.code = '';
+      verify.switchDisabled = true;
+    }
+  },
+);
+
+watch(
+  () => verify.state,
+  (state) => {
+    if (customize.state === state) {
+      return;
+    }
+    syncingCustomizeState = true;
+    customize.state = state;
+    syncingCustomizeState = false;
     if (state === 'error' && customize.type !== 'locked') {
       customize.switchDisabled = true;
     }
   },
 );
+
+function handleRecover() {
+  onRecover();
+}
+
+function syncPanelMotionEnter() {
+  panelMotionActive.value = false;
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      panelMotionActive.value = true;
+    });
+  });
+}
+
+onMounted(() => {
+  syncPanelMotionEnter();
+});
+
+watch(verifyType, () => {
+  syncPanelMotionEnter();
+});
 </script>
 
 <template>
@@ -95,7 +128,7 @@ watch(
       tall-preview
       :show-doc-title="false"
       component-tag="EgVerify"
-      import-code="import { EgVerify, EgPopup } from '@eds/desktop-components';"
+      import-code="import { EgVerify, EgPopup, useVerifySubmit } from '@eds/desktop-components';"
       :customize-controls="verifyCustomizeControls"
       :customize-defaults="verifyCustomizeDefaults"
       :prop-rows="verifyPropRows"
@@ -107,8 +140,13 @@ watch(
           :class="organismStyles.previewOrganismVerifyBoxHost"
         >
           <EgTooltip
+            :class="[
+              'glassMicroFloatHost',
+              panelMotionActive && 'glassMicroFloatHostActive',
+            ]"
             panel-kind="popup"
             panel-radius="radius-lg"
+            :panel-layout-motion="true"
             width-mode="fixed"
             :width="panelWidthPx"
             height-mode="fixed"
@@ -117,18 +155,20 @@ watch(
             panel-flush
           >
             <EgVerify
-              v-model="demoCode"
+              v-model="verify.code"
               :type="verifyType"
-              :state="verifyState"
+              :state="verify.state"
               :title="String(customize.title)"
               :secondary-text="String(customize.secondaryText)"
-              :countdown-seconds="verifyState === 'error' ? null : countdownSeconds"
+              :countdown-seconds="countdownSeconds"
               :switch-label="String(customize.switchLabel)"
-              :switch-disabled="Boolean(customize.switchDisabled)"
+              :switch-disabled="verify.switchDisabled"
               :confirm-label="String(customize.confirmLabel)"
               :cancel-label="String(customize.cancelLabel)"
+              :password-error-text="String(customize.passwordErrorText)"
               :action-tone="customize.actionTone as 'brand' | 'decor'"
-              @recover="onRecover"
+              @complete="onComplete"
+              @recover="handleRecover"
             />
           </EgTooltip>
         </div>

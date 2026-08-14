@@ -32,7 +32,30 @@ export const segmentedControlPropRows: DocPropRow[] = [
 export const tabsPropRows: DocPropRow[] = [
   { name: 'modelValue', type: 'number', defaultValue: '0', description: '当前选中 Tab 索引。' },
   { name: 'labels', type: 'string[]', defaultValue: "['Tab','Tab','Tab','Tab','Tab']", description: 'Tab 文案列表。' },
+  {
+    name: 'horizontalGap',
+    type: "'xl' | 'md' | 'sm' | 'xs'",
+    defaultValue: "'xl'",
+    description:
+      '水平间距：xl → gap var(--spacing-5)；md → var(--spacing-4)；sm → var(--spacing-3)；xs → var(--spacing-2)。',
+  },
+  {
+    name: 'verticalGap',
+    type: "'xl' | 'md' | 'sm' | 'xs'",
+    defaultValue: "'xl'",
+    description:
+      '垂直间距（padding-bottom，含指示条 stroke-xl）：xl → spacing-2-5；md → spacing-2；sm → spacing-1-5；xs → spacing-1。',
+  },
 ];
+
+export type TabsSpacingSize = 'xl' | 'md' | 'sm' | 'xs';
+
+export const tabsSpacingSizeOptions = [
+  { value: 'xl', label: 'Xl' },
+  { value: 'md', label: 'Md' },
+  { value: 'sm', label: 'Sm' },
+  { value: 'xs', label: 'Xs' },
+] as const;
 
 const countOptions = countSelectOptions(10, 2);
 
@@ -105,6 +128,8 @@ export const segmentedControlCustomizeControls: DocCustomizeControl[] = [
 export const tabsCustomizeDefaults = {
   count: '5',
   labels: 'Tab Tab Tab Tab Tab',
+  horizontalGap: 'xl' as TabsSpacingSize,
+  verticalGap: 'xl' as TabsSpacingSize,
 };
 
 export const tabsCustomizeControls: DocCustomizeControl[] = [
@@ -119,6 +144,18 @@ export const tabsCustomizeControls: DocCustomizeControl[] = [
     key: 'labels',
     label: '标签名',
     placeholder: '用空格分隔，如 Overview Assets History',
+  },
+  {
+    kind: 'select',
+    key: 'horizontalGap',
+    label: '水平间距',
+    options: tabsSpacingSizeOptions.map((option) => ({ ...option })),
+  },
+  {
+    kind: 'select',
+    key: 'verticalGap',
+    label: '垂直间距',
+    options: tabsSpacingSizeOptions.map((option) => ({ ...option })),
   },
 ];
 
@@ -144,5 +181,12 @@ export function buildSegmentedControlUsageSnippet(state: Record<string, unknown>
 
 export function buildTabsUsageSnippet(state: Record<string, unknown>): string {
   const labels = resolveTabLabels(state.labels, state.count);
-  return `<EgTabs\n  v-model="selected"\n  :labels="${formatLabelsLiteral(labels)}"\n/>`;
+  const parts = ['v-model="selected"', `:labels="${formatLabelsLiteral(labels)}"`];
+  if (state.horizontalGap !== 'xl') {
+    parts.push(`horizontal-gap="${String(state.horizontalGap)}"`);
+  }
+  if (state.verticalGap !== 'xl') {
+    parts.push(`vertical-gap="${String(state.verticalGap)}"`);
+  }
+  return `<EgTabs\n  ${parts.join('\n  ')}\n/>`;
 }

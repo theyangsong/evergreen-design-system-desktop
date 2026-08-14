@@ -135,6 +135,7 @@ export function buildButtonUsageSnippet(state: Record<string, unknown>): string 
 export const iconButtonCustomizeDefaults = {
   shape: 'rectangular',
   event: 'full' as 'full' | 'default' | 'hover' | 'active' | 'focus',
+  motion: 'ease' as 'ease' | 'hover-enter-only' | 'asym' | 'none',
   size: 'lg',
   label: 'Add',
   symbol: showcaseDefaultIconName,
@@ -153,6 +154,17 @@ export const iconButtonCustomizeControls: DocCustomizeControl[] = [
     key: 'event',
     label: showcaseButtonCustomizeFieldLabels.event,
     options: iconButtonEventRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'motion',
+    label: '动效',
+    options: [
+      { value: 'ease', label: 'is-hover（入+出）' },
+      { value: 'hover-enter-only', label: 'is-hover-enter-only（仅入场）' },
+      { value: 'asym', label: 'is-hover-enter-only（asym 别名）' },
+      { value: 'none', label: 'none' },
+    ],
   },
   {
     kind: 'select',

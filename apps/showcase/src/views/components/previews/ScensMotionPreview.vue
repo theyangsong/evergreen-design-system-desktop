@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, watch } from 'vue';
-import { EgDoneTick, EgIcon, EgVerifyRingDots } from '@eds/desktop-components';
+import { EgDoneTick, EgIcon, EgMnemonicVerify, EgMotionProcessing, EgRipplePulse, EgVerifyRingDots } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import previewPageStyles from './InputPreview.module.css';
 import styles from './ScensMotionPreview.module.css';
@@ -9,6 +9,12 @@ import {
   scensMotionCustomizeDefaults,
   scensMotionDoneTickImportCode,
   scensMotionDoneTickPropRows,
+  scensMotionMotionProcessingImportCode,
+  scensMotionMotionProcessingPropRows,
+  scensMotionMnemonicVerifyImportCode,
+  scensMotionMnemonicVerifyPropRows,
+  scensMotionRipplePulseImportCode,
+  scensMotionRipplePulsePropRows,
   scensMotionRingDotsImportCode,
   scensMotionRingDotsPropRows,
   type ScensMotionInteraction,
@@ -23,18 +29,57 @@ const customize = reactive({ ...scensMotionCustomizeDefaults });
 
 const isVerifyRingDots = computed(() => customize.scenario === 'verify-ring-dots');
 const isDoneTick = computed(() => customize.scenario === 'done-tick');
+const isMotionProcessing = computed(() => customize.scenario === 'motion-processing');
+const isRipplePulse = computed(() => customize.scenario === 'ripple-pulse');
+const isMnemonicVerify = computed(() => customize.scenario === 'mnemonic-verify');
 
-const docComponentTag = computed(() =>
-  isDoneTick.value ? 'EgDoneTick' : 'EgVerifyRingDots',
-);
+const docComponentTag = computed(() => {
+  if (isDoneTick.value) {
+    return 'EgDoneTick';
+  }
+  if (isMotionProcessing.value) {
+    return 'EgMotionProcessing';
+  }
+  if (isRipplePulse.value) {
+    return 'EgRipplePulse';
+  }
+  if (isMnemonicVerify.value) {
+    return 'EgMnemonicVerify';
+  }
+  return 'EgVerifyRingDots';
+});
 
-const docImportCode = computed(() =>
-  isDoneTick.value ? scensMotionDoneTickImportCode : scensMotionRingDotsImportCode,
-);
+const docImportCode = computed(() => {
+  if (isDoneTick.value) {
+    return scensMotionDoneTickImportCode;
+  }
+  if (isMotionProcessing.value) {
+    return scensMotionMotionProcessingImportCode;
+  }
+  if (isRipplePulse.value) {
+    return scensMotionRipplePulseImportCode;
+  }
+  if (isMnemonicVerify.value) {
+    return scensMotionMnemonicVerifyImportCode;
+  }
+  return scensMotionRingDotsImportCode;
+});
 
-const docPropRows = computed(() =>
-  isDoneTick.value ? scensMotionDoneTickPropRows : scensMotionRingDotsPropRows,
-);
+const docPropRows = computed(() => {
+  if (isDoneTick.value) {
+    return scensMotionDoneTickPropRows;
+  }
+  if (isMotionProcessing.value) {
+    return scensMotionMotionProcessingPropRows;
+  }
+  if (isRipplePulse.value) {
+    return scensMotionRipplePulsePropRows;
+  }
+  if (isMnemonicVerify.value) {
+    return scensMotionMnemonicVerifyPropRows;
+  }
+  return scensMotionRingDotsPropRows;
+});
 
 const cycleState = ref<RingPreviewState>('idle');
 let cycleTimer: ReturnType<typeof setInterval> | undefined;
@@ -82,6 +127,24 @@ const showTypeIcon = computed(() => !showSuccessTick.value);
 
 const doneTickToneClass = computed(() =>
   customize.tone === 'brand' ? styles.doneTickToneBrand : styles.doneTickToneSuccess,
+);
+
+const motionProcessingToneClass = computed(() =>
+  customize.tone === 'brand'
+    ? styles.motionProcessingToneBrand
+    : styles.motionProcessingToneWarning,
+);
+
+watch(
+  () => customize.scenario,
+  (scenario) => {
+    if (scenario === 'motion-processing' && customize.tone === 'success') {
+      customize.tone = 'warning';
+    } else if (scenario === 'done-tick' && customize.tone === 'warning') {
+      customize.tone = 'success';
+    }
+  },
+  { immediate: true },
 );
 
 watch(
@@ -137,6 +200,18 @@ onUnmounted(() => {
 
           <div v-else-if="isDoneTick" :class="styles.doneTickHost">
             <EgDoneTick :key="customize.scenario" :class="doneTickToneClass" />
+          </div>
+
+          <div v-else-if="isMotionProcessing" :class="styles.motionProcessingHost">
+            <EgMotionProcessing :key="customize.scenario" :class="motionProcessingToneClass" />
+          </div>
+
+          <div v-else-if="isRipplePulse" :class="styles.ripplePulseHost">
+            <EgRipplePulse :key="customize.scenario" :class="styles.ripplePulseToneBrand" />
+          </div>
+
+          <div v-else-if="isMnemonicVerify" :class="styles.mnemonicVerifyHost">
+            <EgMnemonicVerify :key="customize.scenario" :class="styles.mnemonicVerifyToneBrand" />
           </div>
         </div>
       </template>

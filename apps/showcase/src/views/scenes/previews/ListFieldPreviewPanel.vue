@@ -4,6 +4,8 @@ import '@/styles/desktop-components-scope.css';
 import '@/styles/text-style-preview.css';
 import {
   EgAnchoredTooltip,
+  EgCrypto,
+  EgCryptoAddress,
   EgCryptoCombo,
   EgDivider,
   EgFormSubmission,
@@ -21,19 +23,23 @@ import type { ListFieldSceneSlug } from '@/data/scenes';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import hashLikeStyles from '../../../../../../packages/components/src/molecules/list-field/ListFieldHashLike.module.css';
 import DataListActionCell from '../../../../../../packages/components/src/organisms/data-list/DataListActionCell.vue';
-import { buildCurrencySideAddressData } from './listFieldCurrencyAddressCustomize';
+import {
+  buildCurrencySideAddressData,
+  resolveCurrencySideVisible,
+} from './listFieldCurrencyAddressCustomize';
 import { resolveCryptoNameFromSymbol } from './listFieldCryptoResolve';
-import { buildCurrencySideTagsList } from './listFieldCurrencyTagCustomize';
+import { buildCurrencySideTagsList, buildCurrencySideTags } from './listFieldCurrencyTagCustomize';
+import { parseCurrencyAddressCount } from './listFieldCurrencyShared';
 import {
   SAMPLE_ADDRESS,
   buildListFieldMoreActions,
   isListFieldHashLikeSlug,
   listFieldHashLikePrimarySample,
   listFieldHashLikeSecondarySample,
-  truncateMiddle,
 } from './listFieldsPreviewData';
 import styles from './listFieldScene.module.css';
 import { readHashLikeCopyOnRowHover } from './listFieldHashLikePreview';
+import GeneralStructurePrimaryLead from './GeneralStructurePrimaryLead.vue';
 
 const props = defineProps<{
   slug: ListFieldSceneSlug;
@@ -110,17 +116,80 @@ const networkLabel = () => String(props.customize.networkLabel ?? 'Base');
 const currencyFromAddress = computed(() => buildCurrencySideAddressData('from', props.customize));
 const currencyToAddress = computed(() => buildCurrencySideAddressData('to', props.customize));
 
-const addressFrom = () => truncateMiddle(String(props.customize.address ?? SAMPLE_ADDRESS), 6, 6);
-const addressTo = () => truncateMiddle(String(props.customize.address ?? SAMPLE_ADDRESS), 5, 5);
+const addressFromAddress = computed(() =>
+  props.slug === 'list-field-address'
+    ? buildCurrencySideAddressData('from', props.customize)
+    : currencyFromAddress.value,
+);
+const addressToAddress = computed(() =>
+  props.slug === 'list-field-address'
+    ? buildCurrencySideAddressData('to', props.customize)
+    : currencyToAddress.value,
+);
+const addressFromTagsList = computed(() =>
+  props.slug === 'list-field-address' && displayMode() === 'double'
+    ? buildCurrencySideTagsList('from', props.customize)
+    : undefined,
+);
+const addressSingleTags = computed(() =>
+  props.slug === 'list-field-address' && displayMode() === 'single'
+    ? buildCurrencySideTags('from', props.customize)
+    : undefined,
+);
+const showAddressRowTag = computed(() => props.customize.showAddressRowTag !== false);
+const addressRowTagLabel = computed(() => String(props.customize.addressRowTagLabel ?? 'Tag'));
+const addressRowTagSystemType = computed(
+  () => String(props.customize.addressRowTagSystemType ?? 'gray') as TagSystemType,
+);
+const addressSecondaryText = computed(() =>
+  props.customize.showAddressSecondaryText === false
+    ? ''
+    : String(props.customize.addressSecondaryText ?? '').trim(),
+);
+const addressLineCount = computed(() => {
+  if (props.customize.showAddressMulti !== true) return 1;
+  return parseCurrencyAddressCount(props.customize.addressMultiCount);
+});
+const addressLineAddresses = computed(() => {
+  if (props.customize.showAddressMulti !== true) return undefined;
+  const count = parseCurrencyAddressCount(props.customize.addressMultiCount);
+  return buildCurrencySideAddressData('from', {
+    ...props.customize,
+    fromAddressCount: String(count),
+  }).addresses;
+});
+const addressToTagsList = computed(() =>
+  props.slug === 'list-field-address' && displayMode() === 'double'
+    ? buildCurrencySideTagsList('to', props.customize)
+    : undefined,
+);
+const addressMinWidth = computed(() => parsePreviewMinWidth(props.customize));
+
 const fullAddress = () => String(props.customize.address ?? SAMPLE_ADDRESS);
 
 const displayMode = () => String(props.customize.displayMode ?? 'single');
-const alias = () => String(props.customize.alias ?? 'Treasury');
-const collectionCount = () => String(props.customize.collectionCount ?? '3');
 
 const amountType = () => String(props.customize.amountType ?? 'conversion');
 const fiatValue = () => String(props.customize.fiatValue ?? '$10');
 const cryptoValue = () => String(props.customize.cryptoValue ?? '12,500.000001');
+const cryptoAmountSymbol = computed(() => {
+  if (amountType() === 'crypto') {
+    return String(props.customize.cryptoSymbol ?? 'BTC');
+  }
+  return String(props.customize.cryptoSymbol ?? 'USDT');
+});
+const cryptoAmountCryptoName = computed(
+  () => resolveCryptoNameFromSymbol(cryptoAmountSymbol.value) ?? 'eds-btc-bitcoin',
+);
+const cryptoAmountText = computed(
+  () => `${formatGroupedNumber(cryptoValue())} ${cryptoAmountSymbol.value}`,
+);
+const showAmountCryptoIcon = computed(() => props.customize.showCryptoIcon !== false);
+const showAmountTag = computed(() => props.customize.showAmountTag !== false);
+const amountTagLabel = computed(() => String(props.customize.amountTagLabel ?? 'Tag'));
+const amountTagSystemType = computed(
+  () => String(props.customize.amountTagSystemType ?? 'stroke-subtle') as TagSystemType,
+);
 
 const datetime = () => String(props.customize.datetime ?? '2026-07-19 14:30:00');
 const secondaryDatetime = () =>
@@ -287,6 +356,8 @@ const actionMinWidthStyle = computed(() => {
       :min-width="currencyMinWidth"
       :from-tags-list="currencyFromTagsList"
       :to-tags-list="currencyToTagsList"
+      :show-from="resolveCurrencySideVisible('from', props.customize)"
+      :show-to="resolveCurrencySideVisible('to', props.customize)"
       :address-tooltip-trigger="addressTooltipTrigger"
     />
 
@@ -294,29 +365,36 @@ const actionMinWidthStyle = computed(() => {
       <div v-if="displayMode() === 'single'" :class="styles.addressPreview" :style="cellMinWidthStyle">
         <EgListFieldAddressLine
           :text="fullAddress()"
+          :tags="addressSingleTags"
+          :show-row-tag="showAddressRowTag"
+          :row-tag-label="addressRowTagLabel"
+          :row-tag-system-type="addressRowTagSystemType"
+          :secondary-text="addressSecondaryText"
+          :address-count="addressLineCount"
+          :addresses="addressLineAddresses"
           :copy-on-row-hover="hashLikeCopyOnRowHover"
           :tooltip-trigger="hashLikeTooltipTrigger"
         />
       </div>
 
-      <div v-else-if="displayMode() === 'alias'" :class="styles.addressPreview" :style="cellMinWidthStyle">
-        <EgTag family="system" system-type="subtle" size="sm">{{ alias() }}</EgTag>
-        <span :class="styles.addressText">{{ addressFrom() }}</span>
-      </div>
-
-      <div v-else-if="displayMode() === 'double'" :class="styles.addressPreview" :style="cellMinWidthStyle">
-        <span :class="styles.addressText">{{ addressFrom() }}</span>
-        <EgIcon name="eds-arrow-right" :class="styles.addressArrow" />
-        <span :class="styles.addressText">{{ addressTo() }}</span>
-      </div>
-
       <div v-else :class="styles.addressPreview" :style="cellMinWidthStyle">
-        <EgAnchoredTooltip
-          :content="`${collectionCount()} linked addresses`"
-          placement="top"
-        >
-          <span :class="styles.addressText">({{ collectionCount() }})</span>
-        </EgAnchoredTooltip>
+        <EgCryptoAddress
+          address-mode="double"
+          :from-text="addressFromAddress.address"
+          :from-alias="addressFromAddress.alias || undefined"
+          :to-text="addressToAddress.address"
+          :to-alias="addressToAddress.alias || undefined"
+          :from-address-count="addressFromAddress.count"
+          :to-address-count="addressToAddress.count"
+          :from-addresses="addressFromAddress.addresses"
+          :to-addresses="addressToAddress.addresses"
+          :from-tags-list="addressFromTagsList"
+          :to-tags-list="addressToTagsList"
+          :show-from="resolveCurrencySideVisible('from', props.customize)"
+          :show-to="resolveCurrencySideVisible('to', props.customize)"
+          :min-width="addressMinWidth"
+          :address-tooltip-trigger="addressTooltipTrigger"
+        />
       </div>
     </template>
 
@@ -336,6 +414,10 @@ const actionMinWidthStyle = computed(() => {
             >
               {{ leftTagLabel() }}
             </EgTag>
+            <GeneralStructurePrimaryLead
+              v-if="slug === 'list-field-general-structure'"
+              :customize="customize"
+            />
             <EgListFieldHashLikeLine
               :text="hashLikeValue"
               variant="primary"
@@ -375,6 +457,10 @@ const actionMinWidthStyle = computed(() => {
               >
                 {{ leftTagLabel() }}
               </EgTag>
+              <GeneralStructurePrimaryLead
+                v-if="slug === 'list-field-general-structure'"
+                :customize="customize"
+              />
               <EgListFieldHashLikeLine
                 :text="hashLikeValue"
                 variant="primary"
@@ -412,6 +498,10 @@ const actionMinWidthStyle = computed(() => {
             >
               {{ leftTagLabel() }}
             </EgTag>
+            <GeneralStructurePrimaryLead
+              v-if="slug === 'list-field-general-structure'"
+              :customize="customize"
+            />
             <EgListFieldHashLikeLine
               :text="hashLikeValue"
               variant="primary"
@@ -437,7 +527,21 @@ const actionMinWidthStyle = computed(() => {
           :class="hashLikeStyles.combo"
           :style="hashLikeMinWidthStyle"
         >
+          <div
+            v-if="slug === 'list-field-general-structure'"
+            :class="styles.generalStructureTitleRow"
+          >
+            <GeneralStructurePrimaryLead :customize="customize" />
+            <EgListFieldHashLikeLine
+              :text="hashLikeValue"
+              variant="primary"
+              :identifier-mode="slug === 'list-field-identifier'"
+              :copy-on-row-hover="hashLikeCopyOnRowHover"
+              :tooltip-trigger="hashLikeTooltipTrigger"
+            />
+          </div>
           <EgListFieldHashLikeLine
+            v-else
             :text="hashLikeValue"
             variant="primary"
             :identifier-mode="slug === 'list-field-identifier'"
@@ -457,7 +561,21 @@ const actionMinWidthStyle = computed(() => {
           :class="showGeneralStructureStack ? [styles.generalStructureSingleStack, dismissFeedbackAlignClass] : undefined"
           :style="hashLikeMinWidthStyle"
         >
+          <div
+            v-if="slug === 'list-field-general-structure'"
+            :class="styles.generalStructureTitleRow"
+          >
+            <GeneralStructurePrimaryLead :customize="customize" />
+            <EgListFieldHashLikeLine
+              :text="hashLikeValue"
+              variant="primary"
+              :identifier-mode="slug === 'list-field-identifier'"
+              :copy-on-row-hover="hashLikeCopyOnRowHover"
+              :tooltip-trigger="hashLikeTooltipTrigger"
+            />
+          </div>
           <EgListFieldHashLikeLine
+            v-else
             :text="hashLikeValue"
             variant="primary"
             :identifier-mode="slug === 'list-field-identifier'"
@@ -489,24 +607,56 @@ const actionMinWidthStyle = computed(() => {
         />
       </div>
       <div v-else-if="amountType() === 'crypto'" :class="styles.amountPreview" :style="cellMinWidthStyle">
-        <EgListFieldOverflowText
-          :text="`${formatGroupedNumber('66666.6666')} BTC`"
-          variant="primary"
-          tabular
-          :tooltip-trigger="listFieldTooltipTrigger"
-        />
+        <div :class="styles.amountPrimaryRow">
+          <EgCrypto
+            v-if="showAmountCryptoIcon"
+            :name="cryptoAmountCryptoName"
+            fit
+            :class="styles.amountCryptoIcon"
+            :label="cryptoAmountSymbol"
+          />
+          <EgListFieldOverflowText
+            :text="cryptoAmountText"
+            variant="primary"
+            tabular
+            :tooltip-trigger="listFieldTooltipTrigger"
+          />
+          <EgTag
+            v-if="showAmountTag"
+            size="sm"
+            :system-type="amountTagSystemType"
+          >
+            {{ amountTagLabel }}
+          </EgTag>
+        </div>
         <span v-if="showCountdown" :class="styles.generalStructureCountdown">
           <span :class="styles.generalStructureCountdownTime">{{ countdownTime }}</span>
           <span :class="styles.generalStructureCountdownSuffix"> Until Expiry</span>
         </span>
       </div>
       <div v-else :class="styles.amountPreview" :style="cellMinWidthStyle">
-        <EgListFieldOverflowText
-          :text="`${cryptoValue()} USDT`"
-          variant="primary"
-          tabular
-          :tooltip-trigger="listFieldTooltipTrigger"
-        />
+        <div :class="styles.amountPrimaryRow">
+          <EgCrypto
+            v-if="showAmountCryptoIcon"
+            :name="cryptoAmountCryptoName"
+            fit
+            :class="styles.amountCryptoIcon"
+            :label="cryptoAmountSymbol"
+          />
+          <EgListFieldOverflowText
+            :text="cryptoAmountText"
+            variant="primary"
+            tabular
+            :tooltip-trigger="listFieldTooltipTrigger"
+          />
+          <EgTag
+            v-if="showAmountTag"
+            size="sm"
+            :system-type="amountTagSystemType"
+          >
+            {{ amountTagLabel }}
+          </EgTag>
+        </div>
         <div v-if="showAmountConversionCountdown" :class="styles.amountSecondaryRow">
           <EgListFieldOverflowText
             :text="`≈ ${fiatValue()}`"

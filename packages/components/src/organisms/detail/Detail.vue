@@ -11,9 +11,11 @@ import { EgButton, type ButtonTone } from '../../molecules/button';
 import type { ComboActionPageTone } from '../../molecules/combo';
 import comboActionStyles from '../../molecules/combo/ComboAction.module.css';
 import { EgPaginationItem } from '../../molecules/pagination-item';
-import { EgTabs } from '../../molecules/tab';
+import { EgTabs, type TabsSpacingSize } from '../../molecules/tab';
 import { hasOpenClickAnchoredTooltip } from '../../molecules/tooltip/anchoredTooltipManager';
 import cryptoComboStyles from '../../molecules/crypto-combo/CryptoCombo.module.css';
+import CryptoAddressTags from '../../molecules/crypto-combo/CryptoAddressTags.vue';
+import { hasAddressTags } from '../../molecules/crypto-combo/cryptoAddressTagUtils';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import chromeScrimStyles from '../../styles/popupChromeScrim.module.css';
@@ -22,7 +24,9 @@ import '../../styles/popupInnerBackdrop.css';
 import styles from './Detail.module.css';
 import {
   createDefaultDetailSections,
+  type DetailAddressLayout,
   type DetailItemData,
+  type DetailItemValueEntry,
   type DetailSectionData,
 } from './detailTypes';
 
@@ -70,8 +74,154 @@ function itemHasValueTrailingActions(item: DetailItemData): boolean {
   );
 }
 
-function itemCopyKey(sectionIndex: number, itemIndex: number, item: DetailItemData): string {
-  return item.key ?? `${sectionIndex}-${itemIndex}`;
+function itemCopyKey(
+  sectionIndex: number,
+  itemIndex: number,
+  item: DetailItemData,
+  entryIndex = 0,
+): string {
+  const base = item.key ?? `${sectionIndex}-${itemIndex}`;
+  return entryIndex > 0 ? `${base}-${entryIndex}` : base;
+}
+
+type DetailItemResolvedValueEntry = DetailItemValueEntry & {
+  tagBeforeValue: boolean;
+  tagFamily: NonNullable<DetailItemData['tagFamily']>;
+  tagSystemType: NonNullable<DetailItemData['tagSystemType']>;
+};
+
+function itemAddressLayout(item: DetailItemData): DetailAddressLayout {
+  return item.addressLayout ?? 'single';
+}
+
+function itemResolvedValueEntries(item: DetailItemData): DetailItemResolvedValueEntry[] {
+  const tagFamily = item.tagFamily ?? 'system';
+  const tagSystemType = item.tagSystemType ?? 'stroke-subtle';
+
+  if (item.valueEntries?.length) {
+    return item.valueEntries.map((entry) => ({
+      ...entry,
+      tagBeforeValue: entry.tagBeforeValue ?? item.tagBeforeValue ?? false,
+      tagFamily: entry.tagFamily ?? tagFamily,
+      tagSystemType: entry.tagSystemType ?? tagSystemType,
+    }));
+  }
+
+  return [
+    {
+      value: item.value,
+      tag: item.tag,
+      tagBeforeValue: item.tagBeforeValue ?? false,
+      tagFamily,
+      tagSystemType,
+      dashed: item.dashed,
+    },
+  ];
+}
+
+function itemDisplayValueEntries(item: DetailItemData): DetailItemResolvedValueEntry[] {
+  const entries = itemResolvedValueEntries(item);
+  const layout = itemAddressLayout(item);
+
+  if (layout === 'multi-expanded') {
+    return entries;
+  }
+
+  return entries.slice(0, 1);
+}
+
+function itemAddressCount(item: DetailItemData): number {
+  const count = item.addressCount ?? itemResolvedValueEntries(item).length;
+  return Math.max(1, count);
+}
+
+function itemShowsAddressCollapsedFooter(item: DetailItemData): boolean {
+  const layout = itemAddressLayout(item);
+  if (layout !== 'multi-collapsed' && layout !== 'multi-orders') {
+    return false;
+  }
+  if (itemAddressCount(item) <= 1) {
+    return false;
+  }
+  if (layout === 'multi-orders') {
+    return true;
+  }
+  return Boolean(item.addressViewMoreLabel);
+}
+
+function itemAddressViewMoreText(item: DetailItemData): string {
+  const layout = itemAddressLayout(item);
+  const count = String(itemAddressCount(item));
+  if (layout === 'multi-orders') {
+    const label = item.addressViewMoreLabel ?? '{count} Orders';
+    if (label.includes('{count}')) {
+      return label.replaceAll('{count}', count);
+    }
+    return `${count} Orders`;
+  }
+  const label = item.addressViewMoreLabel ?? 'Expand';
+  if (label.includes('{count}')) {
+    return label.replaceAll('{count}', count);
+  }
+  return `${label} ${count}`;
+}
+
+function itemHasAddressBranch(item: DetailItemData): boolean {
+  return itemAddressLayout(item) === 'multi-expanded'
+    && itemResolvedValueEntries(item).length > 1;
+}
+
+function itemAddressBranchEntries(item: DetailItemData): DetailItemResolvedValueEntry[] {
+  return itemResolvedValueEntries(item).slice(1);
+}
+
+function itemPrimaryValueEntry(item: DetailItemData): DetailItemResolvedValueEntry {
+  return itemDisplayValueEntries(item)[0]!;
+}
+
+function entryAddressTagsBelow(entry: DetailItemResolvedValueEntry): boolean {
+  return entry.valueAddressSideTagsBelow === true;
+}
+
+function resolveItemCopyValue(item: DetailItemData, entry: DetailItemResolvedValueEntry): string {
+  return item.valueCopyText ?? entry.value;
+}
+
+function itemRowCopyable(item: DetailItemData, entry: DetailItemResolvedValueEntry): boolean {
+  return Boolean(item.showValueCopy && resolveItemCopyValue(item, entry));
+}
+
+function itemValueTagText(item: DetailItemData, entry: DetailItemResolvedValueEntry): string | undefined {
+  return entry.tag ?? item.tag;
+}
+
+function itemValueTagBeforeValue(item: DetailItemData, entry: DetailItemResolvedValueEntry): boolean {
+  return entry.tagBeforeValue ?? item.tagBeforeValue ?? false;
+}
+
+function itemValueTagFamily(
+  item: DetailItemData,
+  entry: DetailItemResolvedValueEntry,
+): NonNullable<DetailItemData['tagFamily']> {
+  return entry.tagFamily ?? item.tagFamily ?? 'system';
+}
+
+function itemValueTagSystemType(
+  item: DetailItemData,
+  entry: DetailItemResolvedValueEntry,
+): NonNullable<DetailItemData['tagSystemType']> {
+  return entry.tagSystemType ?? item.tagSystemType ?? 'stroke-subtle';
+}
+
+function inlineValueSegmentClass(
+  segment: DetailItemValueEntry,
+  styles: Record<string, string>,
+): Record<string, boolean> {
+  return {
+    [styles.itemValueText]: true,
+    [styles.itemValueTextNowrap]: true,
+    [styles.itemValueTextSecondary]: segment.valueMuted === true,
+  };
 }
 
 const copiedItemKey = ref<string | null>(null);
@@ -80,10 +230,10 @@ let copiedResetTimer: ReturnType<typeof setTimeout> | undefined;
 async function onCopyItemValue(
   copyKey: string,
   value: string,
-  event: MouseEvent,
+  event?: MouseEvent,
 ) {
-  event.stopPropagation();
-  event.preventDefault();
+  event?.stopPropagation();
+  event?.preventDefault();
   const copied = await copyToClipboard(value);
   if (!copied) return;
 
@@ -92,6 +242,22 @@ async function onCopyItemValue(
   copiedResetTimer = setTimeout(() => {
     if (copiedItemKey.value === copyKey) copiedItemKey.value = null;
   }, 2000);
+}
+
+function onItemRowCopyClick(
+  sectionIndex: number,
+  itemIndex: number,
+  item: DetailItemData,
+  entry: DetailItemResolvedValueEntry,
+  entryIndex: number,
+  event?: MouseEvent,
+) {
+  if (!itemRowCopyable(item, entry)) return;
+  void onCopyItemValue(
+    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+    resolveItemCopyValue(item, entry),
+    event,
+  );
 }
 
 const props = withDefaults(
@@ -105,6 +271,8 @@ const props = withDefaults(
     showStatusTag?: boolean;
     showTabs?: boolean;
     tabLabels?: string[];
+    tabHorizontalGap?: TabsSpacingSize;
+    tabVerticalGap?: TabsSpacingSize;
     sections?: DetailSectionData[];
     showToolbar?: boolean;
     showToolbarNav?: boolean;
@@ -118,6 +286,8 @@ const props = withDefaults(
     /** Cancel 按钮 tone；默认与 toolbarTone 一致。 */
     toolbarCancelTone?: ButtonTone;
     toolbarDirection?: 'left' | 'right';
+    /** 工具栏顶部分割线常驻（不依赖底部是否仍有内容被裁切）。 */
+    toolbarDividerPinned?: boolean;
     toolbarConfirmLabel?: string;
     toolbarCancelLabel?: string;
   }>(),
@@ -131,6 +301,8 @@ const props = withDefaults(
     showStatusTag: true,
     showTabs: false,
     tabLabels: () => ['Tab', 'Tab', 'Tab', 'Tab', 'Tab'],
+    tabHorizontalGap: 'xl',
+    tabVerticalGap: 'xl',
     sections: () => createDefaultDetailSections(),
     showToolbar: true,
     showToolbarNav: true,
@@ -140,6 +312,7 @@ const props = withDefaults(
     toolbarNextDisabled: false,
     toolbarTone: 'decor',
     toolbarDirection: 'right',
+    toolbarDividerPinned: false,
     toolbarConfirmLabel: 'Confirm',
     toolbarCancelLabel: 'Cancel',
   },
@@ -193,6 +366,10 @@ const contentPageStackDirection = computed((): 'forward' | 'backward' | 'none' =
   if (!props.showToolbarNav) return 'none';
   return contentNavDirection.value === 'prev' ? 'backward' : 'forward';
 });
+
+const showToolbarDivider = computed(
+  () => scrollOverflows.value || props.toolbarDividerPinned,
+);
 
 function flashToolbarNav(direction: 'prev' | 'next') {
   toolbarNavFlash.value = direction;
@@ -449,7 +626,9 @@ onBeforeUnmount(() => {
           <header :class="styles.headline">
             <span v-if="showEyebrow" :class="styles.eyebrow">{{ eyebrow }}</span>
             <div :class="styles.headlineRow">
-              <h2 :class="styles.headlineText">{{ headline }}</h2>
+              <h2 :class="styles.headlineText">
+                <slot name="headline-text">{{ headline }}</slot>
+              </h2>
               <EgTag
                 v-if="showStatusTag && statusTag"
                 family="status"
@@ -465,6 +644,8 @@ onBeforeUnmount(() => {
                 v-model="activeTab"
                 :class="styles.tabsHost"
                 :labels="tabLabels"
+                :horizontal-gap="tabHorizontalGap"
+                :vertical-gap="tabVerticalGap"
               />
               <EgDivider
                 :class="styles.headlineDivider"
@@ -495,129 +676,575 @@ onBeforeUnmount(() => {
                   <div
                     v-for="(item, itemIndex) in section.items"
                     :key="item.key ?? itemIndex"
-                    :class="styles.item"
+                    :class="[
+                      styles.item,
+                      (itemHasAddressBranch(item) || itemShowsAddressCollapsedFooter(item))
+                        && styles.itemAddressMulti,
+                      itemHasAddressBranch(item) && styles.itemAddressExpanded,
+                    ]"
                   >
-                  <div :class="styles.itemRow">
-                    <div :class="styles.itemTitle">
-                      <EgIcon
-                        v-if="itemShowsTitleIcon(item)"
-                        :class="styles.itemTitleIcon"
-                        :name="item.titleIcon!"
-                        size="sm"
-                        fit
-                      />
-                      <span :class="styles.itemTitleText">{{ item.title }}</span>
-                    </div>
-                    <div :class="styles.itemValue">
-                      <EgTag
-                        v-if="item.tag && item.tagBeforeValue"
-                        :family="item.tagFamily ?? 'system'"
-                        :status="item.tagStatus"
-                        :system-type="item.tagSystemType ?? 'stroke-subtle'"
-                        size="sm"
-                      >
-                        {{ item.tag }}
-                      </EgTag>
-                      <EgCrypto
-                        v-if="itemShowsValueCrypto(item) && itemValueCryptoName(item)"
-                        :class="styles.itemValueCrypto"
-                        :name="itemValueCryptoName(item)!"
-                        size="md"
-                        fit
-                      />
-                      <EgAvatar
-                        v-else-if="itemShowsValueAvatar(item)"
-                        size="sm"
-                        :name="itemValueAvatarName(item)"
-                      />
-                      <span
-                        v-if="!item.valueTagOnly && item.value"
+                    <div
+                      :class="[
+                        styles.itemRow,
+                        itemRowCopyable(item, itemPrimaryValueEntry(item)) && styles.itemRowCopyable,
+                      ]"
+                      :role="itemRowCopyable(item, itemPrimaryValueEntry(item)) ? 'button' : undefined"
+                      :tabindex="itemRowCopyable(item, itemPrimaryValueEntry(item)) ? 0 : undefined"
+                      @click="onItemRowCopyClick(
+                        sectionIndex,
+                        itemIndex,
+                        item,
+                        itemPrimaryValueEntry(item),
+                        0,
+                        $event,
+                      )"
+                      @keydown.enter.prevent="onItemRowCopyClick(
+                        sectionIndex,
+                        itemIndex,
+                        item,
+                        itemPrimaryValueEntry(item),
+                        0,
+                      )"
+                      @keydown.space.prevent="onItemRowCopyClick(
+                        sectionIndex,
+                        itemIndex,
+                        item,
+                        itemPrimaryValueEntry(item),
+                        0,
+                      )"
+                    >
+                      <div :class="styles.itemTitle">
+                        <EgIcon
+                          v-if="itemShowsTitleIcon(item)"
+                          :class="styles.itemTitleIcon"
+                          :name="item.titleIcon!"
+                          size="sm"
+                          fit
+                        />
+                        <span :class="styles.itemTitleText">{{ item.title }}</span>
+                      </div>
+                      <div
                         :class="[
-                          styles.itemValueText,
-                          !itemShowsValueAvatar(item) && styles.itemValueTextNowrap,
+                          styles.itemValue,
+                          entryAddressTagsBelow(itemPrimaryValueEntry(item))
+                            && styles.itemValueAddressStack,
                         ]"
                       >
-                        {{ item.value }}
-                      </span>
-                      <EgTag
-                        v-if="item.tag && !item.tagBeforeValue"
-                        :family="item.tagFamily ?? 'system'"
-                        :status="item.tagStatus"
-                        :system-type="item.tagSystemType ?? 'stroke-subtle'"
-                        size="sm"
-                      >
-                        {{ item.tag }}
-                      </EgTag>
+                        <slot
+                          v-if="item.key && $slots[`item-value-${item.key}`]"
+                          :name="`item-value-${item.key}`"
+                          :item="item"
+                        />
+                        <template v-else>
+                        <template
+                          v-for="(entry, entryIndex) in [itemPrimaryValueEntry(item)]"
+                          :key="`${item.key ?? itemIndex}-primary`"
+                        >
+                          <div
+                            v-if="entryAddressTagsBelow(entry)"
+                            :class="styles.itemValueAddressMainLine"
+                          >
+                            <EgTag
+                              v-if="itemValueTagText(item, entry) && itemValueTagBeforeValue(item, entry)"
+                              :family="itemValueTagFamily(item, entry)"
+                              :status="entry.tagStatus ?? item.tagStatus"
+                              :system-type="itemValueTagSystemType(item, entry)"
+                              size="sm"
+                            >
+                              {{ itemValueTagText(item, entry) }}
+                            </EgTag>
+                            <EgCrypto
+                              v-if="itemShowsValueCrypto(item) && itemValueCryptoName(item)"
+                              :class="styles.itemValueCrypto"
+                              :name="itemValueCryptoName(item)!"
+                              size="md"
+                              fit
+                            />
+                            <EgAvatar
+                              v-else-if="itemShowsValueAvatar(item)"
+                              size="xs"
+                              :name="itemValueAvatarName(item)"
+                            />
+                            <template v-if="item.inlineValueEntries && item.valueEntries?.length">
+                              <span
+                                v-for="(segment, segmentIndex) in item.valueEntries"
+                                :key="`${item.key ?? itemIndex}-segment-${segmentIndex}`"
+                                :class="inlineValueSegmentClass(segment, styles)"
+                              >
+                                {{ segment.value }}
+                              </span>
+                            </template>
+                            <span
+                              v-else-if="!item.valueTagOnly && entry.value"
+                              :class="[
+                                styles.itemValueText,
+                                !itemShowsValueAvatar(item) && styles.itemValueTextNowrap,
+                              ]"
+                            >
+                              {{ entry.value }}
+                            </span>
+                            <EgTag
+                              v-if="itemValueTagText(item, entry) && !itemValueTagBeforeValue(item, entry)"
+                              :family="itemValueTagFamily(item, entry)"
+                              :status="entry.tagStatus ?? item.tagStatus"
+                              :system-type="itemValueTagSystemType(item, entry)"
+                              size="sm"
+                            >
+                              {{ itemValueTagText(item, entry) }}
+                            </EgTag>
+                            <div
+                              v-if="itemHasValueTrailingActions(item)"
+                              :class="styles.itemValueTrailing"
+                            >
+                              <EgLink
+                                v-if="item.showValueLink"
+                                size="sm"
+                                tone="brand"
+                                @click="onItemValueLinkClick(item, sectionIndex, itemIndex, $event)"
+                              >
+                                {{ item.valueLinkLabel ?? 'Edit' }}
+                              </EgLink>
+                              <span
+                                v-if="item.showValueCopy"
+                                :class="[
+                                  cryptoComboStyles.menuCopyButton,
+                                  copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                    && cryptoComboStyles.menuCopyButtonCopied,
+                                ]"
+                                @click.stop
+                              >
+                                <EgIconButton
+                                  shape="square"
+                                  size="xs"
+                                  label="复制"
+                                  @click="onCopyItemValue(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                    resolveItemCopyValue(item, entry),
+                                    $event,
+                                  )"
+                                >
+                                  <EgIcon
+                                    :name="
+                                      copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                        ? 'eds-enable-fill'
+                                        : 'eds-copy'
+                                    "
+                                    fit
+                                  />
+                                </EgIconButton>
+                              </span>
+                              <EgIconButton
+                                v-if="item.showValueAddressBook"
+                                shape="square"
+                                size="xs"
+                                label="添加到地址簿"
+                              >
+                                <EgIcon name="eds-associates" fit />
+                              </EgIconButton>
+                              <EgIconButton
+                                v-if="item.showValueAmlSearch"
+                                shape="square"
+                                size="xs"
+                                label="AML 查询"
+                              >
+                                <EgIcon name="eds-aml-search" fit />
+                              </EgIconButton>
+                              <EgIconButton
+                                v-if="item.showValueBrowser"
+                                shape="square"
+                                size="xs"
+                                label="区块浏览器"
+                              >
+                                <EgIcon name="eds-earth" fit />
+                              </EgIconButton>
+                            </div>
+                          </div>
+                          <CryptoAddressTags
+                            v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                            :tags="entry.valueAddressSideTags"
+                            :reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                            :class="[
+                              styles.itemValueAddressTags,
+                              styles.itemValueAddressTagsBelow,
+                            ]"
+                          />
+                          <template v-if="!entryAddressTagsBelow(entry)">
+                            <EgTag
+                              v-if="itemValueTagText(item, entry) && itemValueTagBeforeValue(item, entry)"
+                              :family="itemValueTagFamily(item, entry)"
+                              :status="entry.tagStatus ?? item.tagStatus"
+                              :system-type="itemValueTagSystemType(item, entry)"
+                              size="sm"
+                            >
+                              {{ itemValueTagText(item, entry) }}
+                            </EgTag>
+                            <CryptoAddressTags
+                              v-if="entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                              :tags="entry.valueAddressSideTags"
+                              :reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                              :class="styles.itemValueAddressTags"
+                            />
+                            <EgCrypto
+                              v-if="itemShowsValueCrypto(item) && itemValueCryptoName(item)"
+                              :class="styles.itemValueCrypto"
+                              :name="itemValueCryptoName(item)!"
+                              size="md"
+                              fit
+                            />
+                            <EgAvatar
+                              v-else-if="itemShowsValueAvatar(item)"
+                              size="xs"
+                              :name="itemValueAvatarName(item)"
+                            />
+                            <template v-if="item.inlineValueEntries && item.valueEntries?.length">
+                              <span
+                                v-for="(segment, segmentIndex) in item.valueEntries"
+                                :key="`${item.key ?? itemIndex}-segment-${segmentIndex}`"
+                                :class="inlineValueSegmentClass(segment, styles)"
+                              >
+                                {{ segment.value }}
+                              </span>
+                            </template>
+                            <span
+                              v-else-if="!item.valueTagOnly && entry.value"
+                              :class="[
+                                styles.itemValueText,
+                                !itemShowsValueAvatar(item) && styles.itemValueTextNowrap,
+                              ]"
+                            >
+                              {{ entry.value }}
+                            </span>
+                            <EgTag
+                              v-if="itemValueTagText(item, entry) && !itemValueTagBeforeValue(item, entry)"
+                              :family="itemValueTagFamily(item, entry)"
+                              :status="entry.tagStatus ?? item.tagStatus"
+                              :system-type="itemValueTagSystemType(item, entry)"
+                              size="sm"
+                            >
+                              {{ itemValueTagText(item, entry) }}
+                            </EgTag>
+                            <div
+                              v-if="itemHasValueTrailingActions(item)"
+                              :class="styles.itemValueTrailing"
+                            >
+                              <EgLink
+                                v-if="item.showValueLink"
+                                size="sm"
+                                tone="brand"
+                                @click="onItemValueLinkClick(item, sectionIndex, itemIndex, $event)"
+                              >
+                                {{ item.valueLinkLabel ?? 'Edit' }}
+                              </EgLink>
+                              <span
+                                v-if="item.showValueCopy"
+                                :class="[
+                                  cryptoComboStyles.menuCopyButton,
+                                  copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                    && cryptoComboStyles.menuCopyButtonCopied,
+                                ]"
+                                @click.stop
+                              >
+                                <EgIconButton
+                                  shape="square"
+                                  size="xs"
+                                  label="复制"
+                                  @click="onCopyItemValue(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                    resolveItemCopyValue(item, entry),
+                                    $event,
+                                  )"
+                                >
+                                  <EgIcon
+                                    :name="
+                                      copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                        ? 'eds-enable-fill'
+                                        : 'eds-copy'
+                                    "
+                                    fit
+                                  />
+                                </EgIconButton>
+                              </span>
+                              <EgIconButton
+                                v-if="item.showValueAddressBook"
+                                shape="square"
+                                size="xs"
+                                label="添加到地址簿"
+                              >
+                                <EgIcon name="eds-associates" fit />
+                              </EgIconButton>
+                              <EgIconButton
+                                v-if="item.showValueAmlSearch"
+                                shape="square"
+                                size="xs"
+                                label="AML 查询"
+                              >
+                                <EgIcon name="eds-aml-search" fit />
+                              </EgIconButton>
+                              <EgIconButton
+                                v-if="item.showValueBrowser"
+                                shape="square"
+                                size="xs"
+                                label="区块浏览器"
+                              >
+                                <EgIcon name="eds-earth" fit />
+                              </EgIconButton>
+                            </div>
+                          </template>
+                        </template>
+                        </template>
+                      </div>
+                    </div>
+
+                    <div
+                      v-if="itemShowsAddressCollapsedFooter(item)"
+                      :class="styles.itemAddressCollapsedFooter"
+                    >
                       <div
-                        v-if="itemHasValueTrailingActions(item)"
-                        :class="styles.itemValueTrailing"
-                      >
+                        :class="styles.itemAddressDashRule"
+                        aria-hidden="true"
+                      />
+                      <div :class="[styles.itemRow, styles.itemAddressActionRow]">
+                        <div
+                          :class="styles.itemTitleSpacer"
+                          aria-hidden="true"
+                        />
                         <EgLink
-                          v-if="item.showValueLink"
                           size="sm"
                           tone="brand"
                           @click="onItemValueLinkClick(item, sectionIndex, itemIndex, $event)"
                         >
-                          {{ item.valueLinkLabel ?? 'Edit' }}
+                          {{ itemAddressViewMoreText(item) }}
                         </EgLink>
-                        <span
-                          v-if="item.showValueCopy"
-                          :class="[
-                            cryptoComboStyles.menuCopyButton,
-                            copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item)
-                              && cryptoComboStyles.menuCopyButtonCopied,
-                          ]"
-                          @click.stop
-                        >
-                          <EgIconButton
-                            shape="square"
-                            size="xs"
-                            label="复制"
-                            @click="onCopyItemValue(itemCopyKey(sectionIndex, itemIndex, item), item.value, $event)"
-                          >
-                            <EgIcon
-                              :name="
-                                copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item)
-                                  ? 'eds-enable-fill'
-                                  : 'eds-copy'
-                              "
-                              fit
-                            />
-                          </EgIconButton>
-                        </span>
-                        <EgIconButton
-                          v-if="item.showValueAddressBook"
-                          shape="square"
-                          size="xs"
-                          label="添加到地址簿"
-                        >
-                          <EgIcon name="eds-associates" fit />
-                        </EgIconButton>
-                        <EgIconButton
-                          v-if="item.showValueAmlSearch"
-                          shape="square"
-                          size="xs"
-                          label="AML 查询"
-                        >
-                          <EgIcon name="eds-aml-search" fit />
-                        </EgIconButton>
-                        <EgIconButton
-                          v-if="item.showValueBrowser"
-                          shape="square"
-                          size="xs"
-                          label="区块浏览器"
-                        >
-                          <EgIcon name="eds-earth" fit />
-                        </EgIconButton>
                       </div>
                     </div>
-                  </div>
-                  <EgDivider
-                    v-if="item.dashed"
-                    :class="styles.itemDashedDivider"
-                    type="page"
-                    direction="horizontal"
-                  />
+
+                    <div
+                      v-if="itemHasAddressBranch(item)"
+                      :class="styles.itemAddressBranch"
+                    >
+                      <template
+                        v-for="(entry, branchIndex) in itemAddressBranchEntries(item)"
+                        :key="`${item.key ?? itemIndex}-branch-${branchIndex}`"
+                      >
+                        <div
+                          :class="styles.itemAddressDashRule"
+                          aria-hidden="true"
+                        />
+                        <div
+                          :class="[
+                            styles.itemRow,
+                            styles.itemSubRow,
+                            itemRowCopyable(item, entry) && styles.itemRowCopyable,
+                          ]"
+                          :role="itemRowCopyable(item, entry) ? 'button' : undefined"
+                          :tabindex="itemRowCopyable(item, entry) ? 0 : undefined"
+                          @click="onItemRowCopyClick(
+                            sectionIndex,
+                            itemIndex,
+                            item,
+                            entry,
+                            branchIndex + 1,
+                            $event,
+                          )"
+                          @keydown.enter.prevent="onItemRowCopyClick(
+                            sectionIndex,
+                            itemIndex,
+                            item,
+                            entry,
+                            branchIndex + 1,
+                          )"
+                          @keydown.space.prevent="onItemRowCopyClick(
+                            sectionIndex,
+                            itemIndex,
+                            item,
+                            entry,
+                            branchIndex + 1,
+                          )"
+                        >
+                          <div
+                            :class="styles.itemTitleSpacer"
+                            aria-hidden="true"
+                          />
+                          <div
+                            :class="[
+                              styles.itemValue,
+                              entryAddressTagsBelow(entry) && styles.itemValueAddressStack,
+                            ]"
+                          >
+                            <div
+                              v-if="entryAddressTagsBelow(entry)"
+                              :class="styles.itemValueAddressMainLine"
+                            >
+                              <EgTag
+                                v-if="entry.tag && entry.tagBeforeValue"
+                                :family="entry.tagFamily"
+                                :status="entry.tagStatus"
+                                :system-type="entry.tagSystemType"
+                                size="sm"
+                              >
+                                {{ entry.tag }}
+                              </EgTag>
+                              <span
+                                v-if="entry.value"
+                                :class="[styles.itemValueText, styles.itemValueTextNowrap]"
+                              >
+                                {{ entry.value }}
+                              </span>
+                              <div
+                                v-if="itemHasValueTrailingActions(item)"
+                                :class="styles.itemValueTrailing"
+                              >
+                                <span
+                                  v-if="item.showValueCopy"
+                                  :class="[
+                                    cryptoComboStyles.menuCopyButton,
+                                    copiedItemKey === itemCopyKey(
+                                      sectionIndex,
+                                      itemIndex,
+                                      item,
+                                      branchIndex + 1,
+                                    ) && cryptoComboStyles.menuCopyButtonCopied,
+                                  ]"
+                                  @click.stop
+                                >
+                                  <EgIconButton
+                                    shape="square"
+                                    size="xs"
+                                    label="复制"
+                                    @click="onCopyItemValue(
+                                      itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                      resolveItemCopyValue(item, entry),
+                                      $event,
+                                    )"
+                                  >
+                                    <EgIcon
+                                      :name="
+                                        copiedItemKey === itemCopyKey(
+                                          sectionIndex,
+                                          itemIndex,
+                                          item,
+                                          branchIndex + 1,
+                                        )
+                                          ? 'eds-enable-fill'
+                                          : 'eds-copy'
+                                      "
+                                      fit
+                                    />
+                                  </EgIconButton>
+                                </span>
+                                <EgIconButton
+                                  v-if="item.showValueAddressBook"
+                                  shape="square"
+                                  size="xs"
+                                  label="添加到地址簿"
+                                >
+                                  <EgIcon name="eds-associates" fit />
+                                </EgIconButton>
+                                <EgIconButton
+                                  v-if="item.showValueAmlSearch"
+                                  shape="square"
+                                  size="xs"
+                                  label="AML 查询"
+                                >
+                                  <EgIcon name="eds-aml-search" fit />
+                                </EgIconButton>
+                              </div>
+                            </div>
+                            <CryptoAddressTags
+                              v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                              :tags="entry.valueAddressSideTags"
+                              :reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                              :class="[
+                                styles.itemValueAddressTags,
+                                styles.itemValueAddressTagsBelow,
+                              ]"
+                            />
+                            <template v-if="!entryAddressTagsBelow(entry)">
+                              <EgTag
+                                v-if="entry.tag && entry.tagBeforeValue"
+                                :family="entry.tagFamily"
+                                :status="entry.tagStatus"
+                                :system-type="entry.tagSystemType"
+                                size="sm"
+                              >
+                                {{ entry.tag }}
+                              </EgTag>
+                              <CryptoAddressTags
+                                v-if="entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                                :tags="entry.valueAddressSideTags"
+                                :reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                                :class="styles.itemValueAddressTags"
+                              />
+                              <span
+                                v-if="entry.value"
+                                :class="[styles.itemValueText, styles.itemValueTextNowrap]"
+                              >
+                                {{ entry.value }}
+                              </span>
+                              <div
+                                v-if="itemHasValueTrailingActions(item)"
+                                :class="styles.itemValueTrailing"
+                              >
+                                <span
+                                  v-if="item.showValueCopy"
+                                  :class="[
+                                    cryptoComboStyles.menuCopyButton,
+                                    copiedItemKey === itemCopyKey(
+                                      sectionIndex,
+                                      itemIndex,
+                                      item,
+                                      branchIndex + 1,
+                                    ) && cryptoComboStyles.menuCopyButtonCopied,
+                                  ]"
+                                  @click.stop
+                                >
+                                  <EgIconButton
+                                    shape="square"
+                                    size="xs"
+                                    label="复制"
+                                    @click="onCopyItemValue(
+                                      itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                      resolveItemCopyValue(item, entry),
+                                      $event,
+                                    )"
+                                  >
+                                    <EgIcon
+                                      :name="
+                                        copiedItemKey === itemCopyKey(
+                                          sectionIndex,
+                                          itemIndex,
+                                          item,
+                                          branchIndex + 1,
+                                        )
+                                          ? 'eds-enable-fill'
+                                          : 'eds-copy'
+                                      "
+                                      fit
+                                    />
+                                  </EgIconButton>
+                                </span>
+                                <EgIconButton
+                                  v-if="item.showValueAddressBook"
+                                  shape="square"
+                                  size="xs"
+                                  label="添加到地址簿"
+                                >
+                                  <EgIcon name="eds-associates" fit />
+                                </EgIconButton>
+                                <EgIconButton
+                                  v-if="item.showValueAmlSearch"
+                                  shape="square"
+                                  size="xs"
+                                  label="AML 查询"
+                                >
+                                  <EgIcon name="eds-aml-search" fit />
+                                </EgIconButton>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
                   </div>
                 </div>
 
@@ -650,6 +1277,7 @@ onBeforeUnmount(() => {
         v-if="showToolbar || $slots.toolbar"
         :class="[
           styles.toolbar,
+          !scrollOverflows && styles.toolbarSolid,
           chromeScrimStyles.root,
           scrollOverflows && chromeScrimStyles.active,
         ]"
@@ -668,11 +1296,11 @@ onBeforeUnmount(() => {
                 :class="[
                   comboActionStyles.divider,
                   comboActionStyles.dividerAnimated,
-                  !scrollOverflows && comboActionStyles.dividerAnimatedHidden,
+                  !showToolbarDivider && comboActionStyles.dividerAnimatedHidden,
                 ]"
                 type="module"
                 direction="horizontal"
-                :hide="!scrollOverflows"
+                :hide="!showToolbarDivider"
               />
               <div :class="styles.toolbarBar">
                 <div v-if="showToolbarNav" :class="styles.toolbarStart">

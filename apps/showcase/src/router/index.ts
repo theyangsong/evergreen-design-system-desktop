@@ -87,6 +87,7 @@ export const router = createRouter({
                   'feedback-message': 'feedback-message',
                   'feedback-reddot': 'feedback-reddot',
                   'feedback-form-submission': 'feedback-form-submission',
+                  'feedback-streamer': 'feedback-streamer',
                 };
 
                 const tooltipHashToPage: Record<string, string> = {
@@ -96,6 +97,20 @@ export const router = createRouter({
                   'tooltip-subtle': 'tooltip-subtle',
                   'tooltip-molde': 'tooltip-molde',
                 };
+
+                const popoversHashToPage: Record<string, string> = {
+                  'popovers-popover': 'popovers-popover',
+                  'popovers-scens': 'popovers-scens',
+                };
+
+                if (slug === 'popovers') {
+                  const anchorId = to.hash.startsWith('#') ? to.hash.slice(1) : '';
+                  const target =
+                    anchorId && popoversHashToPage[anchorId]
+                      ? popoversHashToPage[anchorId]
+                      : 'popovers-popover';
+                  return { path: `/components/${target}` };
+                }
 
                 if (slug === 'input') {
                   const anchorId = to.hash.startsWith('#') ? to.hash.slice(1) : '';

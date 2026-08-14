@@ -4,7 +4,7 @@
   align-items: stretch;
   width: 100%;
   min-width: var(--scale-40);
-  background: var(--box-page);
+  background: transparent;
   overflow: hidden;
 }
 
@@ -47,6 +47,12 @@
   padding-block: var(--spacing-0);
   padding-inline: var(--spacing-4) var(--spacing-6);
   box-sizing: border-box;
+}
+
+.raw:global(.eds-frosted-page-chrome) {
+  background: var(--effect-mask);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
 }
 
 .rawStatisticsCollapsed {

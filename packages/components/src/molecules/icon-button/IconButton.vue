@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { MOTION_HOVER_ENTER_ONLY } from '../../atoms/motion-hover-enter';
 import styles from './IconButton.module.css';
 
 /** Figma Type */
 export type IconButtonShape = 'rectangular' | 'square' | 'round';
 export type IconButtonSize = 'lg' | 'md' | 'sm' | 'xs';
-export type IconButtonMotion = 'ease' | 'asym' | 'none';
+export type IconButtonMotion = 'ease' | 'asym' | 'hover-enter-only' | 'none';
 
 const props = withDefaults(
   defineProps<{
@@ -33,8 +34,15 @@ const props = withDefaults(
 );
 
 const motionClass = computed(() => {
-  if (props.motion === 'asym') return 'motion-ease is-asym';
-  if (props.motion === 'none') return 'motion-none';
+  if (props.motion === 'hover-enter-only') {
+    return MOTION_HOVER_ENTER_ONLY;
+  }
+  if (props.motion === 'asym') {
+    return 'motion-ease is-asym';
+  }
+  if (props.motion === 'none') {
+    return 'motion-none';
+  }
   return 'motion-ease is-hover';
 });
 </script>

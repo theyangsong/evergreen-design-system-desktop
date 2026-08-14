@@ -10,9 +10,37 @@ export const POPOVER_PRESET_WIDTH_GUIDE = 256;
 export const POPOVER_PRESET_WIDTH_BASE = 336;
 export const POPOVER_PRESET_WIDTH_COMPLEX = 460;
 
+/** 批处理 / 审批 Remark Popover 备注最大字数。 */
+export const REMARK_POPOVER_MAX_LENGTH = 256;
+
 /** adaptive / SVG 面板区最小尺寸（不含箭头；fixed 默认宽见 POPOVER_PANEL_W）。 */
 export const POPOVER_PANEL_MIN_W = 168;
 export const POPOVER_PANEL_MIN_H = 88;
+
+/** compact：单行短文案（如进度百分比）；adaptive 随内容收缩。 */
+export const POPOVER_PANEL_COMPACT_MIN_W = 56;
+export const POPOVER_PANEL_COMPACT_MIN_H = 32;
+
+export type PopoverSize = 'default' | 'compact';
+
+export type PopoverPanelMins = {
+  panelMinW: number;
+  panelMinH: number;
+};
+
+export const DEFAULT_POPOVER_PANEL_MINS: PopoverPanelMins = {
+  panelMinW: POPOVER_PANEL_MIN_W,
+  panelMinH: POPOVER_PANEL_MIN_H,
+};
+
+export const COMPACT_POPOVER_PANEL_MINS: PopoverPanelMins = {
+  panelMinW: POPOVER_PANEL_COMPACT_MIN_W,
+  panelMinH: POPOVER_PANEL_COMPACT_MIN_H,
+};
+
+export function resolvePopoverPanelMins(size: PopoverSize = 'default'): PopoverPanelMins {
+  return size === 'compact' ? COMPACT_POPOVER_PANEL_MINS : DEFAULT_POPOVER_PANEL_MINS;
+}
 
 /** eds-popovers-triangle.svg viewBox 尺寸（1:1，无缩放）。 */
 export const POPOVER_ARROW_W = 37;
@@ -52,10 +80,11 @@ type PtFn = (x: number, y: number) => string;
 
 function resolvePanelDimensions(
   dimensions?: Partial<PopoverPanelDimensions>,
+  mins: PopoverPanelMins = DEFAULT_POPOVER_PANEL_MINS,
 ): PopoverPanelDimensions {
   return {
-    panelW: Math.max(dimensions?.panelW ?? POPOVER_PANEL_W, POPOVER_PANEL_MIN_W),
-    panelH: Math.max(dimensions?.panelH ?? POPOVER_PANEL_H, POPOVER_PANEL_MIN_H),
+    panelW: Math.max(dimensions?.panelW ?? POPOVER_PANEL_W, mins.panelMinW),
+    panelH: Math.max(dimensions?.panelH ?? POPOVER_PANEL_H, mins.panelMinH),
   };
 }
 
@@ -268,8 +297,9 @@ export function buildPopoverOutlinePath(
   placement: PopoverPlacement,
   align: PopoverAlign,
   dimensions?: Partial<PopoverPanelDimensions>,
+  mins: PopoverPanelMins = DEFAULT_POPOVER_PANEL_MINS,
 ): string {
-  const size = resolvePanelDimensions(dimensions);
+  const size = resolvePanelDimensions(dimensions, mins);
   switch (placement) {
     case 'bottom':
       return buildBottomOutline(align, size);
@@ -287,8 +317,9 @@ export function buildPopoverOutlinePath(
 export function getPopoverShellMetrics(
   placement: PopoverPlacement,
   dimensions?: Partial<PopoverPanelDimensions>,
+  mins: PopoverPanelMins = DEFAULT_POPOVER_PANEL_MINS,
 ): PopoverShellMetrics {
-  const { panelW, panelH } = resolvePanelDimensions(dimensions);
+  const { panelW, panelH } = resolvePanelDimensions(dimensions, mins);
   switch (placement) {
     case 'bottom':
       return {

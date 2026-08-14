@@ -135,6 +135,7 @@ export const componentCatalog: CatalogSection[] = [
           { id: 'feedback-message', label: 'Message', standalonePage: true },
           { id: 'feedback-reddot', label: 'Reddot', standalonePage: true },
           { id: 'feedback-form-submission', label: 'Form Submission', standalonePage: true },
+          { id: 'feedback-streamer', label: 'Streamer', standalonePage: true },
         ],
       },
       {
@@ -142,6 +143,10 @@ export const componentCatalog: CatalogSection[] = [
         slug: 'popovers',
         description: 'Anchored overlays for menus and lightweight panels.',
         status: 'implemented',
+        children: [
+          { id: 'popovers-popover', label: 'Popover', standalonePage: true },
+          { id: 'popovers-scens', label: 'Scens', standalonePage: true },
+        ],
       },
       {
         name: 'Countdown',
@@ -153,7 +158,7 @@ export const componentCatalog: CatalogSection[] = [
         name: 'Progress',
         slug: 'progress',
         description: 'Linear and circular progress indicators.',
-        status: 'placeholder',
+        status: 'implemented',
       },
       {
         name: 'Loading',

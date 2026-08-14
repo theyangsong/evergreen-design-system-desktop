@@ -49,6 +49,14 @@ import {
   dataListColumnSettingLabel,
 } from './dataListPagePreviewData';
 import { popupVerifyCustomizeControls, popupVerifyCustomizeDefaults } from './verifyDocCustomize';
+import {
+  popupCustomBoxSizePresetControl,
+  isPopupCustomBoxSizePresetCustom,
+  popupCustomChromeDefaults,
+  popupCustomBoxSizeDefaults,
+  popupCustomContentInsetDefaults,
+  popupCustomContentInsetPresetControl,
+} from './popupDocCustomize';
 
 export const ORGANISM_IMPORT = `import {
   EgNavBar,
@@ -906,6 +914,13 @@ export const moduleMenuPropRows: OrganismPropRow[] = [
       'Module Menu-Title 文案。titleMode=trigger 时作为 EgFlotationTrigger label 回退；内容溢出且向下滚动时，标题下自动显示 EgDivider type=module（不可 prop 定制，与 showEdgeDivider 无关）。',
   },
   { name: 'showEdgeDivider', type: 'boolean', defaultValue: 'true', description: '右侧竖向 EgDivider type=module。' },
+  {
+    name: '—',
+    type: '—',
+    defaultValue: '—',
+    description:
+      'EgModuleMenuItem 内置 `.motion-ease.is-hover-enter-only`：悬浮入场 600ms（--motion-recipe-hover-asym + enter easing）；离场 / focus / active 无过渡。须全局引入 @eds/desktop-tokens/motion/*。',
+  },
 ];
 
 export const cregisModuleMenuPropRows: OrganismPropRow[] = [
@@ -952,6 +967,13 @@ export const moduleMenuGroupPropRows: OrganismPropRow[] = [
 ];
 
 export const moduleMenuItemPropRows: OrganismPropRow[] = [
+  {
+    name: '—',
+    type: '—',
+    defaultValue: '—',
+    description:
+      '内置 `.motion-ease.is-hover-enter-only`（token semantic · 悬浮入）：仅 hover 入场有过渡；mouseleave / :focus-visible / :active 无动效。背景 hover 由 CSS `--event-hover` 驱动。',
+  },
   { name: 'label', type: 'string', defaultValue: "'Label'", description: 'Body Medium 文案。' },
   {
     name: 'tier',
@@ -1742,11 +1764,12 @@ export function buildLayoutUsageSnippet(
 export const popupFigmaNode = '2170:3023';
 
 export const popupCustomizeDefaults = {
-  uses: 'reminder' as 'detail' | 'reminder' | 'verify' | 'custom',
-  alertVerticalAlign: 'padding-top-md' as 'center' | 'padding-top-md',
+  uses: 'custom' as 'detail' | 'reminder' | 'verify' | 'custom',
+  alertVerticalAlign: 'center' as 'center' | 'offset-top',
   reminderType: 'info' as 'info' | 'echo',
-  boxWidth: '328',
-  boxHeight: '436',
+  ...popupCustomBoxSizeDefaults,
+  ...popupCustomContentInsetDefaults,
+  ...popupCustomChromeDefaults,
   ...popupVerifyCustomizeDefaults,
 };
 
@@ -1765,7 +1788,7 @@ export const popupAlertVerticalAlignCustomizeControl: DocCustomizeControl = {
   key: 'alertVerticalAlign',
   label: '垂直对齐方式',
   options: propLabelSelectOptions(
-    ['center', 'padding-top-md'] as const,
+    ['center', 'offset-top'] as const,
     showcasePopupAlertVerticalAlignLabels,
   ),
   visibleWhen: (state) => state.uses !== 'detail',
@@ -1775,14 +1798,14 @@ export const popupCustomBoxWidthControl: DocCustomizeControl = {
   kind: 'text',
   key: 'boxWidth',
   label: 'Popup Box 宽度',
-  visibleWhen: (state) => state.uses === 'custom',
+  visibleWhen: (state) => state.uses === 'custom' && isPopupCustomBoxSizePresetCustom(state),
 };
 
 export const popupCustomBoxHeightControl: DocCustomizeControl = {
   kind: 'text',
   key: 'boxHeight',
   label: 'Popup Box 高度',
-  visibleWhen: (state) => state.uses === 'custom',
+  visibleWhen: (state) => state.uses === 'custom' && isPopupCustomBoxSizePresetCustom(state),
 };
 
 export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
@@ -1796,10 +1819,12 @@ export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
 export const popupCustomizeControls: DocCustomizeControl[] = [
   popupUsesCustomizeControl,
   popupAlertVerticalAlignCustomizeControl,
-  popupReminderTypeCustomizeControl,
-  ...popupVerifyCustomizeControls,
+  popupCustomBoxSizePresetControl,
+  popupCustomContentInsetPresetControl,
   popupCustomBoxWidthControl,
   popupCustomBoxHeightControl,
+  popupReminderTypeCustomizeControl,
+  ...popupVerifyCustomizeControls,
 ];
 
 export const popupPropRows: OrganismPropRow[] = [
@@ -1812,28 +1837,28 @@ export const popupPropRows: OrganismPropRow[] = [
   {
     name: 'uses',
     type: "'detail' | 'reminder' | 'verify' | 'custom'",
-    defaultValue: "'reminder'",
+    defaultValue: "'custom'",
     description:
-      'Popup 场景化。Detail 880×620；Reminder / Verify 为固定 Popup Box + 内容 organism；Custom 为可配置宽高的 Popup Box + 默认插槽。',
+      'Popup 场景化。Detail 880×620；Reminder / Verify 为固定 Popup Box + 内容 organism；Custom 为固定尺寸 Popup Box + 默认插槽。',
   },
   {
     name: 'alertVerticalAlign',
-    type: "'center' | 'padding-top-md'",
-    defaultValue: 'reminder / verify → padding-top-md；custom → center',
+    type: "'center' | 'offset-top'",
+    defaultValue: 'reminder / verify → offset-top；custom → center',
     description:
-      'Alert 舞台垂直对齐（Detail 忽略）。未传时 reminder / verify 默认 padding-top-md（`--padding-top-md`，22%）；custom 默认 center。',
+      'Alert 舞台垂直对齐（Detail 忽略）。center：几何居中；offset-top：顶边距 168px 偏上（`--eds-popup-alert-offset-top`）。未传时 reminder / verify 默认 offset-top；custom 默认 center。',
   },
   {
     name: 'boxWidth',
     type: 'number',
-    defaultValue: '328',
-    description: 'uses=custom 时 Popup Box 宽度（px）。',
+    defaultValue: '780',
+    description: 'uses=custom 且尺寸=自定义时 Popup Box 宽度（px）；lg/md/sm 为固定预设。',
   },
   {
     name: 'boxHeight',
     type: 'number',
-    defaultValue: '436',
-    description: 'uses=custom 时 Popup Box 高度（px）。',
+    defaultValue: '560',
+    description: 'uses=custom 且尺寸=自定义时 Popup Box 高度（px）；lg/md/sm 为固定预设。',
   },
   {
     name: 'verifyType',

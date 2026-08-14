@@ -17,10 +17,13 @@ const props = withDefaults(
     defaultShowMore?: boolean;
     /** Tooltip 内展示全部 Tag（不含溢出计数占位） */
     tooltipMode?: boolean;
+    /** 行内展示全部 Tag（不折叠 +N） */
+    revealAll?: boolean;
   }>(),
   {
     defaultShowMore: true,
     tooltipMode: false,
+    revealAll: false,
   },
 );
 
@@ -36,11 +39,15 @@ const hiddenTags = computed(() =>
   splitTagsForDisplay(props.tags?.system, props.tags?.custom).hidden,
 );
 
-const displayTags = computed(() => (props.tooltipMode ? allTags.value : inlineTags.value));
+const displayTags = computed(() => {
+  if (props.tooltipMode || props.revealAll) return allTags.value;
+  return inlineTags.value;
+});
 
 const more = computed(() => ({
   show:
     !props.tooltipMode &&
+    !props.revealAll &&
     props.defaultShowMore &&
     hiddenTags.value.length > 0,
   label: formatMoreTagLabel(hiddenTags.value.length),

@@ -53,12 +53,16 @@ const props = withDefaults(
     copyLabel?: string;
     copyValue?: string;
     disabled?: boolean;
-    /** 展示文本已语义截断（如 6…6 地址）时也启用复制 Menu（悬浮/聚焦均可）。 */
+    /** 展示文本已语义截断（如 6…6 地址）时也启用只读 Tooltip / 复制 Menu。 */
     semanticTruncated?: boolean;
     /** CryptoAddress Menu：别名 Tag（solid-brand）。 */
     menuAlias?: string;
+    /** CryptoAddress / ListFieldAddress Menu：meta 行副文本（Wallet Name 等）。 */
+    menuSecondaryText?: string;
     /** CryptoAddress Menu：第二行展开全部 Tag（tooltip-mode）。 */
     menuTags?: CryptoAddressSideTags;
+    /** 扩大 Flotation trigger 区域时，将 hover 虚线仅交给 slot 内元素（如地址文案）。 */
+    deferHoverTarget?: boolean;
   }>(),
   {
     trigger: 'hover',
@@ -77,7 +81,9 @@ const props = withDefaults(
     disabled: false,
     semanticTruncated: false,
     menuAlias: undefined,
+    menuSecondaryText: undefined,
     menuTags: undefined,
+    deferHoverTarget: false,
   },
 );
 
@@ -92,26 +98,36 @@ const layoutSettleRef: LayoutSettleTimerRef = {};
 
 const hasMenuAlias = computed(() => Boolean(props.menuAlias?.trim()));
 
+const hasMenuSecondaryText = computed(() => Boolean(props.menuSecondaryText?.trim()));
+
 const showCopyTooltip = computed(() => {
   if (!props.showTooltipCopy) return false;
   if (overflowing.value) return true;
   if (props.semanticTruncated) return true;
   if (hasMenuAlias.value) return true;
+  if (hasMenuMetaRow.value) return true;
   return false;
 });
 
 const showHoverTrigger = computed(() => {
   if (!showCopyTooltip.value) return false;
   if (props.trigger === 'focus') return true;
-  return overflowing.value || props.semanticTruncated || hasMenuAlias.value;
+  return (
+    overflowing.value ||
+    props.semanticTruncated ||
+    hasMenuAlias.value ||
+    hasMenuMetaRow.value
+  );
 });
 
-const showFlatHoverTrigger = computed(() => overflowing.value);
+const showFlatHoverTrigger = computed(
+  () => overflowing.value || props.semanticTruncated,
+);
 
 const tooltipDisabled = computed(
   () =>
     props.disabled ||
-    (!props.showTooltipCopy && !overflowing.value) ||
+    (!props.showTooltipCopy && !overflowing.value && !props.semanticTruncated) ||
     !resolvedTooltipText.value,
 );
 
@@ -142,8 +158,10 @@ const targetShellMotionClass = computed(() => {
     : styles.targetShellHoverMotion;
 });
 
-const tokenScopeClass = computed(
-  () => `${TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE} ${styles.panel} ${props.panelScopeClass}`.trim(),
+const tokenScopeClass = computed(() =>
+  [TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE, styles.panel, props.panelScopeClass]
+    .filter(Boolean)
+    .join(' '),
 );
 
 const hostClasses = computed(() => [
@@ -160,7 +178,7 @@ const typographyClasses = computed(() => {
 
 const menuTextClasses = computed(() => {
   const value = props.menuTextClass;
-  if (!value) return [styles.menuText];
+  if (!value) return [cryptoComboStyles.menuAddress];
   return Array.isArray(value) ? value : [value];
 });
 
@@ -178,6 +196,10 @@ const showMenuExpandedTags = computed(() => {
   if (!props.menuTags) return false;
   return hasAddressTags(props.menuTags.system, props.menuTags.custom);
 });
+
+const hasMenuMetaRow = computed(
+  () => hasMenuSecondaryText.value || showMenuExpandedTags.value,
+);
 
 const resolvedBoundarySelector = computed(() => props.boundarySelector || undefined);
 
@@ -244,7 +266,15 @@ function scheduleOverflowMeasure() {
 }
 
 watch(
-  () => [props.tooltipText, props.semanticTruncated, props.menuAlias, props.trigger] as const,
+  () =>
+    [
+      props.tooltipText,
+      props.semanticTruncated,
+      props.menuAlias,
+      props.menuSecondaryText,
+      props.menuTags,
+      props.trigger,
+    ] as const,
   () => {
     scheduleOverflowMeasure();
   },
@@ -305,20 +335,32 @@ async function onTooltipCopy(event: Event) {
           <span
             :class="[
               styles.targetShell,
-              showHoverTrigger && 'eds-hover-tooltip-trigger__target',
-              showHoverTrigger && tooltipTargetModifier,
-              showHoverTrigger && targetShellMotionClass,
-              showHoverTrigger && typographyClasses,
+              showHoverTrigger && !deferHoverTarget && 'eds-hover-tooltip-trigger__target',
+              showHoverTrigger && !deferHoverTarget && tooltipTargetModifier,
+              showHoverTrigger && !deferHoverTarget && targetShellMotionClass,
+              showHoverTrigger && !deferHoverTarget && typographyClasses,
             ]"
             :tabindex="showHoverTrigger && trigger === 'focus' ? 0 : undefined"
           >
             <span
+              v-if="deferHoverTarget"
+              ref="measureRef"
+              :class="[styles.measure, styles.deferredMeasure, typographyClasses]"
+              aria-hidden="true"
+            >
+              {{ resolvedTooltipText }}
+            </span>
+            <span
+              v-else
               ref="measureRef"
               :class="[
                 measureClasses,
                 !showHoverTrigger && typographyClasses,
               ]"
             >
+              <slot />
+            </span>
+            <span v-if="deferHoverTarget" :class="measureClasses">
               <slot />
             </span>
           </span>
@@ -376,10 +418,17 @@ async function onTooltipCopy(event: Event) {
               </span>
 
               <span
-                v-if="showMenuExpandedTags && menuTags"
+                v-if="hasMenuMetaRow"
                 :class="cryptoComboStyles.menuRowTags"
               >
+                <span
+                  v-if="hasMenuSecondaryText"
+                  :class="cryptoComboStyles.menuRowSecondary"
+                >
+                  {{ menuSecondaryText }}
+                </span>
                 <CryptoAddressTags
+                  v-if="showMenuExpandedTags && menuTags"
                   :tags="menuTags"
                   :default-show-more="false"
                   tooltip-mode

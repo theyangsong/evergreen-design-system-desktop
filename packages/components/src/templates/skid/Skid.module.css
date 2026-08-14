@@ -47,6 +47,12 @@
   background: var(--box-page);
 }
 
+.title:global(.eds-frosted-page-chrome) {
+  background: var(--effect-mask);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
+}
+
 .heading {
   display: flex;
   flex-shrink: 0;
@@ -101,4 +107,10 @@
   width: 100%;
   box-sizing: border-box;
   background: var(--box-page);
+}
+
+.action:global(.eds-frosted-page-chrome) {
+  background: var(--effect-mask);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
 }

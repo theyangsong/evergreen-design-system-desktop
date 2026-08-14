@@ -26,7 +26,8 @@ export const scaleSemanticGroups: ScaleSemanticGroup[] = [
   },
   {
     title: 'Avatar',
-    match: (name) => ['avatar-sm', 'avatar-md', 'avatar-lg', 'avatar-xl'].includes(name),
+    match: (name) =>
+      ['avatar-xs', 'avatar-sm', 'avatar-md', 'avatar-lg', 'avatar-xl'].includes(name),
   },
   {
     title: 'Graphic',

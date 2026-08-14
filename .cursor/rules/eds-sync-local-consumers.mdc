@@ -75,6 +75,8 @@ alwaysApply: true
 
 客户端项目须 **100% Desktop**：排版与颜色只消费 `packages/tokens` spec 中已定义的语义 token；不得依赖 Showcase 外层 Website 变量继承。若 preview 与客户端视觉不一致，优先查 token 名是否在 Desktop spec 中存在，而非继续 sync Website 侧配置。
 
+**Consumer 专项规则（不随 sync 复制，须仓库内维护）：** `work-cregis-desktop/.cursor/rules/top&botton-mask.mdc`（滚动顶底毛玻璃强推，`alwaysApply: true`）；真源 `eds-desktop/.cursor/rules/top&botton-mask.mdc`。
+
 ## Agent 注意
 
 - 用户只说「同步」时，**不要**只 build eds-desktop 就结束；必须同步全部 consumer。

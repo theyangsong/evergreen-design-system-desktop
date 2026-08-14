@@ -39,6 +39,8 @@ const props = withDefaults(
     fromTagsList?: CryptoAddressSideTags[];
     toTagsList?: CryptoAddressSideTags[];
     addressTooltipTrigger?: 'hover' | 'focus';
+    showFrom?: boolean;
+    showTo?: boolean;
   }>(),
   {
     showChain: true,
@@ -53,6 +55,8 @@ const props = withDefaults(
     fromAddressCount: 1,
     toAddressCount: 1,
     addressTooltipTrigger: 'hover',
+    showFrom: true,
+    showTo: true,
   },
 );
 
@@ -136,6 +140,8 @@ const bodyStyle = computed(() => {
         :to-tags="toTags"
         :from-tags-list="fromTagsList"
         :to-tags-list="toTagsList"
+        :show-from="showFrom"
+        :show-to="showTo"
         address-mode="double"
         :min-width="minWidth"
         :address-tooltip-trigger="addressTooltipTrigger"

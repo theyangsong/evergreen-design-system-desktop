@@ -52,3 +52,15 @@
 .theme[aria-disabled='true'] {
   color: var(--text-base-quaternary);
 }
+
+.decor {
+  color: var(--material-decor-primary);
+}
+
+.decor:active:not([aria-disabled='true']) {
+  color: var(--text-base-secondary);
+}
+
+.decor[aria-disabled='true'] {
+  color: var(--text-base-quaternary);
+}

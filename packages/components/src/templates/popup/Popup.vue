@@ -13,8 +13,8 @@ import styles from './Popup.module.css';
 
 export type PopupUses = 'detail' | 'reminder' | 'verify' | 'custom';
 
-/** Alert 舞台垂直对齐：居中，或顶边距百分比占位（`--padding-top-md`）。 */
-export type PopupAlertVerticalAlign = 'center' | 'padding-top-md';
+/** Alert 舞台垂直对齐：居中，或顶边距固定偏上（`--eds-popup-alert-offset-top`，168px）。 */
+export type PopupAlertVerticalAlign = 'center' | 'offset-top';
 
 /** Figma Popup Detail 面板固定尺寸 */
 const DETAIL_PANEL_WIDTH = 880;
@@ -39,9 +39,9 @@ const props = withDefaults(
     boxWidth?: number;
     /** uses=custom 时 Popup Box 高度（px）。 */
     boxHeight?: number;
-    /** Alert 舞台垂直对齐（Detail 忽略）。center：几何居中；padding-top-md：顶边距 22%。 */
+    /** Alert 舞台垂直对齐（Detail 忽略）。未传：reminder / verify → offset-top；custom → center。 */
     alertVerticalAlign?: PopupAlertVerticalAlign;
-    /** 面板进出场（`.motion-layout` + host active）。 */
+    /** 面板进出场 — 全部 uses 统一 `.motion-layout` + host active（与 Detail 一致）。 */
     microFloat?: boolean;
   }>(),
   {
@@ -78,14 +78,14 @@ const resolvedAlertVerticalAlign = computed((): PopupAlertVerticalAlign => {
   if (props.alertVerticalAlign != null) {
     return props.alertVerticalAlign;
   }
-  if (isReminder.value || isVerify.value) {
-    return 'padding-top-md';
+  if (isCustom.value) {
+    return 'center';
   }
-  return 'center';
+  return 'offset-top';
 });
 
-const usesAlertPaddingTop = computed(
-  () => !isDetail.value && resolvedAlertVerticalAlign.value === 'padding-top-md',
+const usesAlertOffsetTop = computed(
+  () => !isDetail.value && resolvedAlertVerticalAlign.value === 'offset-top',
 );
 
 const alertPanelWidthPx = computed(() => {
@@ -114,6 +114,46 @@ const alertPanelHeightPx = computed(() => {
   }
   return undefined;
 });
+
+const panelWidthPx = computed(() => {
+  if (isDetail.value) {
+    return DETAIL_PANEL_WIDTH;
+  }
+  return alertPanelWidthPx.value;
+});
+
+const panelHeightMode = computed((): 'fixed' | 'adaptive' => {
+  if (isDetail.value) {
+    return 'fixed';
+  }
+  return alertHeightMode.value;
+});
+
+const panelHeightPx = computed(() => {
+  if (isDetail.value) {
+    return DETAIL_PANEL_HEIGHT;
+  }
+  return alertPanelHeightPx.value;
+});
+
+const panelMaxWidthPx = computed(() => (isDetail.value ? DETAIL_PANEL_WIDTH : undefined));
+const panelMaxHeightPx = computed(() => (isDetail.value ? DETAIL_PANEL_HEIGHT : undefined));
+
+const panelShellClass = computed(() => [
+  isDetail.value ? styles.detailShell : styles.alertPanelShell,
+  !isDetail.value && isCustom.value && styles.alertPanelShellCenter,
+  !isDetail.value && isCustom.value && styles.alertPanelShellCustom,
+]);
+
+const panelMotionKey = computed(() =>
+  [
+    props.uses,
+    props.verifyType,
+    props.reminderType,
+    props.boxWidth,
+    props.boxHeight,
+  ].join(':'),
+);
 
 function readMotionLeaveMs(el: HTMLElement, motionClass: string): number {
   const probe = document.createElement('div');
@@ -215,11 +255,23 @@ watch(open, async (value, oldValue) => {
   }
 });
 
-watch(() => [props.uses, props.microFloat] as const, () => {
-  if (open.value && shellKeepMounted.value) {
-    syncShellMotionEnter();
-  }
-});
+watch(
+  () =>
+    [
+      props.uses,
+      props.microFloat,
+      props.verifyType,
+      props.reminderType,
+      props.boxWidth,
+      props.boxHeight,
+      props.alertVerticalAlign,
+    ] as const,
+  () => {
+    if (open.value && shellKeepMounted.value) {
+      syncShellMotionEnter();
+    }
+  },
+);
 
 onMounted(() => {
   if (open.value) {
@@ -246,8 +298,9 @@ onBeforeUnmount(() => {
     <div
       :class="[
         styles.stage,
-        isDetail ? styles.stageDetail : styles.stageAlert,
-        !isDetail && usesAlertPaddingTop && styles.stageAlertPaddingTop,
+        styles.stageDetail,
+        isDetail && styles.stageDetailInsets,
+        !isDetail && usesAlertOffsetTop && styles.stageAlertOffsetTop,
         showScrim && styles.stageScrim,
         microFloat && showScrim && styles.stageScrimAnimated,
       ]"
@@ -264,56 +317,33 @@ onBeforeUnmount(() => {
       />
 
       <div
-        v-if="usesAlertPaddingTop"
+        v-if="usesAlertOffsetTop"
         :class="styles.stageAlertTopSpacer"
         aria-hidden="true"
       />
 
       <div :class="styles.stagePanel">
-      <EgTooltip
-        v-if="isDetail"
-        :class="[
-          styles.detailShell,
-          microFloat && 'glassMicroFloatHost',
-          microFloat && shellMotionActive && 'glassMicroFloatHostActive',
-        ]"
-        panel-kind="popup"
-        panel-radius="radius-lg"
-        :panel-layout-motion="microFloat"
-        width-mode="fixed"
-        :width="DETAIL_PANEL_WIDTH"
-        height-mode="fixed"
-        :height="DETAIL_PANEL_HEIGHT"
-        :max-width="DETAIL_PANEL_WIDTH"
-        :max-height="DETAIL_PANEL_HEIGHT"
-        :scrollable="false"
-      >
-        <slot />
-      </EgTooltip>
-
-      <div
-        v-else
-        :class="[
-          styles.alertShell,
-          isCustom && styles.alertShellSlotCenter,
-          microFloat && 'glassMicroFloatHost',
-          microFloat && shellMotionActive && 'glassMicroFloatHostActive',
-        ]"
-      >
         <EgTooltip
+          :key="panelMotionKey"
+          :class="[
+            panelShellClass,
+            microFloat && 'glassMicroFloatHost',
+            microFloat && shellMotionActive && 'glassMicroFloatHostActive',
+          ]"
           panel-kind="popup"
           panel-radius="radius-lg"
           :panel-layout-motion="microFloat"
-          panel-flush
+          :panel-flush="!isDetail"
           width-mode="fixed"
-          :width="alertPanelWidthPx"
-          :height-mode="alertHeightMode"
-          :height="alertPanelHeightPx"
+          :width="panelWidthPx"
+          :height-mode="panelHeightMode"
+          :height="panelHeightPx"
+          :max-width="panelMaxWidthPx"
+          :max-height="panelMaxHeightPx"
           :scrollable="false"
         >
           <slot />
         </EgTooltip>
-      </div>
       </div>
     </div>
   </div>

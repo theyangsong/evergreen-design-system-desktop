@@ -131,7 +131,6 @@
   border-radius: var(--radius-sm);
   background-color: var(--material-hide);
   color: var(--text-base-primary);
-  font: inherit;
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
@@ -323,14 +322,13 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--icon-lg);
-  height: var(--icon-lg);
-}
-
-.triggerSizeSm .triggerSymbol,
-.triggerSizeXs .triggerSymbol {
   width: var(--icon-md);
   height: var(--icon-md);
+}
+
+.triggerSizeXs .triggerSymbol {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 
 .triggerTitle {
@@ -375,15 +373,14 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--icon-lg);
-  height: var(--icon-lg);
+  width: var(--icon-md);
+  height: var(--icon-md);
   color: var(--stroke-base-secondary);
 }
 
-.triggerSizeSm .triggerArrow,
 .triggerSizeXs .triggerArrow {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 
 .triggerArrow :global(.eds-i-f) {
@@ -407,7 +404,6 @@
   border-radius: var(--radius-sm);
   background-color: var(--material-hide);
   color: var(--text-base-primary);
-  font: inherit;
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
@@ -526,4 +522,33 @@
 
 .boxCascader :global(.eds-i-f) {
   fill: currentColor;
+}
+
+/*
+ * Showcase postcss 把 global.css 的 button { font: inherit } 提升为
+ * `.desktopTokens button`（0,1,1），会盖掉仅单 class 的 font-size。
+ * 组件内 typography 须挂 .desktopTokens 祖先以恢复 Figma 字号。
+ */
+:global(.desktopTokens) .addRow,
+:global(.desktopTokens) .triggerRoot,
+:global(.desktopTokens) .boxRoot {
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+:global(.desktopTokens) .triggerSizeSm {
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+}
+
+:global(.desktopTokens) .triggerSizeXs {
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+}
+
+:global(.desktopTokens) .triggerModuleMenuTitle {
+  font-size: var(--eds-body-large-strong-size);
+  font-weight: var(--eds-body-large-strong-weight);
+  line-height: var(--eds-body-large-strong-line-height);
 }

@@ -1,4 +1,4 @@
-import type { DetailItemData } from './detailTypes';
+import type { DetailAddressLayout, DetailItemData, DetailItemValueEntry } from './detailTypes';
 
 /** Figma Apply_Item@Cregis — node 2267:11092 */
 export const DETAIL_APPLY_ITEM_FIGMA_NODE = '2267:11092';
@@ -35,7 +35,17 @@ export type DetailApplyItemVariant = {
 export type DetailApplyItemRowOverrides = Partial<
   Pick<
     DetailItemData,
-    'key' | 'title' | 'value' | 'tag' | 'valueSymbolCrypto' | 'valueIcon' | 'valueSymbolAvatarName'
+    | 'key'
+    | 'title'
+    | 'value'
+    | 'tag'
+    | 'valueSymbolCrypto'
+    | 'valueIcon'
+    | 'valueSymbolAvatarName'
+    | 'addressLayout'
+    | 'valueEntries'
+    | 'addressCount'
+    | 'addressViewMoreLabel'
   >
 >;
 
@@ -47,7 +57,74 @@ const APPLY_ITEM_ROW_OVERRIDE_KEYS: (keyof DetailApplyItemRowOverrides)[] = [
   'valueSymbolCrypto',
   'valueIcon',
   'valueSymbolAvatarName',
+  'addressLayout',
+  'valueEntries',
+  'addressCount',
+  'addressViewMoreLabel',
 ];
+
+/** Showcase / 文档 — Sender·Receiver 多地址演示数据（Figma 2267:11822 / 2267:11830） */
+export const detailAddressDemoEntries: Record<
+  'sender' | 'receiver',
+  Array<Pick<DetailItemValueEntry, 'value' | 'tag'>>
+> = {
+  sender: [
+    { tag: 'Mr. Wang', value: '3MqUP6G1daVS5YTD8fz3QgwjZortWwxXFd' },
+    { tag: 'Pool A', value: 'bc1qsmu69g72d7rdzwv7y7va0rd7cunen7tcer3tn8' },
+    { tag: 'Cold Wallet', value: '0x55e8f6900963c095ff6dd6538749d31c38a7204' },
+  ],
+  receiver: [
+    { tag: 'EverGreen', value: 'bc1qsmu69g72d7rdzwv7y7va0rd7cunen7tcer3tn8' },
+    { tag: 'Treasury', value: '3MqUP6G1daVS5YTD8fz3QgwjZortWwxXFd' },
+    { tag: 'Ops', value: 'TLa2f6VPqDgRE67v1736s7bJ8nyEwRS9WB' },
+  ],
+};
+
+export function buildDetailAddressApplyItemRow(
+  variantId: 'sender' | 'receiver',
+  layout: DetailAddressLayout,
+  overrides: DetailApplyItemRowOverrides = {},
+): DetailItemData {
+  const entries = detailAddressDemoEntries[variantId];
+  const primary = entries[0]!;
+
+  const base = createDetailApplyItemRow(variantId, {
+    ...overrides,
+    value: overrides.value ?? primary.value,
+    tag: overrides.tag ?? primary.tag,
+  });
+
+  if (layout === 'single') {
+    return base;
+  }
+
+  const valueEntries: DetailItemValueEntry[] = entries.map((entry, index) => ({
+    value: entry.value,
+    tag: entry.tag,
+    tagBeforeValue: true,
+    tagFamily: base.tagFamily,
+    tagSystemType: base.tagSystemType,
+    dashed: layout === 'multi-expanded' && index < entries.length - 1,
+  }));
+
+  return {
+    ...base,
+    addressLayout: layout,
+    addressCount: overrides.addressCount ?? (
+      layout === 'multi-collapsed' || layout === 'multi-orders'
+        ? 16
+        : entries.length
+    ),
+    addressViewMoreLabel: layout === 'multi-collapsed'
+      ? (overrides.addressViewMoreLabel ?? 'Expand')
+      : layout === 'multi-orders'
+        ? (overrides.addressViewMoreLabel ?? '{count} Orders')
+        : overrides.addressViewMoreLabel,
+    valueEntries,
+    value: valueEntries[0]!.value,
+    tag: valueEntries[0]!.tag,
+  };
+}
 
 /** ENG · Apply_Item@Cregis（2267:11092）单行变体 — DS 唯一真源 */
 export const detailApplyItemVariants: DetailApplyItemVariant[] = [
@@ -277,7 +354,7 @@ function pickApplyItemRowOverrides(
   for (const key of APPLY_ITEM_ROW_OVERRIDE_KEYS) {
     const value = overrides[key];
     if (value !== undefined) {
-      picked[key] = value;
+      (picked as Record<string, unknown>)[key] = value;
     }
   }
   return picked;

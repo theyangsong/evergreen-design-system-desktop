@@ -52,7 +52,7 @@
 /** BatchBar 浮层：EgDataList 内最高交互层级（Popover 由 AnchoredTooltip z-index: 1000 覆盖其上）。 */
 .operationBar {
   position: absolute;
-  bottom: var(--spacing-8);
+  bottom: calc(var(--eds-layout-chrome-inset-bottom, 0px) + var(--spacing-8));
   z-index: 30;
   left: 50%;
   transform: translateX(-50%) translateY(0);
@@ -94,6 +94,8 @@
   left: 0;
   width: 100%;
   height: 100%;
+  padding-top: var(--eds-layout-chrome-inset-top, 0);
+  padding-bottom: var(--eds-layout-chrome-inset-bottom, 0);
   background-color: transparent;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -560,7 +562,6 @@
 
 /* Body cell — max-width:0 仅用于 flex 列 ellipsis；尾列有操作按钮，不参与压缩。 */
 .column {
-  user-select: text;
   cursor: default;
   overflow: hidden;
   text-overflow: ellipsis;

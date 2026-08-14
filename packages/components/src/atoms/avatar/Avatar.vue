@@ -6,7 +6,7 @@ import { getAvatarRobotMarkup } from './avatarRobot';
 import { pickAvatarColorIndex } from './pickAvatarColorIndex';
 import { resolveAvatarInitials } from './resolveAvatarInitials';
 
-export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type AvatarVariant = 'initials' | 'robot';
 
 const props = withDefaults(

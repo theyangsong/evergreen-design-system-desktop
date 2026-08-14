@@ -44,7 +44,7 @@
 }
 
 .symbolRingDots {
-  --verify-ring-dot-color: var(--material-brand-quaternary);
+  --verify-ring-dot-color: var(--material-brand-tertiary);
 }
 
 .symbolRingDotsActive {
@@ -160,6 +160,12 @@
   margin-top: var(--spacing-2);
 }
 
+.passwordErrorRow {
+  display: flex;
+  width: 100%;
+  margin-top: var(--spacing-2);
+}
+
 .passwordActions {
   width: 100%;
   margin-top: auto;
@@ -171,33 +177,63 @@
   gap: var(--spacing-2);
 }
 
-:global(.eds-popup-box-content.eds-verify[data-verify-state='error']) :global(.eds-input-field) {
-  box-shadow: inset 0 0 0 var(--stroke-xl) var(--stroke-color-danger);
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .codeInputHost,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .codeInputHost {
+  cursor: not-allowed;
 }
 
-:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .passwordActions,
-:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .passwordActions {
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .codeInputHost > :global(*),
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .codeInputHost > :global(*) {
   pointer-events: none;
-  opacity: 0.4;
+}
+
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .passwordBody,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .passwordBody {
+  cursor: not-allowed;
+}
+
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .passwordBody > :global(*),
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .passwordBody > :global(*) {
+  pointer-events: none;
+}
+
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .forgotRow,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .forgotRow {
+  cursor: not-allowed;
 }
 
 :global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .forgotRow :global(.eds-link),
 :global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .forgotRow :global(.eds-link) {
-  opacity: 0.4;
   pointer-events: none;
 }
 
-:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) :global(.eds-verify-input-cell),
-:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) :global(.eds-verify-input-cell) {
-  opacity: 0.6;
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) :global(.eds-verify-input-paste),
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) :global(.eds-verify-input-paste) {
+  cursor: not-allowed;
 }
 
 :global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) :global(.eds-verify-input-paste) :global(.eds-link),
 :global(.eds-popup-box-content.eds-verify[data-verify-state='success']) :global(.eds-verify-input-paste) :global(.eds-link) {
-  opacity: 0.4;
+  pointer-events: none;
 }
 
-:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .switchButton:disabled,
-:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .switchButton:disabled {
-  opacity: 0.4;
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .bottomRow,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .bottomRow {
+  cursor: not-allowed;
+}
+
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .switchButton,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .switchButton {
+  pointer-events: none;
+}
+
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .passwordActions,
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .passwordActions {
+  cursor: not-allowed;
+}
+
+/* 取消等非 disabled 按钮：阻断 hover/点击；确定走 confirmDisabled */
+:global(.eds-popup-box-content.eds-verify[data-verify-state='verifying']) .passwordActions :global(.eds-button:not(:disabled)),
+:global(.eds-popup-box-content.eds-verify[data-verify-state='success']) .passwordActions :global(.eds-button:not(:disabled)) {
+  pointer-events: none;
 }

@@ -4,6 +4,7 @@ import { EgIcon, type IconName } from '../../atoms/icons';
 import { EgButton } from '../../molecules/button';
 import { EgComboActionPopupWindow, type ComboActionPopupTone } from '../../molecules/combo';
 import { EgInput } from '../../molecules/input';
+import { EgFormSubmission } from '../../molecules/feedback';
 import { EgLink } from '../../molecules/link';
 import { EgVerifyInput } from '../../molecules/verify-input';
 import { EgVerifyRingDots } from '../../molecules/verify-ring-dots';
@@ -25,6 +26,8 @@ const props = withDefaults(
     switchLabel?: string;
     retryLabel?: string;
     forgotPasswordLabel?: string;
+    /** 交易/登录密码校验失败文案（error 时替换「忘记密码」行）。 */
+    passwordErrorText?: string;
     confirmLabel?: string;
     cancelLabel?: string;
     placeholder?: string;
@@ -43,6 +46,7 @@ const props = withDefaults(
     switchLabel: undefined,
     retryLabel: '重试',
     forgotPasswordLabel: '忘记密码?',
+    passwordErrorText: '密码有误，请重试',
     confirmLabel: '确定',
     cancelLabel: '取消',
     placeholder: '请输入',
@@ -159,10 +163,20 @@ const verifyInputReadonly = computed(() => isThemedSuccess.value);
 const verifyInputAutofocus = computed(() => props.state === 'idle');
 
 const passwordReadonly = computed(() => isThemedSuccess.value);
-const passwordDisabled = computed(
-  () => props.state === 'verifying' || props.state === 'success',
+const passwordConfirmDisabled = computed(
+  () => isThemedSuccess.value || modelValue.value.trim().length === 0,
 );
-const passwordAutofocus = computed(() => props.state === 'idle');
+const passwordAutofocus = computed(
+  () => props.state === 'idle' || props.state === 'error',
+);
+
+const showPasswordError = computed(
+  () => showPasswordInput.value && props.state === 'error',
+);
+
+const showForgotPassword = computed(
+  () => showPasswordInput.value && props.state !== 'error',
+);
 
 const countdownInitial = computed(() => {
   if (props.countdownSeconds == null || props.countdownSeconds < 0) {
@@ -323,10 +337,39 @@ function onPasswordUpdate(value: string) {
 }
 
 function onPasswordConfirm() {
-  if (passwordDisabled.value) {
+  if (passwordConfirmDisabled.value) {
     return;
   }
   emit('complete', modelValue.value);
+}
+
+function onPasswordKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Enter') {
+    return;
+  }
+  event.preventDefault();
+  onPasswordConfirm();
+}
+
+function onPasswordCancel() {
+  if (isThemedSuccess.value) {
+    return;
+  }
+  emit('cancel');
+}
+
+function onForgotClick() {
+  if (isThemedSuccess.value) {
+    return;
+  }
+  emit('forgot');
+}
+
+function onSwitchClick() {
+  if (isThemedSuccess.value) {
+    return;
+  }
+  emit('switch');
 }
 
 function onVerifyComplete(code: string) {
@@ -414,7 +457,11 @@ watch(
     @paste="emit('paste')"
   />
 
-  <div v-if="showPasswordInput" :class="styles.passwordBody">
+  <div
+    v-if="showPasswordInput"
+    :class="styles.passwordBody"
+    @keydown="onPasswordKeydown"
+  >
     <EgInput
       ref="passwordInputRef"
       v-model="modelValue"
@@ -424,13 +471,15 @@ watch(
       secure
       :placeholder="placeholder"
       :readonly="passwordReadonly"
-      :disabled="passwordDisabled"
       @update:model-value="onPasswordUpdate"
     />
-    <div :class="styles.forgotRow">
-      <EgLink tone="brand" size="sm" href="#" @click.prevent.stop="emit('forgot')">
+    <div v-if="showForgotPassword" :class="styles.forgotRow">
+      <EgLink tone="brand" size="sm" href="#" @click.prevent.stop="onForgotClick">
         {{ forgotPasswordLabel }}
       </EgLink>
+    </div>
+    <div v-else-if="showPasswordError" :class="styles.passwordErrorRow">
+      <EgFormSubmission type="danger" :text="passwordErrorText" />
     </div>
   </div>
 
@@ -440,8 +489,9 @@ watch(
       :count="2"
       :confirm-label="confirmLabel"
       :cancel-label="cancelLabel"
+      :confirm-disabled="passwordConfirmDisabled"
       @confirm="onPasswordConfirm"
-      @cancel="emit('cancel')"
+      @cancel="onPasswordCancel"
     />
   </div>
 
@@ -463,8 +513,8 @@ watch(
       size="xs"
       icon-position="trailing"
       :class="styles.switchButton"
-      :disabled="switchDisabled || isThemedSuccess"
-      @click.stop="emit('switch')"
+      :disabled="switchDisabled"
+      @click.stop="onSwitchClick"
     >
       <template #icon>
         <EgIcon name="eds-arrow-right-mini-ios" fit size="md" />

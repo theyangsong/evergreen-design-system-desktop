@@ -1,6 +1,10 @@
 export { default as EgVerify } from './Verify.vue';
 export type { VerifyState } from './Verify.vue';
-export { useVerifySubmit } from './useVerifySubmit';
+export {
+  useVerifySubmit,
+  VERIFY_SUBMIT_VERIFYING_MS,
+  VERIFY_SUBMIT_SUCCESS_MS,
+} from './useVerifySubmit';
 export type { UseVerifySubmitOptions, UseVerifySubmitReturn, UseVerifySubmitState } from './useVerifySubmit';
 export type { VerifyType, VerifyTypePreset } from './verifyTypesCore';
 export {

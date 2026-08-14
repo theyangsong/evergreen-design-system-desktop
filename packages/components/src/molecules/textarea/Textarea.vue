@@ -12,6 +12,10 @@ const props = withDefaults(
     disabled?: boolean;
     readonly?: boolean;
     widthMode?: TextareaWidthMode;
+    /** Paste 链接文案；中文场景传「粘贴」。 */
+    pasteLabel?: string;
+    /** Clear 链接文案；中文场景传「清空」。 */
+    clearLabel?: string;
   }>(),
   {
     modelValue: '',
@@ -19,6 +23,8 @@ const props = withDefaults(
     disabled: false,
     readonly: false,
     widthMode: 'fixed',
+    pasteLabel: 'Paste',
+    clearLabel: 'Clear',
   },
 );
 
@@ -122,6 +128,7 @@ function onClearClick(event: MouseEvent) {
     >
       <textarea
         ref="textareaRef"
+        class="eds-textarea-control"
         :class="styles.control"
         :value="modelValue"
         :placeholder="placeholder"
@@ -142,7 +149,7 @@ function onClearClick(event: MouseEvent) {
             :disabled="disabled"
             @click="onPasteClick"
           >
-            Paste
+            {{ pasteLabel }}
           </EgLink>
           <EgLink
             tone="brand"
@@ -151,7 +158,7 @@ function onClearClick(event: MouseEvent) {
             :disabled="clearDisabled"
             @click="onClearClick"
           >
-            Clear
+            {{ clearLabel }}
           </EgLink>
         </span>
       </div>

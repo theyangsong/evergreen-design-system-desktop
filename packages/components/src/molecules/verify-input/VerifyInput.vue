@@ -162,6 +162,10 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 async function onPasteClick() {
+  if (props.disabled || props.readonly) {
+    return;
+  }
+
   emit('paste');
 
   if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
@@ -296,7 +300,7 @@ defineExpose({
         tone="brand"
         size="sm"
         href="#"
-        :disabled="disabled || readonly"
+        :disabled="disabled"
         @click.prevent.stop="onPasteClick"
       >
         {{ pasteLabel }}

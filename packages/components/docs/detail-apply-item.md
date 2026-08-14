@@ -50,6 +50,15 @@ const rows = [
 
 `key`、`title`、`value`、`tag`、`valueSymbolCrypto`、`valueIcon`、`valueSymbolAvatarName`
 
+Sender / Receiver 多地址（Figma [2267:11822](https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2267-11822) / [2267:11830](https://www.figma.com/design/OkYrDmatUWtgw9n1uVHt6v/EverGreen-Design-System--Desktop-?node-id=2267-11830)）另可传：
+
+`addressLayout`（`single` · `multi-collapsed` · `multi-expanded` · `multi-orders`）、`valueEntries`、`addressCount`、`addressViewMoreLabel`
+
+- **multi-collapsed**：首行仅展示主地址；下方虚线分隔 + 独立一行 `addressViewMoreLabel` + `addressCount`（如 `Expand 16`）；点击触发 `itemValueLinkClick`。
+- **multi-orders**：视觉同 multi-collapsed；链文案为 `{count} Orders`（如 `16 Orders`）；点击触发 `itemValueLinkClick`（业务可唤起自定义 Popup）。
+- **multi-expanded**：主行下方展开其余地址；行间横虚线与 Tag 左缘对齐（2px 线段 / 2px 间距，`--stroke-base-quaternary`，0.5px）。
+- `addressViewMoreLabel` 支持 `{count}` 占位；未写占位时自动拼接为 ``${label} ${addressCount}``。
+
 其余字段（含 `showValueCopy`、`showValueLink`、`tagFamily`、`valueType`、`showValueSymbol` 等）**由变体决定**，传入会被 `createDetailApplyItemRow` 忽略（请只传上表字段）。
 
 ### 变体 id 一览

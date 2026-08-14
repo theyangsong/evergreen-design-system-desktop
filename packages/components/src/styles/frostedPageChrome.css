@@ -1,6 +1,16 @@
-/** Skid Title / Action 固定栏 — box-page 88% + eds-blur-bg */
+/** Page chrome 固定栏 — effect-mask + eds-blur-bg（Skid Title/Action、ToolBar、Paginer） */
 .eds-frosted-page-chrome {
-  background: color-mix(in display-p3, var(--box-page) 88%, transparent);
+  background: var(--effect-mask);
   -webkit-backdrop-filter: var(--eds-blur-bg);
   backdrop-filter: var(--eds-blur-bg);
+}
+
+/**
+ * Layout 顶/底栏叠在 EgDataList 滚动区上时，外层 effect-container-box 的 blur 会阻断内层二次 blur。
+ * 与 popupInnerBackdrop.css 同理：有 chrome overlay 标记时关闭祖先 blur。
+ */
+.effect-container-box:has(.eds-layout-chrome-overlay),
+.effect-popup-box:has(.eds-layout-chrome-overlay) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }

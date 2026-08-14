@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { onBeforeUnmount, provide, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  onUpdated,
+  provide,
+  ref,
+  watch,
+} from 'vue';
 import styles from './Layout.module.css';
+import '../../styles/frostedPageChrome.css';
 import {
   SKID_AFFECTING_MAIN_KEY,
   SKID_PUSH_TRANSITION_MS,
@@ -57,11 +67,85 @@ watch(
 
 onBeforeUnmount(() => {
   if (skidReleaseTimer !== undefined) clearTimeout(skidReleaseTimer);
+  chromeResizeObserver?.disconnect();
+  chromeResizeObserver = undefined;
+});
+
+const bodyRef = ref<HTMLElement | null>(null);
+const toolbarOverlayRef = ref<HTMLElement | null>(null);
+const paginerOverlayRef = ref<HTMLElement | null>(null);
+
+const hasChromeOverlay = computed(
+  () => props.showToolbar || props.showPaginer,
+);
+
+let chromeResizeObserver: ResizeObserver | undefined;
+
+function updateChromeInsets() {
+  const body = bodyRef.value;
+  if (!body) return;
+
+  const top =
+    props.showToolbar && toolbarOverlayRef.value
+      ? toolbarOverlayRef.value.offsetHeight
+      : 0;
+  const bottom =
+    props.showPaginer && paginerOverlayRef.value
+      ? paginerOverlayRef.value.offsetHeight
+      : 0;
+
+  body.style.setProperty('--eds-layout-chrome-inset-top', `${top}px`);
+  body.style.setProperty('--eds-layout-chrome-inset-bottom', `${bottom}px`);
+}
+
+function observeChromeOverlays() {
+  if (!hasChromeOverlay.value) return;
+
+  if (!chromeResizeObserver) {
+    chromeResizeObserver = new ResizeObserver(() => {
+      updateChromeInsets();
+    });
+  }
+
+  chromeResizeObserver.disconnect();
+
+  if (toolbarOverlayRef.value) {
+    chromeResizeObserver.observe(toolbarOverlayRef.value);
+  }
+  if (paginerOverlayRef.value) {
+    chromeResizeObserver.observe(paginerOverlayRef.value);
+  }
+
+  updateChromeInsets();
+}
+
+function scheduleChromeInsetUpdate() {
+  nextTick(() => {
+    requestAnimationFrame(observeChromeOverlays);
+  });
+}
+
+watch(
+  () => [props.showToolbar, props.showPaginer] as const,
+  () => {
+    scheduleChromeInsetUpdate();
+  },
+);
+
+onMounted(() => {
+  scheduleChromeInsetUpdate();
+});
+
+onUpdated(() => {
+  scheduleChromeInsetUpdate();
 });
 </script>
 
 <template>
-  <div class="eds-layout" :class="styles.root">
+  <div
+    class="eds-layout"
+    :class="[styles.root, hasChromeOverlay && 'eds-layout-chrome-overlay']"
+  >
     <div v-if="type !== 'empty' && $slots.nav" :class="styles.nav">
       <slot name="nav" />
     </div>
@@ -73,15 +157,26 @@ onBeforeUnmount(() => {
     </div>
     <div :class="[styles.main, showSkid && $slots.skid && styles.mainSkidOpen]">
       <div :class="styles.scrollPanel">
-        <div v-if="showToolbar && $slots.toolbar" :class="styles.toolbar">
-          <slot name="toolbar" />
-        </div>
-        <div :class="styles.body">
+        <div
+          ref="bodyRef"
+          :class="[styles.body, hasChromeOverlay && styles.bodyChromeOverlay]"
+        >
           <slot />
+          <div
+            v-if="showToolbar && $slots.toolbar"
+            ref="toolbarOverlayRef"
+            :class="styles.toolbarOverlay"
+          >
+            <slot name="toolbar" />
+          </div>
+          <div
+            v-if="showPaginer && $slots.paginer"
+            ref="paginerOverlayRef"
+            :class="styles.paginerOverlay"
+          >
+            <slot name="paginer" />
+          </div>
         </div>
-      </div>
-      <div v-if="showPaginer && $slots.paginer" :class="styles.paginer">
-        <slot name="paginer" />
       </div>
     </div>
     <div

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { EgIcon } from '../../atoms/icons';
 import CryptoAddressSide from './CryptoAddressSide.vue';
 import styles from './CryptoCombo.module.css';
@@ -21,6 +22,8 @@ const props = withDefaults(
     fromTagsList?: CryptoAddressSideTags[];
     toTagsList?: CryptoAddressSideTags[];
     addressMode?: 'single' | 'double';
+    showFrom?: boolean;
+    showTo?: boolean;
     minWidth?: number;
     addressTooltipTrigger?: 'hover' | 'focus';
   }>(),
@@ -30,37 +33,56 @@ const props = withDefaults(
     fromAddressCount: 1,
     toAddressCount: 1,
     addressMode: 'double',
+    showFrom: true,
+    showTo: true,
   },
+);
+
+const showFromSide = computed(() => props.showFrom !== false);
+const showToSide = computed(
+  () => props.addressMode === 'double' && props.showTo !== false,
+);
+const showArrow = computed(
+  () => props.addressMode === 'double' && showFromSide.value && showToSide.value,
+);
+const resolvedSideMode = computed(() =>
+  props.addressMode === 'double' && showFromSide.value && showToSide.value
+    ? 'double'
+    : 'single',
+);
+const useSingleLayout = computed(
+  () => props.addressMode === 'single' || !showFromSide.value || !showToSide.value,
 );
 </script>
 
 <template>
-  <span :class="[styles.cryptoAddress, addressMode === 'single' && styles.cryptoAddressSingle]">
+  <span :class="[styles.cryptoAddress, useSingleLayout && styles.cryptoAddressSingle]">
     <CryptoAddressSide
+      v-if="showFromSide"
       :address="fromText"
       :alias="fromAlias"
       :address-count="fromAddressCount"
       :addresses="fromAddresses"
       :tags="fromTags"
       :address-tags="fromTagsList"
-      :address-mode="addressMode"
+      :address-mode="resolvedSideMode"
       :min-width="minWidth"
       :tooltip-trigger="addressTooltipTrigger"
     />
 
-    <span v-if="addressMode === 'double'" :class="styles.cryptoAddressArrow">
+    <span v-if="showArrow" :class="styles.cryptoAddressArrow">
       <EgIcon name="eds-arrow-right" fit />
     </span>
 
     <CryptoAddressSide
-      v-if="addressMode === 'double'"
+      v-if="showToSide"
       :address="toText"
       :alias="toAlias"
       :address-count="toAddressCount"
       :addresses="toAddresses"
       :tags="toTags"
       :address-tags="toTagsList"
-      :address-mode="addressMode"
+      :address-mode="resolvedSideMode"
       :min-width="minWidth"
       :tooltip-trigger="addressTooltipTrigger"
     />

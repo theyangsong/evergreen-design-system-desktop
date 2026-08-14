@@ -569,7 +569,7 @@
     },
     {
       "name": "effect-mask",
-      "light": "color(var(--eds-page) / .6)",
+      "light": "color(var(--eds-page) / .82)",
       "dark": "color(var(--eds-page) / .6)"
     },
     {

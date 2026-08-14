@@ -46,7 +46,12 @@ watch(
     >
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewInputHost">
-          <EgTabs v-model="tabsIndex" :labels="labels" />
+          <EgTabs
+            v-model="tabsIndex"
+            :labels="labels"
+            :horizontal-gap="customize.horizontalGap as 'xl' | 'md' | 'sm' | 'xs'"
+            :vertical-gap="customize.verticalGap as 'xl' | 'md' | 'sm' | 'xs'"
+          />
         </div>
       </template>
     </ComponentDocLayout>

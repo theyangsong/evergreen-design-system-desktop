@@ -78,6 +78,7 @@ export const showcaseButtonToneLabels = {
 export const showcaseLinkToneLabels = {
   brand: tokenLabel('品牌', 'brand'),
   theme: tokenLabel('主题', 'theme'),
+  decor: tokenLabel('装饰', 'decor'),
 } as const;
 
 export const showcasePaginationToneLabels = {
@@ -216,6 +217,17 @@ export const showcaseFormSubmissionTypeLabels = {
   success: tokenLabel('成功', 'success'),
 } as const;
 
+export const showcaseStreamerTypeLabels = {
+  info: tokenLabel('信息', 'info'),
+  warning: tokenLabel('警告', 'warning'),
+  danger: tokenLabel('危险', 'danger'),
+} as const;
+
+export const showcaseStreamerVisualLabels = {
+  brand: tokenLabel('品牌', 'brand'),
+  moderate: tokenLabel('弱化', 'moderate'),
+} as const;
+
 export const showcaseToggleCheckboxModeLabels = {
   checkbox: tokenLabel('复选框', 'checkbox'),
   'unchecked-disable': tokenLabel('未选禁用', 'unchecked-disable'),
@@ -312,7 +324,7 @@ export const showcasePopupUsesLabels = {
 
 export const showcasePopupAlertVerticalAlignLabels = {
   center: tokenLabel('居中', 'center'),
-  'padding-top-md': tokenLabel('百分比', 'padding-top-md'),
+  'offset-top': tokenLabel('偏上', 'offset-top'),
 } as const;
 
 export const showcaseSearchScenarioLabels = {
@@ -434,6 +446,9 @@ export const showcaseInputCustomizeFieldLabels = {
   clearable: '可清空',
   showMax: '显示 Max',
   maxLabel: 'Max 文案',
+  pasteLabel: 'Paste 文案',
+  clearLabel: 'Clear 文案',
+  interaction: '交互',
   label: '标题',
   feedback: '反馈区',
 } as const;
@@ -525,7 +540,7 @@ export const iconShapeRows = propLabelRows(
   showcaseIconShapeLabels,
 );
 
-export const linkToneRows = propLabelRows(['brand', 'theme'] as const, showcaseLinkToneLabels);
+export const linkToneRows = propLabelRows(['brand', 'theme', 'decor'] as const, showcaseLinkToneLabels);
 
 export const linkSizeRows = propLabelRows(['lg', 'md', 'sm'] as const, showcaseLinkSizeLabels);
 

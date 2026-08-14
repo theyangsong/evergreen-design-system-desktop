@@ -51,31 +51,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tooltipPanel :global(.eds-tooltip-panel),
-.tooltipPanelSecondary :global(.eds-tooltip-panel),
-.tooltipPanelSmall :global(.eds-tooltip-panel) {
+.tooltipPanel :global(.eds-tooltip-panel) {
   padding: var(--spacing-1) var(--spacing-2);
   white-space: normal;
   word-break: break-word;
-}
-
-.tooltipPanel :global(.eds-tooltip-panel) {
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
-  color: var(--text-base-primary);
-}
-
-.tooltipPanelSecondary :global(.eds-tooltip-panel) {
-  font-size: var(--eds-footnote-size);
-  font-weight: var(--eds-footnote-weight);
-  line-height: var(--eds-footnote-line-height);
-  color: var(--text-base-secondary);
-}
-
-.tooltipPanelSmall :global(.eds-tooltip-panel) {
-  font-size: var(--eds-body-small-size);
-  font-weight: var(--eds-body-small-weight);
-  line-height: var(--eds-body-small-line-height);
   color: var(--text-base-primary);
 }

@@ -7,6 +7,11 @@ import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css
 import styles from './InputPreview.module.css';
 import previewStyles from './SkidPreview.module.css';
 import {
+  skidDemoContentCustomizeControls,
+  skidDemoContentCustomizeDefaults,
+  skidDemoPlainText,
+} from './skidPreviewDemo';
+import {
   ORGANISM_IMPORT,
   buildSkidUsageSnippet,
   skidActionCustomizeControls,
@@ -18,6 +23,7 @@ import {
 
 const customize = reactive({
   ...skidCustomizeDefaults,
+  ...skidDemoContentCustomizeDefaults,
   tone: skidCustomizeDefaults.tone as 'brand' | 'decor' | 'danger',
 });
 
@@ -54,11 +60,21 @@ const usageSnippet = computed(() => buildSkidUsageSnippet(customize));
             :show-button="Boolean(customize.showButton)"
             :action-tone="customize.tone"
             :confirm-label="String(customize.confirmLabel)"
-          />
+          >
+            <p v-if="customize.showDemoContent" :class="previewStyles.demoPlainText">
+              {{ skidDemoPlainText }}
+            </p>
+          </EgSkid>
         </div>
       </template>
 
       <template #customize-after>
+        <CustomizePanel
+          v-model="customize"
+          title="溢出测试"
+          nested
+          :controls="skidDemoContentCustomizeControls"
+        />
         <CustomizePanel
           v-if="customize.showButton"
           v-model="customize"

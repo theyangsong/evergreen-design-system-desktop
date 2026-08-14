@@ -23,7 +23,7 @@
 }
 
 .symbolRingDots {
-  --verify-ring-dot-color: var(--material-brand-quaternary);
+  --verify-ring-dot-color: var(--material-brand-tertiary);
 }
 
 .symbolRingDotsActive {
@@ -67,4 +67,38 @@
 
 .doneTickToneBrand {
   --done-tick-color: var(--material-brand-primary);
+}
+
+.motionProcessingHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.motionProcessingToneWarning {
+  --motion-processing-color: var(--status-warning);
+}
+
+.motionProcessingToneBrand {
+  --motion-processing-color: var(--material-brand-primary);
+}
+
+.ripplePulseHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ripplePulseToneBrand {
+  --ripple-pulse-color: var(--material-brand-primary);
+}
+
+.mnemonicVerifyHost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mnemonicVerifyToneBrand {
+  --mnemonic-verify-color: var(--material-brand-primary);
 }

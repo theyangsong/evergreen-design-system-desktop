@@ -12,3 +12,16 @@
   height: 100%;
   min-height: 0;
 }
+
+.demoPlainText {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-4);
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

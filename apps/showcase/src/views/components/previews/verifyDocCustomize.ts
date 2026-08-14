@@ -44,6 +44,7 @@ export const verifyCustomizeDefaults = {
   confirmLabel: '确定',
   cancelLabel: '取消',
   actionTone: 'decor',
+  passwordErrorText: '密码有误，请重试',
 };
 
 export function applyVerifyTypePresetToState(
@@ -142,6 +143,12 @@ export const verifyCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (state) => isPasswordVerifyType(state.type),
   },
   {
+    kind: 'text',
+    key: 'passwordErrorText',
+    label: '密码错误文案',
+    visibleWhen: (state) => isPasswordVerifyType(state.type),
+  },
+  {
     kind: 'select',
     key: 'actionTone',
     label: '按钮 Tone',
@@ -166,7 +173,7 @@ export const verifyPropRows: DocPropRow[] = [
     type: "'idle' | 'verifying' | 'success' | 'error'",
     defaultValue: "'idle'",
     description:
-      '校验状态。外圈 36 点静止/追光（仅 verifying 动）；success 仅内圈勾号；error 时 OTP 红底 + 左右晃动；重新输入 emit recover。',
+      '校验状态。外圈 36 点静止/追光（仅 verifying 动）；success 仅内圈勾号；OTP error 红底 + 左右晃动；密码 error 输入框保持默认态、忘记密码行换 EgFormSubmission danger；重新输入 emit recover。',
   },
   {
     name: 'title',
@@ -184,13 +191,19 @@ export const verifyPropRows: DocPropRow[] = [
     name: 'modelValue (v-model)',
     type: 'string',
     defaultValue: "''",
-    description: '验证码字符串；OTP 满 codeLength 位或密码点确定 emit complete。',
+    description: '验证码字符串；OTP 满 codeLength 位或密码点确定 emit complete。密码为空时确认按钮禁用。',
   },
   {
     name: 'forgotPasswordLabel',
     type: 'string',
     defaultValue: "'忘记密码?'",
-    description: '交易/登录密码场景「忘记密码」链接文案。',
+    description: '交易/登录密码场景「忘记密码」链接文案；error 时隐藏。',
+  },
+  {
+    name: 'passwordErrorText',
+    type: 'string',
+    defaultValue: "'密码有误，请重试'",
+    description: '交易/登录密码校验失败时 EgFormSubmission（type=danger）文案；重新输入后恢复忘记密码行。',
   },
   {
     name: 'confirmLabel',

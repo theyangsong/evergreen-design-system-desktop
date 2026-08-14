@@ -8,7 +8,7 @@ export type {
 } from './button';
 
 export { EgIconButton } from './icon-button';
-export type { IconButtonShape, IconButtonSize } from './icon-button';
+export type { IconButtonShape, IconButtonSize, IconButtonMotion } from './icon-button';
 
 export { EgIconButtonPro } from './icon-button-pro';
 
@@ -24,6 +24,9 @@ export * from './search';
 export * from './verify-input';
 export * from './verify-ring-dots';
 export * from './done-tick';
+export * from './motion-processing';
+export * from './ripple-pulse';
+export * from './mnemonic-verify';
 export * from './combo';
 export * from './tooltip';
 export * from './flotation';
@@ -32,6 +35,7 @@ export * from './toggle';
 export * from './tab';
 export * from './feedback';
 export * from './popovers';
+export * from './miner-fee';
 export * from './countdown';
 export * from './progress';
 export * from './skeleton';

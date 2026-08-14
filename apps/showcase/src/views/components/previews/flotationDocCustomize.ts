@@ -1266,12 +1266,6 @@ export const flotationTriggerCustomizeControls: DocCustomizeControl[] = [
   ...flotationTriggerDropdownCustomizeControls,
 ];
 
-/** Trigger 文档页 — 主定制区（触发器类型 + 标准下拉框） */
-export const flotationTriggerPageCustomizeControls: DocCustomizeControl[] = [
-  ...flotationTriggerKindCustomizeControls,
-  ...flotationTriggerCustomizeControls,
-];
-
 /** 纵览页 EgFlotation：触发器预置（标准下拉框） */
 export const flotationTriggerOverviewControls: DocCustomizeControl[] = [
   ...flotationTriggerOverviewBodyControls,

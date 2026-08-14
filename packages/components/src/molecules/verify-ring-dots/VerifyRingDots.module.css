@@ -2,7 +2,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  --verify-ring-dot-color: var(--material-brand-quaternary);
+  --verify-ring-dot-color: var(--material-brand-tertiary);
 }
 
 .dot {

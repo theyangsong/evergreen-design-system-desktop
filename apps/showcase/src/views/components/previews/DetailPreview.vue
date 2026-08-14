@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
-import { EgDetail, EgTooltip } from '@eds/desktop-components';
+import { computed, reactive, ref, watch } from 'vue';
+import { EgDetail, EgPopup, EgTooltip } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
+import PopupCustomSlotChromePreview from './PopupCustomSlotChromePreview.vue';
 import {
   buildDetailSectionsFromCustomize,
   buildDetailSectionCustomizeControls,
@@ -18,6 +19,7 @@ import {
   detailSectionItemKey,
   detailSlotRows,
   detailToolbarCustomizeControls,
+  findDetailItemByKey,
   parseDetailSectionEditItemIndex,
   parseDetailSectionItemCount,
   resetDetailSectionItemCustomizeFields,
@@ -122,6 +124,19 @@ const toolbarPrevDisabled = computed(() => parseToolbarIndex(customize.toolbarCu
 const toolbarNextDisabled = computed(
   () => parseToolbarIndex(customize.toolbarCurrent) >= parseToolbarIndex(customize.toolbarTotal),
 );
+
+const ordersPopupOpen = ref(false);
+
+function onItemValueLinkClick(key: string) {
+  const item = findDetailItemByKey(detailSections.value, key);
+  if (item?.addressLayout === 'multi-orders') {
+    ordersPopupOpen.value = true;
+  }
+}
+
+function closeOrdersPopup() {
+  ordersPopupOpen.value = false;
+}
 </script>
 
 <template>
@@ -165,8 +180,11 @@ const toolbarNextDisabled = computed(
               :show-status-tag="Boolean(customize.showStatusTag)"
               :show-tabs="Boolean(customize.showTabs)"
               :tab-labels="detailTabLabels"
+              :tab-horizontal-gap="customize.tabHorizontalGap as 'xl' | 'md' | 'sm' | 'xs'"
+              :tab-vertical-gap="customize.tabVerticalGap as 'xl' | 'md' | 'sm' | 'xs'"
               :sections="detailSections"
               :show-toolbar="Boolean(customize.showToolbar)"
+              :toolbar-divider-pinned="Boolean(customize.toolbarDividerPinned)"
               :show-toolbar-nav="Boolean(customize.showToolbarNav)"
               :toolbar-current="String(customize.toolbarCurrent)"
               :toolbar-total="String(customize.toolbarTotal)"
@@ -178,8 +196,30 @@ const toolbarNextDisabled = computed(
               :toolbar-cancel-label="String(customize.toolbarCancelLabel)"
               @toolbar-prev="onToolbarPrev"
               @toolbar-next="onToolbarNext"
+              @item-value-link-click="onItemValueLinkClick"
             />
           </EgTooltip>
+
+          <EgPopup
+            v-model:open="ordersPopupOpen"
+            uses="custom"
+            :box-width="780"
+            :box-height="560"
+          >
+            <PopupCustomSlotChromePreview
+              toolbar-tone="decor"
+              toolbar-confirm-label="Confirm"
+              toolbar-cancel-label="Cancel"
+              content-inset-preset="lg"
+              @close="closeOrdersPopup"
+              @toolbar-cancel="closeOrdersPopup"
+              @toolbar-confirm="closeOrdersPopup"
+            >
+              <div :class="organismStyles.previewOrganismPopupBoxPlaceholder">
+                Orders · 16 addresses
+              </div>
+            </PopupCustomSlotChromePreview>
+          </EgPopup>
         </div>
       </template>
 
@@ -201,7 +241,7 @@ const toolbarNextDisabled = computed(
             nested
             embedded
             sequential
-            :row-columns="3"
+            :row-columns="5"
             :controls="detailTabsCustomizeControls"
           />
           <CustomizePanel

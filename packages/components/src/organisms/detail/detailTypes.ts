@@ -1,3 +1,5 @@
+import type { CryptoAddressSideTags } from '../../molecules/crypto-combo/cryptoAddressTypes';
+
 export type DetailValueType = 'text' | 'crypto' | 'user';
 
 export type DetailValueSymbolKind = 'crypto' | 'avatar';
@@ -13,6 +15,32 @@ export type DetailItemTagSystemType =
   | 'gray'
   | 'stroke-subtle'
   | 'stroke-solid';
+
+/** Sender / Receiver — 单地址 · 多地址默认 · 多地址展开 · 数量 Orders（Figma 2267:11822 / 2267:11830） */
+export type DetailAddressLayout =
+  | 'single'
+  | 'multi-collapsed'
+  | 'multi-expanded'
+  | 'multi-orders';
+
+export type DetailItemValueEntry = {
+  value: string;
+  tag?: string;
+  tagFamily?: DetailItemTagFamily;
+  tagStatus?: DetailItemTagStatus;
+  tagSystemType?: DetailItemTagSystemType;
+  tagBeforeValue?: boolean;
+  /** 展开态下行尾虚线分隔（最后一行不加） */
+  dashed?: boolean;
+  /** Sender / Receiver 地址行内 Tag（与 EgCryptoAddress 对齐）。 */
+  valueAddressSideTags?: CryptoAddressSideTags;
+  /** 展示全部 Tag（不折叠 +N）。 */
+  valueAddressSideTagsRevealAll?: boolean;
+  /** Tag 置于别名/地址行下方。 */
+  valueAddressSideTagsBelow?: boolean;
+  /** 次要 value 文案（60% 字色，如钱包编号）。 */
+  valueMuted?: boolean;
+};
 
 export type DetailItemData = {
   key?: string;
@@ -46,6 +74,18 @@ export type DetailItemData = {
   showValueBrowser?: boolean;
   /** Figma Popup Detail-Item · Dashed=Yes — 行下缩进分隔线 */
   dashed?: boolean;
+  /** Sender / Receiver 地址展示形态；默认 single */
+  addressLayout?: DetailAddressLayout;
+  /** 多地址条目；首条与 value/tag 对齐，展开态渲染全部 */
+  valueEntries?: DetailItemValueEntry[];
+  /** 多地址默认态计数；省略时用 valueEntries.length */
+  addressCount?: number;
+  /** 多地址默认态「查看更多」链文案；有值时渲染 EgLink */
+  addressViewMoreLabel?: string;
+  /** 同一行内连续展示多条 value 文案（如钱包名 + 编号）。 */
+  inlineValueEntries?: boolean;
+  /** 复制按钮写入剪贴板的文案；省略时用 entry.value。 */
+  valueCopyText?: string;
 };
 
 export type DetailSectionData = {

@@ -96,7 +96,7 @@ function buildModuleMenuItemSnippet(item: ModuleMenuPresetItem, indent: string):
   }
 
   const iconSlot = item.avatar
-    ? `${indent}  <template #icon><EgAvatar name="${escapeAttr(item.avatar.name)}" size="${item.avatar.size ?? 'sm'}"${
+    ? `${indent}  <template #icon><EgAvatar name="${escapeAttr(item.avatar.name)}" size="${item.avatar.size ?? 'xs'}"${
         item.avatar.colorIndex === undefined ? '' : ` :color-index="${item.avatar.colorIndex}"`
       } /></template>`
     : `${indent}  <template #icon><EgIcon name="${escapeAttr(item.icon)}" size="sm" /></template>`;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import styles from './Link.module.css';
 
-export type LinkTone = 'brand' | 'theme';
+export type LinkTone = 'brand' | 'theme' | 'decor';
 export type LinkSize = 'lg' | 'md' | 'sm';
 
 const props = withDefaults(

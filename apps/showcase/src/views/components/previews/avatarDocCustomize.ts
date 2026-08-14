@@ -28,8 +28,9 @@ export const avatarCustomizeControls: DocCustomizeControl[] = [
     key: 'size',
     label: '尺寸',
     options: [
-      { value: 'sm', label: 'sm (16px)' },
-      { value: 'md', label: 'md (24px)' },
+      { value: 'xs', label: 'xs (16px)' },
+      { value: 'sm', label: 'sm (24px)' },
+      { value: 'md', label: 'md (32px)' },
       { value: 'lg', label: 'lg (36px)' },
       { value: 'xl', label: 'xl (40px)' },
     ],

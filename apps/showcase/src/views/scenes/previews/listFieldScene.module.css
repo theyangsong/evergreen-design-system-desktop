@@ -75,11 +75,11 @@
 
 .addressPreview {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-1);
   min-width: 0;
   max-width: 100%;
-  width: 100%;
+  width: auto;
 }
 
 .addressText {
@@ -122,7 +122,37 @@
   align-items: flex-start;
   min-width: 0;
   max-width: 100%;
-  width: 100%;
+  width: auto;
+}
+
+.amountPrimaryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.amountCryptoIcon {
+  flex-shrink: 0;
+  width: var(--avatar-xs);
+  height: var(--avatar-xs);
+}
+
+.amountPrimaryRow :global(.eds-anchored-tooltip) {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.amountPrimaryRow :global(.eds-tag) {
+  flex-shrink: 0;
+}
+
+.generalStructureCryptoIcon {
+  flex-shrink: 0;
+  width: var(--avatar-xs);
+  height: var(--avatar-xs);
 }
 
 .amountPrimary {

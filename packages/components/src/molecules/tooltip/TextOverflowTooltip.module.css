@@ -106,3 +106,13 @@
   min-width: 0;
   max-width: 100%;
 }
+
+.deferredMeasure {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}

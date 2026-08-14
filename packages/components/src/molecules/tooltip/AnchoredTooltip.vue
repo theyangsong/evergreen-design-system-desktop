@@ -694,9 +694,15 @@ function unbindOpenSideEffects() {
 }
 
 watch(
-  () => props.placement,
-  (placement) => {
+  () => [props.placement, props.align] as const,
+  ([placement]) => {
     resolvedPlacement.value = placement;
+    if (open.value) {
+      nextTick(() => {
+        updatePosition();
+        requestAnimationFrame(() => updatePosition());
+      });
+    }
   },
 );
 

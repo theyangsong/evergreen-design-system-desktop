@@ -1,2 +1,1 @@
-/** Progress — 进度条。 */
-export {};
+export { default as EgProgress } from './Progress.vue';

@@ -159,21 +159,6 @@
   cursor: default;
 }
 
-/*
- * is-asym 契约（moduleMenuMotion.ts）：仅 :hover 入场有过渡；离场 / focus / active 无过渡。
- * 覆盖 semantic `.motion-ease.is-asym` 对 :focus-visible/:active 的入场 timing。
- */
-.item:global(.motion-ease.is-asym) {
-  transition: none;
-}
-
-@media (hover: hover) {
-  .item:global(.motion-ease.is-asym):not(.itemFocused):hover {
-    transition: var(--motion-recipe-hover-asym);
-    transition-timing-function: var(--motion-easing-enter);
-  }
-}
-
 @media (hover: hover) {
   .item:hover:not(.itemFocused) {
     background-color: var(--event-hover);
@@ -258,6 +243,7 @@
 .itemFocused:hover {
   background-color: var(--event-focus-brand);
   color: var(--text-same-white-primary);
+  transition: none;
 }
 
 .itemFocused .itemIcon,

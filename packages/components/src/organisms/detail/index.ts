@@ -6,9 +6,15 @@ export type {
   DetailValueSymbolKind,
 } from './detailTypes';
 export { createDefaultDetailSections } from './detailTypes';
+export type {
+  DetailAddressLayout,
+  DetailItemValueEntry,
+} from './detailTypes';
 export {
   DETAIL_APPLY_ITEM_FIGMA_NODE,
+  buildDetailAddressApplyItemRow,
   createDetailApplyItemRow,
+  detailAddressDemoEntries,
   detailApplyItemPresetIds,
   detailApplyItemPresets,
   detailApplyItemVariantIds,

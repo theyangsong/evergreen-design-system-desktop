@@ -165,7 +165,7 @@ const menuShell = useFlotationBoxMenuShellProps(customize);
           :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
         >
           <EgFlotationMenu
-            :class="menuShell.menuClass"
+            :class="[menuShell.menuClass, 'glassMicroFloatHostActive']"
             :width-mode="menuShell.widthMode"
             :width="menuShell.width"
             :max-width="menuShell.maxWidth"

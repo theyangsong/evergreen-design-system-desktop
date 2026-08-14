@@ -15,30 +15,47 @@ import previewPageStyles from './InputPreview.module.css';
 import matrixStyles from './PopoversPreview.module.css';
 import {
   POPOVER_ALIGNS,
+  applyPopoverScenarioPreset,
+  buildPopoverComponentUsageSnippet,
   buildPopoverProps,
-  buildPopoversUsageSnippet,
   popoverAlignOptions,
+  popoverComponentCustomizeControls,
+  popoverComponentCustomizeDefaults,
+  popoverComponentImportCode,
   popoverPlacementOptions,
   popoverPropRows,
   popoverSlotRows,
-  popoversCustomizeControls,
-  popoversCustomizeDefaults,
-  popoversImportCode,
 } from './popoversDocCustomize';
 
 const customize = reactive({
-  ...popoversCustomizeDefaults,
-  placement: popoversCustomizeDefaults.placement as PopoverPlacement,
-  align: popoversCustomizeDefaults.align as PopoverAlign,
-  trigger: popoversCustomizeDefaults.trigger as 'click' | 'hover',
-  widthMode: popoversCustomizeDefaults.widthMode as 'fixed' | 'adaptive' | 'preset',
-  heightMode: popoversCustomizeDefaults.heightMode as 'fixed' | 'adaptive',
+  ...popoverComponentCustomizeDefaults,
+  scenario: 'component' as const,
+  placement: popoverComponentCustomizeDefaults.placement as PopoverPlacement,
+  align: popoverComponentCustomizeDefaults.align as PopoverAlign,
+  trigger: popoverComponentCustomizeDefaults.trigger as 'click' | 'hover',
+  widthMode: popoverComponentCustomizeDefaults.widthMode as 'fixed' | 'adaptive' | 'preset',
+  heightMode: popoverComponentCustomizeDefaults.heightMode as 'fixed' | 'adaptive',
 });
 
-const previewSlotContent = ref('Popover 内容');
+applyPopoverScenarioPreset(customize, 'component');
+
 const anchoredRef = ref<{ close: () => void } | null>(null);
 
-const popoverPreviewProps = computed(() => buildPopoverProps(customize));
+const previewFloatingScopeClass = 'desktopTokens';
+
+const popoverPreviewProps = computed(() => {
+  const props = buildPopoverProps(customize);
+  delete props.topTool;
+  delete props.topToolTitle;
+  delete props.topToolClosable;
+  return props;
+});
+
+const popoverShowTopTool = computed(
+  () => customize.placement === 'top' && Boolean(customize.topTool),
+);
+
+const popoverTopToolClosable = computed(() => Boolean(customize.topToolClosable));
 
 function onTopToolClose() {
   anchoredRef.value?.close();
@@ -50,7 +67,7 @@ const slotDemoUsesFill = computed(
     customize.heightMode === 'fixed',
 );
 
-const usageSnippet = computed(() => buildPopoversUsageSnippet(customize));
+const usageSnippet = computed(() => buildPopoverComponentUsageSnippet(customize));
 
 type MatrixCell = {
   placement: PopoverPlacement;
@@ -89,17 +106,17 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
   <div :class="previewPageStyles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      anchor-id="popovers"
-      title="Popovers"
+      anchor-id="popovers-popover"
+      title="Popover"
       :show-doc-title="false"
       component-tag="EgPopover"
-      :import-code="popoversImportCode"
-      :customize-controls="popoversCustomizeControls"
-      :customize-defaults="popoversCustomizeDefaults"
+      :import-code="popoverComponentImportCode"
+      :customize-controls="popoverComponentCustomizeControls"
+      :customize-defaults="popoverComponentCustomizeDefaults"
       :usage-snippet-override="usageSnippet"
       :prop-rows="popoverPropRows"
       :slot-rows="popoverSlotRows"
-      props-section-id="popovers-props"
+      props-section-id="popovers-popover-props"
     >
       <template #preview>
         <div
@@ -117,10 +134,18 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
             :trigger="customize.trigger"
             :disabled="Boolean(customize.disabled)"
             :wrap-tooltip="false"
+            :token-scope-class="previewFloatingScopeClass"
           >
             <EgButton variant="outline">{{ customize.triggerLabel }}</EgButton>
             <template #content>
-              <EgPopover v-bind="popoverPreviewProps" @top-tool-close="onTopToolClose">
+              <EgPopover
+                :key="`popover-${customize.topToolClosable}`"
+                v-bind="popoverPreviewProps"
+                :top-tool="popoverShowTopTool"
+                :top-tool-title="String(customize.topToolTitle ?? 'Title')"
+                :top-tool-closable="popoverTopToolClosable"
+                @top-tool-close="onTopToolClose"
+              >
                 <div
                   :class="[
                     matrixStyles.slotDemo,
@@ -128,7 +153,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
                   ]"
                 >
                   <textarea
-                    v-model="previewSlotContent"
+                    v-model="customize.slotContent"
                     :class="matrixStyles.slotEditor"
                     rows="2"
                     aria-label="Popover 插槽内容"
@@ -172,15 +197,15 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
               :class="matrixStyles.cell"
             >
               <EgPopover
-              :placement="cell.placement"
-              :align="cell.align"
-              width-mode="fixed"
-              :width="POPOVER_PANEL_MIN_W"
-              height-mode="fixed"
-              :height="POPOVER_PANEL_MIN_H"
-            >
-              <div :class="[matrixStyles.slotDemo, matrixStyles.slotDemoFixed]">Label</div>
-            </EgPopover>
+                :placement="cell.placement"
+                :align="cell.align"
+                width-mode="fixed"
+                :width="POPOVER_PANEL_MIN_W"
+                height-mode="fixed"
+                :height="POPOVER_PANEL_MIN_H"
+              >
+                <div :class="[matrixStyles.slotDemo, matrixStyles.slotDemoFixed]">Label</div>
+              </EgPopover>
               <span :class="matrixStyles.cellLabel">{{ matrixLabel(cell.placement, cell.align) }}</span>
             </div>
           </div>
@@ -194,15 +219,15 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
               :class="matrixStyles.cell"
             >
               <EgPopover
-              :placement="cell.placement"
-              :align="cell.align"
-              width-mode="fixed"
-              :width="POPOVER_PANEL_MIN_W"
-              height-mode="fixed"
-              :height="POPOVER_PANEL_MIN_H"
-            >
-              <div :class="[matrixStyles.slotDemo, matrixStyles.slotDemoFixed]">Label</div>
-            </EgPopover>
+                :placement="cell.placement"
+                :align="cell.align"
+                width-mode="fixed"
+                :width="POPOVER_PANEL_MIN_W"
+                height-mode="fixed"
+                :height="POPOVER_PANEL_MIN_H"
+              >
+                <div :class="[matrixStyles.slotDemo, matrixStyles.slotDemoFixed]">Label</div>
+              </EgPopover>
               <span :class="matrixStyles.cellLabel">{{ matrixLabel(cell.placement, cell.align) }}</span>
             </div>
           </div>

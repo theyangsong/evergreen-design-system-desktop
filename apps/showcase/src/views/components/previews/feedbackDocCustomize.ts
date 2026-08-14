@@ -1,10 +1,17 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import {
+  buttonToneRows,
+  buttonSizeRows,
+  buttonVariantRows,
+  linkSizeRows,
+  linkToneRows,
   propLabelRows,
   showcaseFeedbackMessageTypeLabels,
   showcaseFeedbackToastTypeLabels,
   showcaseFormSubmissionTypeLabels,
+  showcaseStreamerTypeLabels,
+  showcaseStreamerVisualLabels,
 } from '@/data/showcasePropLabels';
 
 export const endFeedbackCardImportCode = `import { EgEndFeedbackCard } from '@eds/desktop-components';`;
@@ -12,9 +19,20 @@ export const toastImportCode = `import { EgToast } from '@eds/desktop-components
 export const messageImportCode = `import { EgMessage } from '@eds/desktop-components';`;
 export const reddotImportCode = `import { EgReddot } from '@eds/desktop-components';`;
 export const formSubmissionImportCode = `import { EgFormSubmission } from '@eds/desktop-components';`;
+export const streamerImportCode = `import { EgStreamer } from '@eds/desktop-components';`;
+
+/** Figma Streamer doc — node 2534:5785 */
+export const streamerFigmaNode = '2534:5785';
 
 export const endFeedbackCardPropRows: DocPropRow[] = [
   { name: 'text', type: 'string', defaultValue: "'I am Text'", description: '卡片正文。' },
+  {
+    name: '—',
+    type: '—',
+    defaultValue: '—',
+    description:
+      '成功勾号使用 EgDoneTick（16px 白描边，延迟 --motion-delay-feedback-tick 于绿圆入场后播放）。',
+  },
 ];
 
 export const toastPropRows: DocPropRow[] = [
@@ -71,6 +89,89 @@ export const formSubmissionPropRows: DocPropRow[] = [
     type: 'boolean',
     defaultValue: 'true',
     description: '是否显示链接；仅 Notes 生效。',
+  },
+];
+
+export const streamerPropRows: DocPropRow[] = [
+  {
+    name: 'type',
+    type: "'info' | 'warning' | 'danger'",
+    defaultValue: "'info'",
+    description: '组级横幅语义色。info 背景 `--material-card-moderate`；warning / danger 在 visual=brand 时用类型 weaken，moderate 时统一 `--material-card-moderate`。',
+  },
+  {
+    name: 'visual',
+    type: "'brand' | 'moderate'",
+    defaultValue: "'brand'",
+    description: '视觉：brand 类型 weaken 背景；moderate 统一 `--material-card-moderate`。',
+  },
+  { name: 'text', type: 'string', defaultValue: "'Connect to EDS'", description: '横幅文案。' },
+  {
+    name: 'showSymbol',
+    type: 'boolean',
+    defaultValue: 'true',
+    description: '是否显示左侧符号图标。',
+  },
+  {
+    name: 'showButton',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: '是否在右侧显示 EgButton（默认 outline · xs · subtle，边框 `--stroke-xs`）。',
+  },
+  {
+    name: 'buttonLabel',
+    type: 'string',
+    defaultValue: "'Button'",
+    description: '按钮文案；仅 showButton 为 true 时显示。',
+  },
+  {
+    name: 'buttonVariant',
+    type: "'solid' | 'outline' | 'text'",
+    defaultValue: "'outline'",
+    description: 'EgButton 风格（Style）。',
+  },
+  {
+    name: 'buttonTone',
+    type: "'brand' | 'decor' | 'subtle'",
+    defaultValue: "'subtle'",
+    description: 'EgButton tone。',
+  },
+  {
+    name: 'buttonSize',
+    type: "'lg' | 'md' | 'sm' | 'xs'",
+    defaultValue: "'xs'",
+    description: 'EgButton 尺寸。',
+  },
+  {
+    name: 'showLink',
+    type: 'boolean',
+    defaultValue: 'false',
+    description: '是否在右侧显示 EgLink（可与按钮并存，用于文档对比）。',
+  },
+  {
+    name: 'linkLabel',
+    type: 'string',
+    defaultValue: "'Button'",
+    description: 'Link 文案；仅 showLink 为 true 时显示。',
+  },
+  {
+    name: 'linkTone',
+    type: "'brand' | 'decor'",
+    defaultValue: "'brand'",
+    description: 'EgLink tone。',
+  },
+  {
+    name: 'linkSize',
+    type: "'md'",
+    defaultValue: "'md'",
+    description: 'EgLink 尺寸。',
+  },
+  { name: 'href', type: 'string', defaultValue: "'#'", description: 'Link 地址。' },
+  {
+    name: '—',
+    type: '—',
+    defaultValue: '—',
+    description: '区块顶部警告条，`role="alert"`；用于 group_failure 组级校验失败。',
   },
 ];
 
@@ -141,6 +242,154 @@ export const formSubmissionCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (s) => s.type === 'notes',
   },
 ];
+
+export const streamerCustomizeDefaults = {
+  type: 'info',
+  visual: 'brand',
+  text: 'Connect to EDS',
+  showSymbol: true,
+  showButton: true,
+  buttonLabel: 'Button',
+  buttonVariant: 'outline',
+  buttonTone: 'subtle',
+  buttonSize: 'xs',
+  showLink: false,
+  linkLabel: 'Button',
+  linkTone: 'brand',
+  linkSize: 'md',
+};
+
+export const streamerCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'type',
+    label: '类型',
+    options: propLabelRows(['info', 'warning', 'danger'] as const, showcaseStreamerTypeLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
+  },
+  { kind: 'text', key: 'text', label: '文案' },
+];
+
+export const streamerVisualCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'visual',
+    label: '视觉',
+    options: propLabelRows(['brand', 'moderate'] as const, showcaseStreamerVisualLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
+  },
+];
+
+export const streamerSymbolCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'boolean', key: 'showSymbol', label: '显示符号' },
+];
+
+const streamerButtonToneOptions = buttonToneRows
+  .filter((row) => row.key === 'brand' || row.key === 'decor' || row.key === 'subtle')
+  .map((row) => ({ value: row.key, label: row.label }));
+
+export const streamerButtonCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'boolean', key: 'showButton', label: '显示按钮', row: 0 },
+  {
+    kind: 'select',
+    key: 'buttonVariant',
+    label: '风格',
+    row: 0,
+    visibleWhen: (state) => Boolean(state.showButton),
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'buttonTone',
+    label: '色调',
+    row: 1,
+    visibleWhen: (state) => Boolean(state.showButton),
+    options: streamerButtonToneOptions,
+  },
+  {
+    kind: 'select',
+    key: 'buttonSize',
+    label: '尺寸',
+    row: 1,
+    visibleWhen: (state) => Boolean(state.showButton),
+    options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'text',
+    key: 'buttonLabel',
+    label: '按钮文案',
+    row: 1,
+    visibleWhen: (state) => Boolean(state.showButton),
+  },
+];
+
+const streamerLinkToneOptions = linkToneRows
+  .filter((row) => row.key === 'brand' || row.key === 'decor')
+  .map((row) => ({ value: row.key, label: row.label }));
+
+const streamerLinkSizeOptions = linkSizeRows
+  .filter((row) => row.key === 'md')
+  .map((row) => ({ value: row.key, label: row.label }));
+
+export const streamerLinkCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'boolean', key: 'showLink', label: '显示 Link', row: 0 },
+  {
+    kind: 'select',
+    key: 'linkTone',
+    label: '色调',
+    row: 0,
+    visibleWhen: (state) => Boolean(state.showLink),
+    options: streamerLinkToneOptions,
+  },
+  {
+    kind: 'select',
+    key: 'linkSize',
+    label: '尺寸',
+    row: 0,
+    visibleWhen: (state) => Boolean(state.showLink),
+    options: streamerLinkSizeOptions,
+  },
+  {
+    kind: 'text',
+    key: 'linkLabel',
+    label: '文案',
+    visibleWhen: (state) => Boolean(state.showLink),
+  },
+];
+
+export function buildStreamerUsageSnippet(state: Record<string, unknown>): string {
+  const props: Record<string, unknown> = {
+    type: String(state.type ?? streamerCustomizeDefaults.type),
+    text: String(state.text ?? streamerCustomizeDefaults.text),
+    showSymbol: state.showSymbol !== false,
+  };
+  if (state.visual && state.visual !== streamerCustomizeDefaults.visual) {
+    props.visual = String(state.visual);
+  }
+  if (state.showButton) {
+    props.showButton = true;
+    props.buttonLabel = String(state.buttonLabel ?? streamerCustomizeDefaults.buttonLabel);
+    props.buttonVariant = String(state.buttonVariant ?? streamerCustomizeDefaults.buttonVariant);
+    props.buttonTone = String(state.buttonTone ?? streamerCustomizeDefaults.buttonTone);
+    props.buttonSize = String(state.buttonSize ?? streamerCustomizeDefaults.buttonSize);
+  }
+  if (state.showLink) {
+    props.showLink = true;
+    props.linkLabel = String(state.linkLabel ?? streamerCustomizeDefaults.linkLabel);
+    props.linkTone = String(state.linkTone ?? streamerCustomizeDefaults.linkTone);
+    props.linkSize = String(state.linkSize ?? streamerCustomizeDefaults.linkSize);
+    props.href = String(state.href ?? '#');
+  }
+  return buildVueSelfClosingSnippet('EgStreamer', props, {
+    defaults: {
+      ...streamerCustomizeDefaults,
+      /** 组件 API 默认仍为 false；文档预览打开按钮时须写出 show-button。 */
+      showButton: false,
+    },
+  });
+}
 
 export function buildFormSubmissionUsageSnippet(state: Record<string, unknown>): string {
   const type = String(state.type ?? formSubmissionCustomizeDefaults.type);

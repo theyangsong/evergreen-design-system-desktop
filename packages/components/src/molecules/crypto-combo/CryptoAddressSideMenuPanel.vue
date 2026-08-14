@@ -16,6 +16,8 @@ export type CryptoAddressSideMenuRow = {
   key: string;
   address: string;
   alias?: string;
+  /** ListFieldAddress 等：meta 行副文本（Wallet Name 等）。 */
+  secondaryText?: string;
   tags?: CryptoAddressSideTags;
   showExpandedTags?: boolean;
 };
@@ -82,8 +84,18 @@ const emit = defineEmits<{
           </span>
         </span>
 
-        <span v-if="row.showExpandedTags && row.tags" :class="styles.menuRowTags">
+        <span
+          v-if="row.showExpandedTags && (row.secondaryText || row.tags)"
+          :class="styles.menuRowTags"
+        >
+          <span
+            v-if="row.secondaryText"
+            :class="styles.menuRowSecondary"
+          >
+            {{ row.secondaryText }}
+          </span>
           <CryptoAddressTags
+            v-if="row.tags"
             :tags="row.tags"
             :default-show-more="false"
             tooltip-mode

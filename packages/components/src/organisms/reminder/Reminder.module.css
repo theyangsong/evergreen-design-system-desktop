@@ -161,6 +161,9 @@
   width: 100%;
   border-bottom-right-radius: var(--radius-md);
   border-bottom-left-radius: var(--radius-md);
-  background: var(--box-page);
   transition: var(--motion-recipe-scroll-fade-background);
+}
+
+.echoToolbarSolid {
+  background: var(--box-page);
 }

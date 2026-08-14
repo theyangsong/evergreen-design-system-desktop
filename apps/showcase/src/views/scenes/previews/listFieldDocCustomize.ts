@@ -23,13 +23,17 @@ import {
 } from '@/views/components/previews/tagDocCustomize';
 import { resolveCryptoNameFromSymbol } from './listFieldCryptoResolve';
 import {
-  currencyTagCustomizeDefaults,
-} from './listFieldCurrencyTagCustomize';
-import {
-  buildCurrencySideAddressControls,
+  appendCurrencySideVisibilityProps,
   buildCurrencySideAddressData,
   currencySideAddressDefaults,
 } from './listFieldCurrencyAddressCustomize';
+import { parseCurrencyAddressCount } from './listFieldCurrencyShared';
+import {
+  currencyTagCustomizeDefaults,
+  currencyTagShowKey,
+  buildCurrencySideTags,
+} from './listFieldCurrencyTagCustomize';
+import { formatGroupedNumber, hasAddressTags } from '@eds/desktop-components';
 import {
   LIST_FIELD_MORE_ACTION_COUNT_MAX,
   SAMPLE_ADDRESS,
@@ -48,6 +52,7 @@ const CRYPTO_COMBO_IMPORT = `import { EgCryptoCombo } from '@eds/desktop-compone
 
 const LIST_FIELD_IMPORT = `import {
   EgAnchoredTooltip,
+  EgCrypto,
   EgCryptoCombo,
   EgIcon,
   EgListFieldAddressLine,
@@ -158,6 +163,20 @@ function generalStructureTagCustomizeControls(
   }));
 }
 
+const amountTagCustomizeControls: DocCustomizeControl[] = tagSystemSmCustomizeControls.map(
+  (control) => ({
+    ...control,
+    key: control.key === 'systemType' ? 'amountTagSystemType' : 'amountTagLabel',
+  }),
+);
+
+const addressRowTagCustomizeControls: DocCustomizeControl[] = tagSystemSmCustomizeControls.map(
+  (control) => ({
+    ...control,
+    key: control.key === 'systemType' ? 'addressRowTagSystemType' : 'addressRowTagLabel',
+  }),
+);
+
 const listFieldMinWidthProp = sceneProp(
   'minWidth',
   'number',
@@ -167,9 +186,7 @@ const listFieldMinWidthProp = sceneProp(
 
 const addressDisplayOptions = [
   chineseOption('single', '单地址'),
-  chineseOption('alias', '别名'),
   chineseOption('double', '双地址'),
-  chineseOption('collection', '合集'),
 ];
 
 const amountTypeOptions = [
@@ -182,6 +199,7 @@ export type ListFieldCustomizePanel = {
   title: string;
   controls: DocCustomizeControl[];
   addressSide?: 'from' | 'to';
+  addressTagOnly?: boolean;
   sequential?: boolean;
   rowColumns?: number;
   visibleWhen?: (state: Record<string, unknown>) => boolean;
@@ -200,10 +218,6 @@ export type ListFieldDocConfig = {
   customizeSequential?: boolean;
   customizeRowColumns?: number;
 };
-
-function sideAddressControls(_prefix: 'from' | 'to'): DocCustomizeControl[] {
-  return [];
-}
 
 function sceneProp(
   name: string,
@@ -260,6 +274,7 @@ function buildCurrencyUsageSnippet(state: Record<string, unknown>): string {
     if (to.alias) {
       props.toAlias = to.alias;
     }
+    appendCurrencySideVisibilityProps(props, state);
   }
 
   const minWidthRaw = String(state.minWidth ?? '').trim();
@@ -282,46 +297,112 @@ function buildCurrencyUsageSnippet(state: Record<string, unknown>): string {
   });
 }
 
+function buildAddressCryptoProps(state: Record<string, unknown>): Record<string, unknown> {
+  const from = buildCurrencySideAddressData('from', state);
+  const to = buildCurrencySideAddressData('to', state);
+  const props: Record<string, unknown> = {
+    'address-mode': 'double',
+    'from-text': from.address,
+    'from-address-count': from.count,
+    'from-addresses': from.addresses,
+    'to-text': to.address,
+    'to-address-count': to.count,
+    'to-addresses': to.addresses,
+    'address-tooltip-trigger': String(state.addressTooltipTrigger ?? 'hover'),
+  };
+
+  if (from.alias) {
+    props['from-alias'] = from.alias;
+  }
+
+  if (to.alias) {
+    props['to-alias'] = to.alias;
+  }
+
+  const minWidthRaw = String(state.minWidth ?? '').trim();
+  const minWidth = minWidthRaw ? Number(minWidthRaw) : 0;
+  if (minWidth > 0) {
+    props['min-width'] = minWidth;
+  }
+
+  appendCurrencySideVisibilityProps(props, state);
+
+  return props;
+}
+
+function addressSingleModeDefaults(): Record<string, unknown> {
+  return {
+    [currencyTagShowKey('from', 1, 'system')]: false,
+    [currencyTagShowKey('from', 1, 'custom')]: true,
+    showAddressRowTag: true,
+    addressRowTagLabel: 'Tag',
+    addressRowTagSystemType: 'gray',
+    showAddressSecondaryText: true,
+    addressSecondaryText: 'Wallet Name',
+    showAddressMulti: false,
+    addressMultiCount: '3',
+  };
+}
+
 function buildAddressUsageSnippet(state: Record<string, unknown>): string {
   const mode = String(state.displayMode ?? 'single');
   const address = String(state.address ?? SAMPLE_ADDRESS);
 
-  if (mode === 'alias') {
-    return [
-      '<div class="list-field-address">',
-      `  ${buildVueSelfClosingSnippet('EgTag', { family: 'system', systemType: 'subtle', size: 'sm' }).replace('/>', '>Treasury</EgTag>')}`,
-      `  <span class="mono">${address.slice(0, 6)}...${address.slice(-6)}</span>`,
-      '</div>',
-    ].join('\n');
+  if (mode !== 'single') {
+    return buildVueSelfClosingSnippet('EgCryptoAddress', buildAddressCryptoProps(state), {
+      defaults: {
+        'address-mode': 'single',
+        'from-text': SAMPLE_ADDRESS,
+        'from-address-count': 1,
+      },
+    });
   }
 
-  if (mode === 'double') {
-    return [
-      '<div class="list-field-address">',
-      `  <span class="mono">${address.slice(0, 6)}...${address.slice(-6)}</span>`,
-      `  ${buildVueSelfClosingSnippet('EgIcon', { name: 'eds-arrow-right' })}`,
-      `  <span class="mono">${address.slice(0, 5)}...${address.slice(-5)}</span>`,
-      '</div>',
-    ].join('\n');
+  const tags = buildCurrencySideTags('from', state);
+  const tagProps = hasAddressTags(tags.system, tags.custom) ? { ':tags': 'addressTags' } : {};
+  const rowTagProps: Record<string, unknown> = {};
+
+  if (state.showAddressRowTag !== false) {
+    rowTagProps['show-row-tag'] = true;
+    rowTagProps['row-tag-label'] = String(state.addressRowTagLabel ?? 'Tag');
+    rowTagProps['row-tag-system-type'] = String(state.addressRowTagSystemType ?? 'gray');
   }
 
-  if (mode === 'collection') {
-    return [
-      buildVueOpeningTag('EgAnchoredTooltip', { content: '3 linked addresses', placement: 'top' }),
-      '  <span class="mono">(3)</span>',
-      '</EgAnchoredTooltip>',
-    ].join('\n');
+  if (state.showAddressSecondaryText !== false) {
+    const secondaryText = String(state.addressSecondaryText ?? '').trim();
+    if (secondaryText) {
+      rowTagProps['secondary-text'] = secondaryText;
+    }
+  }
+
+  const lineProps: Record<string, unknown> = {
+    text: address,
+    'copy-on-row-hover': Boolean(state.copyOnRowHover ?? true),
+    'tooltip-trigger': String(state.tooltipTrigger ?? 'hover'),
+    ...tagProps,
+    ...rowTagProps,
+  };
+
+  if (state.showAddressMulti === true) {
+    const count = parseCurrencyAddressCount(state.addressMultiCount);
+    lineProps['address-count'] = count;
+    const from = buildCurrencySideAddressData('from', {
+      ...state,
+      fromAddressCount: String(count),
+    });
+    if (from.addresses.length > 0) {
+      lineProps[':addresses'] = 'addressList';
+    }
   }
 
   return [
-    buildVueOpeningTag('EgListFieldAddressLine', {
-      text: address,
-      'copy-on-row-hover': Boolean(state.copyOnRowHover ?? true),
-      'tooltip-trigger': String(state.tooltipTrigger ?? 'hover'),
-    }),
-    '  <!-- CryptoAddressSide + EgFlotationMenu：地址溢出 Item、可复制 -->',
+    buildVueOpeningTag('EgListFieldAddressLine', lineProps),
+    lineProps[':addresses'] ? '  <!-- addressList: string[] -->' : '',
+    tagProps[':tags'] ? '  <!-- addressTags: CryptoAddressSideTags -->' : '',
     '</EgListFieldAddressLine>',
-  ].join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function buildHashLikeUsageSnippet(
@@ -371,6 +452,33 @@ function buildHashLikeUsageSnippet(
   return primaryLine;
 }
 
+function buildAmountPrimaryRowSnippet(
+  state: Record<string, unknown>,
+  symbol: string,
+  defaultCryptoValue: string,
+): string {
+  const cryptoName = resolveCryptoNameFromSymbol(symbol) ?? 'eds-btc-bitcoin';
+  const amountText = formatGroupedNumber(String(state.cryptoValue ?? defaultCryptoValue));
+  const lines = ['<div class="list-field-amount-primary-row">'];
+
+  if (state.showCryptoIcon !== false) {
+    lines.push(
+      `  <EgCrypto name="${cryptoName}" fit class="list-field-amount-crypto-icon" label="${symbol}" />`,
+    );
+  }
+
+  lines.push(`  <span class="typography-body-medium tabular-nums">${amountText} ${symbol}</span>`);
+
+  if (state.showAmountTag !== false) {
+    const tagLabel = String(state.amountTagLabel ?? 'Tag');
+    const tagSystemType = String(state.amountTagSystemType ?? 'stroke-subtle');
+    lines.push(`  <EgTag size="sm" system-type="${tagSystemType}">${tagLabel}</EgTag>`);
+  }
+
+  lines.push('</div>');
+  return lines.join('\n');
+}
+
 function buildAmountUsageSnippet(state: Record<string, unknown>): string {
   const amountType = String(state.amountType ?? 'conversion');
   const showCountdown =
@@ -381,14 +489,16 @@ function buildAmountUsageSnippet(state: Record<string, unknown>): string {
   }
 
   if (amountType === 'crypto') {
-    const primary = `<span class="typography-body-medium">${String(state.cryptoValue ?? '66,666.6666')} BTC</span>`;
+    const symbol = String(state.cryptoSymbol ?? 'BTC');
+    const primary = buildAmountPrimaryRowSnippet(state, symbol, '66666.6666');
     if (!showCountdown) return primary;
     return ['<div class="list-field-amount">', primary, buildCountdownUsageSnippet(state), '</div>'].join(
       '\n',
     );
   }
 
-  const primary = `<span class="typography-body-medium">${String(state.cryptoValue ?? '12,500.000001')} USDT</span>`;
+  const symbol = String(state.cryptoSymbol ?? 'USDT');
+  const primary = buildAmountPrimaryRowSnippet(state, symbol, '12,500.000001');
   const fiat = `<span class="typography-footnote">≈ ${String(state.fiatValue ?? '$12,500.01')}</span>`;
 
   if (!showCountdown) {
@@ -487,6 +597,13 @@ function buildCountdownUsageSnippet(state: Record<string, unknown>): string {
   ].join('');
 }
 
+function buildGeneralStructureCryptoSnippet(state: Record<string, unknown>): string {
+  if (state.showCryptoIcon === false) return '';
+  const symbol = String(state.cryptoSymbol ?? 'BTC');
+  const cryptoName = resolveCryptoNameFromSymbol(symbol) ?? 'eds-btc-bitcoin';
+  return `<EgCrypto name="${cryptoName}" fit class="list-field-general-structure-crypto-icon" label="${symbol}" />`;
+}
+
 function buildGeneralStructureUsageSnippet(state: Record<string, unknown>): string {
   const hashLike = buildHashLikeUsageSnippet(
     'ListFieldGeneralStructure',
@@ -498,6 +615,8 @@ function buildGeneralStructureUsageSnippet(state: Record<string, unknown>): stri
     lineLayout === 'single' && Boolean(state.showDismissFeedback);
   const showCountdown = lineLayout === 'single' && Boolean(state.showCountdown);
 
+  const cryptoSnippet = buildGeneralStructureCryptoSnippet(state);
+
   const parts: string[] = [];
   if (state.showLeftTag) {
     parts.push(
@@ -508,7 +627,8 @@ function buildGeneralStructureUsageSnippet(state: Record<string, unknown>): stri
       }),
     );
   }
-  parts.push(hashLike);
+  const primaryParts = [cryptoSnippet, hashLike].filter(Boolean);
+  parts.push(primaryParts.join('\n'));
   if (state.showRightTag) {
     parts.push(
       buildTagSystemUsageSnippet({
@@ -652,7 +772,7 @@ const currencyConfig: ListFieldDocConfig = {
       rowColumns: 4,
       addressSide: 'from',
       visibleWhen: (state) => state.comboMode === 'single-address',
-      controls: sideAddressControls('from'),
+      controls: [],
     },
     {
       title: '发送方',
@@ -660,7 +780,7 @@ const currencyConfig: ListFieldDocConfig = {
       rowColumns: 4,
       addressSide: 'from',
       visibleWhen: (state) => state.comboMode === 'double-address',
-      controls: sideAddressControls('from'),
+      controls: [],
     },
     {
       title: '接收方',
@@ -668,7 +788,7 @@ const currencyConfig: ListFieldDocConfig = {
       rowColumns: 4,
       addressSide: 'to',
       visibleWhen: (state) => state.comboMode === 'double-address',
-      controls: sideAddressControls('to'),
+      controls: [],
     },
   ],
   propRows: [
@@ -732,16 +852,20 @@ const currencyConfig: ListFieldDocConfig = {
 
 const addressConfig: ListFieldDocConfig = {
   componentTag: 'ListFieldAddress',
-  importCode: LIST_FIELD_IMPORT,
+  importCode: `import { EgCryptoAddress, EgListFieldAddressLine } from '@eds/desktop-components';`,
   propsSectionId: 'list-field-address-props',
   customizeDefaults: {
     displayMode: 'single',
     address: SAMPLE_ADDRESS,
-    alias: 'Treasury',
-    collectionCount: '3',
+    symbol: 'ZEC',
     minWidth: '',
     copyOnRowHover: true,
     tooltipTrigger: 'hover',
+    addressTooltipTrigger: 'hover',
+    ...currencySideAddressDefaults('from', 'ZEC'),
+    ...currencySideAddressDefaults('to', 'ZEC'),
+    ...currencyTagCustomizeDefaults(),
+    ...addressSingleModeDefaults(),
   },
   customizeControls: [
     listFieldMinWidthControl(1),
@@ -757,35 +881,187 @@ const addressConfig: ListFieldDocConfig = {
       key: 'address',
       label: '地址 address',
       row: 2,
-      visibleWhen: (state) => state.displayMode !== 'collection',
+      visibleWhen: (state) => state.displayMode === 'single',
+    },
+    {
+      kind: 'boolean',
+      key: 'copyOnRowHover',
+      label: '复制',
+      row: 2,
+      visibleWhen: (state) => state.displayMode === 'single',
+    },
+    {
+      kind: 'select',
+      key: 'tooltipTrigger',
+      label: 'Tooltip 交互',
+      options: addressTooltipTriggerOptions,
+      row: 2,
+      visibleWhen: (state) => state.displayMode === 'single',
+    },
+    {
+      kind: 'boolean',
+      key: 'showAddressRowTag',
+      label: '显示行内 Tag',
+      row: 2,
+      visibleWhen: (state) => state.displayMode === 'single',
+    },
+    {
+      kind: 'boolean',
+      key: 'showAddressSecondaryText',
+      label: '显示副文本',
+      row: 2,
+      visibleWhen: (state) => state.displayMode === 'single',
     },
     {
       kind: 'text',
-      key: 'alias',
-      label: '别名 alias',
+      key: 'addressSecondaryText',
+      label: '副文本',
       row: 2,
-      visibleWhen: (state) => state.displayMode === 'alias',
+      visibleWhen: (state) =>
+        state.displayMode === 'single' && Boolean(state.showAddressSecondaryText),
     },
     {
-      kind: 'text',
-      key: 'collectionCount',
-      label: '数量 collectionCount',
+      kind: 'boolean',
+      key: 'showAddressMulti',
+      label: '显示多地址',
       row: 2,
-      visibleWhen: (state) => state.displayMode === 'collection',
+      visibleWhen: (state) => state.displayMode === 'single',
+    },
+    {
+      kind: 'select',
+      key: 'addressMultiCount',
+      label: '地址数 N',
+      options: countSelectOptions(100, 2),
+      row: 2,
+      visibleWhen: (state) =>
+        state.displayMode === 'single' && Boolean(state.showAddressMulti),
+    },
+    {
+      kind: 'select',
+      key: 'addressTooltipTrigger',
+      label: 'Tooltip 交互',
+      options: addressTooltipTriggerOptions,
+      row: 2,
+      visibleWhen: (state) => state.displayMode === 'double',
+    },
+  ],
+  customizePanels: [
+    {
+      title: 'EgTag',
+      controls: addressRowTagCustomizeControls,
+      visibleWhen: (state) =>
+        state.displayMode === 'single' && Boolean(state.showAddressRowTag),
+    },
+    {
+      title: '标签',
+      sequential: true,
+      rowColumns: 4,
+      addressSide: 'from',
+      addressTagOnly: true,
+      visibleWhen: (state) => state.displayMode === 'single',
+      controls: [],
+    },
+    {
+      title: '发送方',
+      sequential: true,
+      rowColumns: 4,
+      addressSide: 'from',
+      visibleWhen: (state) => state.displayMode === 'double',
+      controls: [],
+    },
+    {
+      title: '接收方',
+      sequential: true,
+      rowColumns: 4,
+      addressSide: 'to',
+      visibleWhen: (state) => state.displayMode === 'double',
+      controls: [],
     },
   ],
   propRows: [
     sceneProp(
       'displayMode',
-      "'single' | 'alias' | 'double' | 'collection'",
+      "'single' | 'double'",
       "'single'",
-      '单地址中间省略、别名 Tag、双地址、地址合集 (N)。',
+      '单地址用 EgListFieldAddressLine（行内 EgTag + 地址行 (N) + 下方 Wallet Name / CryptoAddressTags）；双地址用 EgCryptoAddress + 发送方/接收方定制。',
     ),
-    sceneProp('address', 'string', '-', '完整链上地址；溢出时中间省略 + Tooltip。'),
-    sceneProp('alias', 'string', '-', '别名，配合 System Tag 展示。'),
-    sceneProp('collectionCount', 'number', '-', '合集数量，展示为 (N) 并 Tooltip 列出。'),
+    sceneProp('address', 'string', '-', '单地址模式完整链上地址；溢出时中间省略 + Tooltip。'),
+    sceneProp(
+      'showAddressRowTag',
+      'boolean',
+      'true',
+      '单地址：地址行尾展示 EgTag（spacing-1，固定 Sm）。',
+    ),
+    sceneProp(
+      'addressRowTagLabel',
+      'string',
+      "'Tag'",
+      'Customize「EgTag」嵌套 — 行内 Tag 文案。',
+    ),
+    sceneProp(
+      'addressRowTagSystemType',
+      'TagSystemType',
+      "'gray'",
+      'Customize「EgTag」嵌套 — 行内 Tag 类型。',
+    ),
+    sceneProp(
+      'showAddressSecondaryText',
+      'boolean',
+      'true',
+      '单地址：副文本 + CryptoAddressTags 同一行（副文本在前，spacing-1）。',
+    ),
+    sceneProp(
+      'addressSecondaryText',
+      'string',
+      "'Wallet Name'",
+      '单地址副文本文案（meta 行首位，如钱包名称）。',
+    ),
+    sceneProp(
+      'showAddressMulti',
+      'boolean',
+      'false',
+      '单地址：地址行尾展示多地址计数 (N)；与 EgCryptoAddress 一致，N>2 时显示。',
+    ),
+    sceneProp(
+      'addressMultiCount',
+      'number',
+      '3',
+      'showAddressMulti 为 true 时的地址数 N（≥2）。',
+    ),
+    sceneProp(
+      'addressCount',
+      'number',
+      '1',
+      'EgListFieldAddressLine：地址行内 (N) 计数；>2 时展示。',
+    ),
+    sceneProp(
+      'addresses',
+      'string[]',
+      '-',
+      'EgListFieldAddressLine：多地址 Menu 各行完整地址列表。',
+    ),
+    sceneProp(
+      'tags',
+      'CryptoAddressSideTags',
+      '-',
+      '单地址模式：地址行下方 Tag（Custom / +N）；由标签定制面板配置。',
+    ),
+    sceneProp('fromAddress', 'string', '-', '发送方首条；有别名时由 fromAlias 替代展示。'),
+    sceneProp('fromAlias', 'string', '-', '发送方地址别名。'),
+    sceneProp('fromAddressCount', 'number', '1', '发送方地址数（1–100）；>2 时展示 (N) 并启用 Tooltip。'),
+    sceneProp('fromAddresses', 'string[]', '-', '发送方完整地址列表（Tooltip 内容）。'),
+    sceneProp('toAddress', 'string', '-', '接收方首条；双地址时展示。'),
+    sceneProp('toAlias', 'string', '-', '接收方地址别名。'),
+    sceneProp('toAddressCount', 'number', '1', '接收方地址数（1–100）；双地址时生效。'),
+    sceneProp('toAddresses', 'string[]', '-', '接收方完整地址列表。'),
     listFieldMinWidthProp,
-    sceneProp('copyOnRowHover', 'boolean', 'true', '悬浮 Data List 行时显示复制。'),
+    sceneProp('copyOnRowHover', 'boolean', 'true', '单地址：悬浮 Data List 行时显示复制。'),
+    sceneProp(
+      'addressTooltipTrigger',
+      "'hover' | 'focus'",
+      "'hover'",
+      '非单地址：CryptoAddress Tooltip 交互。',
+    ),
   ],
   buildUsageSnippet: buildAddressUsageSnippet,
 };
@@ -923,6 +1199,8 @@ const generalStructureConfig: ListFieldDocConfig = {
     rightLabel: tagSystemCustomizeDefaults.label,
     leftSystemType: 'stroke-subtle',
     leftLabel: tagSystemCustomizeDefaults.label,
+    cryptoSymbol: 'BTC',
+    showCryptoIcon: true,
   },
   customizeControls: buildHashLikeCustomizeControls(
     '主文本 value',
@@ -948,6 +1226,7 @@ const generalStructureConfig: ListFieldDocConfig = {
         },
       ],
       afterCopy: [
+        { kind: 'boolean', key: 'showCryptoIcon', label: '显示符号', row: 1 },
         { kind: 'boolean', key: 'showRightTag', label: '显示右侧Tag', row: 1 },
         { kind: 'boolean', key: 'showLeftTag', label: '显示左侧Tag', row: 1 },
       ],
@@ -979,6 +1258,12 @@ const generalStructureConfig: ListFieldDocConfig = {
   ],
   propRows: [
     sceneProp('value', 'string', '-', '主文本；单行时唯一展示值，双行时为 Combo Title 首行。'),
+    sceneProp(
+      'showCryptoIcon',
+      'boolean',
+      'true',
+      '主文本前是否展示符号图标（EgCrypto，`--avatar-xs`）；符号由业务数据提供。',
+    ),
     sceneProp(
       'secondaryValue',
       'string',
@@ -1074,6 +1359,11 @@ const amountConfig: ListFieldDocConfig = {
     amountType: 'conversion',
     fiatValue: '$12,500.01',
     cryptoValue: '12,500.000001',
+    cryptoSymbol: 'USDT',
+    showCryptoIcon: true,
+    showAmountTag: true,
+    amountTagSystemType: 'stroke-subtle',
+    amountTagLabel: 'Tag',
     showCountdown: false,
     countdownMinutes: '30',
     countdownSeconds: '0',
@@ -1103,6 +1393,27 @@ const amountConfig: ListFieldDocConfig = {
       visibleWhen: (state) => state.amountType !== 'fiat',
     },
     {
+      kind: 'text',
+      key: 'cryptoSymbol',
+      label: '币种 cryptoSymbol',
+      row: 2,
+      visibleWhen: (state) => state.amountType !== 'fiat',
+    },
+    {
+      kind: 'boolean',
+      key: 'showCryptoIcon',
+      label: '显示币种图标',
+      row: 2,
+      visibleWhen: (state) => state.amountType !== 'fiat',
+    },
+    {
+      kind: 'boolean',
+      key: 'showAmountTag',
+      label: '显示 Tag',
+      row: 2,
+      visibleWhen: (state) => state.amountType !== 'fiat',
+    },
+    {
       kind: 'boolean',
       key: 'showCountdown',
       label: '显示倒计时',
@@ -1111,6 +1422,12 @@ const amountConfig: ListFieldDocConfig = {
     },
   ],
   customizePanels: [
+    {
+      title: 'EgTag',
+      controls: amountTagCustomizeControls,
+      visibleWhen: (state) =>
+        state.amountType !== 'fiat' && Boolean(state.showAmountTag),
+    },
     {
       title: '倒计时',
       controls: countdownTimeCustomizeControls,
@@ -1128,6 +1445,21 @@ const amountConfig: ListFieldDocConfig = {
     sceneProp('groupSeparator', 'boolean', 'true', '千分位分隔符。'),
     sceneProp('fiatPrecision', 'number', '2', '法币小数精度。'),
     sceneProp('conversionLine', 'string', '-', '折合行：`数量 币种 ≈ 折合法币`。'),
+    sceneProp('cryptoSymbol', 'string', "'USDT'", '加密货币 / 折合主行币种符号；驱动 EgCrypto 图标。'),
+    sceneProp('showCryptoIcon', 'boolean', 'true', '主行是否展示 EgCrypto 图标（`--avatar-xs`）。'),
+    sceneProp('showAmountTag', 'boolean', 'true', '主行是否展示 EgTag（spacing-1，固定 Sm）。'),
+    sceneProp(
+      'amountTagLabel',
+      'string',
+      "'Tag'",
+      'Customize「EgTag」嵌套 — 主行 Tag 文案。',
+    ),
+    sceneProp(
+      'amountTagSystemType',
+      'TagSystemType',
+      "'stroke-subtle'",
+      'Customize「EgTag」嵌套 — 主行 Tag 类型。',
+    ),
     sceneProp(
       'showCountdown',
       'boolean',

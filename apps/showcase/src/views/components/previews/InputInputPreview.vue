@@ -12,6 +12,15 @@ import {
   inputImportCode,
 } from './inputDocCustomize';
 import {
+  inputEventHostClass,
+  inputEventSnapshotHostClass,
+  inputSnapshotDisabled,
+  inputSnapshotModelValue,
+  inputSnapshotReadonly,
+  isInputInteractiveEvent,
+  readInputDocEvent,
+} from './inputDocPreview';
+import {
   buildWidthModeUsageSnippet,
   previewFixedWidthStyle,
 } from './inputPreviewWidth';
@@ -21,6 +30,7 @@ const heroValue = ref('');
 const inputCustomize = reactive({
   ...inputCustomizeDefaults,
   type: inputCustomizeDefaults.type as 'standard' | 'amount',
+  interaction: inputCustomizeDefaults.interaction as string,
   size: inputCustomizeDefaults.size as 'lg' | 'md' | 'sm',
   widthMode: inputCustomizeDefaults.widthMode as 'fixed' | 'full',
 });
@@ -33,7 +43,7 @@ const inputUsageSnippet = computed(() =>
   buildWidthModeUsageSnippet(
     'EgInput',
     inputCustomize,
-    { defaults: inputCustomizeDefaults, vModel: 'value' },
+    { defaults: inputCustomizeDefaults, vModel: 'value', omitKeys: ['interaction'] },
     buildVueSelfClosingSnippet,
   ),
 );
@@ -47,6 +57,48 @@ const inputPreviewUnit = computed(() => {
   if (unit) return unit;
   return inputCustomize.type === 'amount' ? 'ETH' : undefined;
 });
+
+const isInteractive = computed(() => isInputInteractiveEvent(inputCustomize.interaction));
+
+const docEvent = computed(() => readInputDocEvent(inputCustomize.interaction));
+
+const eventHostClass = computed(() => inputEventHostClass(inputCustomize.interaction));
+
+const snapshotHostClass = computed(() =>
+  inputEventSnapshotHostClass(inputCustomize.interaction),
+);
+
+const previewDisabled = computed(() => {
+  if (isInteractive.value) {
+    return Boolean(inputCustomize.disabled);
+  }
+  return inputSnapshotDisabled(docEvent.value);
+});
+
+const previewReadonly = computed(() => {
+  if (isInteractive.value) {
+    return Boolean(inputCustomize.readonly);
+  }
+  return inputSnapshotReadonly(docEvent.value);
+});
+
+const snapshotModelValue = computed(() =>
+  inputSnapshotModelValue(docEvent.value, String(inputCustomize.placeholder)),
+);
+
+const sharedInputProps = computed(() => ({
+  style: inputPreviewStyle.value,
+  type: inputCustomize.type as 'standard' | 'amount',
+  size: inputCustomize.size as 'lg' | 'md' | 'sm',
+  widthMode: inputCustomize.widthMode as 'fixed' | 'full',
+  placeholder: String(inputCustomize.placeholder),
+  disabled: previewDisabled.value,
+  readonly: previewReadonly.value,
+  unit: inputPreviewUnit.value,
+  clearable: Boolean(inputCustomize.clearable),
+  showMax: Boolean(inputCustomize.showMax),
+  maxLabel: String(inputCustomize.maxLabel),
+}));
 </script>
 
 <template>
@@ -67,36 +119,24 @@ const inputPreviewUnit = computed(() => {
       @reset-preview="heroValue = ''"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
+        <div
+          class="desktopTokens"
+          :class="[
+            docStyles.previewInputHost,
+            eventHostClass,
+            snapshotHostClass,
+          ]"
+        >
           <EgInput
-            v-if="!inputCustomize.disabled"
+            v-if="isInteractive"
             v-model="heroValue"
-            :style="inputPreviewStyle"
-            :type="inputCustomize.type as 'standard' | 'amount'"
-            :size="inputCustomize.size as 'lg' | 'md' | 'sm'"
-            :width-mode="inputCustomize.widthMode as 'fixed' | 'full'"
-            :placeholder="String(inputCustomize.placeholder)"
-            :readonly="Boolean(inputCustomize.readonly)"
-            :unit="inputPreviewUnit"
-            :clearable="Boolean(inputCustomize.clearable)"
-            :show-max="Boolean(inputCustomize.showMax)"
-            :max-label="String(inputCustomize.maxLabel)"
+            v-bind="sharedInputProps"
             @max="onInputMax"
           />
           <EgInput
             v-else
-            model-value="请输入"
-            :style="inputPreviewStyle"
-            :type="inputCustomize.type as 'standard' | 'amount'"
-            :size="inputCustomize.size as 'lg' | 'md' | 'sm'"
-            :width-mode="inputCustomize.widthMode as 'fixed' | 'full'"
-            :placeholder="String(inputCustomize.placeholder)"
-            disabled
-            :readonly="Boolean(inputCustomize.readonly)"
-            :unit="inputPreviewUnit"
-            :clearable="Boolean(inputCustomize.clearable)"
-            :show-max="Boolean(inputCustomize.showMax)"
-            :max-label="String(inputCustomize.maxLabel)"
+            :model-value="snapshotModelValue"
+            v-bind="sharedInputProps"
           />
         </div>
       </template>

@@ -6,9 +6,10 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from '@/views/components/previews/InputPreview.module.css';
-import { getListFieldDocConfig } from './listFieldDocCustomize';
+import { getListFieldDocConfig, type ListFieldCustomizePanel } from './listFieldDocCustomize';
 import {
   buildCurrencySideAddressControls,
+  buildCurrencyAddressTagOnlyControls,
   syncCurrencyAddressesForSymbol,
 } from './listFieldCurrencyAddressCustomize';
 import { syncCurrencyMinWidthForComboMode } from './listFieldCurrencyShared';
@@ -37,7 +38,18 @@ watch(
 );
 
 watch(
-  () => (props.slug === 'list-field-currency' ? String(customize.symbol ?? 'ZEC') : ''),
+  () => {
+    if (props.slug === 'list-field-currency') {
+      return String(customize.symbol ?? 'ZEC');
+    }
+    if (
+      props.slug === 'list-field-address' &&
+      String(customize.displayMode ?? 'single') === 'double'
+    ) {
+      return String(customize.symbol ?? 'ZEC');
+    }
+    return '';
+  },
   (symbol) => {
     if (!symbol) return;
     syncCurrencyAddressesForSymbol(customize, symbol);
@@ -62,6 +74,10 @@ watch(
   () => {
     if (props.slug === 'list-field-currency') {
       syncCurrencyTagCustomize(customize);
+      return;
+    }
+    if (props.slug === 'list-field-address') {
+      syncCurrencyTagCustomize(customize);
     }
   },
   { immediate: true, deep: true },
@@ -71,6 +87,16 @@ const usageSnippet = computed(() => docConfig.value.buildUsageSnippet(customize)
 
 function addressPanelControls(side: 'from' | 'to') {
   return buildCurrencySideAddressControls(side, customize);
+}
+
+function customizePanelControls(panel: ListFieldCustomizePanel) {
+  if (panel.addressTagOnly && panel.addressSide) {
+    return buildCurrencyAddressTagOnlyControls(panel.addressSide, 1, customize);
+  }
+  if (panel.addressSide) {
+    return addressPanelControls(panel.addressSide);
+  }
+  return panel.controls;
 }
 </script>
 
@@ -107,7 +133,7 @@ function addressPanelControls(side: 'from' | 'to') {
             :sequential="panel.sequential"
             :row-columns="panel.rowColumns"
             :title="panel.title"
-            :controls="panel.addressSide ? addressPanelControls(panel.addressSide) : panel.controls"
+            :controls="customizePanelControls(panel)"
           />
         </div>
       </template>

@@ -19,19 +19,19 @@ import {
   DEFAULT_POPOVER_PANEL,
   getPopoverShellMetrics,
   POPOVER_PANEL_H,
-  POPOVER_PANEL_MIN_H,
-  POPOVER_PANEL_MIN_W,
   POPOVER_PANEL_W,
+  resolvePopoverPanelMins,
   type PopoverAlign,
   type PopoverPanelDimensions,
   type PopoverPlacement,
+  type PopoverSize,
 } from './popoverShape';
 import '../../styles/overlayGlassMicroFloat.module.css';
 import styles from './Popover.module.css';
 
 export type PopoverWidthMode = 'fixed' | 'adaptive';
 export type PopoverHeightMode = 'fixed' | 'adaptive';
-export type { PopoverAlign, PopoverPlacement };
+export type { PopoverAlign, PopoverPlacement, PopoverSize };
 
 const props = withDefaults(
   defineProps<{
@@ -64,6 +64,8 @@ const props = withDefaults(
     contentPaddingTop?: number;
     contentPaddingInline?: number;
     contentPaddingBottom?: number;
+    /** default 常规面板；compact 单行短文案，adaptive 随内容收缩。 */
+    size?: PopoverSize;
   }>(),
   {
     placement: 'bottom',
@@ -74,6 +76,7 @@ const props = withDefaults(
     topTool: false,
     topToolTitle: 'Title',
     topToolClosable: true,
+    size: 'default',
   },
 );
 
@@ -89,9 +92,10 @@ const shellRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const contentSlotRef = ref<HTMLElement | null>(null);
 const contentSlotOverflow = ref(false);
+const panelMins = computed(() => resolvePopoverPanelMins(props.size));
 const measuredPanel = ref<PopoverPanelDimensions>({
-  panelW: POPOVER_PANEL_MIN_W,
-  panelH: POPOVER_PANEL_MIN_H,
+  panelW: resolvePopoverPanelMins(props.size).panelMinW,
+  panelH: resolvePopoverPanelMins(props.size).panelMinH,
 });
 
 const motionActive = computed(() => {
@@ -136,11 +140,16 @@ const panelDimensions = computed((): PopoverPanelDimensions => {
 });
 
 const shellMetrics = computed(() =>
-  getPopoverShellMetrics(props.placement, panelDimensions.value),
+  getPopoverShellMetrics(props.placement, panelDimensions.value, panelMins.value),
 );
 
 const outlinePath = computed(() =>
-  buildPopoverOutlinePath(props.placement, props.align, panelDimensions.value),
+  buildPopoverOutlinePath(
+    props.placement,
+    props.align,
+    panelDimensions.value,
+    panelMins.value,
+  ),
 );
 
 const clipPathStyle = computed(() => {
@@ -207,7 +216,7 @@ const contentBodyStyle = computed((): CSSProperties => {
   if (!usesAdaptiveWidth.value) {
     style.width = `${resolvedFixedWidth.value}px`;
   } else {
-    style.minWidth = `${POPOVER_PANEL_MIN_W}px`;
+    style.minWidth = `${panelMins.value.panelMinW}px`;
     if (props.maxWidth != null) {
       style.maxWidth = `${props.maxWidth}px`;
     }
@@ -216,7 +225,7 @@ const contentBodyStyle = computed((): CSSProperties => {
   if (!usesAdaptiveHeight.value) {
     style.height = `${resolvedFixedHeight.value}px`;
   } else {
-    style.minHeight = `${POPOVER_PANEL_MIN_H}px`;
+    style.minHeight = `${panelMins.value.panelMinH}px`;
     if (props.maxHeight != null) {
       style.maxHeight = `${props.maxHeight}px`;
     }
@@ -294,14 +303,19 @@ function bindSlotOverflowObserver() {
 
 function readPanelSizeFromShell(shell: HTMLElement): PopoverPanelDimensions {
   const rect = shell.getBoundingClientRect();
-  const inset = getPopoverShellMetrics(props.placement, DEFAULT_POPOVER_PANEL).contentInset;
+  const inset = getPopoverShellMetrics(
+    props.placement,
+    DEFAULT_POPOVER_PANEL,
+    panelMins.value,
+  ).contentInset;
+  const { panelMinW, panelMinH } = panelMins.value;
 
   return {
     panelW: usesAdaptiveWidth.value
-      ? Math.max(Math.ceil(rect.width - inset.left - inset.right), POPOVER_PANEL_MIN_W)
+      ? Math.max(Math.ceil(rect.width - inset.left - inset.right), panelMinW)
       : resolvedFixedWidth.value,
     panelH: usesAdaptiveHeight.value
-      ? Math.max(Math.ceil(rect.height - inset.top - inset.bottom), POPOVER_PANEL_MIN_H)
+      ? Math.max(Math.ceil(rect.height - inset.top - inset.bottom), panelMinH)
       : resolvedFixedHeight.value,
   };
 }
@@ -387,8 +401,12 @@ watch(
 );
 
 watch(
-  () => [props.widthMode, props.heightMode, props.width, props.height, props.maxWidth, props.maxHeight],
+  () => [props.widthMode, props.heightMode, props.width, props.height, props.maxWidth, props.maxHeight, props.size],
   () => {
+    measuredPanel.value = {
+      panelW: panelMins.value.panelMinW,
+      panelH: panelMins.value.panelMinH,
+    };
     nextTick(() => {
       bindContentObserver();
       bindSlotOverflowObserver();
@@ -482,17 +500,17 @@ onBeforeUnmount(() => {
             <p
               :class="[
                 styles.topToolTitle,
-                topToolClosable && styles.topToolTitleWithClose,
+                props.topToolClosable && styles.topToolTitleWithClose,
               ]"
             >
-              {{ topToolTitle }}
+              {{ props.topToolTitle }}
             </p>
-            <div v-if="topToolClosable" :class="styles.topToolClose">
+            <div v-if="props.topToolClosable" :class="styles.topToolClose">
               <EgIconButton
                 shape="square"
                 size="sm"
                 label="关闭"
-                motion="asym"
+                motion="ease"
                 @click="emit('topToolClose')"
               >
                 <EgIcon name="eds-close-circle-fill" fit />
