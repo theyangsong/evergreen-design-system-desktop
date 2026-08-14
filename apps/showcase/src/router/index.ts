@@ -19,7 +19,7 @@ export const router = createRouter({
       path: '/',
       component: ShowcaseLayout,
       children: [
-        { path: '', redirect: '/components' },
+        { path: '', redirect: '/tokens' },
         { path: 'tokens', name: 'tokens', component: TokensView },
         {
           path: 'components',
