@@ -132,6 +132,7 @@ function scopeDesktopTokens() {
 }
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [vue(), watchDesktopTokens()],
   resolve: {
     alias: {
