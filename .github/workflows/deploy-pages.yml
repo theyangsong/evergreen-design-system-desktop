@@ -57,6 +57,14 @@ jobs:
       - name: Build Showcase
         run: pnpm build:tokens && pnpm build:components && pnpm --filter @eds/desktop-showcase build:pages
 
+      - name: Verify Showcase artifact
+        run: |
+          test -f apps/showcase/dist/index.html
+          test -f apps/showcase/dist/404.html
+          test ! -d apps/storybook/storybook-static || test ! -f apps/storybook/storybook-static/index.html
+          grep -q "Desktop ShowCase" apps/showcase/dist/index.html
+          ! grep -qi "storybook" apps/showcase/dist/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

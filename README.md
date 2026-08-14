@@ -1,6 +1,8 @@
 # EverGreen Design System (Desktop)
 
-Vue 3 design system with CSS Modules, Figma-synced design tokens, and Storybook documentation.
+Vue 3 design system with CSS Modules, Figma-synced design tokens, and Showcase documentation.
+
+**Live Showcase:** https://theyangsong.github.io/evergreen-design-system-desktop/
 
 ## Requirements
 
