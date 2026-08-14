@@ -1,4 +1,4 @@
-import { getProcessedIcon } from '@eds/desktop-components';
+import { getProcessedIcon } from '../../atoms/icons';
 import { formatGroupedAmountText, formatGroupedTemplateValue } from '../../utils/formatGroupedAmountText';
 
 const TRON_RESOURCES_ICON_DESIGN = 'eds-energy-fill';

@@ -2,12 +2,12 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import {
   EgButton,
-  EgComboInputItem,
-  EgIcon,
-  EgIconButton,
-  EgInput,
-  EgTabs,
-} from '@eds/desktop-components';
+} from '../button';
+import { EgComboInputItem } from '../combo';
+import { EgIcon } from '../../atoms/icons';
+import { EgIconButton } from '../icon-button';
+import { EgInput } from '../input';
+import { EgTabs } from '../tab';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import styles from './MinerFeeCustomPanel.module.css';
 import {

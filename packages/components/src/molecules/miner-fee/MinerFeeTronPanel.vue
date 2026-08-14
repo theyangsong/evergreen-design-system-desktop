@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import {
-  EgComboActionPopupWindow,
-  EgDivider,
-  EgFormSubmission,
-  EgIcon,
-  EgTag,
-} from '@eds/desktop-components';
+import { EgComboActionPopupWindow } from '../combo';
+import { EgDivider } from '../../atoms/divider';
+import { EgFormSubmission } from '../feedback';
+import { EgIcon } from '../../atoms/icons';
+import { EgTag } from '../tag';
 import { computed } from 'vue';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import type { MinerFeeConfirmPayload } from './minerFeeTypes';

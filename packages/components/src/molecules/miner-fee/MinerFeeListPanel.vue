@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import {
-  EgComboActionPopupWindow,
-  EgDivider,
-  EgIcon,
-  EgLink,
-} from '@eds/desktop-components';
+import { EgComboActionPopupWindow } from '../combo';
+import { EgDivider } from '../../atoms/divider';
+import { EgIcon } from '../../atoms/icons';
+import { EgLink } from '../link';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import type { MinerFeeCustomDraft, MinerFeeCustomSaved } from './minerFeeCustomTypes';
 import MinerFeeCustomAnchoredPopover from './MinerFeeCustomAnchoredPopover.vue';
