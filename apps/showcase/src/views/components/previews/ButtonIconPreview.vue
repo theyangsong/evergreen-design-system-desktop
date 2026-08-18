@@ -36,7 +36,7 @@ const iconButtonProps = computed(() => ({
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="iconButtonCustomize"
-      title="iCons Container Simple"
+      title="IconContainer"
       :show-doc-title="false"
       component-tag="EgIconButton"
       :import-code="iconButtonImportCode"

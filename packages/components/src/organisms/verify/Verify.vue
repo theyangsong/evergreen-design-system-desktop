@@ -479,7 +479,7 @@ watch(
       </EgLink>
     </div>
     <div v-else-if="showPasswordError" :class="styles.passwordErrorRow">
-      <EgFormSubmission type="danger" :text="passwordErrorText" />
+      <EgFormSubmission type="danger" :text="passwordErrorText" :show-link="false" />
     </div>
   </div>
 

@@ -100,7 +100,7 @@ export const showcasePaginationKindLabels = {
 } as const;
 
 export const showcaseInputTypeLabels = {
-  standard: tokenLabel('标准', 'standard'),
+  standard: tokenLabel('文本', 'text'),
   amount: tokenLabel('金额', 'amount'),
 } as const;
 
@@ -317,7 +317,7 @@ export const showcaseLayoutTypeLabels = {
 
 export const showcasePopupUsesLabels = {
   detail: tokenLabel('详情', 'detail'),
-  reminder: tokenLabel('提醒', 'reminder'),
+  dialog: tokenLabel('对话框', 'dialog'),
   verify: tokenLabel('验证', 'verify'),
   custom: tokenLabel('自定义', 'custom'),
 } as const;
@@ -332,10 +332,16 @@ export const showcaseSearchScenarioLabels = {
   'verify-input': tokenLabel('验证输入', 'verify-input'),
 } as const;
 
-export const showcaseReminderTypeLabels = {
-  info: tokenLabel('信息', 'info'),
-  echo: tokenLabel('扩展', 'echo'),
+export const showcaseDialogTypeLabels = {
+  symbol: tokenLabel('符号', 'symbol'),
+  compose: tokenLabel('组合', 'compose'),
+  standard: tokenLabel('标准', 'standard'),
+  /** @deprecated Use compose */
+  slot: tokenLabel('组合', 'compose'),
 } as const;
+
+/** @deprecated Use showcaseDialogTypeLabels */
+export const showcaseReminderTypeLabels = showcaseDialogTypeLabels;
 
 export const showcasePaginerDataVolumeLabels = {
   few: tokenLabel('少量', 'few'),

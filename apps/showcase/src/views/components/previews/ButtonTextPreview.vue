@@ -28,7 +28,7 @@ const previewHostClass = computed(() =>
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="buttonCustomize"
-      title="Button"
+      title="Standard"
       :show-doc-title="false"
       component-tag="EgButton"
       :import-code="buttonTextImportCode"

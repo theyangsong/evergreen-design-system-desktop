@@ -5,6 +5,7 @@ export {
   findCatalogChildPage,
   findCatalogItem,
   getCatalogChildAnchorIds,
+  getCatalogPageAnchorIds,
   getCatalogChildLabel,
   getCatalogChildPageSlug,
   getComponentRouteSlug,

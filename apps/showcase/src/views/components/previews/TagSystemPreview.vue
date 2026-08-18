@@ -31,7 +31,7 @@ function selectSystemType(value: string) {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="System"
+      title="Standard"
       :show-doc-title="false"
       component-tag="EgTag"
       :import-code="tagImportCode"

@@ -3,11 +3,13 @@ import { computed, inject, ref, useSlots, type ComputedRef } from 'vue';
 import { EgButton, EgSegmentedControl, rescanCornerSmoothing } from '@eds/desktop-components';
 import { buildComponentAiPrompt, buildVueSelfClosingSnippet } from './buildUsageSnippet';
 import CustomizePanel from './CustomizePanel.vue';
+import ExtensionDeliveryMatrix from './ExtensionDeliveryMatrix.vue';
 import PropsDocTables from './PropsDocTables.vue';
 import shared from '@/views/shared/showcase.module.css';
 import styles from './ComponentDocLayout.module.css';
 import type { DocCustomizeControl, DocPropRow } from './types';
 import { filterDocCustomizeControls } from './types';
+import type { ComponentDocTier, ExtensionLayer } from './extensionDelivery';
 const props = withDefaults(
   defineProps<{
     title: string;
@@ -36,6 +38,10 @@ const props = withDefaults(
     customizeRowColumns?: number;
     /** When false, parent supplies catalog group label (e.g. previewGroupLabel). */
     showDocTitle?: boolean;
+    /** 组件文档层级，用于扩展交付矩阵最低要求。 */
+    docTier?: ComponentDocTier;
+    /** 覆盖自动推断的扩展层交付状态。 */
+    extensionLayers?: Partial<Record<ExtensionLayer, boolean>>;
   }>(),
   {
     customizeDefaults: () => ({}),
@@ -82,6 +88,29 @@ const showCustomizePanel = computed(
       Boolean(slots['customize-extra']) ||
       Boolean(slots['customize-after'])),
 );
+
+const resolvedExtensionLayers = computed(() => {
+  const controls = docCustomizeControls.value;
+  const hasVariantControl = controls.some(
+    (control) =>
+      control.key === 'type' ||
+      control.key === 'variant' ||
+      control.key === 'kind' ||
+      control.key === 'triggerKind',
+  );
+
+  return {
+    variants: props.extensionLayers?.variants ?? hasVariantControl,
+    props: props.extensionLayers?.props ?? props.propRows.length > 0,
+    slots: props.extensionLayers?.slots ?? (props.slotRows?.length ?? 0) > 0,
+    composition:
+      props.extensionLayers?.composition ??
+      (Boolean(slots['customize-extra']) || Boolean(slots['customize-after'])),
+    scenarios:
+      props.extensionLayers?.scenarios ??
+      controls.some((control) => control.key === 'scenario'),
+  };
+});
 
 type DocViewMode = 'preview' | 'code';
 
@@ -230,6 +259,12 @@ async function copyAiPrompt() {
     </CustomizePanel>
 
     <slot name="customize-after" />
+
+    <ExtensionDeliveryMatrix
+      v-if="docTier"
+      :tier="docTier"
+      :layers="resolvedExtensionLayers"
+    />
 
     <section
       v-if="showProps"

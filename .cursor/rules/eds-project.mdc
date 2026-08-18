@@ -7,7 +7,7 @@ alwaysApply: false
 # EDS Desktop — 项目约定
 
 > 专项规则：`display-p3-color-usage.mdc`（颜色）、`corner-smoothing.mdc`（圆角）、`stroke-svg-scaling.mdc`（SVG 描边）、`top&botton-mask.mdc`（滚动顶底毛玻璃遮罩）。
-> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR/native reset · **§6** 滚动边界 · **§7** Organism（含 Popup/Popover/Scens/Detail/Reminder 边界）· **§8** 同步。
+> 索引：**§0** 执行范围 · **§1** token · **§2–4** Showcase 命名/文案/演示数据 · **§5** 库作用域/HMR/native reset · **§6** 滚动边界 · **§7** Organism（含 Popup/Popover/Scenes/Detail/Dialog 边界）· **§8** 同步。**EverGreen IA** 见 `evergreen-ia.mdc`；组件文档五层扩展见 `component-doc-extension.mdc`。
 
 ## 0. Agent 执行范围
 
@@ -73,9 +73,20 @@ alwaysApply: false
 - style：`solid`|`outline`|`text`；tone/size/status 与组件 API literal 一致。
 - 例：`button_solid_brand_lg_disabled`
 
-## 3. Showcase 多子类锚点
+## 3. Showcase 目录（EverGreen IA）
 
-- `catalog.ts` `children[].id` = 预览页根 `id`（如 `button-text`）；内层 section 二级锚点。
+**真源：`evergreen-ia.mdc`**（五根一级目录、Variant≠Scene、Flotation 例外、`catalog.ts` 约定）。
+
+Showcase 顶栏：**Tokens · Animations · Components · Patterns · Workflows**。
+
+- **Components** 侧栏：Atoms / Molecules / Organisms（Navigation·Data·Verify 分组）/ Templates；分子/有机体默认 **本体 + `navSection: Scenes` + scene 子路由**。
+- **Patterns**（`/patterns`）：原 `/scenes` list-field、Detail 等；**≠** 组件族侧栏 Scenes。
+- **Animations**（`/animations`）：成品场景动画；**≠** Motion token。
+- **slug / `Eg*` 命名不改**；仅 catalog 与侧栏 IA 对齐 EverGreen。
+
+### 3.1 锚点与预览页
+
+- `catalog.ts` `children[].id` = 预览页根 `id`（如 `button-text`）；内层 section 为二级锚点。
 - 新增子类：**先 catalog + 根 id，再 section**。
 - 同族 **一条整合 import**；第一个 child 无 `previewGroupLabel`，第二个起分割线 + 标题（`getCatalogChildLabel`）。
 
@@ -139,14 +150,14 @@ Showcase PostCSS 把 `global.css` 的 `button { … }` 提升为 `.desktopTokens
 
 ```text
 EgPopup 外壳
-├── 遮罩（Reminder/Verify：仅 .backdrop；Detail：.stageScrim + animated scrim）
+├── 遮罩（Dialog/Verify：仅 .backdrop；Detail：.stageScrim + animated scrim）
 ├── 点击空白关闭 / Esc 关闭
 ├── 容器进出场（.motion-layout + shellKeepMounted / shellMotionActive，出场后再卸载）
-└── 默认插槽 ← Detail / Reminder / Verify 等内容
+└── 默认插槽 ← Detail / Dialog / Verify 等内容
 ```
 
-- **外壳只做**：全窗遮罩、空白/Esc 关闭、进出场动效、按 `uses` 选容器尺寸（detail 880×620；reminder/verify 按 Info/Echo 宽）。**不做**标题/副文案/符号/按钮等内容定制。
-- **内容各自负责**：`EgDetail` / `EgReminder` / `EgVerify` 在各自组件与文档页配置；Popup 页 **禁止**编辑内容文案或 Reminder 定制控件。
+- **外壳只做**：全窗遮罩、空白/Esc 关闭、进出场动效、按 `uses` 选容器尺寸（detail 880×620；dialog/verify 按 Symbol/Compose/Standard 宽）。**不做**标题/副文案/符号/按钮等内容定制。
+- **内容各自负责**：`EgDetail` / `EgDialog` / `EgVerify` 在各自组件与文档页配置；Popup 页 **禁止**编辑内容文案或 Dialog 定制控件。
 - **遮罩范围**：须铺满 **NavBar + 侧栏 + 主内容** 整块客户端。根为 `width/height: 100%`，只填满直接父容器——挂在列表页 subtree 会被裁切。
 - **挂载**：业务 Popup host 放在**客户端 shell**（与 Layout 同级或 shell Teleport 目标）；**禁止**挂在列表页、ModuleMenu 内容区等业务 subtree。
 - **Alert 舞台顶边距**：`--padding-top-lg`（30% flex 占位，§1「顶边距 %」）。
@@ -154,16 +165,19 @@ EgPopup 外壳
 
 | 页面 | 定制范围 |
 |------|----------|
-| `/components/popup` | 用途（detail/reminder/verify）、Popup Box 宽度（info/echo）、开关闭演示 |
+| `/components/popup` | 用途（detail/dialog/verify）、对话框内容类型（symbol/compose/standard）、开关闭演示 |
 | `/components/detail` | Detail 全文案、Tab、Section、Apply_Item 等 |
-| `/components/reminder` | 类型、标题、副文案、符号、符号背景色、按钮区 |
+| `/components/dialog-standard` | Standard · 标题 + 正文 + Flotation 工具栏 |
+| `/components/dialog-symbol` | DialogSymbol · 符号 + 居中文案 + PopupWindow |
+| `/components/dialog-compose` | Compose · Title/Bar + 内容区 + Flotation |
 | `/components/verify` | 验证方式（单/双/锁定）、状态、标题、副文案、倒计时、切换文案 |
 | `/components/popovers-popover` | EgPopover 本体 + 全部方向矩阵；`:wrap-tooltip="false"` 须布尔（勿传 truthy 字符串） |
 | `/components/popovers-scens` | 场景：引导 / 备注 / 矿工费（Bitcoin / Ethereum / TON / Tron） |
 | `/components/upload` | 临时 Layout Deform demo（`LayoutDeformDemoPreview.vue`）；验证后删除 |
 | `/tokens` | 与 spec/dist 1:1 的 token 展示 |
 
-- **EgReminder**：Info / Echo；符号区 56px 圆 + `EgIcon size="lg"`；可用 `--eds-reminder-symbol-bg` / `--eds-reminder-symbol-color` 覆盖。危险/成功背景用 `--status-danger` / `--status-success`，图标 `--stroke-same-white-primary`。
+- **EgDialog**（`EgReminder` 已废弃）：Symbol / Compose / Standard；Symbol 符号区 56px 圆 + `EgIcon size="lg"`；Standard：Title + Body Medium 正文 + Flotation 工具栏（460px 固定宽，工具栏 `spacing-5` 内边距）；Compose：Title/Bar + 内容区 + Flotation。可用 `--eds-dialog-symbol-bg` / `--eds-dialog-symbol-color` 覆盖。`toolbarDividerPinned`：Compose 默认 `true`；Standard 默认 `false`。
+- **EgPopup**：`uses: 'detail' | 'dialog' | 'verify' | 'custom'`；`dialogType` 决定 Dialog 内容 Popup Box 宽度。
 - **EgVerify**：Popup Box 固定宽高随 `type`（邮箱 328×436、Google 328×412、交易/登录/锁定 328×416、PassKey 328×406、2FA 358×459），不可改；Showcase 仅切换验证方式。
 - **Showcase**：文档预览可用静态 Popup Box 壳（无全屏 scrim）；完整 `EgPopup` 行为见 `PopupPreview.vue`。
 - **`/components/popovers` 重定向**到 `popovers-popover`（与 Input 子页拆分同模式）。
@@ -281,7 +295,7 @@ createDetailApplyItemRow('receiver', { value: addr, tag: alias })
 
 ## 9. 变更记录
 
-- 2026-08-13：§5.1 native reset — 禁止 `font: inherit` 简写；组件 typography 用 `:global(.desktopTokens)`。§7 Popovers 拆 `popovers-popover` / `popovers-scens`；矿工费 Footer 按 DOM 标记区分左右 padding。
+- 2026-08-18：EverGreen IA — 顶栏五根目录、`evergreen-ia.mdc`；Components catalog 按分子/有机体分组重组；Patterns/Animations/Workflows 路由。
 - 2026-08-08：§7 Layout Deform — Popover 多页切换契约（`layout-deform-page-switch.md`）；内容位移 +offset→0；业务须绑齐 exiting/entering、高度预测量、layout 跟 activePage。
 - 2026-08-08：§1 Popover — `effect-popover-box` 填充栈；`.outline` shadow 用 `--effect-vulvar-shadow-deep`；禁误动 layout。
 - 2026-08-08：§7 EgPopup — 外壳 vs 内容锁死；Showcase popup/detail/reminder/popovers 职责对照；Reminder 符号 token。

@@ -81,14 +81,14 @@ export const formSubmissionPropRows: DocPropRow[] = [
     name: 'linkLabel',
     type: 'string',
     defaultValue: "'Button'",
-    description: 'Notes 态链接文案（嵌套 EgLink size=sm）；Danger / Success 无链接。',
+    description: 'Notes / Danger 态链接文案（嵌套 EgLink size=sm）；Success 无链接。',
   },
-  { name: 'href', type: 'string', defaultValue: "'#'", description: 'Notes 态链接地址。' },
+  { name: 'href', type: 'string', defaultValue: "'#'", description: 'Notes / Danger 态链接地址。' },
   {
     name: 'showLink',
     type: 'boolean',
     defaultValue: 'true',
-    description: '是否显示链接；仅 Notes 生效。',
+    description: '是否显示链接；Notes / Danger 生效，Success 无链接。',
   },
 ];
 
@@ -233,13 +233,13 @@ export const formSubmissionCustomizeControls: DocCustomizeControl[] = [
     kind: 'text',
     key: 'linkLabel',
     label: '链接文案',
-    visibleWhen: (s) => s.type === 'notes',
+    visibleWhen: (s) => s.type === 'notes' || s.type === 'danger',
   },
   {
     kind: 'boolean',
     key: 'showLink',
     label: '显示链接',
-    visibleWhen: (s) => s.type === 'notes',
+    visibleWhen: (s) => s.type === 'notes' || s.type === 'danger',
   },
 ];
 
@@ -397,7 +397,7 @@ export function buildFormSubmissionUsageSnippet(state: Record<string, unknown>):
     type,
     text: String(state.text ?? formSubmissionCustomizeDefaults.text),
   };
-  if (type === 'notes') {
+  if (type === 'notes' || type === 'danger') {
     props.linkLabel = String(state.linkLabel ?? formSubmissionCustomizeDefaults.linkLabel);
     props.showLink = state.showLink !== false;
     props.href = String(state.href ?? '#');

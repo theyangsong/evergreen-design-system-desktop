@@ -93,6 +93,10 @@
   --ripple-pulse-color: var(--material-brand-primary);
 }
 
+.ripplePulseToneSuccess {
+  --ripple-pulse-color: var(--status-success);
+}
+
 .mnemonicVerifyHost {
   display: flex;
   align-items: center;
@@ -101,4 +105,28 @@
 
 .mnemonicVerifyToneBrand {
   --mnemonic-verify-color: var(--material-brand-primary);
+}
+
+.mnemonicVerifyToneSuccess {
+  --mnemonic-verify-color: var(--status-success);
+}
+
+.verifyRingToneBrand {
+  --verify-ring-dot-color: var(--material-brand-primary);
+}
+
+.verifyRingToneSuccess {
+  --verify-ring-dot-color: var(--status-success);
+}
+
+.symbolInner.verifyRingToneBrand {
+  background: var(--material-brand-quaternary);
+  color: var(--material-brand-primary);
+  --done-tick-color: var(--material-brand-primary);
+}
+
+.symbolInner.verifyRingToneSuccess {
+  background: var(--status-success-weaken);
+  color: var(--status-success);
+  --done-tick-color: var(--status-success);
 }

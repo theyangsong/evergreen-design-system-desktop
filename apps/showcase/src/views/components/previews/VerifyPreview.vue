@@ -16,10 +16,26 @@ import {
   applyVerifyTypePresetToState,
   verifyCustomizeControls,
   verifyCustomizeDefaults,
+  verifyEventRows,
   verifyPropRows,
+  verifySlotRows,
 } from './verifyDocCustomize';
 
-const customize = reactive({ ...verifyCustomizeDefaults });
+const props = withDefaults(
+  defineProps<{
+    initialVerifyType?: VerifyType;
+    pageTitle?: string;
+    lockVerifyType?: boolean;
+  }>(),
+  {
+    lockVerifyType: false,
+  },
+);
+
+const customize = reactive({
+  ...verifyCustomizeDefaults,
+  ...(props.initialVerifyType ? { type: props.initialVerifyType } : {}),
+});
 
 const verifyType = computed(() => customize.type as VerifyType);
 
@@ -113,25 +129,39 @@ function syncPanelMotionEnter() {
 
 onMounted(() => {
   syncPanelMotionEnter();
+  if (props.initialVerifyType) {
+    applyVerifyTypePresetToState(customize, props.initialVerifyType);
+  }
 });
 
 watch(verifyType, () => {
   syncPanelMotionEnter();
 });
+
+const verifyControls = computed(() =>
+  props.lockVerifyType
+    ? verifyCustomizeControls.filter((control) => control.key !== 'type')
+    : verifyCustomizeControls,
+);
+
+const pageTitle = computed(() => props.pageTitle ?? 'Verify');
 </script>
 
 <template>
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Verify"
+      :title="pageTitle"
+      doc-tier="organism"
       tall-preview
       :show-doc-title="false"
       component-tag="EgVerify"
       import-code="import { EgVerify, EgPopup, useVerifySubmit } from '@eds/desktop-components';"
-      :customize-controls="verifyCustomizeControls"
+      :customize-controls="verifyControls"
       :customize-defaults="verifyCustomizeDefaults"
       :prop-rows="verifyPropRows"
+      :event-rows="verifyEventRows"
+      :slot-rows="verifySlotRows"
       props-section-id="verify-props"
     >
       <template #preview>

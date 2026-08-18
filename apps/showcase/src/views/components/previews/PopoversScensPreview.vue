@@ -37,9 +37,17 @@ const MINER_FEE_PANELS: Record<PopoverMinerFeeNetwork, Component> = {
   tron: EgMinerFeeTronPanel,
 };
 
+const props = withDefaults(
+  defineProps<{
+    initialScenario?: PopoverScensScenario;
+    pageTitle?: string;
+  }>(),
+  {},
+);
+
 const customize = reactive({
   ...popoverScensCustomizeDefaults,
-  scenario: popoverScensCustomizeDefaults.scenario as PopoverScensScenario,
+  scenario: (props.initialScenario ?? popoverScensCustomizeDefaults.scenario) as PopoverScensScenario,
   placement: popoverScensCustomizeDefaults.placement as PopoverPlacement,
   align: popoverScensCustomizeDefaults.align as PopoverAlign,
   trigger: popoverScensCustomizeDefaults.trigger as 'click' | 'hover',
@@ -65,6 +73,14 @@ const previewComponentTag = computed(() => {
 const minerFeePanel = computed(
   () => MINER_FEE_PANELS[customize.minerFeeNetwork] ?? EgMinerFeeEthereumPanel,
 );
+
+const scensCustomizeControls = computed(() =>
+  props.initialScenario
+    ? popoverScensCustomizeControls.filter((control) => control.key !== 'scenario')
+    : popoverScensCustomizeControls,
+);
+
+const pageTitle = computed(() => props.pageTitle ?? 'Scenes');
 
 watch(
   () => customize.scenario,
@@ -107,11 +123,11 @@ function onTopToolClose() {
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="popovers-scens"
-      title="Scens"
+      :title="pageTitle"
       :show-doc-title="false"
       :component-tag="previewComponentTag"
       :import-code="popoverScensImportCode"
-      :customize-controls="popoverScensCustomizeControls"
+      :customize-controls="scensCustomizeControls"
       :customize-defaults="popoverScensCustomizeDefaults"
       :usage-snippet-override="usageSnippet"
       :prop-rows="popoverPropRows"

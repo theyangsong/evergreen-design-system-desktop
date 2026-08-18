@@ -3,14 +3,18 @@ import ShowcaseLayout from '@/layout/ShowcaseLayout.vue';
 import TokensView from '@/views/tokens/TokensView.vue';
 import ComponentsView from '@/views/components/ComponentsView.vue';
 import ComponentDetailView from '@/views/components/ComponentDetailView.vue';
-import ScenesView from '@/views/scenes/ScenesView.vue';
-import SceneDetailView from '@/views/scenes/SceneDetailView.vue';
+import AnimationsView from '@/views/animations/AnimationsView.vue';
+import AnimationDetailView from '@/views/animations/AnimationDetailView.vue';
+import PatternsView from '@/views/patterns/PatternsView.vue';
+import PatternDetailView from '@/views/patterns/PatternDetailView.vue';
+import WorkflowsView from '@/views/workflows/WorkflowsView.vue';
 import {
   defaultComponentSlug,
   findCatalogItem,
   isValidComponentSlug,
 } from '@/data/components/navigation';
-import { defaultSceneSlug, isValidSceneSlug, legacyListFieldsSlug } from '@/data/scenes';
+import { defaultAnimationSlug, isValidAnimationSlug } from '@/data/animations';
+import { defaultPatternSlug, isValidPatternSlug } from '@/data/patterns';
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +25,34 @@ export const router = createRouter({
       children: [
         { path: '', redirect: '/tokens' },
         { path: 'tokens', name: 'tokens', component: TokensView },
+        {
+          path: 'animations',
+          component: AnimationsView,
+          children: [
+            {
+              path: '',
+              redirect: {
+                name: 'animation-detail',
+                params: { slug: defaultAnimationSlug },
+              },
+            },
+            {
+              path: ':slug',
+              name: 'animation-detail',
+              component: AnimationDetailView,
+              props: true,
+              beforeEnter: (to) => {
+                const slug = to.params.slug;
+                if (typeof slug !== 'string' || !isValidAnimationSlug(slug)) {
+                  return {
+                    name: 'animation-detail',
+                    params: { slug: defaultAnimationSlug },
+                  };
+                }
+              },
+            },
+          ],
+        },
         {
           path: 'components',
           component: ComponentsView,
@@ -50,7 +82,9 @@ export const router = createRouter({
                   'input-input': 'input-input',
                   'input-textarea': 'input-textarea',
                   'input-search': 'input-search',
-                  'input-combo': 'input-combo',
+                  'input-verify-input': 'input-verify-input',
+                  'input-combo-input': 'input-combo-input',
+                  'input-combo-textarea': 'input-combo-textarea',
                 };
 
                 const buttonHashToPage: Record<string, string> = {
@@ -114,8 +148,13 @@ export const router = createRouter({
 
                 if (slug === 'input') {
                   const anchorId = to.hash.startsWith('#') ? to.hash.slice(1) : '';
-                  const target = anchorId && inputHashToPage[anchorId] ? inputHashToPage[anchorId] : 'input-input';
+                  const target =
+                    anchorId && inputHashToPage[anchorId] ? inputHashToPage[anchorId] : 'input-input';
                   return { path: `/components/${target}` };
+                }
+
+                if (slug === 'input-combo') {
+                  return { path: '/components/input-combo-input' };
                 }
 
                 if (slug === 'button') {
@@ -146,7 +185,7 @@ export const router = createRouter({
                   const target =
                     anchorId && tabHashToPage[anchorId]
                       ? tabHashToPage[anchorId]
-                      : 'tab-segmented-control';
+                      : 'tab-tabs';
                   return { path: `/components/${target}` };
                 }
 
@@ -164,12 +203,12 @@ export const router = createRouter({
                   const target =
                     anchorId && tooltipHashToPage[anchorId]
                       ? tooltipHashToPage[anchorId]
-                      : 'tooltip-container';
+                      : 'tooltip-flotation';
                   return { path: `/components/${target}` };
                 }
 
                 if (slug === 'menu-box') {
-                  return { path: '/components/tooltip-container' };
+                  return { path: '/components/tooltip-flotation' };
                 }
 
                 if (slug === 'combo') {
@@ -190,6 +229,45 @@ export const router = createRouter({
                   return { path: `/components/${buttonLegacySlugs[slug]}` };
                 }
 
+                if (slug === 'detail') {
+                  return { path: '/patterns/detail' };
+                }
+
+                if (slug === 'verify') {
+                  return { path: '/components/verify-email' };
+                }
+
+                if (slug === 'popovers-scens') {
+                  return { path: '/components/popovers-scens-guidance' };
+                }
+
+                if (slug === 'dialog' || slug === 'reminder') {
+                  return { path: '/components/dialog-standard' };
+                }
+
+                const familyLegacySlugs: Record<string, string> = {
+                  popovers: 'popovers-popover',
+                  popover: 'popovers-popover',
+                  textarea: 'input-textarea',
+                  segmented: 'tab-segmented-control',
+                  checkbox: 'toggle-checkbox',
+                  radio: 'toggle-radio',
+                  switch: 'toggle-switch',
+                  decide: 'toggle-decide',
+                  toast: 'feedback-toast',
+                  message: 'feedback-message',
+                  reddot: 'feedback-reddot',
+                  'end-feedback-card': 'feedback-end-feedback-card',
+                  'form-submission': 'feedback-form-submission',
+                  streamer: 'feedback-streamer',
+                  pagination: 'paginer',
+                  'data-grid': 'data-table-view',
+                };
+
+                if (slug in familyLegacySlugs) {
+                  return { path: `/components/${familyLegacySlugs[slug]}` };
+                }
+
                 if (!isValidComponentSlug(slug)) {
                   return {
                     name: 'component-detail',
@@ -201,39 +279,42 @@ export const router = createRouter({
           ],
         },
         {
-          path: 'scenes',
-          component: ScenesView,
+          path: 'patterns',
+          component: PatternsView,
           children: [
             {
               path: '',
               redirect: {
-                name: 'scene-detail',
-                params: { slug: defaultSceneSlug },
+                name: 'pattern-detail',
+                params: { slug: defaultPatternSlug },
               },
             },
             {
               path: ':slug',
-              name: 'scene-detail',
-              component: SceneDetailView,
+              name: 'pattern-detail',
+              component: PatternDetailView,
               props: true,
               beforeEnter: (to) => {
                 const slug = to.params.slug;
-                if (slug === legacyListFieldsSlug) {
+                if (slug === 'list-fields') {
                   return {
-                    name: 'scene-detail',
+                    name: 'pattern-detail',
                     params: { slug: 'list-field-currency' },
                   };
                 }
-                if (typeof slug !== 'string' || !isValidSceneSlug(slug)) {
+                if (typeof slug !== 'string' || !isValidPatternSlug(slug)) {
                   return {
-                    name: 'scene-detail',
-                    params: { slug: defaultSceneSlug },
+                    name: 'pattern-detail',
+                    params: { slug: defaultPatternSlug },
                   };
                 }
               },
             },
           ],
         },
+        { path: 'scenes', redirect: '/patterns' },
+        { path: 'scenes/:slug', redirect: (to) => `/patterns/${String(to.params.slug)}` },
+        { path: 'workflows', name: 'workflows', component: WorkflowsView },
       ],
     },
   ],

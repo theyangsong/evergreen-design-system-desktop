@@ -24,7 +24,7 @@ const iconButtonProUsageSnippet = computed(() =>
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="iconButtonProCustomize"
-      title="iCons Container Professional"
+      title="IconContainerPro"
       :show-doc-title="false"
       component-tag="EgIconButtonPro"
       :import-code="iconButtonProImportCode"

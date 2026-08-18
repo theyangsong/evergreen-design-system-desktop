@@ -21,7 +21,7 @@ const customize = reactive({
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Form Submission"
+      title="FormSubmission"
       :show-doc-title="false"
       component-tag="EgFormSubmission"
       :import-code="formSubmissionImportCode"

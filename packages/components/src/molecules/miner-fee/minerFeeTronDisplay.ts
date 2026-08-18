@@ -1,22 +1,14 @@
-import { getProcessedIcon } from '../../atoms/icons';
 import { formatGroupedAmountText, formatGroupedTemplateValue } from '../../utils/formatGroupedAmountText';
-
-const TRON_RESOURCES_ICON_DESIGN = 'eds-energy-fill';
-const TRON_RESOURCES_ICON_FALLBACK = 'eds-gas-fee';
-
-/** 设计稿为 eds-energy-fill；引用库暂无该 SVG 时回退 eds-gas-fee。 */
-export function resolveTronResourcesIconName(): string {
-  return getProcessedIcon(TRON_RESOURCES_ICON_DESIGN)
-    ? TRON_RESOURCES_ICON_DESIGN
-    : TRON_RESOURCES_ICON_FALLBACK;
-}
 
 export type TronMinerFeeQuote = {
   bandwidth: number;
   energy: number;
+  availableBandwidth: number;
+  availableEnergy: number;
   activationExtraTrx: number;
   estimatedTrx: string;
   estimatedUsd: string;
+  estimatedUsdOriginal: string;
 };
 
 /** TRON 演示用固定资源与能量模式报价。 */
@@ -24,9 +16,12 @@ export function resolveTronMinerFeeQuote(): TronMinerFeeQuote {
   return {
     bandwidth: 345,
     energy: 885,
+    availableBandwidth: 1200,
+    availableEnergy: 560,
     activationExtraTrx: 1,
     estimatedTrx: '6.75',
-    estimatedUsd: '$4.88',
+    estimatedUsd: '$10.09',
+    estimatedUsdOriginal: '$12.08',
   };
 }
 
@@ -42,5 +37,5 @@ export function fillMinerFeeUiTemplate(
 
 export function buildTronMinerFeeDisplay(quote?: TronMinerFeeQuote): string {
   const resolved = quote ?? resolveTronMinerFeeQuote();
-  return formatGroupedAmountText(`${resolved.estimatedTrx} TRX ≈ ${resolved.estimatedUsd}`);
+  return formatGroupedAmountText(`预计费用: ${resolved.estimatedUsd}`);
 }

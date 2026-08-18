@@ -64,7 +64,7 @@ const sectionItems = computed(() => {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Tool Bar"
+      title="ToolBar"
       :show-doc-title="false"
       component-tag="EgToolBar"
       :import-code="ORGANISM_IMPORT"

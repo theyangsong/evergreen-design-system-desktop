@@ -47,7 +47,7 @@ watch(
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Segmented Control"
+      title="SegmentedControl"
       :show-doc-title="false"
       component-tag="EgSegmentedControl"
       :import-code="segmentedControlImportCode"

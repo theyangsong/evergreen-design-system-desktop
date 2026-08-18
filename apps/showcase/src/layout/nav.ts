@@ -1,5 +1,7 @@
 export const navItems = [
   { label: 'Tokens', to: '/tokens' },
+  { label: 'Animations', to: '/animations' },
   { label: 'Components', to: '/components' },
-  { label: 'Scenes', to: '/scenes' },
+  { label: 'Patterns', to: '/patterns' },
+  { label: 'Workflows', to: '/workflows' },
 ];

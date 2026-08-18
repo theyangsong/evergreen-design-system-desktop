@@ -24,6 +24,7 @@ const previewEntry = computed(() => componentPreviewBySlug[activeSlug.value]);
 
 const headerTitle = computed(() => {
   if (previewEntry.value?.title) return previewEntry.value.title;
+  if (childPage.value) return childPage.value.child.label;
   return moleculeLocation.value?.item.name ?? 'Components';
 });
 

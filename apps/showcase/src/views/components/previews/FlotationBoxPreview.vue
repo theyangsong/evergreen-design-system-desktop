@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 import { EgFlotationMenu } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
@@ -37,9 +37,20 @@ import {
   sceneAddressStateKey,
 } from './flotationBoxSceneAddressCustomize';
 
+const props = withDefaults(
+  defineProps<{
+    initialBoxKind?: FlotationBoxKind;
+    pageTitle?: string;
+    lockBoxKind?: boolean;
+  }>(),
+  {
+    lockBoxKind: false,
+  },
+);
+
 const customize = reactive({
   ...flotationBoxPageCustomizeDefaults,
-  boxKind: flotationBoxPageCustomizeDefaults.boxKind as FlotationBoxKind,
+  boxKind: (props.initialBoxKind ?? flotationBoxPageCustomizeDefaults.boxKind) as FlotationBoxKind,
 });
 
 watch(
@@ -141,6 +152,24 @@ const boxPanelControls = computed(() =>
 );
 
 const menuShell = useFlotationBoxMenuShellProps(customize);
+
+const boxKindControls = computed(() =>
+  props.lockBoxKind
+    ? flotationBoxKindCustomizeControls.filter((control) => control.key !== 'boxKind')
+    : flotationBoxKindCustomizeControls,
+);
+
+const pageTitle = computed(() => props.pageTitle ?? 'Box');
+
+onMounted(() => {
+  if (customize.boxKind === 'standard-cascade-menu') {
+    const editIndex = parseFlotationEditBoxIndex(customize);
+    customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
+  }
+  if (isFlotationBoxSceneAddressKind(customize)) {
+    applyFlotationBoxSceneAddressPreset(customize);
+  }
+});
 </script>
 
 <template>
@@ -148,11 +177,11 @@ const menuShell = useFlotationBoxMenuShellProps(customize);
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="flotation-box"
-      title="Box"
+      :title="pageTitle"
       :show-doc-title="false"
       component-tag="EgFlotationMenu"
       :import-code="flotationBoxImportCode"
-      :customize-controls="flotationBoxKindCustomizeControls"
+      :customize-controls="boxKindControls"
       :customize-defaults="{ ...flotationBoxPageCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationBoxDocPropRows"

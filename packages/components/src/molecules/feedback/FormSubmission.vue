@@ -41,8 +41,10 @@ const textClass = computed(() => {
   return undefined;
 });
 
-/** Link only for Notes — Danger / Success have no link. */
-const linkVisible = computed(() => props.type === 'notes' && props.showLink);
+/** Notes / Danger 可在文案右侧展示 EgLink；Success 无链接。 */
+const linkVisible = computed(
+  () => (props.type === 'notes' || props.type === 'danger') && props.showLink,
+);
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import type { Component } from 'vue';
+import type { ComponentPreviewEntry } from './componentPreviewTypes';
 import IconPreview from './IconPreview.vue';
 import CryptoPreview from './CryptoPreview.vue';
 import FlotationPreview from './FlotationPreview.vue';
@@ -8,7 +8,9 @@ import TooltipPanelKindPreview from './TooltipPanelKindPreview.vue';
 import InputInputPreview from './InputInputPreview.vue';
 import InputTextareaPreview from './InputTextareaPreview.vue';
 import InputSearchPreview from './InputSearchPreview.vue';
-import InputComboPreview from './InputComboPreview.vue';
+import InputVerifyInputPreview from './InputVerifyInputPreview.vue';
+import InputComboInputPreview from './InputComboInputPreview.vue';
+import InputComboTextareaPreview from './InputComboTextareaPreview.vue';
 import ButtonTextPreview from './ButtonTextPreview.vue';
 import ButtonIconPreview from './ButtonIconPreview.vue';
 import ButtonIconProPreview from './ButtonIconProPreview.vue';
@@ -16,7 +18,6 @@ import ButtonLinkPreview from './ButtonLinkPreview.vue';
 import ButtonPaginationPreview from './ButtonPaginationPreview.vue';
 import ButtonComboPreview from './ButtonComboPreview.vue';
 import DividerPreview from './DividerPreview.vue';
-import ScensMotionPreview from './ScensMotionPreview.vue';
 import AvatarPreview from './AvatarPreview.vue';
 import TagSystemPreview from './TagSystemPreview.vue';
 import TagStatusPreview from './TagStatusPreview.vue';
@@ -39,33 +40,28 @@ import NavBarPreview from './NavBarPreview.vue';
 import ModuleMenuPreview from './ModuleMenuPreview.vue';
 import ToolBarPreview from './ToolBarPreview.vue';
 import PaginerPreview from './PaginerPreview.vue';
-import ReminderPreview from './ReminderPreview.vue';
-import VerifyPreview from './VerifyPreview.vue';
+import DialogStandardPreview from './DialogStandardPreview.vue';
+import DialogSymbolPreview from './DialogSymbolPreview.vue';
+import DialogComposePreview from './DialogComposePreview.vue';
 import BatchBarPreview from './BatchBarPreview.vue';
 import DataListPreview from './DataListPreview.vue';
 import ContainerPreview from './ContainerPreview.vue';
 import LayoutPreview from './LayoutPreview.vue';
-import DetailPreview from './DetailPreview.vue';
 import PopupPreview from './PopupPreview.vue';
 import PopoversPopoverPreview from './PopoversPopoverPreview.vue';
-import PopoversScensPreview from './PopoversScensPreview.vue';
 import SkidPreview from './SkidPreview.vue';
-import LayoutDeformDemoPreview from './LayoutDeformDemoPreview.vue';
+import { splitScenePreviewEntries } from './splitScenePreviewEntries';
 
-export type ComponentPreviewEntry = {
-  slug: string;
-  title: string;
-  component: Component;
-  /** Component doc layout: no molecule lead; hide doc h2 when it matches page title. */
-  usesComponentDocHeader?: boolean;
-};
+export type { ComponentPreviewEntry } from './componentPreviewTypes';
 
 /** Showcase 文档页：预览区高度 280px（见 --showcase-doc-preview-height-compact）。 */
 export const compactComponentPreviewSlugs = new Set<string>([
   'input-input',
   'input-textarea',
   'input-search',
-  'input-combo',
+  'input-verify-input',
+  'input-combo-input',
+  'input-combo-textarea',
   'button-text',
   'button-icon',
   'button-icon-pro',
@@ -78,6 +74,10 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'tooltip-subtle',
   'tooltip-molde',
   'flotation-trigger',
+  'flotation-trigger-scene-module-menu',
+  'flotation-box-cascade-menu',
+  'flotation-box-address-dropdown',
+  'flotation-box-address-hover',
   'flotation',
   'tag-system',
   'tag-status',
@@ -96,10 +96,10 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'feedback-form-submission',
   'feedback-streamer',
   'popovers-popover',
-  'popovers-scens',
+  'popovers-scens-guidance',
+  'popovers-scens-notes',
+  'popovers-scens-gas-fee',
   'avatar',
-  'scens-motion',
-  'upload',
   'tool-bar',
   'paginer',
 ]);
@@ -122,24 +122,35 @@ export function usesTagComponentPreview(slug: string): boolean {
 
 export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'input-input', title: 'Input', component: InputInputPreview, usesComponentDocHeader: true },
-  { slug: 'input-textarea', title: 'Textarea', component: InputTextareaPreview, usesComponentDocHeader: true },
-  { slug: 'input-search', title: 'Scens', component: InputSearchPreview, usesComponentDocHeader: true },
-  { slug: 'input-combo', title: 'Combo', component: InputComboPreview, usesComponentDocHeader: true },
-  { slug: 'button-text', title: 'Button', component: ButtonTextPreview, usesComponentDocHeader: true },
-  { slug: 'button-icon', title: 'iCons Container Simple', component: ButtonIconPreview, usesComponentDocHeader: true },
-  { slug: 'button-icon-pro', title: 'iCons Container Professional', component: ButtonIconProPreview, usesComponentDocHeader: true },
-  { slug: 'button-link', title: 'Link', component: ButtonLinkPreview, usesComponentDocHeader: true },
-  { slug: 'button-pagination', title: 'Scens', component: ButtonPaginationPreview, usesComponentDocHeader: true },
-  { slug: 'button-combo', title: 'Combo', component: ButtonComboPreview, usesComponentDocHeader: true },
-  { slug: 'divider', title: 'Divider', component: DividerPreview, usesComponentDocHeader: true },
+  { slug: 'input-search', title: 'Search', component: InputSearchPreview, usesComponentDocHeader: true },
   {
-    slug: 'scens-motion',
-    title: 'ScensMotion',
-    component: ScensMotionPreview,
+    slug: 'input-verify-input',
+    title: 'Verify Input',
+    component: InputVerifyInputPreview,
     usesComponentDocHeader: true,
   },
+  {
+    slug: 'input-combo-input',
+    title: 'Combo Input Item',
+    component: InputComboInputPreview,
+    usesComponentDocHeader: true,
+  },
+  { slug: 'input-textarea', title: 'Textarea', component: InputTextareaPreview, usesComponentDocHeader: true },
+  {
+    slug: 'input-combo-textarea',
+    title: 'Combo Textarea Item',
+    component: InputComboTextareaPreview,
+    usesComponentDocHeader: true,
+  },
+  { slug: 'button-text', title: 'Standard', component: ButtonTextPreview, usesComponentDocHeader: true },
+  { slug: 'button-icon', title: 'IconContainer', component: ButtonIconPreview, usesComponentDocHeader: true },
+  { slug: 'button-icon-pro', title: 'IconContainerPro', component: ButtonIconProPreview, usesComponentDocHeader: true },
+  { slug: 'button-link', title: 'Link', component: ButtonLinkPreview, usesComponentDocHeader: true },
+  { slug: 'button-pagination', title: 'Scenes', component: ButtonPaginationPreview, usesComponentDocHeader: true },
+  { slug: 'button-combo', title: 'Combo', component: ButtonComboPreview, usesComponentDocHeader: true },
+  { slug: 'divider', title: 'Divider', component: DividerPreview, usesComponentDocHeader: true },
   { slug: 'avatar', title: 'Avatar', component: AvatarPreview, usesComponentDocHeader: true },
-  { slug: 'tag-system', title: 'System', component: TagSystemPreview, usesComponentDocHeader: true },
+  { slug: 'tag-system', title: 'Standard', component: TagSystemPreview, usesComponentDocHeader: true },
   { slug: 'tag-status', title: 'Status', component: TagStatusPreview, usesComponentDocHeader: true },
   { slug: 'tag-colorful', title: 'Colorful', component: TagColorfulPreview, usesComponentDocHeader: true },
   { slug: 'tag-custom', title: 'Custom', component: TagCustomPreview, usesComponentDocHeader: true },
@@ -149,14 +160,14 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'toggle-switch', title: 'Switch', component: ToggleSwitchPreview, usesComponentDocHeader: true },
   {
     slug: 'tab-segmented-control',
-    title: 'Segmented Control',
+    title: 'SegmentedControl',
     component: TabSegmentedControlPreview,
     usesComponentDocHeader: true,
   },
-  { slug: 'tab-tabs', title: 'Tabs', component: TabTabsPreview, usesComponentDocHeader: true },
+  { slug: 'tab-tabs', title: 'Standard', component: TabTabsPreview, usesComponentDocHeader: true },
   {
     slug: 'feedback-end-feedback-card',
-    title: 'End Feedback Card',
+    title: 'EndFeedbackCard',
     component: FeedbackEndFeedbackCardPreview,
     usesComponentDocHeader: true,
   },
@@ -165,7 +176,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'feedback-reddot', title: 'Reddot', component: FeedbackReddotPreview, usesComponentDocHeader: true },
   {
     slug: 'feedback-form-submission',
-    title: 'Form Submission',
+    title: 'FormSubmission',
     component: FeedbackFormSubmissionPreview,
     usesComponentDocHeader: true,
   },
@@ -176,35 +187,28 @@ export const componentPreviews: ComponentPreviewEntry[] = [
     usesComponentDocHeader: true,
   },
   { slug: 'progress', title: 'Progress', component: ProgressPreview, usesComponentDocHeader: true },
-  { slug: 'nav-bar', title: 'Nav Bar', component: NavBarPreview, usesComponentDocHeader: true },
-  { slug: 'module-menu', title: 'Module Menu', component: ModuleMenuPreview, usesComponentDocHeader: true },
-  { slug: 'tool-bar', title: 'Tool Bar', component: ToolBarPreview, usesComponentDocHeader: true },
+  { slug: 'nav-bar', title: 'NavBar', component: NavBarPreview, usesComponentDocHeader: true },
+  { slug: 'module-menu', title: 'ModuleMenu', component: ModuleMenuPreview, usesComponentDocHeader: true },
+  { slug: 'tool-bar', title: 'ToolBar', component: ToolBarPreview, usesComponentDocHeader: true },
   { slug: 'paginer', title: 'Paginer', component: PaginerPreview, usesComponentDocHeader: true },
-  { slug: 'data-list', title: 'Data List', component: DataListPreview, usesComponentDocHeader: true },
-  { slug: 'reminder', title: 'Reminder', component: ReminderPreview, usesComponentDocHeader: true },
-  { slug: 'verify', title: 'Verify', component: VerifyPreview, usesComponentDocHeader: true },
-  { slug: 'batch-bar', title: 'Batch Bar', component: BatchBarPreview, usesComponentDocHeader: true },
+  { slug: 'data-list', title: 'DataList', component: DataListPreview, usesComponentDocHeader: true },
+  { slug: 'batch-bar', title: 'BatchBar', component: BatchBarPreview, usesComponentDocHeader: true },
   { slug: 'container', title: 'Container', component: ContainerPreview, usesComponentDocHeader: true },
   { slug: 'layout', title: 'Layout', component: LayoutPreview, usesComponentDocHeader: true },
-  { slug: 'detail', title: 'Detail', component: DetailPreview, usesComponentDocHeader: true },
   { slug: 'popup', title: 'Popup', component: PopupPreview, usesComponentDocHeader: true },
-  { slug: 'popovers-popover', title: 'Popover', component: PopoversPopoverPreview, usesComponentDocHeader: true },
-  { slug: 'popovers-scens', title: 'Scens', component: PopoversScensPreview, usesComponentDocHeader: true },
+  { slug: 'popovers-popover', title: 'Standard', component: PopoversPopoverPreview, usesComponentDocHeader: true },
+  { slug: 'dialog-standard', title: 'Standard', component: DialogStandardPreview, usesComponentDocHeader: true },
+  { slug: 'dialog-symbol', title: 'DialogSymbol', component: DialogSymbolPreview, usesComponentDocHeader: true },
+  { slug: 'dialog-compose', title: 'Compose', component: DialogComposePreview, usesComponentDocHeader: true },
   { slug: 'skid', title: 'Skid', component: SkidPreview, usesComponentDocHeader: true },
-  {
-    slug: 'upload',
-    title: 'Layout Deform Demo',
-    component: LayoutDeformDemoPreview,
-    usesComponentDocHeader: true,
-  },
   { slug: 'icons', title: 'Icon', component: IconPreview },
   { slug: 'crypto', title: 'Crypto', component: CryptoPreview },
   ...([
-    { slug: 'tooltip-container', title: 'Container Box' },
-    { slug: 'tooltip-flotation', title: 'Flotation Box' },
-    { slug: 'tooltip-popup', title: 'Popup Box' },
-    { slug: 'tooltip-subtle', title: 'Subtle Card' },
-    { slug: 'tooltip-molde', title: 'Molde Level' },
+    { slug: 'tooltip-flotation', title: 'StandardBox' },
+    { slug: 'tooltip-container', title: 'ContainerBox' },
+    { slug: 'tooltip-popup', title: 'PopupBox' },
+    { slug: 'tooltip-subtle', title: 'SubtleCard' },
+    { slug: 'tooltip-molde', title: 'ModeLevel' },
   ] as const).map(({ slug, title }) => ({
     slug,
     title,
@@ -224,6 +228,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
     component: FlotationBoxPreview,
     usesComponentDocHeader: true,
   },
+  ...splitScenePreviewEntries,
 ];
 
 export const componentPreviewBySlug = Object.fromEntries(

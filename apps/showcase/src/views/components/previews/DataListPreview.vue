@@ -63,7 +63,7 @@ const eventRows = [
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="data-list"
-      title="Data List"
+      title="DataList"
       tall-preview
       :show-doc-title="false"
       component-tag="EgDataList"

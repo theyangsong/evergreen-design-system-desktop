@@ -147,16 +147,21 @@
   min-height: 0;
 }
 
-/** Reminder — Popup Box 固定宽（Info 280 / Echo 460）、高度随内容 */
-.previewOrganismReminderBoxHost {
+/** Dialog — Popup Box 固定宽（Symbol 280 / Compose / Standard 460）、高度随内容 */
+.previewOrganismDialogBoxHost {
   composes: previewOrganismPopupBoxHost;
   align-items: center;
   justify-content: center;
 }
 
+/** @deprecated Use previewOrganismDialogBoxHost */
+.previewOrganismReminderBoxHost {
+  composes: previewOrganismDialogBoxHost;
+}
+
 /** Verify — Popup Box 固定宽 328、高度随内容 */
 .previewOrganismVerifyBoxHost {
-  composes: previewOrganismReminderBoxHost;
+  composes: previewOrganismDialogBoxHost;
 }
 
 .previewOrganismVerifyBoxHost :global(.effect-popup-box) {
@@ -175,13 +180,13 @@
   border-radius: inherit;
 }
 
-.previewOrganismReminderBoxHost :global(.effect-popup-box) {
+.previewOrganismDialogBoxHost :global(.effect-popup-box) {
   flex-shrink: 0;
   height: auto;
   align-items: stretch !important;
 }
 
-.previewOrganismReminderBoxHost :global(.eds-tooltip-panel:not(.eds-verify)) {
+.previewOrganismDialogBoxHost :global(.eds-tooltip-panel:not(.eds-verify)) {
   display: flex;
   flex-direction: column;
   height: auto;

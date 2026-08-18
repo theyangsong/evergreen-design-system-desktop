@@ -248,3 +248,23 @@ export const verifyPropRows: DocPropRow[] = [
     description: '底部切换不可用（仍展示，勿隐藏）。',
   },
 ];
+
+export const verifyEventRows: DocPropRow[] = [
+  { name: 'update:modelValue', type: '(value: string) => void', defaultValue: '—', description: '验证码 / 密码值变化。' },
+  { name: 'complete', type: '(code: string) => void', defaultValue: '—', description: 'OTP 输满或密码确认时触发。' },
+  { name: 'recover', type: '() => void', defaultValue: '—', description: 'error 后重新输入时触发。' },
+  { name: 'retry', type: '() => void', defaultValue: '—', description: '倒计时结束或 error 后点击重试。' },
+  { name: 'cancel', type: '() => void', defaultValue: '—', description: '密码场景取消。' },
+  { name: 'forgot', type: '() => void', defaultValue: '—', description: '点击忘记密码。' },
+  { name: 'switch', type: '() => void', defaultValue: '—', description: '底部切换验证方式。' },
+  { name: 'paste', type: '() => void', defaultValue: '—', description: 'OTP 粘贴操作。' },
+];
+
+export const verifySlotRows: DocPropRow[] = [
+  {
+    name: '(无公开插槽)',
+    type: '—',
+    defaultValue: '—',
+    description: 'EgVerify 无公开插槽；子结构由 type 预设与 props 驱动（EgVerifyInput、EgVerifyRingDots 等）。',
+  },
+];

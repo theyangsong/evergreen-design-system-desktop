@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { EgTooltip } from '../../molecules/tooltip';
-import { resolveReminderPanelWidthPx } from '../../organisms/reminder/reminderPanelWidths';
+import { resolveDialogPanelWidthPx } from '../../organisms/dialog/dialogPanelWidths';
 import {
   resolveVerifyPanelHeightPx,
   resolveVerifyPanelWidthPx,
   type VerifyType,
 } from '../../organisms/verify';
-import type { ReminderType } from '../../organisms/reminder';
+import type { DialogType } from '../../organisms/dialog';
 import '../../styles/overlayGlassMicroFloat.module.css';
 import styles from './Popup.module.css';
 
-export type PopupUses = 'detail' | 'reminder' | 'verify' | 'custom';
+export type PopupUses = 'detail' | 'dialog' | 'verify' | 'custom';
 
 /** Alert 舞台垂直对齐：居中，或顶边距固定偏上（`--eds-popup-alert-offset-top`，168px）。 */
 export type PopupAlertVerticalAlign = 'center' | 'offset-top';
@@ -31,22 +31,22 @@ const DETAIL_PANEL_HEIGHT = 620;
 const props = withDefaults(
   defineProps<{
     uses?: PopupUses;
-    /** Reminder 内容类型，决定 Popup Box 固定宽度（Info 280 / Echo 460）。 */
-    reminderType?: ReminderType;
+    /** Dialog 内容类型，决定 Popup Box 固定宽度（Symbol 280 / Slot / Standard 460）。 */
+    dialogType?: DialogType;
     /** Verify 场景类型，决定 Popup Box 固定宽高（见 VERIFY_TYPE_PRESETS）。 */
     verifyType?: VerifyType;
     /** uses=custom 时 Popup Box 宽度（px）。 */
     boxWidth?: number;
     /** uses=custom 时 Popup Box 高度（px）。 */
     boxHeight?: number;
-    /** Alert 舞台垂直对齐（Detail 忽略）。未传：reminder / verify → offset-top；custom → center。 */
+    /** Alert 舞台垂直对齐（Detail 忽略）。未传：dialog / verify → offset-top；custom → center。 */
     alertVerticalAlign?: PopupAlertVerticalAlign;
     /** 面板进出场 — 全部 uses 统一 `.motion-layout` + host active（与 Detail 一致）。 */
     microFloat?: boolean;
   }>(),
   {
-    uses: 'reminder',
-    reminderType: 'info',
+    uses: 'dialog',
+    dialogType: 'symbol',
     verifyType: 'single-email',
     boxWidth: 328,
     boxHeight: 436,
@@ -72,7 +72,6 @@ const showScrim = computed(() => open.value || shellKeepMounted.value);
 
 const isVerify = computed(() => props.uses === 'verify');
 const isCustom = computed(() => props.uses === 'custom');
-const isReminder = computed(() => props.uses === 'reminder');
 
 const resolvedAlertVerticalAlign = computed((): PopupAlertVerticalAlign => {
   if (props.alertVerticalAlign != null) {
@@ -95,7 +94,7 @@ const alertPanelWidthPx = computed(() => {
   if (isCustom.value) {
     return props.boxWidth;
   }
-  return resolveReminderPanelWidthPx(props.reminderType);
+  return resolveDialogPanelWidthPx(props.dialogType);
 });
 
 const alertHeightMode = computed((): 'fixed' | 'adaptive' => {
@@ -149,7 +148,7 @@ const panelMotionKey = computed(() =>
   [
     props.uses,
     props.verifyType,
-    props.reminderType,
+    props.dialogType,
     props.boxWidth,
     props.boxHeight,
   ].join(':'),
@@ -261,7 +260,7 @@ watch(
       props.uses,
       props.microFloat,
       props.verifyType,
-      props.reminderType,
+      props.dialogType,
       props.boxWidth,
       props.boxHeight,
       props.alertVerticalAlign,

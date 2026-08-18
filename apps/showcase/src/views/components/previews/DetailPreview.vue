@@ -144,6 +144,7 @@ function closeOrdersPopup() {
     <ComponentDocLayout
       v-model:customize-state="customize"
       title="Detail"
+      doc-tier="organism"
       :show-doc-title="false"
       component-tag="EgDetail"
       import-code="import { EgDetail } from '@eds/desktop-components';"

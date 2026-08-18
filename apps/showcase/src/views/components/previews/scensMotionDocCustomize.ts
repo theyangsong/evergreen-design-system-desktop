@@ -52,26 +52,6 @@ export const scensMotionCustomizeControls: DocCustomizeControl[] = [
   },
   {
     kind: 'select',
-    key: 'tone',
-    label: '色调',
-    options: propLabelSelectOptions(
-      Object.keys(scensMotionToneLabels) as ScensMotionTone[],
-      scensMotionToneLabels,
-    ),
-    visibleWhen: (state) => state.scenario === 'done-tick',
-  },
-  {
-    kind: 'select',
-    key: 'tone',
-    label: '色调',
-    options: propLabelSelectOptions(
-      Object.keys(scensMotionProcessingToneLabels) as ScensMotionProcessingTone[],
-      scensMotionProcessingToneLabels,
-    ),
-    visibleWhen: (state) => state.scenario === 'motion-processing',
-  },
-  {
-    kind: 'select',
     key: 'interaction',
     label: '交互',
     options: propLabelSelectOptions(
@@ -81,6 +61,53 @@ export const scensMotionCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (state) => state.scenario === 'verify-ring-dots',
   },
 ];
+
+export const scensMotionSuccessBrandToneControl: DocCustomizeControl = {
+  kind: 'select',
+  key: 'tone',
+  label: '色调',
+  options: propLabelSelectOptions(
+    Object.keys(scensMotionToneLabels) as ScensMotionTone[],
+    scensMotionToneLabels,
+  ),
+};
+
+export const scensMotionProcessingToneControl: DocCustomizeControl = {
+  kind: 'select',
+  key: 'tone',
+  label: '色调',
+  options: propLabelSelectOptions(
+    Object.keys(scensMotionProcessingToneLabels) as ScensMotionProcessingTone[],
+    scensMotionProcessingToneLabels,
+  ),
+};
+
+export function buildScensMotionCustomizeControls(options?: {
+  lockScenario?: boolean;
+  scenario?: ScensMotionScenario;
+}): DocCustomizeControl[] {
+  const scenario = options?.scenario ?? scensMotionCustomizeDefaults.scenario;
+  const controls: DocCustomizeControl[] = [];
+
+  if (!options?.lockScenario) {
+    controls.push(scensMotionCustomizeControls[0]);
+  }
+
+  if (scenario === 'verify-ring-dots') {
+    controls.push(scensMotionCustomizeControls[1]);
+    controls.push(scensMotionSuccessBrandToneControl);
+  } else if (scenario === 'motion-processing') {
+    controls.push(scensMotionProcessingToneControl);
+  } else if (
+    scenario === 'done-tick' ||
+    scenario === 'ripple-pulse' ||
+    scenario === 'mnemonic-verify'
+  ) {
+    controls.push(scensMotionSuccessBrandToneControl);
+  }
+
+  return controls;
+}
 
 export const scensMotionRingDotsImportCode =
   "import { EgVerifyRingDots } from '@eds/desktop-components';";

@@ -5,7 +5,7 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import previewPageStyles from './InputPreview.module.css';
 import styles from './ScensMotionPreview.module.css';
 import {
-  scensMotionCustomizeControls,
+  buildScensMotionCustomizeControls,
   scensMotionCustomizeDefaults,
   scensMotionDoneTickImportCode,
   scensMotionDoneTickPropRows,
@@ -17,21 +17,39 @@ import {
   scensMotionRipplePulsePropRows,
   scensMotionRingDotsImportCode,
   scensMotionRingDotsPropRows,
-  type ScensMotionInteraction,
 } from './scensMotionDocCustomize';
+import type { ScensMotionInteraction, ScensMotionScenario } from './scensMotionDocCustomize';
+
+const props = withDefaults(
+  defineProps<{
+    initialScenario?: ScensMotionScenario;
+    pageTitle?: string;
+  }>(),
+  {},
+);
 
 type RingPreviewState = 'idle' | 'verifying' | 'success' | 'error';
 
 const FULL_CYCLE_SEQUENCE: RingPreviewState[] = ['idle', 'verifying', 'success'];
 const FULL_CYCLE_STEP_MS = 1400;
 
-const customize = reactive({ ...scensMotionCustomizeDefaults });
+const customize = reactive({
+  ...scensMotionCustomizeDefaults,
+  ...(props.initialScenario ? { scenario: props.initialScenario } : {}),
+});
 
 const isVerifyRingDots = computed(() => customize.scenario === 'verify-ring-dots');
 const isDoneTick = computed(() => customize.scenario === 'done-tick');
 const isMotionProcessing = computed(() => customize.scenario === 'motion-processing');
 const isRipplePulse = computed(() => customize.scenario === 'ripple-pulse');
 const isMnemonicVerify = computed(() => customize.scenario === 'mnemonic-verify');
+
+const motionCustomizeControls = computed(() =>
+  buildScensMotionCustomizeControls({
+    lockScenario: Boolean(props.initialScenario),
+    scenario: customize.scenario as ScensMotionScenario,
+  }),
+);
 
 const docComponentTag = computed(() => {
   if (isDoneTick.value) {
@@ -135,12 +153,29 @@ const motionProcessingToneClass = computed(() =>
     : styles.motionProcessingToneWarning,
 );
 
+const ripplePulseToneClass = computed(() =>
+  customize.tone === 'success' ? styles.ripplePulseToneSuccess : styles.ripplePulseToneBrand,
+);
+
+const mnemonicVerifyToneClass = computed(() =>
+  customize.tone === 'success'
+    ? styles.mnemonicVerifyToneSuccess
+    : styles.mnemonicVerifyToneBrand,
+);
+
+const verifyRingToneClass = computed(() =>
+  customize.tone === 'success' ? styles.verifyRingToneSuccess : styles.verifyRingToneBrand,
+);
+
 watch(
   () => customize.scenario,
   (scenario) => {
     if (scenario === 'motion-processing' && customize.tone === 'success') {
       customize.tone = 'warning';
-    } else if (scenario === 'done-tick' && customize.tone === 'warning') {
+    } else if (
+      scenario !== 'motion-processing' &&
+      customize.tone === 'warning'
+    ) {
       customize.tone = 'success';
     }
   },
@@ -168,11 +203,11 @@ onUnmounted(() => {
   <div :class="previewPageStyles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="ScensMotion"
+      :title="pageTitle ?? 'ScensMotion'"
       :show-doc-title="false"
       :component-tag="docComponentTag"
       :import-code="docImportCode"
-      :customize-controls="scensMotionCustomizeControls"
+      :customize-controls="motionCustomizeControls"
       :customize-defaults="scensMotionCustomizeDefaults"
       :prop-rows="docPropRows"
       props-section-id="scens-motion-props"
@@ -185,13 +220,18 @@ onUnmounted(() => {
                 :class="[
                   styles.symbolRingDots,
                   ringDotsActive && styles.symbolRingDotsActive,
+                  ringDotsActive && verifyRingToneClass,
                 ]"
                 :active="ringDotsActive"
               />
-              <div :class="styles.symbolInner">
+              <div :class="[styles.symbolInner, verifyRingToneClass]">
                 <EgDoneTick
                   v-if="showSuccessTick"
-                  :class="[styles.doneTickToneBrand]"
+                  :class="[
+                    customize.tone === 'success'
+                      ? styles.doneTickToneSuccess
+                      : styles.doneTickToneBrand,
+                  ]"
                 />
                 <EgIcon v-else-if="showTypeIcon" name="eds-key-fill" fit />
               </div>
@@ -207,11 +247,14 @@ onUnmounted(() => {
           </div>
 
           <div v-else-if="isRipplePulse" :class="styles.ripplePulseHost">
-            <EgRipplePulse :key="customize.scenario" :class="styles.ripplePulseToneBrand" />
+            <EgRipplePulse :key="`${customize.scenario}-${customize.tone}`" :class="ripplePulseToneClass" />
           </div>
 
           <div v-else-if="isMnemonicVerify" :class="styles.mnemonicVerifyHost">
-            <EgMnemonicVerify :key="customize.scenario" :class="styles.mnemonicVerifyToneBrand" />
+            <EgMnemonicVerify
+              :key="`${customize.scenario}-${customize.tone}`"
+              :class="mnemonicVerifyToneClass"
+            />
           </div>
         </div>
       </template>

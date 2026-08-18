@@ -4,7 +4,6 @@ import {
   showcaseInputCustomizeFieldLabels,
   showcaseInputSizeLabels,
   showcaseInputTypeLabels,
-  showcaseSearchScenarioLabels,
   showcaseWidthModeLabels,
 } from '@/data/showcasePropLabels';
 import {
@@ -145,7 +144,6 @@ export const textareaCustomizeControls: DocCustomizeControl[] = [
 ];
 
 export const searchCustomizeDefaults = {
-  scenario: 'search' as 'search' | 'verify-input',
   placeholder: 'Search',
   widthMode: 'full',
   fixedWidth: '319',
@@ -154,21 +152,35 @@ export const searchCustomizeDefaults = {
 } as const;
 
 export const searchCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
   {
     kind: 'select',
-    key: 'scenario',
-    label: showcaseInputCustomizeFieldLabels.scenario,
-    options: propLabelSelectOptions(
-      ['search', 'verify-input'] as const,
-      showcaseSearchScenarioLabels,
-    ),
+    key: 'widthMode',
+    label: showcaseInputCustomizeFieldLabels.widthMode,
+    options: [
+      { value: 'fixed', label: showcaseWidthModeLabels.fixed },
+      { value: 'full', label: showcaseWidthModeLabels.full },
+    ],
   },
   {
     kind: 'text',
-    key: 'placeholder',
-    label: showcaseInputCustomizeFieldLabels.placeholder,
-    visibleWhen: (state) => state.scenario === 'search',
+    key: 'fixedWidth',
+    label: showcaseInputCustomizeFieldLabels.fixedWidth,
+    placeholder: '319 或 319px',
+    visibleWhen: (s) => s.widthMode === 'fixed',
   },
+  { kind: 'boolean', key: 'disabled', label: showcaseInputCustomizeFieldLabels.disabled },
+  { kind: 'boolean', key: 'readonly', label: showcaseInputCustomizeFieldLabels.readonly },
+];
+
+export const verifyInputCustomizeDefaults = {
+  widthMode: 'full',
+  fixedWidth: '319',
+  disabled: false,
+  readonly: false,
+} as const;
+
+export const verifyInputCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'widthMode',

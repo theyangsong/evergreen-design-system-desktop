@@ -457,8 +457,20 @@
 .minerFeeTronBody {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: 0;
   width: 100%;
+}
+
+.minerFeeTronSection + .minerFeeTronActivationFeedback {
+  margin-top: var(--spacing-3);
+}
+
+.minerFeeTronActivationFeedback + .minerFeeTronInnerDivider {
+  margin-top: var(--spacing-4);
+}
+
+.minerFeeTronInnerDivider + .minerFeeTronSection {
+  margin-top: var(--spacing-4);
 }
 
 .minerFeeTronSection {
@@ -476,41 +488,134 @@
   line-height: var(--eds-body-small-line-height);
 }
 
-.minerFeeTronResourcesRow {
-  display: flex;
+.minerFeeTronSectionTitleRow {
+  display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
+  max-width: 100%;
   min-width: 0;
-  margin-top: var(--spacing-1-5);
 }
 
-.minerFeeTronResourcesIcon {
+.minerFeeTronResourcesInfoTooltipRoot {
+  display: inline-flex;
   flex-shrink: 0;
-  width: var(--icon-md);
-  height: var(--icon-md);
-  color: var(--material-base-primary);
+  vertical-align: middle;
 }
 
-.minerFeeTronResourcesIcon :global(.eds-icon svg),
-.minerFeeTronResourcesIcon :global(svg) {
+.minerFeeTronResourcesInfoButton {
+  flex-shrink: 0;
+}
+
+.minerFeeTronResourcesInfoButton:global(.eds-icon-button:hover),
+.minerFeeTronResourcesInfoButton:global(.eds-icon-button:active) {
+  background-color: var(--event-hover);
+}
+
+.minerFeeTronResourcesInfoButton:global(.eds-icon-button:focus-visible),
+.minerFeeTronResourcesInfoTooltipRoot :global([data-eds-tooltip-open])
+  .minerFeeTronResourcesInfoButton:global(.eds-icon-button) {
+  background-color: var(--event-focus);
+}
+
+.minerFeeTronResourcesInfoIconOutline,
+.minerFeeTronResourcesInfoIconFill {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.minerFeeTronResourcesInfoIconFill {
+  display: none;
+}
+
+.minerFeeTronResourcesInfoButton:hover .minerFeeTronResourcesInfoIconOutline,
+.minerFeeTronResourcesInfoTooltipRoot :global([data-eds-tooltip-open])
+  .minerFeeTronResourcesInfoIconOutline {
+  display: none;
+}
+
+.minerFeeTronResourcesInfoButton:hover .minerFeeTronResourcesInfoIconFill,
+.minerFeeTronResourcesInfoTooltipRoot :global([data-eds-tooltip-open])
+  .minerFeeTronResourcesInfoIconFill {
+  display: inline-flex;
+}
+
+.minerFeeTronResourcesInfoTooltipScope :global(.eds-tooltip-panel) {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-family: var(--eds-family-sans);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  color: var(--text-base-primary);
+  white-space: normal;
+  word-break: break-word;
+}
+
+.minerFeeTronResourcesInfoTooltip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  box-sizing: border-box;
+}
+
+.minerFeeTronResourcesInfoSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
   width: 100%;
-  height: 100%;
 }
 
-.minerFeeTronResourcesIcon :global(path) {
-  fill: currentColor;
+.minerFeeTronResourcesInfoLead,
+.minerFeeTronResourcesInfoHeading,
+.minerFeeTronResourcesInfoBody,
+.minerFeeTronResourcesInfoFootnote {
+  margin: 0;
+  color: var(--text-base-primary);
 }
 
-.minerFeeTronResourcesText {
+.minerFeeTronResourcesInfoHeading {
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-strong-line-height);
+}
+
+.minerFeeTronResourcesSummary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  width: 100%;
+}
+
+.minerFeeTronResourcesSummary + .minerFeeTronResourcesSummary {
+  margin-top: var(--spacing-3);
+}
+
+.minerFeeTronResourcesSummaryBody {
+  margin: 0;
   color: var(--text-base-primary);
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
 }
 
+.minerFeeTronResourcesSummaryValueRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5);
+  max-width: 100%;
+  min-width: 0;
+}
+
+.minerFeeTronResourcesSummaryValueRow > :global(.eds-divider) {
+  align-self: center;
+  flex-shrink: 0;
+  height: var(--scale-2-5);
+  min-height: var(--scale-2-5);
+  max-height: var(--scale-2-5);
+  background: var(--stroke-base-quaternary);
+}
+
 .minerFeeTronActivationFeedback {
   width: 100%;
-  margin-top: var(--spacing-2);
 }
 
 /** 对齐 EgComboInputItem #feedback 槽，不覆盖 EgFormSubmission 自持字阶/色。 */
@@ -583,8 +688,26 @@
   line-height: var(--eds-footnote-strong-line-height);
 }
 
-.minerFeeTronEstimatedCostUsd {
-  color: var(--text-base-secondary);
+.minerFeeTronEstimatedCostOriginal {
+  margin-left: var(--spacing-1);
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-weight);
+  line-height: var(--eds-footnote-line-height);
+  text-decoration: line-through;
+}
+
+.minerFeeTronPaymentBalanceFeedback {
+  width: 100%;
+  margin-top: var(--spacing-2);
+}
+
+/** 对齐 EgComboInputItem #feedback 槽，不覆盖 EgFormSubmission 自持字阶/色。 */
+.minerFeeTronPaymentBalanceFeedback:has(:global(.eds-form-submission)) {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .minerFeeStubMessage {

@@ -105,13 +105,12 @@
   top: 0;
   left: 0;
   box-sizing: border-box;
-  width: 100%;
   border: var(--stroke-sm) solid var(--stroke-base-secondary);
   border-radius: var(--radius-full);
   background-color: var(--box-page);
   opacity: 0;
   pointer-events: none;
-  will-change: transform, height, opacity;
+  will-change: transform, width, height, opacity;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -122,6 +121,7 @@
   .activeIndicatorMove {
     transition:
       transform var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
+      width var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
       height var(--eds-motion-indicator-duration) var(--eds-motion-ease-standard),
       opacity var(--eds-motion-indicator-opacity-duration) ease;
   }
@@ -191,6 +191,61 @@
   padding-inline: var(--spacing-5);
 }
 
+.linkNestedScene {
+  padding-inline: var(--spacing-7);
+}
+
+.linkNestedSceneDeep {
+  padding-inline: var(--spacing-9);
+}
+
+.sceneBranch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-inline-start: var(--spacing-5);
+  padding-inline-start: var(--spacing-1);
+}
+
+.sceneBranch::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--spacing-1);
+  inset-inline-start: 0;
+  width: var(--stroke-xs);
+  border-radius: var(--radius-full);
+  background-color: var(--stroke-base-secondary);
+}
+
+.sceneBranch .linkNested {
+  padding-inline-start: var(--spacing-1);
+  padding-inline-end: var(--spacing-3);
+  font-size: var(--eds-footnote-medium-size);
+  line-height: var(--eds-footnote-medium-line-height);
+  font-weight: var(--eds-footnote-weight);
+}
+
+.sceneBranch .linkNested.linkActive {
+  font-weight: var(--eds-footnote-medium-strong-weight);
+}
+
+.navSectionLabel {
+  color: var(--text-base-secondary);
+  cursor: default;
+  pointer-events: none;
+}
+
+.navSubgroupLabel {
+  color: var(--text-base-primary);
+  font-weight: var(--eds-footnote-large-strong-weight);
+}
+
+.organGroupLabel {
+  padding-inline: var(--spacing-3);
+  padding-top: var(--spacing-2);
+}
+
 .linkActive {
   color: var(--text-base-primary);
   font-weight: var(--eds-footnote-large-strong-weight);
@@ -213,6 +268,21 @@
   font-size: var(--eds-footnote-medium-size);
   font-weight: var(--eds-footnote-medium-strong-weight);
   line-height: var(--eds-footnote-medium-line-height);
+}
+
+.navGroupLabel {
+  display: block;
+  padding-block: var(--spacing-1) var(--spacing-05);
+  padding-inline: var(--spacing-5);
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-medium-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-line-height);
+}
+
+.navGroupLabel:first-of-type,
+.linkNestedDeep + .navGroupLabel {
+  padding-top: var(--spacing-2);
 }
 
 @media (max-width: 1100px) {

@@ -6,6 +6,7 @@ import { EgDivider } from '../../atoms/divider';
 import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
 import { EgLink } from '../../molecules/link';
+import DetailValueActionIcon from './DetailValueActionIcon.vue';
 import { EgTag, type TagSize, type TagStatus } from '../../molecules/tag';
 import { EgButton, type ButtonTone } from '../../molecules/button';
 import type { ComboActionPageTone } from '../../molecules/combo';
@@ -290,6 +291,10 @@ const props = withDefaults(
     toolbarDividerPinned?: boolean;
     toolbarConfirmLabel?: string;
     toolbarCancelLabel?: string;
+    valueCopyLabel?: string;
+    valueAddressBookLabel?: string;
+    valueAmlSearchLabel?: string;
+    valueBrowserLabel?: string;
   }>(),
   {
     eyebrow: 'Title',
@@ -315,6 +320,10 @@ const props = withDefaults(
     toolbarDividerPinned: false,
     toolbarConfirmLabel: 'Confirm',
     toolbarCancelLabel: 'Cancel',
+    valueCopyLabel: 'Copy',
+    valueAddressBookLabel: 'Add to address book',
+    valueAmlSearchLabel: 'AML Search',
+    valueBrowserLabel: 'Block explorer',
   },
 );
 
@@ -804,59 +813,44 @@ onBeforeUnmount(() => {
                               >
                                 {{ item.valueLinkLabel ?? 'Edit' }}
                               </EgLink>
-                              <span
-                                v-if="item.showValueCopy"
-                                :class="[
-                                  cryptoComboStyles.menuCopyButton,
-                                  copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
-                                    && cryptoComboStyles.menuCopyButtonCopied,
-                                ]"
-                                @click.stop
-                              >
-                                <EgIconButton
-                                  shape="square"
-                                  size="xs"
-                                  label="复制"
-                                  @click="onCopyItemValue(
-                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
-                                    resolveItemCopyValue(item, entry),
-                                    $event,
-                                  )"
+                                <span
+                                  v-if="item.showValueCopy"
+                                  :class="[
+                                    cryptoComboStyles.menuCopyButton,
+                                    copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                      && cryptoComboStyles.menuCopyButtonCopied,
+                                  ]"
+                                  @click.stop
                                 >
-                                  <EgIcon
-                                    :name="
+                                  <DetailValueActionIcon
+                                    :label="valueCopyLabel"
+                                    :icon="
                                       copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
                                         ? 'eds-enable-fill'
                                         : 'eds-copy'
                                     "
-                                    fit
+                                    @click="onCopyItemValue(
+                                      itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                      resolveItemCopyValue(item, entry),
+                                      $event,
+                                    )"
                                   />
-                                </EgIconButton>
-                              </span>
-                              <EgIconButton
-                                v-if="item.showValueAddressBook"
-                                shape="square"
-                                size="xs"
-                                label="添加到地址簿"
-                              >
-                                <EgIcon name="eds-associates" fit />
-                              </EgIconButton>
-                              <EgIconButton
-                                v-if="item.showValueAmlSearch"
-                                shape="square"
-                                size="xs"
-                                label="AML 查询"
-                              >
-                                <EgIcon name="eds-aml-search" fit />
-                              </EgIconButton>
-                              <EgIconButton
-                                v-if="item.showValueBrowser"
-                                shape="square"
-                                size="xs"
-                                label="区块浏览器"
-                              >
-                                <EgIcon name="eds-earth" fit />
-                              </EgIconButton>
+                                </span>
+                                <DetailValueActionIcon
+                                  v-if="item.showValueAddressBook"
+                                  :label="valueAddressBookLabel"
+                                  icon="eds-associates"
+                                />
+                                <DetailValueActionIcon
+                                  v-if="item.showValueAmlSearch"
+                                  :label="valueAmlSearchLabel"
+                                  icon="eds-aml-search"
+                                />
+                                <DetailValueActionIcon
+                                  v-if="item.showValueBrowser"
+                                  :label="valueBrowserLabel"
+                                  icon="eds-earth"
+                                />
                             </div>
                           </div>
                           <CryptoAddressTags
@@ -935,59 +929,44 @@ onBeforeUnmount(() => {
                               >
                                 {{ item.valueLinkLabel ?? 'Edit' }}
                               </EgLink>
-                              <span
-                                v-if="item.showValueCopy"
-                                :class="[
-                                  cryptoComboStyles.menuCopyButton,
-                                  copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
-                                    && cryptoComboStyles.menuCopyButtonCopied,
-                                ]"
-                                @click.stop
-                              >
-                                <EgIconButton
-                                  shape="square"
-                                  size="xs"
-                                  label="复制"
-                                  @click="onCopyItemValue(
-                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
-                                    resolveItemCopyValue(item, entry),
-                                    $event,
-                                  )"
+                                <span
+                                  v-if="item.showValueCopy"
+                                  :class="[
+                                    cryptoComboStyles.menuCopyButton,
+                                    copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
+                                      && cryptoComboStyles.menuCopyButtonCopied,
+                                  ]"
+                                  @click.stop
                                 >
-                                  <EgIcon
-                                    :name="
+                                  <DetailValueActionIcon
+                                    :label="valueCopyLabel"
+                                    :icon="
                                       copiedItemKey === itemCopyKey(sectionIndex, itemIndex, item, entryIndex)
                                         ? 'eds-enable-fill'
                                         : 'eds-copy'
                                     "
-                                    fit
+                                    @click="onCopyItemValue(
+                                      itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                      resolveItemCopyValue(item, entry),
+                                      $event,
+                                    )"
                                   />
-                                </EgIconButton>
-                              </span>
-                              <EgIconButton
-                                v-if="item.showValueAddressBook"
-                                shape="square"
-                                size="xs"
-                                label="添加到地址簿"
-                              >
-                                <EgIcon name="eds-associates" fit />
-                              </EgIconButton>
-                              <EgIconButton
-                                v-if="item.showValueAmlSearch"
-                                shape="square"
-                                size="xs"
-                                label="AML 查询"
-                              >
-                                <EgIcon name="eds-aml-search" fit />
-                              </EgIconButton>
-                              <EgIconButton
-                                v-if="item.showValueBrowser"
-                                shape="square"
-                                size="xs"
-                                label="区块浏览器"
-                              >
-                                <EgIcon name="eds-earth" fit />
-                              </EgIconButton>
+                                </span>
+                                <DetailValueActionIcon
+                                  v-if="item.showValueAddressBook"
+                                  :label="valueAddressBookLabel"
+                                  icon="eds-associates"
+                                />
+                                <DetailValueActionIcon
+                                  v-if="item.showValueAmlSearch"
+                                  :label="valueAmlSearchLabel"
+                                  icon="eds-aml-search"
+                                />
+                                <DetailValueActionIcon
+                                  v-if="item.showValueBrowser"
+                                  :label="valueBrowserLabel"
+                                  icon="eds-earth"
+                                />
                             </div>
                           </template>
                         </template>
@@ -1107,47 +1086,35 @@ onBeforeUnmount(() => {
                                   ]"
                                   @click.stop
                                 >
-                                  <EgIconButton
-                                    shape="square"
-                                    size="xs"
-                                    label="复制"
+                                  <DetailValueActionIcon
+                                    :label="valueCopyLabel"
+                                    :icon="
+                                      copiedItemKey === itemCopyKey(
+                                        sectionIndex,
+                                        itemIndex,
+                                        item,
+                                        branchIndex + 1,
+                                      )
+                                        ? 'eds-enable-fill'
+                                        : 'eds-copy'
+                                    "
                                     @click="onCopyItemValue(
                                       itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
                                       resolveItemCopyValue(item, entry),
                                       $event,
                                     )"
-                                  >
-                                    <EgIcon
-                                      :name="
-                                        copiedItemKey === itemCopyKey(
-                                          sectionIndex,
-                                          itemIndex,
-                                          item,
-                                          branchIndex + 1,
-                                        )
-                                          ? 'eds-enable-fill'
-                                          : 'eds-copy'
-                                      "
-                                      fit
-                                    />
-                                  </EgIconButton>
+                                  />
                                 </span>
-                                <EgIconButton
+                                <DetailValueActionIcon
                                   v-if="item.showValueAddressBook"
-                                  shape="square"
-                                  size="xs"
-                                  label="添加到地址簿"
-                                >
-                                  <EgIcon name="eds-associates" fit />
-                                </EgIconButton>
-                                <EgIconButton
+                                  :label="valueAddressBookLabel"
+                                  icon="eds-associates"
+                                />
+                                <DetailValueActionIcon
                                   v-if="item.showValueAmlSearch"
-                                  shape="square"
-                                  size="xs"
-                                  label="AML 查询"
-                                >
-                                  <EgIcon name="eds-aml-search" fit />
-                                </EgIconButton>
+                                  :label="valueAmlSearchLabel"
+                                  icon="eds-aml-search"
+                                />
                               </div>
                             </div>
                             <CryptoAddressTags
@@ -1198,47 +1165,35 @@ onBeforeUnmount(() => {
                                   ]"
                                   @click.stop
                                 >
-                                  <EgIconButton
-                                    shape="square"
-                                    size="xs"
-                                    label="复制"
+                                  <DetailValueActionIcon
+                                    :label="valueCopyLabel"
+                                    :icon="
+                                      copiedItemKey === itemCopyKey(
+                                        sectionIndex,
+                                        itemIndex,
+                                        item,
+                                        branchIndex + 1,
+                                      )
+                                        ? 'eds-enable-fill'
+                                        : 'eds-copy'
+                                    "
                                     @click="onCopyItemValue(
                                       itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
                                       resolveItemCopyValue(item, entry),
                                       $event,
                                     )"
-                                  >
-                                    <EgIcon
-                                      :name="
-                                        copiedItemKey === itemCopyKey(
-                                          sectionIndex,
-                                          itemIndex,
-                                          item,
-                                          branchIndex + 1,
-                                        )
-                                          ? 'eds-enable-fill'
-                                          : 'eds-copy'
-                                      "
-                                      fit
-                                    />
-                                  </EgIconButton>
+                                  />
                                 </span>
-                                <EgIconButton
+                                <DetailValueActionIcon
                                   v-if="item.showValueAddressBook"
-                                  shape="square"
-                                  size="xs"
-                                  label="添加到地址簿"
-                                >
-                                  <EgIcon name="eds-associates" fit />
-                                </EgIconButton>
-                                <EgIconButton
+                                  :label="valueAddressBookLabel"
+                                  icon="eds-associates"
+                                />
+                                <DetailValueActionIcon
                                   v-if="item.showValueAmlSearch"
-                                  shape="square"
-                                  size="xs"
-                                  label="AML 查询"
-                                >
-                                  <EgIcon name="eds-aml-search" fit />
-                                </EgIconButton>
+                                  :label="valueAmlSearchLabel"
+                                  icon="eds-aml-search"
+                                />
                               </div>
                             </template>
                           </div>

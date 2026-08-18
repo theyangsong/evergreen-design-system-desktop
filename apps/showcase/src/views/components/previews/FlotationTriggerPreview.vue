@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 import { EgComboInputItem, EgFlotationTrigger, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
@@ -20,9 +20,21 @@ import {
   type FlotationTriggerKind,
 } from './flotationDocCustomize';
 
+const props = withDefaults(
+  defineProps<{
+    initialTriggerKind?: FlotationTriggerKind;
+    pageTitle?: string;
+    lockTriggerKind?: boolean;
+  }>(),
+  {
+    lockTriggerKind: false,
+  },
+);
+
 const customize = reactive({
   ...flotationTriggerCustomizeDefaults,
-  triggerKind: flotationTriggerCustomizeDefaults.triggerKind as FlotationTriggerKind,
+  triggerKind: (props.initialTriggerKind ??
+    flotationTriggerCustomizeDefaults.triggerKind) as FlotationTriggerKind,
   triggerStyle: flotationTriggerCustomizeDefaults.triggerStyle as 'subtle' | 'outline' | 'text',
   widthMode: flotationTriggerCustomizeDefaults.widthMode as 'trigger' | 'adaptive' | 'fixed',
   size: flotationTriggerCustomizeDefaults.size as 'lg' | 'md' | 'sm' | 'xs',
@@ -68,6 +80,22 @@ const previewHostStyle = computed(() => ({
   width: '100%',
   maxWidth: isModuleMenuKind.value ? 'none' : 'var(--scale-50)',
 }));
+
+const triggerKindControls = computed(() =>
+  props.lockTriggerKind
+    ? flotationTriggerKindCustomizeControls.filter((control) => control.key !== 'triggerKind')
+    : flotationTriggerKindCustomizeControls,
+);
+
+const pageTitle = computed(() => props.pageTitle ?? 'Trigger');
+
+onMounted(() => {
+  if (customize.triggerKind !== 'module-menu') return;
+  customize.label = String(flotationTriggerModuleMenuDefaults.label);
+  customize.showReddot = Boolean(flotationTriggerModuleMenuDefaults.showReddot);
+  customize.triggerStyle = 'text';
+  customize.widthMode = 'trigger';
+});
 
 const triggerFixedWidth = computed(() => {
   if (customize.widthMode !== 'fixed') return undefined;
@@ -117,11 +145,11 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="flotation-trigger"
-      title="Trigger"
+      :title="pageTitle"
       :show-doc-title="false"
       component-tag="EgFlotationTrigger"
       :import-code="flotationTriggerImportCode"
-      :customize-controls="flotationTriggerKindCustomizeControls"
+      :customize-controls="triggerKindControls"
       :customize-defaults="{ ...flotationTriggerCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationTriggerPropRows"

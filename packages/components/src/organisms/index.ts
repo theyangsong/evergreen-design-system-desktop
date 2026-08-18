@@ -6,7 +6,7 @@ export * from './data-list';
 export * from './data-table-view';
 export * from './data-table-edit';
 export * from './detail';
-export * from './reminder';
+export * from './dialog';
 export * from './verify';
 export * from './filter';
 export * from './batch-bar';

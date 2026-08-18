@@ -325,7 +325,7 @@ const previewGroups = computed((): PreviewGroup[] => {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Module Menu"
+      title="ModuleMenu"
       tall-preview
       :show-doc-title="false"
       component-tag="EgModuleMenu"

@@ -29,6 +29,8 @@ const listRef = ref<HTMLElement | null>(null);
 const scrollRef = ref<HTMLElement | null>(null);
 const linkRefs = new Map<string, HTMLElement>();
 const indicatorTop = ref(0);
+const indicatorLeft = ref(0);
+const indicatorWidth = ref(0);
 const indicatorHeight = ref(0);
 const indicatorVisible = ref(false);
 const indicatorMoveTransition = ref(true);
@@ -59,8 +61,12 @@ function syncIndicatorPosition() {
     return;
   }
 
-  indicatorTop.value = link.offsetTop;
-  indicatorHeight.value = link.offsetHeight;
+  const listRect = list.getBoundingClientRect();
+  const linkRect = link.getBoundingClientRect();
+  indicatorTop.value = linkRect.top - listRect.top;
+  indicatorLeft.value = linkRect.left - listRect.left;
+  indicatorWidth.value = linkRect.width;
+  indicatorHeight.value = linkRect.height;
   indicatorVisible.value = true;
 }
 
@@ -133,7 +139,8 @@ onBeforeUnmount(() => {
             indicatorMoveTransition && styles.activeIndicatorMove,
           ]"
           :style="{
-            transform: `translateY(${indicatorTop}px)`,
+            transform: `translate(${indicatorLeft}px, ${indicatorTop}px)`,
+            width: `${indicatorWidth}px`,
             height: `${indicatorHeight}px`,
           }"
           aria-hidden="true"

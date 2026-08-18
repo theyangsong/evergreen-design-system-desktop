@@ -18,6 +18,15 @@ export const textareaEventRows: InputPropRow[] = [
   { name: 'clear', type: '() => void', defaultValue: '-', description: '点击 Clear 时触发。' },
 ];
 
+export const textareaSlotRows: InputPropRow[] = [
+  {
+    name: '(无公开插槽)',
+    type: '—',
+    defaultValue: '—',
+    description: 'EgTextarea 无公开插槽；Paste / Clear 通过 props 与事件配置。',
+  },
+];
+
 export const searchHeroCode = `<EgSearch v-model="query" placeholder="Search" width-mode="full" />`;
 
 export const searchPropRows: InputPropRow[] = [

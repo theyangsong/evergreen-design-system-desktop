@@ -20,11 +20,18 @@ import {
   showcasePaginerDataVolumeLabels,
   showcasePopupUsesLabels,
   showcasePopupAlertVerticalAlignLabels,
-  showcaseReminderTypeLabels,
+  showcaseDialogTypeLabels,
   showcaseYesNoLabels,
   tokenLabel,
   tokenOption,
 } from '@/data/showcasePropLabels';
+import {
+  DIALOG_TYPES,
+  dialogCustomizeControls,
+  dialogCustomizeDefaults,
+  dialogFigmaNode,
+  dialogPropRows,
+} from './dialogDocCustomize';
 import {
   DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
   buildModuleMenuBusinessTitleOptions,
@@ -75,7 +82,7 @@ export const ORGANISM_IMPORT = `import {
   EgPaginationItem,
   EgDataList,
   EgDataListColumn,
-  EgReminder,
+  EgDialog,
   EgMessage,
   EgReddot,
   EgBatchBar,
@@ -1083,7 +1090,7 @@ export const toolBarSectionCustomizeControls = buildIconButtonProZoneItemControl
 export const toolBarPropRows: OrganismPropRow[] = [
   { name: 'title', type: 'string', defaultValue: "'Title'", description: 'ToolBar-Title Body Large Strong。' },
   { name: 'showBack', type: 'boolean', defaultValue: 'false', description: 'ToolBar-Title Back=Yes。' },
-  { name: 'showOperation', type: 'boolean', defaultValue: 'true', description: 'Operation 开关：右侧操作 iCons。' },
+  { name: 'showOperation', type: 'boolean', defaultValue: 'true', description: 'Operation 开关：右侧操作 Icons。' },
   { name: 'showDivider', type: 'boolean', defaultValue: 'true', description: '底部分割线（EgDivider type=module）；开启后默认即显示，不随滚动隐藏。' },
   { name: 'showSection', type: 'boolean', defaultValue: 'false', description: 'Functional 内以竖向 EgDivider type=page 分区。' },
 ];
@@ -1276,47 +1283,13 @@ export const paginerSlotRows: OrganismPropRow[] = [
   },
 ];
 
-export const reminderFigmaNode = '2769:8358';
-
-export const reminderCustomizeDefaults = {
-  type: 'info' as 'info' | 'echo',
-  title: 'Title',
-  secondaryText: 'I am text',
-  showSecondaryText: true,
-  confirmLabel: 'Confirm',
-  actionCount: 1,
-};
-
-export const reminderCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'type',
-    label: '类型',
-    options: propLabelSelectOptions(['info', 'echo'] as const, showcaseReminderTypeLabels),
-  },
-  { kind: 'text', key: 'title', label: '标题' },
-  { kind: 'text', key: 'secondaryText', label: '副文案' },
-  { kind: 'boolean', key: 'showSecondaryText', label: '显示副文案' },
-  { kind: 'text', key: 'confirmLabel', label: '确认文案' },
-  {
-    kind: 'select',
-    key: 'actionCount',
-    label: '操作按钮数',
-    options: [
-      { value: '2', label: showcaseComboPopupCountLabels['2'] },
-      { value: '1', label: showcaseComboPopupCountLabels['1'] },
-    ],
-  },
-];
-
-export const reminderPropRows: OrganismPropRow[] = [
-  { name: 'type', type: "'info' | 'echo'", defaultValue: "'info'", description: 'Info：标准提醒；Echo：扩展内容槽。' },
-  { name: 'title', type: 'string', defaultValue: "'Title'", description: 'Body Large Strong 标题。' },
-  { name: 'secondaryText', type: 'string', defaultValue: "'I am text'", description: 'Body Small secondary（Info）。' },
-  { name: 'showSecondaryText', type: 'boolean', defaultValue: 'true', description: '是否展示副文案。' },
-  { name: 'confirmLabel', type: 'string', defaultValue: "'Confirm'", description: 'EgComboActionPopupWindow 确认文案。' },
-  { name: 'actionCount', type: '1 | 2', defaultValue: '1', description: '嵌套 Combo Action Popup Window 按钮数。' },
-];
+export {
+  DIALOG_TYPES,
+  dialogFigmaNode,
+  dialogCustomizeDefaults,
+  dialogCustomizeControls,
+  dialogPropRows,
+} from './dialogDocCustomize';
 
 export const batchBarFigmaNode = '2840:4360';
 export const batchBarActionItemFigmaNode = '2840:3358';
@@ -1764,9 +1737,9 @@ export function buildLayoutUsageSnippet(
 export const popupFigmaNode = '2170:3023';
 
 export const popupCustomizeDefaults = {
-  uses: 'custom' as 'detail' | 'reminder' | 'verify' | 'custom',
+  uses: 'custom' as 'detail' | 'dialog' | 'verify' | 'custom',
   alertVerticalAlign: 'center' as 'center' | 'offset-top',
-  reminderType: 'info' as 'info' | 'echo',
+  dialogType: 'symbol' as 'symbol' | 'compose' | 'standard',
   ...popupCustomBoxSizeDefaults,
   ...popupCustomContentInsetDefaults,
   ...popupCustomChromeDefaults,
@@ -1778,7 +1751,7 @@ export const popupUsesCustomizeControl: DocCustomizeControl = {
   key: 'uses',
   label: '场景化',
   options: propLabelSelectOptions(
-    ['detail', 'reminder', 'verify', 'custom'] as const,
+    ['detail', 'dialog', 'verify', 'custom'] as const,
     showcasePopupUsesLabels,
   ),
 };
@@ -1808,13 +1781,16 @@ export const popupCustomBoxHeightControl: DocCustomizeControl = {
   visibleWhen: (state) => state.uses === 'custom' && isPopupCustomBoxSizePresetCustom(state),
 };
 
-export const popupReminderTypeCustomizeControl: DocCustomizeControl = {
+export const popupDialogTypeCustomizeControl: DocCustomizeControl = {
   kind: 'select',
-  key: 'reminderType',
-  label: 'Popup Box 宽度',
-  options: propLabelSelectOptions(['info', 'echo'] as const, showcaseReminderTypeLabels),
-  visibleWhen: (state) => state.uses === 'reminder',
+  key: 'dialogType',
+  label: '内容类型',
+  options: propLabelSelectOptions(DIALOG_TYPES, showcaseDialogTypeLabels),
+  visibleWhen: (state) => state.uses === 'dialog',
 };
+
+/** @deprecated Use popupDialogTypeCustomizeControl */
+export const popupReminderTypeCustomizeControl = popupDialogTypeCustomizeControl;
 
 export const popupCustomizeControls: DocCustomizeControl[] = [
   popupUsesCustomizeControl,
@@ -1823,7 +1799,7 @@ export const popupCustomizeControls: DocCustomizeControl[] = [
   popupCustomContentInsetPresetControl,
   popupCustomBoxWidthControl,
   popupCustomBoxHeightControl,
-  popupReminderTypeCustomizeControl,
+  popupDialogTypeCustomizeControl,
   ...popupVerifyCustomizeControls,
 ];
 
@@ -1836,17 +1812,17 @@ export const popupPropRows: OrganismPropRow[] = [
   },
   {
     name: 'uses',
-    type: "'detail' | 'reminder' | 'verify' | 'custom'",
+    type: "'detail' | 'dialog' | 'verify' | 'custom'",
     defaultValue: "'custom'",
     description:
-      'Popup 场景化。Detail 880×620；Reminder / Verify 为固定 Popup Box + 内容 organism；Custom 为固定尺寸 Popup Box + 默认插槽。',
+      'Popup 场景化。Detail 880×620；Dialog / Verify 为固定 Popup Box + 内容 organism；Custom 为固定尺寸 Popup Box + 默认插槽。',
   },
   {
     name: 'alertVerticalAlign',
     type: "'center' | 'offset-top'",
-    defaultValue: 'reminder / verify → offset-top；custom → center',
+    defaultValue: 'dialog / verify → offset-top；custom → center',
     description:
-      'Alert 舞台垂直对齐（Detail 忽略）。center：几何居中；offset-top：顶边距 168px 偏上（`--eds-popup-alert-offset-top`）。未传时 reminder / verify 默认 offset-top；custom 默认 center。',
+      'Alert 舞台垂直对齐（Detail 忽略）。center：几何居中；offset-top：顶边距 168px 偏上（`--eds-popup-alert-offset-top`）。未传时 dialog / verify 默认 offset-top；custom 默认 center。',
   },
   {
     name: 'boxWidth',
@@ -1868,10 +1844,10 @@ export const popupPropRows: OrganismPropRow[] = [
       'uses=verify 时内容场景与 Popup Box 固定尺寸（邮箱 328×436、Google 328×412、交易/登录/锁定 328×416、PassKey 328×406、2FA 358×459）。',
   },
   {
-    name: 'reminderType',
-    type: "'info' | 'echo'",
-    defaultValue: "'info'",
-    description: 'uses=reminder 时 Popup Box 固定宽度（Info 280 / Echo 460）。',
+    name: 'dialogType',
+    type: "'symbol' | 'compose' | 'standard'",
+    defaultValue: "'symbol'",
+    description: 'uses=dialog 时 EgDialog 内容类型（Symbol 280px / Compose·Standard 460px）。',
   },
   {
     name: 'microFloat',

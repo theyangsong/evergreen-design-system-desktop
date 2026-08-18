@@ -515,12 +515,25 @@ function clampToBoundary(
   left: number,
   floatingRect: DOMRect,
   boundary: BoundaryRect,
+  placement: TooltipPlacement,
+  align: TooltipAlign,
 ): { top: number; left: number } {
-  const maxLeft = Math.max(boundary.left, boundary.right - floatingRect.width);
   const maxTop = Math.max(boundary.top, boundary.bottom - floatingRect.height);
+  const clampedTop = Math.min(Math.max(top, boundary.top), maxTop);
+
+  let clampedLeft = left;
+  if ((placement === 'top' || placement === 'bottom') && align === 'end') {
+    if (clampedLeft + floatingRect.width > boundary.right) {
+      clampedLeft = boundary.right - floatingRect.width;
+    }
+  } else {
+    const maxLeft = Math.max(boundary.left, boundary.right - floatingRect.width);
+    clampedLeft = Math.min(Math.max(left, boundary.left), maxLeft);
+  }
+
   return {
-    left: Math.min(Math.max(left, boundary.left), maxLeft),
-    top: Math.min(Math.max(top, boundary.top), maxTop),
+    left: clampedLeft,
+    top: clampedTop,
   };
 }
 
@@ -605,7 +618,7 @@ function updatePosition() {
     }
   }
 
-  coords = clampToBoundary(coords.top, coords.left, floatingRect, boundary);
+  coords = clampToBoundary(coords.top, coords.left, floatingRect, boundary, placement, align);
 
   resolvedPlacement.value = placement;
 

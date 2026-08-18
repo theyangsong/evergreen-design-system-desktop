@@ -1,6 +1,6 @@
 /**
- * Reminder — Popup Box 内容 organism（Figma 2769:8357）。
- * Info：280px 固定宽、居中；Echo：460px 固定宽、左对齐 + 滚动 + sticky 工具栏。
+ * Dialog — Popup Box 内容 organism（Figma 2769:8357）。
+ * Symbol：280px 固定宽、居中；Compose / Standard：460px 固定宽、左对齐 + 滚动 + sticky 工具栏。
  */
 .root {
   display: flex;
@@ -11,13 +11,13 @@
   max-height: 100%;
 }
 
-.info {
+.symbolLayout {
   align-items: center;
   width: 280px;
   max-width: 100%;
 }
 
-.infoBody {
+.symbolBody {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,6 +25,26 @@
   width: 100%;
   padding-top: var(--spacing-8);
   box-sizing: border-box;
+}
+
+.standardCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--spacing-4) var(--spacing-5) var(--spacing-4);
+  box-sizing: border-box;
+}
+
+.standardBodyText {
+  width: 100%;
+  margin: 0;
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  word-break: break-word;
 }
 
 .symbol {
@@ -35,8 +55,8 @@
   width: var(--graphic-sm);
   height: var(--graphic-sm);
   border-radius: var(--radius-full);
-  background: var(--eds-reminder-symbol-bg, var(--material-card-moderate));
-  color: var(--eds-reminder-symbol-color, var(--text-base-primary));
+  background: var(--eds-dialog-symbol-bg, var(--material-card-moderate));
+  color: var(--eds-dialog-symbol-color, var(--text-base-primary));
 }
 
 .symbol :global(.icon) {
@@ -46,7 +66,7 @@
   justify-content: center;
 }
 
-.infoCopy {
+.symbolCopy {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,7 +76,7 @@
   text-align: center;
 }
 
-.infoTitle {
+.symbolTitle {
   width: 100%;
   max-width: 232px;
   margin: 0;
@@ -67,7 +87,7 @@
   word-break: break-word;
 }
 
-.infoSecondary {
+.symbolSecondary {
   width: 100%;
   max-width: 232px;
   margin: 0;
@@ -78,17 +98,24 @@
   word-break: break-word;
 }
 
-.infoActions {
+.symbolActions {
   width: 100%;
 }
 
-.echo {
+.composeLayout {
   align-items: stretch;
   width: 460px;
   max-width: 100%;
 }
 
-.echoScroll {
+.standardLayout {
+  align-items: stretch;
+  width: 460px;
+  min-width: 460px;
+  max-width: 460px;
+}
+
+.scrollRoot {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -100,13 +127,13 @@
   scrollbar-width: none;
 }
 
-.echoScroll::-webkit-scrollbar {
+.scrollRoot::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-.echoContent {
+.scrollContent {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -116,7 +143,7 @@
   box-sizing: border-box;
 }
 
-.echoCopy {
+.composeCopy {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -126,7 +153,7 @@
   box-sizing: border-box;
 }
 
-.echoTitle {
+.dialogTitle {
   width: 100%;
   margin: 0;
   color: var(--text-base-primary);
@@ -136,7 +163,7 @@
   word-break: break-word;
 }
 
-.echoSecondary {
+.composeBar {
   width: 100%;
   margin: 0;
   color: var(--text-base-secondary);
@@ -146,14 +173,14 @@
   word-break: break-word;
 }
 
-.echoBody {
+.composeBody {
   width: 100%;
   min-height: 90px;
   padding: var(--spacing-4) var(--spacing-5);
   box-sizing: border-box;
 }
 
-.echoToolbar {
+.dialogToolbar {
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -164,6 +191,6 @@
   transition: var(--motion-recipe-scroll-fade-background);
 }
 
-.echoToolbarSolid {
+.dialogToolbarSolid {
   background: var(--box-page);
 }

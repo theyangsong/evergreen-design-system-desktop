@@ -34,7 +34,7 @@ watch(
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Tabs"
+      title="Standard"
       :show-doc-title="false"
       component-tag="EgTabs"
       :import-code="tabsImportCode"

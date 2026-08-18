@@ -107,7 +107,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="popovers-popover"
-      title="Popover"
+      title="Standard"
       :show-doc-title="false"
       component-tag="EgPopover"
       :import-code="popoverComponentImportCode"

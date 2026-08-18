@@ -1,0 +1,131 @@
+---
+description: EverGreen Design System — 五层信息架构、Variant≠Scene、Showcase 目录真源
+globs: apps/showcase/**/*,.cursor/rules/eds-project.mdc
+alwaysApply: false
+---
+
+# EverGreen Design System — 信息架构（IA）
+
+> Showcase 导航与 `catalog.ts` 的真源。业务 API 不进 Atoms/Molecules 分层；`packages/components/src/**` 为源码组织，与侧栏同名但职责不同。
+> 组件文档五层（Variants/Props/Slots/Composition/Scenarios）见 `component-doc-extension.mdc`。
+
+## 0. 五根一级目录
+
+| 一级 | 定义 | Showcase 路由 |
+|------|------|----------------|
+| **Tokens** | 设计语言：颜色、尺寸、字体、基础动效、效果 | `/tokens` |
+| **Animations** | 已封装、可直接复用的场景动画 | `/animations` |
+| **Components** | Atom → Template 可复用 UI 零件 | `/components` |
+| **Patterns** | 可复用页面 / 数据组合（多组件拼装） | `/patterns` |
+| **Workflows** | 可复用业务流程（跨页面任务） | `/workflows` |
+
+**禁止混淆：** Showcase `/patterns`（Patterns 层）≠ 组件族侧栏里的 **Scenes**（单组件场景子页）。
+
+## 1. Tokens 树
+
+```text
+Tokens
+├── Color → Base / Semantic
+├── Scale → Base / Semantic（Spacing, Radius, Stroke, Padding, CornerSmoothing, Blur, Depth, Icon, Avatar, Graphic）
+├── Typography → Base / Semantic / TextStyle
+├── Motion → Base / Recipe / Semantic
+└── Effect → Base / Semantic
+```
+
+真源：`packages/tokens/spec/**`；展示与 spec/dist 1:1（`eds-project.mdc` §1）。
+
+## 2. Animations
+
+与 **Motion token** 分离：Motion 回答「用什么时长/缓动」；Animations 回答「成品场景动画资产」。
+
+```text
+Animations
+├── VerificationRingDots
+├── BusinessSuccess
+├── BusinessProcessing
+├── RipplePulse
+└── MnemonicVerification
+```
+
+## 3. Components
+
+### 3.1 三层 + 默认子结构
+
+```text
+Components
+├── Atoms（仅本体，无 Scenes 侧栏）
+├── Molecules（每族：本体 + Scenes）
+├── Organisms（按业务域分组 → 每族：本体 + Scenes）
+└── Templates（每族：本体 + Scenes · preset 如 Cregis/UDun）
+```
+
+**默认分子/有机体/模板侧栏：**
+
+```text
+{Family}
+├── {Family}     ← 本体路由
+└── Scenes       ← navSection（与本体平级，非链接）
+    └── …        ← 独立 scene 路由（缩进一级）
+```
+
+### 3.2 Variant ≠ Scene（锁死）
+
+| | **Variant** | **Scene** |
+|---|-------------|-----------|
+| 定义 | 组件本体配置项；**不改变**基本结构与用途 | 针对具体使用场景的扩展；可增加结构、交互、内容、语义 |
+| Showcase | 本体页定制区 / `Variants` 文档层 | **独立子路由** + 侧栏 `Scenes` 下 |
+| 例 | `EgInput` `type="standard"\|"amount"` | `EgSearch`、`EgComboInputItem` |
+| 禁止 | 把 IconButton / DialogSymbol 当 Variant 侧栏页后又标 `navRole: variant` | 用 `navSection: Scenes` + `navParent` |
+
+`navRole: variant | combo` **废弃**；新 catalog 只用 `navSection` + `navParent`。
+
+### 3.3 Flotation 例外（复合产品线）
+
+不套用单族 Body+Scenes，保留三条子线：
+
+```text
+Flotation
+├── Trigger → Trigger + Scenes（ModuleMenu…）
+├── Box → DropDownMenu + Slot（CascadeMenu…）
+└── Combo → Interaction
+```
+
+侧栏用 `navSubgroup` 标 Trigger/Box/Combo。
+
+### 3.4 Molecules 族清单（EverGreen）
+
+Input、Textarea、Button、Tooltip、Popover、Flotation、Tag、Checkbox、Radio、Switch、Decide、Tab、Segmented、Toast、Message、Reddot、EndFeedbackCard、FormSubmission、Streamer、Dialog、Countdown、Progress、Loading、Upload。
+
+**slug / `Eg*` 命名不改**；仅 catalog 拆族与侧栏（如 `toggle-checkbox` 路由归 Checkbox 族）。
+
+### 3.5 Organisms 分组
+
+```text
+Organisms
+├── Navigation → NavBar, ModuleMenu, …
+├── Data → ToolBar, BatchBar, DataGrid, DataList, Pagination, Filter
+└── Verify → Email, Google, LoginPassword, TransactionPassword, PassKey, Locked（逐步拆路由）
+```
+
+### 3.6 Templates
+
+Container、Layout、Popup、Skid — 各本体 + Scenes（业务 preset）。
+
+## 4. Patterns
+
+可复用页面/数据组合：Data、Forms、Dashboard、Search、Detail、List Fields 等。原 Showcase `/scenes` 内容迁入 `/patterns`。
+
+## 5. Workflows
+
+Authentication、Verification、Transaction、Submission、Approval、Onboarding 等（占位，逐步落地）。
+
+## 6. catalog 实现约定
+
+- `catalogHelpers.ts`：`catalogFamilyBodyAndScenes`、`catalogBodyOnly`、`catalogSubgroup`
+- `children[]`：`navSection` / `navSubgroup` / `standalonePage` + `navParent`
+- `CatalogSection.groups`：Organisms 的 Navigation / Data / Verify
+- `buildCatalogAnchorItems`：section →（可选 group）→ family → body / Scenes / scene 页
+
+## 7. 变更记录
+
+- 2026-08-18：初版 — 五根目录、Variant≠Scene、Flotation 例外、Patterns 与组件 Scenes 区分。

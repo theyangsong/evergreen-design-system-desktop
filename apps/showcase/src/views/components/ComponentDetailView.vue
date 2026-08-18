@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, provide, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
+import { findCatalogChildPage, findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
 import { componentPreviewBySlug, usesCompactComponentPreview, usesTagComponentPreview } from './previews';
+import ShowcasePlaceholderPreview from './previews/ShowcasePlaceholderPreview.vue';
 import shared from '@/views/shared/showcase.module.css';
 
 const props = defineProps<{
@@ -13,7 +14,11 @@ const route = useRoute();
 
 const pageSlug = computed(() => getComponentRouteSlug(route.path, props.slug));
 
-const location = computed(() => findCatalogItem(pageSlug.value));
+const childLocation = computed(() => findCatalogChildPage(pageSlug.value));
+const familyLocation = computed(() => {
+  if (childLocation.value) return childLocation.value.parent;
+  return findCatalogItem(pageSlug.value);
+});
 const preview = computed(() => componentPreviewBySlug[pageSlug.value]);
 
 const compactPreview = computed(() => usesCompactComponentPreview(pageSlug.value));
@@ -65,7 +70,13 @@ watch(
 
 <template>
   <component :is="preview.component" v-if="preview" :key="pageSlug" />
-  <section v-else-if="location" :class="shared.section">
+  <template v-else-if="childLocation?.child.emptyScenesPlaceholder" />
+  <ShowcasePlaceholderPreview
+    v-else-if="childLocation"
+    :key="pageSlug"
+    :title="childLocation.child.label"
+  />
+  <section v-else-if="familyLocation" :class="shared.section">
     <p :class="shared.bodyText">Preview coming soon.</p>
   </section>
 </template>

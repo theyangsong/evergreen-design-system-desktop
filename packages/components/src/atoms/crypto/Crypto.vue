@@ -31,6 +31,7 @@ const ariaLabel = computed(() => props.label || String(props.name));
     v-if="processed"
     :class="hostClass"
     role="img"
+    :data-crypto="name"
     :aria-label="label ? ariaLabel : undefined"
     :aria-hidden="label ? undefined : true"
   >

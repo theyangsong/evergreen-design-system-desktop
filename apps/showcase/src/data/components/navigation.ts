@@ -38,6 +38,25 @@ export function getCatalogChildAnchorIds(slug: string): string[] {
   return entry?.item.children?.map((child) => child.id) ?? [];
 }
 
+/** Hash section ids for a standalone component page (body + `navParent` scenes). */
+export function getCatalogPageAnchorIds(pageSlug: string): string[] {
+  for (const { item } of iterCatalogItems()) {
+    const children = item.children ?? [];
+    const body = children.find(
+      (child) => child.standalonePage && getCatalogChildPageSlug(child) === pageSlug,
+    );
+    if (!body) continue;
+
+    const sceneIds = children
+      .filter((child) => child.navParent === pageSlug)
+      .map((child) => child.id);
+
+    return [body.id, ...sceneIds];
+  }
+
+  return [];
+}
+
 export function getComponentRouteSlug(path: string, paramSlug: unknown): string {
   if (typeof paramSlug === 'string' && paramSlug.length > 0) {
     return paramSlug;
@@ -51,9 +70,18 @@ export function moleculeUsesChildPages(item: CatalogItem): boolean {
 }
 
 export function getMoleculeLandingPageSlug(item: CatalogItem): string {
-  if (moleculeUsesChildPages(item) && item.children?.length) {
-    return getCatalogChildPageSlug(item.children[0]);
-  }
+  const body = item.children?.find(
+    (child) =>
+      child.standalonePage &&
+      !child.navParent &&
+      !child.navSection &&
+      !child.navSubgroup,
+  );
+  if (body) return getCatalogChildPageSlug(body);
+
+  const firstPage = item.children?.find((child) => child.standalonePage);
+  if (firstPage) return getCatalogChildPageSlug(firstPage);
+
   return item.slug;
 }
 

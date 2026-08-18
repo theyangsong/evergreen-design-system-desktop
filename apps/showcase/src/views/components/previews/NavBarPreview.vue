@@ -77,7 +77,7 @@ const docUsageSnippet = computed(() => {
     <ComponentDocLayout
       v-model:customize-state="customize"
       anchor-id="nav-bar"
-      title="Nav Bar"
+      title="NavBar"
       tall-preview
       :show-doc-title="false"
       :component-tag="docComponentTag"

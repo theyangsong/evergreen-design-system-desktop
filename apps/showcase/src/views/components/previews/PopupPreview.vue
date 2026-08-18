@@ -3,10 +3,11 @@ import { computed, reactive, ref, watch } from 'vue';
 import {
   EgButton,
   EgDetail,
+  EgDialog,
   EgPopup,
-  EgReminder,
   EgVerify,
   useVerifySubmit,
+  type DialogType,
   type VerifyType,
 } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
@@ -33,13 +34,13 @@ import {
   popupPropRows,
 } from './organismTemplateDocData';
 
-type PopupUses = 'detail' | 'reminder' | 'verify' | 'custom';
+type PopupUses = 'detail' | 'dialog' | 'verify' | 'custom';
 
 const customize = reactive({
   ...popupCustomizeDefaults,
   uses: popupCustomizeDefaults.uses as PopupUses,
   alertVerticalAlign: popupCustomizeDefaults.alertVerticalAlign as 'center' | 'offset-top',
-  reminderType: popupCustomizeDefaults.reminderType as 'info' | 'echo',
+  dialogType: popupCustomizeDefaults.dialogType as DialogType,
   verifyType: popupCustomizeDefaults.verifyType as VerifyType,
 });
 
@@ -109,6 +110,7 @@ function closePopup() {
     <ComponentDocLayout
       v-model:customize-state="customize"
       title="Popup"
+      doc-tier="template"
       :show-doc-title="false"
       component-tag="EgPopup"
       :import-code="ORGANISM_IMPORT"
@@ -129,7 +131,7 @@ function closePopup() {
             v-model:open="popupOpen"
             :uses="customize.uses as PopupUses"
             :alert-vertical-align="customize.alertVerticalAlign as 'center' | 'offset-top'"
-            :reminder-type="customize.reminderType as 'info' | 'echo'"
+            :dialog-type="customize.dialogType as DialogType"
             :verify-type="verifyType"
             :box-width="customBoxWidth"
             :box-height="customBoxHeight"
@@ -138,20 +140,20 @@ function closePopup() {
               v-if="customize.uses === 'detail'"
               @close="closePopup"
             />
-            <EgReminder
-              v-else-if="customize.uses === 'reminder'"
-              :type="customize.reminderType as 'info' | 'echo'"
+            <EgDialog
+              v-else-if="customize.uses === 'dialog'"
+              :type="customize.dialogType as DialogType"
               @cancel="closePopup"
               @confirm="closePopup"
             >
-              <template v-if="customize.reminderType === 'echo'" #default>
+              <template v-if="customize.dialogType === 'compose'" #default>
                 <div style="white-space: pre-line">
-                  Echo slot content
+                  Compose content
 
                   Scroll to preview frosted toolbar blur.
                 </div>
               </template>
-            </EgReminder>
+            </EgDialog>
             <EgVerify
               v-else-if="customize.uses === 'verify'"
               v-model="verify.code"
@@ -159,64 +161,48 @@ function closePopup() {
               :state="verify.state"
               @complete="onComplete"
               @recover="onRecover"
-              @switch="closePopup"
             />
             <PopupCustomSlotChromePreview
               v-else
-              :show-system-bar-close="popupCustomSystemBarProps.showSystemBarClose"
-              :show-toolbar="popupCustomToolbarProps.showToolbar"
-              :show-toolbar-buttons="popupCustomToolbarProps.showToolbarButtons"
-              :show-toolbar-cancel="popupCustomToolbarProps.showToolbarCancel"
-              :show-scroll-body="popupCustomToolbarProps.showScrollBody"
-              :toolbar-tone="popupCustomToolbarProps.toolbarTone"
-              :toolbar-variant="popupCustomToolbarProps.toolbarVariant"
-              :toolbar-cancel-tone="popupCustomToolbarProps.toolbarCancelTone"
-              :toolbar-cancel-variant="popupCustomToolbarProps.toolbarCancelVariant"
-              :toolbar-confirm-label="popupCustomToolbarProps.toolbarConfirmLabel"
-              :toolbar-cancel-label="popupCustomToolbarProps.toolbarCancelLabel"
-              :toolbar-direction="popupCustomToolbarProps.toolbarDirection"
-              :toolbar-divider-pinned="popupCustomToolbarProps.toolbarDividerPinned"
+              :class="chromePreviewStyles.root"
+              :system-bar-props="popupCustomSystemBarProps"
+              :toolbar-props="popupCustomToolbarProps"
               :content-inset-preset="popupCustomContentInsetPreset"
-              @close="closePopup"
-            >
-              <template v-if="popupCustomToolbarProps.useToolbarSlot" #toolbar>
-                <div :class="[organismStyles.previewOrganismPopupBoxPlaceholder, chromePreviewStyles.toolbarSlotFull]">
-                  toolbar 插槽内容
-                </div>
-              </template>
-            </PopupCustomSlotChromePreview>
+            />
           </EgPopup>
         </div>
       </template>
 
-      <template #customize-extra>
-        <div
+      <template #customize-after>
+        <CustomizePanel
           v-if="customize.uses === 'custom'"
-          :class="docStyles.customizeExtraStack"
-        >
-          <CustomizePanel
-            v-model="customize"
-            title="系统条 · systemBarClose"
-            nested
-            embedded
-            :controls="popupCustomSystemBarCustomizeControls"
-          />
-          <CustomizePanel
-            v-model="customize"
-            title="内容区插槽"
-            nested
-            embedded
-            :controls="popupCustomContentCustomizeControls"
-          />
-          <CustomizePanel
-            v-model="customize"
-            title="工具栏 · toolbarBar"
-            nested
-            embedded
-            sequential
-            :row-columns="4"
-            :controls="popupCustomToolbarCustomizeControls"
-          />
+          v-model="customize"
+          title="System Bar"
+          nested
+          embedded
+          :controls="popupCustomSystemBarCustomizeControls"
+        />
+        <CustomizePanel
+          v-if="customize.uses === 'custom'"
+          v-model="customize"
+          title="Toolbar"
+          nested
+          embedded
+          :controls="popupCustomToolbarCustomizeControls"
+        />
+        <CustomizePanel
+          v-if="customize.uses === 'custom'"
+          v-model="customize"
+          title="Content"
+          nested
+          embedded
+          :controls="popupCustomContentCustomizeControls"
+        />
+      </template>
+
+      <template #customize-extra>
+        <div v-if="!popupOpen" :class="docStyles.previewReopenHint">
+          <EgButton size="md" tone="brand" @click="popupOpen = true">重新打开 Popup</EgButton>
         </div>
       </template>
     </ComponentDocLayout>

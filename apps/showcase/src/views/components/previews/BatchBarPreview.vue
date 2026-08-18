@@ -52,7 +52,7 @@ function onLabelClick(_label: string, index: number) {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Batch Bar"
+      title="BatchBar"
       compact-preview
       :show-doc-title="false"
       component-tag="EgBatchBar"

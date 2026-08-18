@@ -2,7 +2,7 @@
  * Popup（Figma 2181:741 / Reminder 2769:8357）
  *
  * - detail：880×620 Popup Box（effect-popup-box）+ 默认插槽放内容（如 EgDetail）
- * - reminder：Popup Box 固定宽（Info 280 / Echo 460）、高度随内容
+ * - dialog：Popup Box 固定宽（Symbol 280 / Slot / Standard 460）、高度随内容
  * - verify：Popup Box 固定宽高（随 verifyType，不可改）
  */
 .root {
@@ -154,7 +154,7 @@
   padding: 0;
 }
 
-.alertPanelShell :global(.eds-reminder) {
+.alertPanelShell :global(.eds-dialog) {
   width: 100%;
   max-width: 100%;
 }
@@ -195,14 +195,14 @@
   justify-content: stretch;
 }
 
-.alertPanelShellCustom :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-reminder)) {
+.alertPanelShellCustom :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-dialog)) {
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   align-self: stretch;
 }
 
-.alertPanelShell :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-reminder)) {
+.alertPanelShell :global(.eds-popup-box-content:not(.eds-verify)) > :not(:global(.eds-dialog)) {
   display: flex;
   flex: 1 1 auto;
   align-items: center;

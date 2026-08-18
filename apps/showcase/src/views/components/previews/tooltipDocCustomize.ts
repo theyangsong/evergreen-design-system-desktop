@@ -49,11 +49,11 @@ export const tooltipPanelKindOptions = [
 export type TooltipPanelKindValue = (typeof tooltipPanelKindOptions)[number]['value'];
 
 export const tooltipPanelKindSections = [
-  { id: 'tooltip-container', label: 'Container Box', panelKind: 'container' },
-  { id: 'tooltip-flotation', label: 'Flotation Box', panelKind: 'flotation' },
-  { id: 'tooltip-popup', label: 'Popup Box', panelKind: 'popup' },
-  { id: 'tooltip-subtle', label: 'Subtle Card', panelKind: 'subtle' },
-  { id: 'tooltip-molde', label: 'Molde Level', panelKind: 'molde' },
+  { id: 'tooltip-flotation', label: 'StandardBox', panelKind: 'flotation' },
+  { id: 'tooltip-container', label: 'ContainerBox', panelKind: 'container' },
+  { id: 'tooltip-popup', label: 'PopupBox', panelKind: 'popup' },
+  { id: 'tooltip-subtle', label: 'SubtleCard', panelKind: 'subtle' },
+  { id: 'tooltip-molde', label: 'ModeLevel', panelKind: 'molde' },
 ] as const satisfies ReadonlyArray<{
   id: string;
   label: string;

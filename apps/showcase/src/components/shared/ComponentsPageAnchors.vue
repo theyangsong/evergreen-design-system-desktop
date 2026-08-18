@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
-import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import { componentAnchorItems } from '@/data/components';
+import { buildCatalogNavSegments } from '@/data/buildCatalogNavSegments';
 import {
   findCatalogChildPage,
   findCatalogItem,
@@ -15,9 +16,10 @@ import { useNavScrollFade } from '@/composables/useNavScrollFade';
 import styles from './ComponentsPageAnchors.module.css';
 
 const route = useRoute();
-const router = useRouter();
 
 const activeSlug = computed(() => getComponentRouteSlug(route.path, route.params.slug));
+
+const navSegments = computed(() => buildCatalogNavSegments(componentAnchorItems));
 
 const childPage = computed(() => findCatalogChildPage(activeSlug.value));
 
@@ -37,6 +39,9 @@ const { activeId: scrollActiveId, refresh: refreshScrollSpy } = useScrollSpy(chi
 const activeNavId = computed(() => {
   if (childPage.value) {
     const { parent, child } = childPage.value;
+    if (child.hideSidebarBody) {
+      return parent.item.slug;
+    }
     return `${parent.item.slug}:${child.id}`;
   }
 
@@ -51,6 +56,8 @@ const listRef = ref<HTMLElement | null>(null);
 const scrollRef = ref<HTMLElement | null>(null);
 const linkRefs = new Map<string, HTMLElement>();
 const indicatorTop = ref(0);
+const indicatorLeft = ref(0);
+const indicatorWidth = ref(0);
 const indicatorHeight = ref(0);
 const indicatorVisible = ref(false);
 const indicatorMoveTransition = ref(true);
@@ -81,8 +88,12 @@ function syncIndicatorPosition() {
     return;
   }
 
-  indicatorTop.value = link.offsetTop;
-  indicatorHeight.value = link.offsetHeight;
+  const listRect = list.getBoundingClientRect();
+  const linkRect = link.getBoundingClientRect();
+  indicatorTop.value = linkRect.top - listRect.top;
+  indicatorLeft.value = linkRect.left - listRect.left;
+  indicatorWidth.value = linkRect.width;
+  indicatorHeight.value = linkRect.height;
   indicatorVisible.value = true;
 }
 
@@ -98,39 +109,6 @@ function syncIndicatorWithAnimation(previousNavId = '') {
   indicatorVisible.value = true;
 }
 
-async function scrollToAnchor(anchorId: string, behavior: ScrollBehavior = 'smooth') {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    await nextTick();
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
-    });
-
-    const element = document.getElementById(anchorId);
-    if (element) {
-      element.scrollIntoView({ behavior, block: 'start' });
-      return true;
-    }
-  }
-
-  return false;
-}
-
-async function scrollToChildSection(event: MouseEvent, parentSlug: string, anchorId: string) {
-  event.preventDefault();
-
-  if (activeSlug.value !== parentSlug) {
-    await router.push({
-      name: 'component-detail',
-      params: { slug: parentSlug },
-      hash: `#${anchorId}`,
-    });
-    return;
-  }
-
-  await router.replace({ hash: `#${anchorId}` });
-  await scrollToAnchor(anchorId);
-}
-
 function moleculeNavTo(slug: string) {
   const entry = findCatalogItem(slug);
   if (entry && moleculeUsesChildPages(entry.item)) {
@@ -139,8 +117,34 @@ function moleculeNavTo(slug: string) {
   return { name: 'component-detail', params: { slug } };
 }
 
+function isFamilyNavItem(item: (typeof componentAnchorItems)[number]) {
+  return (
+    !item.kind &&
+    !item.standalonePage &&
+    (item.depth === 2 || item.depth === 3)
+  );
+}
+
+function isHiddenSidebarBody(item: (typeof componentAnchorItems)[number]) {
+  return Boolean(item.hideSidebarBody);
+}
+
 function isLinkActive(item: (typeof componentAnchorItems)[number]) {
-  if (item.depth === 3) {
+  if (item.depth && item.depth >= 2 && item.depth <= 5 && item.standalonePage) {
+    return activeNavId.value === item.id;
+  }
+
+  if (isFamilyNavItem(item)) {
+    if (childPage.value) {
+      const bodySlug = getMoleculeLandingPageSlug(childPage.value.parent.item);
+      if (activeSlug.value !== bodySlug) {
+        return false;
+      }
+      return childPage.value.parent.item.slug === item.id;
+    }
+    if (childAnchorIds.value.length) {
+      return false;
+    }
     return activeNavId.value === item.id;
   }
 
@@ -208,61 +212,92 @@ onBeforeUnmount(() => {
           indicatorMoveTransition && styles.activeIndicatorMove,
         ]"
         :style="{
-          transform: `translateY(${indicatorTop}px)`,
+          transform: `translate(${indicatorLeft}px, ${indicatorTop}px)`,
+          width: `${indicatorWidth}px`,
           height: `${indicatorHeight}px`,
         }"
         aria-hidden="true"
       />
 
-      <template v-for="item in componentAnchorItems" :key="item.id">
-        <span
-          v-if="item.depth === 1"
-          :class="styles.sectionLabel"
-        >
-          {{ item.label }}
-        </span>
+      <template v-for="segment in navSegments" :key="segment.type === 'item' ? segment.item.id : `scene-branch-${segment.items[0]?.id}`">
+        <template v-if="segment.type === 'item'">
+          <span
+            v-if="segment.item.depth === 1"
+            :class="styles.sectionLabel"
+          >
+            {{ segment.item.label }}
+          </span>
 
-        <RouterLink
-          v-else-if="item.depth === 2"
-          :ref="(element) => setLinkRef(item.id, element)"
-          :to="moleculeNavTo(item.id)"
-          :class="[
-            styles.link,
-            styles.linkNested,
-            isLinkActive(item) && styles.linkActive,
-          ]"
-        >
-          {{ item.label }}
-        </RouterLink>
+          <RouterLink
+            v-else-if="isFamilyNavItem(segment.item)"
+            :ref="(element) => setLinkRef(segment.item.id, element)"
+            :to="moleculeNavTo(segment.item.id)"
+            :class="[
+              styles.link,
+              styles.linkNested,
+              isLinkActive(segment.item) && styles.linkActive,
+            ]"
+          >
+            {{ segment.item.label }}
+          </RouterLink>
 
-        <RouterLink
-          v-else-if="item.depth === 3 && item.standalonePage && item.pageSlug"
-          :ref="(element) => setLinkRef(item.id, element)"
-          :to="`/components/${item.pageSlug}`"
-          :class="[
-            styles.link,
-            styles.linkNested,
-            styles.linkNestedDeep,
-            isLinkActive(item) && styles.linkActive,
-          ]"
-        >
-          {{ item.label }}
-        </RouterLink>
+          <span
+            v-else-if="segment.item.kind === 'navGroup'"
+            :class="[
+              styles.navGroupLabel,
+              segment.item.depth === 2 && styles.organGroupLabel,
+            ]"
+          >
+            {{ segment.item.label }}
+          </span>
 
-        <a
-          v-else-if="item.depth === 3 && item.parentSlug && item.anchorId"
-          :ref="(element) => setLinkRef(item.id, element as Element | null)"
-          :href="`/components/${item.parentSlug}#${item.anchorId}`"
-          :class="[
-            styles.link,
-            styles.linkNested,
-            styles.linkNestedDeep,
-            isLinkActive(item) && styles.linkActive,
-          ]"
-          @click="scrollToChildSection($event, item.parentSlug, item.anchorId)"
-        >
-          {{ item.label }}
-        </a>
+          <span
+            v-else-if="segment.item.kind === 'navSection' || segment.item.kind === 'navSubgroup'"
+            :class="[
+              styles.link,
+              styles.linkNested,
+              styles.linkNestedDeep,
+              styles.navSectionLabel,
+              segment.item.kind === 'navSubgroup' && styles.navSubgroupLabel,
+            ]"
+          >
+            {{ segment.item.label }}
+          </span>
+
+          <RouterLink
+            v-else-if="
+              segment.item.standalonePage &&
+              segment.item.pageSlug &&
+              !isHiddenSidebarBody(segment.item)
+            "
+            :ref="(element) => setLinkRef(segment.item.id, element)"
+            :to="`/components/${segment.item.pageSlug}`"
+            :class="[
+              styles.link,
+              styles.linkNested,
+              styles.linkNestedDeep,
+              isLinkActive(segment.item) && styles.linkActive,
+            ]"
+          >
+            {{ segment.item.label }}
+          </RouterLink>
+        </template>
+
+        <div v-else :class="styles.sceneBranch">
+          <RouterLink
+            v-for="item in segment.items"
+            :key="item.id"
+            :ref="(element) => setLinkRef(item.id, element)"
+            :to="`/components/${item.pageSlug}`"
+            :class="[
+              styles.link,
+              styles.linkNested,
+              isLinkActive(item) && styles.linkActive,
+            ]"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </div>
       </template>
       </nav>
     </div>

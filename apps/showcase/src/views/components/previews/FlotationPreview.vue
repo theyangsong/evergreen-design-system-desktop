@@ -149,6 +149,7 @@ const previewHostClass = computed(() =>
       v-model:customize-state="customize"
       anchor-id="flotation"
       title="Combo"
+      doc-tier="molecule"
       :show-doc-title="false"
       component-tag="EgFlotation"
       :import-code="flotationImportCode"

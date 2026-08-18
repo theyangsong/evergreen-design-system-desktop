@@ -30,7 +30,7 @@ function onResetPreview() {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="End Feedback Card"
+      title="EndFeedbackCard"
       :show-doc-title="false"
       component-tag="EgEndFeedbackCard"
       :import-code="endFeedbackCardImportCode"

@@ -5,7 +5,7 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import styles from './InputPreview.module.css';
-import { textareaEventRows, textareaPropRows } from './inputSubPreviewData';
+import { textareaEventRows, textareaPropRows, textareaSlotRows } from './inputSubPreviewData';
 import {
   textareaCustomizeControls,
   textareaCustomizeDefaults,
@@ -38,6 +38,7 @@ const textareaUsageSnippet = computed(() =>
     <ComponentDocLayout
       v-model:customize-state="textareaCustomize"
       title="Textarea"
+      doc-tier="molecule"
       :show-doc-title="false"
       component-tag="EgTextarea"
       :import-code="textareaImportCode"
@@ -46,6 +47,7 @@ const textareaUsageSnippet = computed(() =>
       :usage-snippet-override="textareaUsageSnippet"
       :prop-rows="textareaPropRows"
       :event-rows="textareaEventRows"
+      :slot-rows="textareaSlotRows"
       props-section-id="input-textarea-props"
       @reset-preview="textareaValue = ''"
     >
