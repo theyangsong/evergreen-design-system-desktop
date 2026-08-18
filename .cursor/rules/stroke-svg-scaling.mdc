@@ -1,19 +1,20 @@
 ---
-description: Stroke-based SVG icons — non-scaling stroke when sizing with --icon-* tokens
+description: Stroke-based SVG icons — calc stroke-width compensation (Chrome 541684117 fallback)
 globs: packages/**/*,apps/showcase/**/*
 alwaysApply: false
 ---
 
 # 描边型 SVG 放大
 
-完整方案见 `packages/components/docs/icon-stroke-scaling.md`（对齐 **eds-doc** `renderIconHtml`）。
+完整方案与 **Chrome 153 验证清单** 见 `packages/components/docs/icon-stroke-scaling.md`。
 
-## EgIcon
+## EgIcon（当前回退）
 
-- `sizeIconMarkup`：显式 `svg width/height` + attribute `stroke` / `stroke-width`
-- **不用** CSS stroke、**不用** `vector-effect`
-- 32 viewBox → displayPx：`stroke_user = 1.4 × 32 / displayPx`
+- **不用** `vector-effect: non-scaling-stroke` — [Chromium 541684117](https://issues.chromium.org/issues/541684117)，153 前回归
+- calc：`stroke-width: calc(var(--eds-icon-stroke-screen) * 32 / var(--eds-icon-display-px))`
+- **不用** `shape-rendering`
+- 业务例外：`--eds-icon-stroke-screen: var(--stroke-md)` 等
 
-## Showcase 手写 SVG
+## 153 后
 
-仍可用 `stroke-width: var(--stroke-lg)` + `vector-effect: non-scaling-stroke`（与 EgIcon 管线分离）。
+按 `icon-stroke-scaling.md` 验证清单通过后，可评估切回 `vector-effect` 简化公式。

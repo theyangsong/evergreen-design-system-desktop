@@ -28,7 +28,7 @@ const displayPx = ref<number>(ICON_PX[props.size]);
 
 function syncDisplayPx() {
   const px = rootRef.value?.getBoundingClientRect().width ?? 0;
-  if (px > 0) displayPx.value = px;
+  if (px > 0) displayPx.value = Math.round(px);
 }
 
 let resizeObserver: ResizeObserver | undefined;
@@ -53,7 +53,15 @@ const sizedMarkup = computed(() => {
   const icon = processed.value;
   if (!icon) return '';
   const px = props.fit ? displayPx.value : ICON_PX[props.size];
-  return sizeIconMarkup(icon.markup, px, icon.colorMode === 'token');
+  return sizeIconMarkup(icon.markup, px);
+});
+
+const iconStrokeStyle = computed(() => {
+  const icon = processed.value;
+  if (!icon || icon.colorMode !== 'token') return undefined;
+  const px = Math.round(props.fit ? displayPx.value : ICON_PX[props.size]);
+  const safePx = px > 0 ? px : ICON_PX[props.size];
+  return { '--eds-icon-display-px': String(safePx) } as Record<string, string>;
 });
 
 const kindClass = computed(() => {
@@ -80,6 +88,7 @@ const ariaLabel = computed(() => props.label || String(props.name));
     v-if="processed"
     ref="rootRef"
     :class="hostClass"
+    :style="iconStrokeStyle"
     role="img"
     :data-icon="name"
     :aria-label="label ? ariaLabel : undefined"

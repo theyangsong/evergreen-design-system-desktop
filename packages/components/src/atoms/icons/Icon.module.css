@@ -39,9 +39,17 @@
   height: 100%;
 }
 
-/*
- * token 线稿：描边几何在 sizeIconMarkup attribute（对齐 eds-doc），勿用 CSS stroke / vector-effect。
- */
+/* token 线稿：calc 补偿 viewBox 缩放；暂不用 vector-effect（Chrome <153 回归，见 icon-stroke-scaling.md） */
+.tokenKind {
+  --eds-icon-stroke-screen: var(--stroke-lg);
+  --eds-icon-display-px: 20;
+}
+
+.tokenKind :global(.eds-i-s) {
+  stroke: currentColor;
+  stroke-width: calc(var(--eds-icon-stroke-screen) * 32 / var(--eds-icon-display-px));
+}
+
 .tokenFillPrimary :global(.eds-i-f) {
   fill: currentColor;
 }

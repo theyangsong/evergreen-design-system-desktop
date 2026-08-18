@@ -279,10 +279,7 @@
   width: var(--icon-md);
   height: var(--icon-md);
   color: var(--stroke-base-secondary);
-}
-
-.itemTitleIcon :global(.eds-i-s) {
-  stroke-width: var(--stroke-md);
+  --eds-icon-stroke-screen: var(--stroke-md);
 }
 
 .itemValueCrypto {

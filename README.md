@@ -53,11 +53,19 @@ import { EgButton } from '@eds-evergreen/desktop/components';
 import { EgVerifyRingDots } from '@eds-evergreen/desktop/animations';
 ```
 
-维护者发布流程：
+维护者发布流程（与 0.1.0 相同，终端会打开浏览器完成 npm 认证）：
 
 ```bash
 pnpm build:desktop
-pnpm --filter @eds-evergreen/desktop publish --access public --no-git-checks --otp=你的6位验证码
+pnpm --filter @eds-evergreen/desktop publish --access public --no-git-checks
+```
+
+若 `~/.npmrc` 里配置了普通 token 且报 `EOTP`，先删掉 token 再走浏览器登录：
+
+```bash
+npm config delete //registry.npmjs.org/:_authToken
+npm login --auth-type=web
+pnpm --filter @eds-evergreen/desktop publish --access public --no-git-checks
 ```
 
 详见 [packages/desktop/README.md](packages/desktop/README.md)。

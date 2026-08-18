@@ -86,9 +86,13 @@ function injectClass(attrs: string, className: string): string {
   return `${attrs} class="${className}"`;
 }
 
-/** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
+/** 移除 token 色值与内联描边宽度，描边改由 CSS calc 补偿（见 Icon.module.css）。 */
 function stripTokenColors(attrs: string): string {
-  return attrs.replace(/\sstyle="[^"]*"/gi, '').replace(/\s(stroke|fill)="#[^"]*"/gi, '');
+  return attrs
+    .replace(/\sstyle="[^"]*"/gi, '')
+    .replace(/\s(stroke|fill)="#[^"]*"/gi, '')
+    .replace(/\sstroke-width="[^"]*"/gi, '')
+    .replace(/\svector-effect="[^"]*"/gi, '');
 }
 
 function annotateTokenShapes(svg: string): string {
