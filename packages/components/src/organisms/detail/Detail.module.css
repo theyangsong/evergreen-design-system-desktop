@@ -281,10 +281,8 @@
   color: var(--stroke-base-secondary);
 }
 
-/* Detail 行首 icon：屏上 1.1px（stroke-md）；须 non-scaling-stroke，勿裸写 stroke: */
 .itemTitleIcon :global(.eds-i-s) {
   stroke-width: var(--stroke-md);
-  vector-effect: non-scaling-stroke;
 }
 
 .itemValueCrypto {

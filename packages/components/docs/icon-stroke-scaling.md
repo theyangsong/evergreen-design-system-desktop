@@ -1,36 +1,31 @@
 # EgIcon 线稿描边缩放
 
-## 方案（现行）
+## 现行方案（2026-08-14 稳定版）
 
-EgIcon 将 **32×32 viewBox** 缩放到 16/20/24px。线稿描边对应 `--stroke-lg`（1.4px）。
+EgIcon 将 **32×32 viewBox** 缩放到 16/20/24px。线稿 path 源稿保留 **`stroke-width="1.4"`**（inline attribute）。
 
 ### 实现
 
-1. **`processSvg`**：path 打 `class="eds-i-s"`，**保留** `stroke-width="1.4"` 等结构属性，只移除 `#020304` 等 token 色值
+1. **`processSvg`**：path 打 `eds-i-s`，保留 inline `stroke-width`，只剥 token 色值
 2. **`Icon.module.css`**：
 
 ```css
 .tokenKind :global(.eds-i-s) {
   stroke: currentColor;
-  stroke-width: var(--stroke-lg, 1.4px);
   vector-effect: non-scaling-stroke;
 }
 ```
 
+**不要**在 CSS 里再写 `stroke-width: var(--stroke-lg)`——会与 inline 1.4 双源，Chrome 下易偏细。
+
 3. **`Icon.vue`**：无运行时 JS
 
-### Pages fallback
+### 与 8/18 实验的区别
 
-Showcase 的 Desktop token 经 postcss 挂在 `.desktopTokens` 下。极少数生产构建场景 `--stroke-lg` 未继承到 v-html 内 path 时，`1.4px` fallback 保证描边仍精准，**不加粗**。
+8/18 晚间多次改动（CSS var、attribute-only、ResizeObserver）均已回退。以 **eb3b0c3（8/14）** 为准。
 
-## 不要做的事
+## 业务侧
 
-| 已证伪 | 原因 |
-|--------|------|
-| ResizeObserver 反算 `--eds-icon-stroke-user` | 运行时补丁，非正统 SVG 方案 |
-| 去掉 inline `stroke-width` 只靠 CSS | 本地 Chrome 回归变细 |
-| 全 attribute `vector-effect` 替代 CSS | 未解决 Chrome，还引入双源歧义 |
-
-## 本地 consumer
-
-`work-cregis-desktop` 通过 `link:` + Vite alias 读源码，token 全局可用，无需 npm 版本。
+- 勿在 `.eds-i-s` 上写 `stroke:`（会重置 stroke-width）
+- 改色用父级 `color`
+- Detail 行首 1.1px：仅覆写 `stroke-width: var(--stroke-md)`
