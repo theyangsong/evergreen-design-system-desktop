@@ -9,6 +9,7 @@ const repoRoot = resolve(__dirname, '../..');
 const tokensSpecDir = resolve(repoRoot, 'packages/tokens/spec');
 const tokensDistDir = resolve(repoRoot, 'packages/tokens/dist');
 const componentsSrcDir = resolve(repoRoot, 'packages/components/src');
+const animationsSrcDir = resolve(repoRoot, 'packages/animations/src');
 const tokensBuildScript = resolve(repoRoot, 'packages/tokens/scripts/build.mjs');
 
 /** spec 变更 → 重建 dist → full-reload；dist/css 外部重建 → full-reload；components 走 alias + HMR。 */
@@ -57,6 +58,7 @@ function watchDesktopTokens(): Plugin {
       server.watcher.add(tokensSpecDir);
       server.watcher.add(tokensDistDir);
       server.watcher.add(componentsSrcDir);
+      server.watcher.add(animationsSrcDir);
 
       server.watcher.on('change', (file) => {
         if (file.startsWith(tokensSpecDir)) {
@@ -75,6 +77,11 @@ function watchDesktopTokens(): Plugin {
         }
 
         if (file.startsWith(componentsSrcDir) && /\.(vue|css)$/.test(file)) {
+          scheduleFullReload(server);
+          return;
+        }
+
+        if (file.startsWith(animationsSrcDir) && /\.(vue|css)$/.test(file)) {
           scheduleFullReload(server);
         }
       });
@@ -139,6 +146,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
       // Dev/HMR：走组件源码 + 各 SFC 的 CSS Modules，避免 dist/index.css 与 dist JS 哈希不同步
       '@eds/desktop-components': resolve(__dirname, '../../packages/components/src/index.ts'),
+      '@eds/desktop-animations': resolve(__dirname, '../../packages/animations/src/index.ts'),
     },
   },
   css: {
@@ -147,7 +155,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['@eds/desktop-components'],
+    exclude: ['@eds/desktop-components', '@eds/desktop-animations'],
   },
   server: {
     host: true,
@@ -160,6 +168,7 @@ export default defineConfig({
       ignored: [
         '**/node_modules/**',
         '!**/packages/components/**',
+        '!**/packages/animations/**',
         '!**/packages/tokens/dist/**',
         '!**/packages/tokens/spec/**',
       ],

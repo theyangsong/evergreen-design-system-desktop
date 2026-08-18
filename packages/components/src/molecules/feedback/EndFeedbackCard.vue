@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EgDoneTick } from '../done-tick';
+import { EgDoneTick } from '@eds/desktop-animations';
 import styles from './Feedback.module.css';
 
 withDefaults(

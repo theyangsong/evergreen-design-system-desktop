@@ -26,6 +26,12 @@
       "@eds/desktop-components/*": [
         "../../packages/components/*"
       ],
+      "@eds/desktop-animations": [
+        "../../packages/animations"
+      ],
+      "@eds/desktop-animations/*": [
+        "../../packages/animations/*"
+      ],
       "@eds/desktop-tokens": [
         "../../packages/tokens"
       ],

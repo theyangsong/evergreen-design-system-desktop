@@ -20,7 +20,7 @@ const EDS_ROOT = resolve(__dirname, '..');
 const PROJECTS_ROOT = resolve(EDS_ROOT, '..');
 const EDS_PACKAGES = join(EDS_ROOT, 'packages');
 
-const EDS_DEPS = ['@eds/desktop-components', '@eds/desktop-tokens'];
+const EDS_DEPS = ['@eds/desktop-components', '@eds/desktop-tokens', '@eds/desktop-animations'];
 
 function parseArgs(argv) {
   const listOnly = argv.includes('--list');
@@ -117,7 +117,7 @@ function main() {
 
   if (!skipBuild) {
     console.log('\n=== Building eds-desktop ===');
-    run('pnpm build:tokens && pnpm build:components', EDS_ROOT);
+    run('pnpm build:tokens && pnpm build:animations && pnpm build:components', EDS_ROOT);
   }
 
   for (const c of consumers) {

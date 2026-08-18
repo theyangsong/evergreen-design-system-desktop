@@ -86,6 +86,14 @@ function injectClass(attrs: string, className: string): string {
   return `${attrs} class="${className}"`;
 }
 
+const NON_SCALING_STROKE = 'non-scaling-stroke';
+
+/** vector-effect 不继承，须在 path/line 等节点写 presentation attribute（比仅靠 CSS 更稳）。 */
+function injectNonScalingStroke(attrs: string): string {
+  if (/vector-effect=/i.test(attrs)) return attrs;
+  return `${attrs} vector-effect="${NON_SCALING_STROKE}"`;
+}
+
 /** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
 function stripTokenColors(attrs: string): string {
   return attrs.replace(/\sstyle="[^"]*"/gi, '').replace(/\s(stroke|fill)="#[^"]*"/gi, '');
@@ -99,11 +107,25 @@ function annotateTokenShapes(svg: string): string {
     const fill = shapeHasTokenFill(attrs);
     let clean = stripTokenColors(attrs);
     const classes: string[] = [];
-    if (stroke) classes.push('eds-i-s');
+    if (stroke) {
+      classes.push('eds-i-s');
+      clean = injectNonScalingStroke(clean);
+    }
     if (fill) classes.push('eds-i-f');
     if (classes.length > 0) {
       clean = injectClass(clean, classes.join(' '));
     }
+    return `<${tag}${clean}${selfClose}>`;
+  });
+}
+
+/** fixed 调色板图标：保留原色，仅对 stroke 形状补 non-scaling attribute。 */
+function annotateFixedStrokeShapes(svg: string): string {
+  const shapeRe = new RegExp(`<${SHAPE_TAG}\\b([^>]*?)(\\/?)>`, 'gi');
+
+  return svg.replace(shapeRe, (match, tag: string, attrs: string, selfClose: string) => {
+    if (!shapeHasStroke(tag, attrs)) return match;
+    const clean = injectNonScalingStroke(attrs);
     return `<${tag}${clean}${selfClose}>`;
   });
 }
@@ -129,6 +151,7 @@ function usesFixedPalette(raw: string, colors: Set<string>): boolean {
 function processFixedSvg(iconName: string, raw: string): ProcessedIcon {
   let svg = normalizeSvgShell(iconName, raw);
   svg = stripRedundantStylesOnly(svg);
+  svg = annotateFixedStrokeShapes(svg);
   return {
     markup: svg.trim(),
     colorMode: 'fixed',

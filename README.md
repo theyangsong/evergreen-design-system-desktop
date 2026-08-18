@@ -24,13 +24,43 @@ pnpm dev:storybook      # Storybook → http://localhost:6006
 ```
 eds-desktop/
 ├── packages/
-│   ├── tokens/          # Design tokens (spec → CSS)
-│   └── components/      # Vue 3 components (CSS Modules) — see packages/components/README.md
+│   ├── desktop/         # @eds-evergreen/desktop — **唯一对外发布的 npm 总包**
+│   ├── tokens/          # 内部：tokens 构建产物
+│   ├── animations/      # 内部：场景动画
+│   ├── components/      # 内部：Vue 组件
+│   ├── patterns/        # 内部：页面模式（持续扩展）
+│   └── workflows/       # 内部：业务流程（持续扩展）
 ├── apps/
 │   ├── showcase/        # Desktop 预览站（token + 组件画廊）
 │   └── storybook/       # 组件文档 + 设计规范（Storybook）
 └── figma.config.json    # Figma file configuration
 ```
+
+## Publish to npm (`@eds-evergreen/desktop`)
+
+npm 组织：**eds-evergreen**
+
+对外只发布 **一个包**，五根柱子通过 subpath 使用：
+
+```bash
+pnpm add @eds-evergreen/desktop vue
+```
+
+```ts
+import '@eds-evergreen/desktop/tokens';
+import '@eds-evergreen/desktop/components/style.css';
+import { EgButton } from '@eds-evergreen/desktop/components';
+import { EgVerifyRingDots } from '@eds-evergreen/desktop/animations';
+```
+
+维护者发布流程：
+
+```bash
+pnpm build:desktop
+pnpm --filter @eds-evergreen/desktop publish --access public --no-git-checks --otp=你的6位验证码
+```
+
+详见 [packages/desktop/README.md](packages/desktop/README.md)。
 
 ## Scripts
 
@@ -39,7 +69,9 @@ eds-desktop/
 | `pnpm dev` | Start Showcase preview site |
 | `pnpm dev:showcase` | Start Showcase preview site |
 | `pnpm dev:storybook` | Start Storybook |
-| `pnpm build` | Build all packages |
+| `pnpm build` | Build unified `@eds-evergreen/desktop` package |
+| `pnpm build:desktop` | Same as `build` |
+| `pnpm publish:desktop` | Build and publish `@eds-evergreen/desktop` to npm |
 | `pnpm build:tokens` | Build CSS variables from tokens |
 | `pnpm build:components` | Build Vue component library |
 | `pnpm sync:tokens` | Figma token sync helper |

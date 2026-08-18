@@ -14,12 +14,12 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'EvergreenComponents',
+      name: 'EvergreenAnimations',
       formats: ['es'],
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['vue', '@eds/desktop-tokens/corner-smoothing', '@eds/desktop-animations'],
+      external: ['vue'],
       output: {
         globals: {
           vue: 'Vue',

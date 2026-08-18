@@ -176,7 +176,7 @@ watch(
       scenario !== 'motion-processing' &&
       customize.tone === 'warning'
     ) {
-      customize.tone = 'success';
+      customize.tone = 'brand';
     }
   },
   { immediate: true },

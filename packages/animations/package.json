@@ -1,8 +1,8 @@
 {
-  "name": "@eds/desktop-components",
+  "name": "@eds/desktop-animations",
   "version": "0.1.0",
   "private": true,
-  "description": "Vue 3 components for EverGreen Design System (Desktop)",
+  "description": "Scene animations for EverGreen Design System (Desktop)",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -24,10 +24,6 @@
   },
   "peerDependencies": {
     "vue": "^3.5.0"
-  },
-  "dependencies": {
-    "@eds/desktop-tokens": "workspace:*",
-    "@eds/desktop-animations": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

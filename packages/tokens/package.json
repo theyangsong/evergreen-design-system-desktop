@@ -1,6 +1,7 @@
 {
   "name": "@eds/desktop-tokens",
   "version": "0.1.0",
+  "private": true,
   "description": "Design tokens for EverGreen Design System (Desktop)",
   "type": "module",
   "main": "./dist/css/index.css",

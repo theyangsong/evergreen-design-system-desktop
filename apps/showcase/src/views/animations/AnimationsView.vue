@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '@/styles/desktop-components-scope.css';
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import PageHeader from '@/components/shared/PageHeader.vue';

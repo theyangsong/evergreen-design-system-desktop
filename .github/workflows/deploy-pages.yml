@@ -55,7 +55,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Showcase
-        run: pnpm build:tokens && pnpm build:components && pnpm --filter @eds/desktop-showcase build:pages
+        run: pnpm build:tokens && pnpm build:animations && pnpm build:components && pnpm --filter @eds/desktop-showcase build:pages
 
       - name: Verify Showcase artifact
         run: |

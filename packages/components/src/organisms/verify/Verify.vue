@@ -7,8 +7,7 @@ import { EgInput } from '../../molecules/input';
 import { EgFormSubmission } from '../../molecules/feedback';
 import { EgLink } from '../../molecules/link';
 import { EgVerifyInput } from '../../molecules/verify-input';
-import { EgVerifyRingDots } from '../../molecules/verify-ring-dots';
-import { EgDoneTick } from '../../molecules/done-tick';
+import { EgVerifyRingDots, EgDoneTick } from '@eds/desktop-animations';
 import { getVerifyTypePreset, type VerifyType } from './verifyTypesCore';
 import styles from './Verify.module.css';
 

@@ -37,7 +37,7 @@ export type ScensMotionProcessingTone = keyof typeof scensMotionProcessingToneLa
 export const scensMotionCustomizeDefaults = {
   scenario: 'verify-ring-dots' as ScensMotionScenario,
   interaction: 'full' as ScensMotionInteraction,
-  tone: 'success' as ScensMotionTone,
+  tone: 'brand' as ScensMotionTone,
 };
 
 export const scensMotionCustomizeControls: DocCustomizeControl[] = [
