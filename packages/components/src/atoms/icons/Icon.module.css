@@ -40,14 +40,13 @@
 }
 
 /*
- * 线稿描边：EgIcon 按实际显示像素设置 --eds-icon-stroke-user（32/viewBox * 1.4），
- * 使屏上恒为 1.4px，不依赖 non-scaling-stroke（Chrome 在 CSS 缩放 SVG 时不稳）。
- * 勿用 var(--stroke-lg)（scoped token + v-html 在 Chrome 会失效）。
+ * token 线稿：CSS token + non-scaling-stroke（与 spec 一致）。
+ * fallback 1.4px：Showcase Pages 等 scoped token 未继承时仍保持精准描边。
  */
-.svgHost :global(.eds-i-s) {
-  fill: none;
+.tokenKind :global(.eds-i-s) {
   stroke: currentColor;
-  stroke-width: var(--eds-icon-stroke-user, 2.24);
+  stroke-width: var(--stroke-lg, 1.4px);
+  vector-effect: non-scaling-stroke;
 }
 
 .tokenFillPrimary :global(.eds-i-f) {
@@ -56,4 +55,11 @@
 
 .tokenFillBrand :global(.eds-i-f) {
   fill: var(--text-brand-primary);
+}
+
+/* fixed 彩色：保留 SVG 原 fill/stroke，仅统一描边缩放 */
+.fixedKind :global([stroke-width]),
+.fixedKind :global(line),
+.fixedKind :global(polyline) {
+  vector-effect: non-scaling-stroke;
 }

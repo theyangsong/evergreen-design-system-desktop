@@ -86,27 +86,6 @@ function injectClass(attrs: string, className: string): string {
   return `${attrs} class="${className}"`;
 }
 
-function injectAttr(attrs: string, name: string, value: string): string {
-  if (new RegExp(`\\b${name}=`, 'i').test(attrs)) return attrs;
-  return `${attrs} ${name}="${value}"`;
-}
-
-/** 线稿描边宽度由 EgIcon 按显示像素反算（--eds-icon-stroke-user），此处不写 stroke-width。 */
-function stripStrokeWidth(attrs: string): string {
-  return attrs.replace(/\sstroke-width="[^"]*"/gi, '');
-}
-
-/**
- * token 线稿：颜色走 stroke="currentColor"；几何宽度由 Icon.vue 注入的 CSS 变量控制。
- * 避免 Chrome 对 non-scaling-stroke + CSS 缩放 SVG 的不稳定表现。
- */
-function annotateTokenStrokeGeometry(attrs: string): string {
-  let next = stripStrokeWidth(attrs);
-  next = injectAttr(next, 'fill', 'none');
-  next = injectAttr(next, 'stroke', 'currentColor');
-  return next;
-}
-
 /** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
 function stripTokenColors(attrs: string): string {
   return attrs.replace(/\sstyle="[^"]*"/gi, '').replace(/\s(stroke|fill)="#[^"]*"/gi, '');
@@ -120,21 +99,13 @@ function annotateTokenShapes(svg: string): string {
     const fill = shapeHasTokenFill(attrs);
     let clean = stripTokenColors(attrs);
     const classes: string[] = [];
-    if (stroke) {
-      classes.push('eds-i-s');
-      clean = annotateTokenStrokeGeometry(clean);
-    }
+    if (stroke) classes.push('eds-i-s');
     if (fill) classes.push('eds-i-f');
     if (classes.length > 0) {
       clean = injectClass(clean, classes.join(' '));
     }
     return `<${tag}${clean}${selfClose}>`;
   });
-}
-
-/** fixed 调色板：保留源稿 stroke-width / 颜色，不参与 token 描边补偿。 */
-function annotateFixedStrokeShapes(svg: string): string {
-  return svg;
 }
 
 function stripRedundantStylesOnly(svg: string): string {
@@ -158,7 +129,6 @@ function usesFixedPalette(raw: string, colors: Set<string>): boolean {
 function processFixedSvg(iconName: string, raw: string): ProcessedIcon {
   let svg = normalizeSvgShell(iconName, raw);
   svg = stripRedundantStylesOnly(svg);
-  svg = annotateFixedStrokeShapes(svg);
   return {
     markup: svg.trim(),
     colorMode: 'fixed',

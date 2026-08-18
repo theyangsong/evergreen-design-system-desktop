@@ -8,23 +8,23 @@ alwaysApply: false
 
 完整方案见 `packages/components/docs/icon-stroke-scaling.md`。
 
-## 问题
+## EgIcon（token 线稿）
 
-用 CSS 放大 SVG（例如 `width` / `height` 从 `--icon-md` 调到 `--icon-lg`）时，若图形用 **stroke 描边**绘制，描边会随图形一起 **同比变粗**，视觉上像「边框被强行放大」，与设计稿不符。
+- `processSvg`：path 打 `eds-i-s`，**保留**源稿 `stroke-width="1.4"`，只剥 token 色值
+- `Icon.module.css`：
 
-EgIcon 将 32×32 viewBox 缩到 16/20/24px 时，若无补偿，屏上描边约 0.7–1.05px，Chrome 尤其明显。
+```css
+.tokenKind :global(.eds-i-s) {
+  stroke: currentColor;
+  stroke-width: var(--stroke-lg, 1.4px);
+  vector-effect: non-scaling-stroke;
+}
+```
 
-## EgIcon（token 线稿）— 现行方案
-
-- **不要**用 `vector-effect: non-scaling-stroke`（Chrome + CSS 缩放 SVG 不稳）
-- **不要**用 `stroke-width: var(--stroke-lg)` 打在 v-html 内 path（scoped token + Chrome 失效）
-- `processSvg`：path 写 `stroke="currentColor"`、`fill="none"`、class `eds-i-s`；**不写** stroke-width / vector-effect
-- `Icon.vue`：`ResizeObserver` → `--eds-icon-stroke-user = 1.4 × 32 / displayPx`
-- `Icon.module.css`：`.eds-i-s { stroke-width: var(--eds-icon-stroke-user) }` → 屏上恒 **1.4px**
+- `1.4px` fallback：Showcase Pages 等 scoped token 未继承时仍保持精准描边
+- **不要**用 ResizeObserver / 运行时反算；**不要**去掉 inline `stroke-width` 后只靠 CSS
 
 ## Showcase 手写 SVG（非 EgIcon）
-
-仍可用 CSS + token：
 
 ```css
 .myIcon :global(path) {
@@ -37,17 +37,9 @@ EgIcon 将 32×32 viewBox 缩到 16/20/24px 时，若无补偿，屏上描边约
 
 `vector-effect` **不继承**，每个 path/line 须单独设。
 
-## Toggle 外环（Checkbox / Radio / Decide）
-
-Figma 16×16 含 1.4 描边。外环用 inset ring，不用 border 占内容区：
+## Toggle 外环
 
 ```css
 border: none;
 box-shadow: inset 0 0 0 var(--stroke-lg) var(--stroke-base-quaternary);
 ```
-
-选中/填充态去掉 `box-shadow`，仅保留背景色。
-
-## 不适用
-
-fill 实心图标、fixed 多色硬编码 SVG（除非同样走 EgIcon token 管线）。

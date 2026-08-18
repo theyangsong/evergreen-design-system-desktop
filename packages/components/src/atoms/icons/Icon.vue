@@ -1,17 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import styles from './Icon.module.css';
 import { getProcessedIcon, type IconName } from './iconRegistry';
 import type { IconFillTone } from './processSvg';
-
-/** 与 --stroke-lg / 32 viewBox 一致：屏上 1.4px → user-space = 1.4 * 32 / displayPx */
-const TOKEN_SCREEN_STROKE_PX = 1.4;
-const VIEWBOX_SIZE = 32;
-const ICON_PX = { sm: 16, md: 20, lg: 24 } as const;
-
-function strokeUserForDisplayPx(px: number) {
-  return (TOKEN_SCREEN_STROKE_PX * VIEWBOX_SIZE) / px;
-}
 
 const props = withDefaults(
   defineProps<{
@@ -28,28 +19,6 @@ const props = withDefaults(
     fit: false,
   },
 );
-
-const rootRef = ref<HTMLElement | null>(null);
-const strokeUser = ref(strokeUserForDisplayPx(ICON_PX[props.size]));
-
-function syncStrokeUser() {
-  const px = rootRef.value?.getBoundingClientRect().width ?? 0;
-  if (px <= 0) return;
-  strokeUser.value = strokeUserForDisplayPx(px);
-}
-
-let resizeObserver: ResizeObserver | undefined;
-
-onMounted(() => {
-  syncStrokeUser();
-  if (typeof ResizeObserver === 'undefined' || !rootRef.value) return;
-  resizeObserver = new ResizeObserver(() => syncStrokeUser());
-  resizeObserver.observe(rootRef.value);
-});
-
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
-});
 
 const processed = computed(() => getProcessedIcon(String(props.name)));
 
@@ -70,18 +39,12 @@ const hostClass = computed(() => [
 ]);
 
 const ariaLabel = computed(() => props.label || String(props.name));
-
-const rootStyle = computed(() => ({
-  '--eds-icon-stroke-user': String(strokeUser.value),
-}));
 </script>
 
 <template>
   <span
     v-if="processed"
-    ref="rootRef"
     :class="hostClass"
-    :style="rootStyle"
     role="img"
     :data-icon="name"
     :aria-label="label ? ariaLabel : undefined"
