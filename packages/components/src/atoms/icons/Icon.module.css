@@ -40,9 +40,16 @@
 }
 
 /*
- * token 线稿：描边几何在 processSvg attribute（stroke-width 1.4 + vector-effect）；
- * 颜色经 stroke="currentColor" 继承 EgIcon 的 color。勿再用 CSS stroke-width（Chrome 不稳）。
+ * 线稿描边：EgIcon 按实际显示像素设置 --eds-icon-stroke-user（32/viewBox * 1.4），
+ * 使屏上恒为 1.4px，不依赖 non-scaling-stroke（Chrome 在 CSS 缩放 SVG 时不稳）。
+ * 勿用 var(--stroke-lg)（scoped token + v-html 在 Chrome 会失效）。
  */
+.svgHost :global(.eds-i-s) {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--eds-icon-stroke-user, 2.24);
+}
+
 .tokenFillPrimary :global(.eds-i-f) {
   fill: currentColor;
 }
@@ -50,5 +57,3 @@
 .tokenFillBrand :global(.eds-i-f) {
   fill: var(--text-brand-primary);
 }
-
-/* fixed 彩色：non-scaling 由 processSvg attribute 注入 */

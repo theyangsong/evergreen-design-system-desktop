@@ -2,7 +2,7 @@
 
 > **npm 包：** [`@eds-evergreen/desktop`](https://www.npmjs.com/package/@eds-evergreen/desktop)  
 > **在线文档：** [Showcase 预览站](https://theyangsong.github.io/evergreen-design-system-desktop/)  
-> **适用版本：** `0.1.3` 起（icon 描边已回退至稳定实现；`data-icon` 保留）
+> **适用版本：** `0.1.5` 起（EgIcon 线稿描边 Chrome 兼容：`--eds-icon-stroke-user` 反算；详见 `packages/components/docs/icon-stroke-scaling.md`）
 
 EverGreen Desktop 是一套面向 **Vue 3 桌面端** 的设计系统，包含设计 Token、场景动画、UI 组件等能力。对外以 **一个 npm 包** 发布，通过 **子路径（subpath）** 按需引用。
 

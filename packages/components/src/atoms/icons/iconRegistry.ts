@@ -53,7 +53,7 @@ export const iconFileNames = iconNames;
 
 const processedCache = new Map<string, ProcessedIcon>();
 /** Bump when processSvg output shape changes (invalidates in-memory cache in long dev sessions). */
-const PROCESSED_ICON_CACHE_VERSION = 3;
+const PROCESSED_ICON_CACHE_VERSION = 4;
 let activeCacheVersion = 0;
 
 function ensureProcessedCacheFresh() {

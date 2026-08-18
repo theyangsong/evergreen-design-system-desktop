@@ -6,32 +6,28 @@ alwaysApply: false
 
 # 描边型 SVG 放大：边框不随缩放变粗
 
+完整方案见 `packages/components/docs/icon-stroke-scaling.md`。
+
 ## 问题
 
 用 CSS 放大 SVG（例如 `width` / `height` 从 `--icon-md` 调到 `--icon-lg`）时，若图形用 **stroke 描边**绘制，描边会随图形一起 **同比变粗**，视觉上像「边框被强行放大」，与设计稿不符。
 
-## 原则
+EgIcon 将 32×32 viewBox 缩到 16/20/24px 时，若无补偿，屏上描边约 0.7–1.05px，Chrome 尤其明显。
 
-- 描边宽度用 **Evergreen token**（如 `var(--stroke-lg)`、`calc(var(--stroke-xs) * 0.7)`），不要写死 px（除非 spec 明确要求且无 token）。
-- **token 线稿（EgIcon）**：`processSvg` 在 path 上写 `stroke-width="1.4"`（与 `--stroke-lg` 一致）、`stroke="currentColor"`、`vector-effect="non-scaling-stroke"` **presentation attribute**；**不要**再用 CSS `stroke-width: var(--stroke-lg)`（Chrome 对 v-html 内 SVG 不稳定）。
-- 在 **实际绘制的节点**（`<path>`、`<line>`、`<circle>` 等）上设置 `vector-effect: non-scaling-stroke`（Showcase 手写 SVG 示例仍可用 CSS）。
-- **`vector-effect` 不会继承**：父级 `<svg>` 或 `<g>` 上设置无效，每个 path/line 都要单独设。
+## EgIcon（token 线稿）— 现行方案
 
-## CSS 写法（推荐与模板一致）
+- **不要**用 `vector-effect: non-scaling-stroke`（Chrome + CSS 缩放 SVG 不稳）
+- **不要**用 `stroke-width: var(--stroke-lg)` 打在 v-html 内 path（scoped token + Chrome 失效）
+- `processSvg`：path 写 `stroke="currentColor"`、`fill="none"`、class `eds-i-s`；**不写** stroke-width / vector-effect
+- `Icon.vue`：`ResizeObserver` → `--eds-icon-stroke-user = 1.4 × 32 / displayPx`
+- `Icon.module.css`：`.eds-i-s { stroke-width: var(--eds-icon-stroke-user) }` → 屏上恒 **1.4px**
+
+## Showcase 手写 SVG（非 EgIcon）
+
+仍可用 CSS + token：
 
 ```css
-.myIcon {
-  display: block;
-  width: var(--icon-lg);
-  height: var(--icon-lg);
-  overflow: visible;
-  color: var(--text-base-primary);
-}
-
-/* 仅适用于 stroke 图标：fill: none + stroke */
-.myIcon :global(path),
-.myIcon :global(line),
-.myIcon :global(circle) {
+.myIcon :global(path) {
   fill: none;
   stroke: currentColor;
   stroke-width: var(--stroke-lg);
@@ -39,16 +35,11 @@ alwaysApply: false
 }
 ```
 
-## 适用范围
+`vector-effect` **不继承**，每个 path/line 须单独设。
 
-- **Desktop 组件**（`packages/components/**`）内随 `--icon-sm|md|lg` 缩放的 stroke 图标。
-- Showcase **`.desktopTokens`** 预览区内的示例 SVG（与 live 组件一致，用 Desktop `--stroke-*` / `--icon-*`）。
+## Toggle 外环（Checkbox / Radio / Decide）
 
-## Toggle 控件外环（Checkbox / Radio / Decide）
-
-Figma 为 **16×16 含 1.4 描边**。若用 `border: var(--stroke-lg)` + `box-sizing: border-box`，内容区会缩到约 13.2px，而 `EgIcon` 仍按 **16px + non-scaling 1.4px** 描边绘制，环与勾/点比例会偏离稿面。
-
-**外环用 inset ring，不用 border 占内容区：**
+Figma 16×16 含 1.4 描边。外环用 inset ring，不用 border 占内容区：
 
 ```css
 border: none;
@@ -57,4 +48,6 @@ box-shadow: inset 0 0 0 var(--stroke-lg) var(--stroke-base-quaternary);
 
 选中/填充态去掉 `box-shadow`，仅保留背景色。
 
-**不适用**：fill 实心图标、壳层 Website 装饰 SVG（除非同样用 stroke + token 缩放）。
+## 不适用
+
+fill 实心图标、fixed 多色硬编码 SVG（除非同样走 EgIcon token 管线）。

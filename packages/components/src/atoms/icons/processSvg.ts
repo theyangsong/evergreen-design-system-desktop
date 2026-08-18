@@ -86,29 +86,25 @@ function injectClass(attrs: string, className: string): string {
   return `${attrs} class="${className}"`;
 }
 
-/** 与 spec --stroke-lg 一致（1.4px @ 32 viewBox + non-scaling-stroke）。 */
-const TOKEN_STROKE_WIDTH = '1.4';
-const NON_SCALING_STROKE = 'non-scaling-stroke';
-
 function injectAttr(attrs: string, name: string, value: string): string {
   if (new RegExp(`\\b${name}=`, 'i').test(attrs)) return attrs;
   return `${attrs} ${name}="${value}"`;
 }
 
-/**
- * Chrome 对 v-html 内 path 的 `stroke-width: var(--stroke-lg)` 支持不稳定；
- * 描边几何走 SVG presentation attribute（精准 1.4，不加粗），颜色走 stroke="currentColor"。
- */
-function annotateTokenStrokeGeometry(attrs: string): string {
-  let next = attrs;
-  next = injectAttr(next, 'stroke-width', TOKEN_STROKE_WIDTH);
-  next = injectAttr(next, 'stroke', 'currentColor');
-  next = injectAttr(next, 'vector-effect', NON_SCALING_STROKE);
-  return next;
+/** 线稿描边宽度由 EgIcon 按显示像素反算（--eds-icon-stroke-user），此处不写 stroke-width。 */
+function stripStrokeWidth(attrs: string): string {
+  return attrs.replace(/\sstroke-width="[^"]*"/gi, '');
 }
 
-function annotateFixedStrokeGeometry(attrs: string): string {
-  return injectAttr(attrs, 'vector-effect', NON_SCALING_STROKE);
+/**
+ * token 线稿：颜色走 stroke="currentColor"；几何宽度由 Icon.vue 注入的 CSS 变量控制。
+ * 避免 Chrome 对 non-scaling-stroke + CSS 缩放 SVG 的不稳定表现。
+ */
+function annotateTokenStrokeGeometry(attrs: string): string {
+  let next = stripStrokeWidth(attrs);
+  next = injectAttr(next, 'fill', 'none');
+  next = injectAttr(next, 'stroke', 'currentColor');
+  return next;
 }
 
 /** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
@@ -136,15 +132,9 @@ function annotateTokenShapes(svg: string): string {
   });
 }
 
-/** fixed 调色板：保留原 stroke-width，仅补 non-scaling attribute。 */
+/** fixed 调色板：保留源稿 stroke-width / 颜色，不参与 token 描边补偿。 */
 function annotateFixedStrokeShapes(svg: string): string {
-  const shapeRe = new RegExp(`<${SHAPE_TAG}\\b([^>]*?)(\\/?)>`, 'gi');
-
-  return svg.replace(shapeRe, (match, tag: string, attrs: string, selfClose: string) => {
-    if (!shapeHasStroke(tag, attrs)) return match;
-    const clean = annotateFixedStrokeGeometry(attrs);
-    return `<${tag}${clean}${selfClose}>`;
-  });
+  return svg;
 }
 
 function stripRedundantStylesOnly(svg: string): string {
