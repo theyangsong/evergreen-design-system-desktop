@@ -6,26 +6,14 @@ alwaysApply: false
 
 # 描边型 SVG 放大
 
-完整方案见 `packages/components/docs/icon-stroke-scaling.md`。
+完整方案见 `packages/components/docs/icon-stroke-scaling.md`（对齐 **eds-doc** `renderIconHtml`）。
 
-## EgIcon（token 线稿）— 8/14 稳定版
+## EgIcon
 
-- `processSvg`：保留 path 上 inline `stroke-width="1.4"`，打 `eds-i-s`
-- `Icon.module.css` **仅**：
-
-```css
-.tokenKind :global(.eds-i-s) {
-  stroke: currentColor;
-  vector-effect: non-scaling-stroke;
-}
-```
-
-- **不要** CSS `stroke-width: var(--stroke-lg)`（与 inline 双源，Chrome 易偏细）
+- `sizeIconMarkup`：显式 `svg width/height` + attribute `stroke` / `stroke-width`
+- **不用** CSS stroke、**不用** `vector-effect`
+- 32 viewBox → displayPx：`stroke_user = 1.4 × 32 / displayPx`
 
 ## Showcase 手写 SVG
 
-可单独使用 `stroke-width: var(--stroke-lg)` + `vector-effect: non-scaling-stroke`。
-
-## Toggle 外环
-
-`box-shadow: inset 0 0 0 var(--stroke-lg) …`，不用 border 占内容区。
+仍可用 `stroke-width: var(--stroke-lg)` + `vector-effect: non-scaling-stroke`（与 EgIcon 管线分离）。

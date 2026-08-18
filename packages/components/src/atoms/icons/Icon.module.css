@@ -40,25 +40,12 @@
 }
 
 /*
- * token 图标：仅替换配色，不增删描边/填充结构。
- * eds-i-s / eds-i-f 由 processSvg 按 SVG 原结构标注。
+ * token 线稿：描边几何在 sizeIconMarkup attribute（对齐 eds-doc），勿用 CSS stroke / vector-effect。
  */
-.tokenKind :global(.eds-i-s) {
-  stroke: currentColor;
-  vector-effect: non-scaling-stroke;
-}
-
 .tokenFillPrimary :global(.eds-i-f) {
   fill: currentColor;
 }
 
 .tokenFillBrand :global(.eds-i-f) {
   fill: var(--text-brand-primary);
-}
-
-/* fixed 彩色：保留 SVG 原 fill/stroke，仅统一描边缩放 */
-.fixedKind :global([stroke-width]),
-.fixedKind :global(line),
-.fixedKind :global(polyline) {
-  vector-effect: non-scaling-stroke;
 }

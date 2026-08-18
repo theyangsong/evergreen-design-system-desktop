@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import styles from './Icon.module.css';
 import { getProcessedIcon, type IconName } from './iconRegistry';
 import type { IconFillTone } from './processSvg';
+import { sizeIconMarkup } from './sizeIconMarkup';
+
+const ICON_PX = { sm: 16, md: 20, lg: 24 } as const;
 
 const props = withDefaults(
   defineProps<{
@@ -20,7 +23,38 @@ const props = withDefaults(
   },
 );
 
+const rootRef = ref<HTMLElement | null>(null);
+const displayPx = ref<number>(ICON_PX[props.size]);
+
+function syncDisplayPx() {
+  const px = rootRef.value?.getBoundingClientRect().width ?? 0;
+  if (px > 0) displayPx.value = px;
+}
+
+let resizeObserver: ResizeObserver | undefined;
+
+onMounted(() => {
+  if (props.fit) {
+    syncDisplayPx();
+    if (typeof ResizeObserver !== 'undefined' && rootRef.value) {
+      resizeObserver = new ResizeObserver(() => syncDisplayPx());
+      resizeObserver.observe(rootRef.value);
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
+
 const processed = computed(() => getProcessedIcon(String(props.name)));
+
+const sizedMarkup = computed(() => {
+  const icon = processed.value;
+  if (!icon) return '';
+  const px = props.fit ? displayPx.value : ICON_PX[props.size];
+  return sizeIconMarkup(icon.markup, px, icon.colorMode === 'token');
+});
 
 const kindClass = computed(() => {
   const icon = processed.value;
@@ -44,11 +78,13 @@ const ariaLabel = computed(() => props.label || String(props.name));
 <template>
   <span
     v-if="processed"
+    ref="rootRef"
     :class="hostClass"
     role="img"
+    :data-icon="name"
     :aria-label="label ? ariaLabel : undefined"
     :aria-hidden="label ? undefined : true"
   >
-    <span class="eds-icon" :class="styles.svgHost" v-html="processed.markup" />
+    <span class="eds-icon" :class="styles.svgHost" v-html="sizedMarkup" />
   </span>
 </template>
