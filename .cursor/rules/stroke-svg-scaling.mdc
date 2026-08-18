@@ -14,8 +14,8 @@ alwaysApply: false
 
 - 描边宽度用 **Evergreen token**（如 `var(--stroke-lg)`、`calc(var(--stroke-xs) * 0.7)`），不要写死 px（除非 spec 明确要求且无 token）。
 - 在 **实际绘制的节点**（`<path>`、`<line>`、`<circle>` 等）上设置 `vector-effect: non-scaling-stroke`。
-- **`processSvg`** 会对 stroke 形状注入 `vector-effect="non-scaling-stroke"` presentation attribute（比仅靠 CSS 更稳）；`Icon.module.css` 仍保留同名 CSS 规则作 token 换色/线宽。
-- **`vector-effect` 不会继承**：父级 `<svg>` 或 `<g>` 上设置无效，每个 path/line 都要单独设（CSS 用 `:global(path)` 批量选时也要覆盖到每个形状）。
+- **`processSvg`** 会对 stroke 形状注入 `vector-effect="non-scaling-stroke"` presentation attribute，并 **移除** path 上内联 `stroke-width`（宽度单源：`var(--stroke-lg)` CSS，避免 Chrome attribute+CSS 双源歧义）。
+- **`vector-effect` 不继承**：父级 `<svg>` 或 `<g>` 上设置无效；token 线稿的 `vector-effect` 只写在 SVG attribute，不在 `Icon.module.css` 重复。
 
 ## CSS 写法（推荐与模板一致）
 

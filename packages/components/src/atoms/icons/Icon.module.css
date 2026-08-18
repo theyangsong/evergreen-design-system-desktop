@@ -46,7 +46,7 @@
 .tokenKind :global(.eds-i-s) {
   stroke: currentColor;
   stroke-width: var(--stroke-lg);
-  vector-effect: non-scaling-stroke;
+  /* vector-effect 仅写在 SVG attribute（processSvg），避免 Chrome 下 CSS+attribute 双源 */
 }
 
 .tokenFillPrimary :global(.eds-i-f) {
@@ -57,8 +57,7 @@
   fill: var(--text-brand-primary);
 }
 
-/* fixed 彩色：保留 SVG 原 fill/stroke，仅统一描边缩放 */
-.fixedKind :global([stroke-width]),
+/* fixed 彩色：保留 SVG 原 fill/stroke-width；non-scaling 由 processSvg attribute 注入 */
 .fixedKind :global(line),
 .fixedKind :global(polyline) {
   vector-effect: non-scaling-stroke;

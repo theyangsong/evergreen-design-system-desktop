@@ -94,9 +94,14 @@ function injectNonScalingStroke(attrs: string): string {
   return `${attrs} vector-effect="${NON_SCALING_STROKE}"`;
 }
 
-/** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
+/** 仅移除 token 色值；保留 linecap / fill-rule 等结构属性。 */
 function stripTokenColors(attrs: string): string {
   return attrs.replace(/\sstyle="[^"]*"/gi, '').replace(/\s(stroke|fill)="#[^"]*"/gi, '');
+}
+
+/** token 线稿：描边宽度只由 CSS var(--stroke-lg) 控制，避免 attribute 与 CSS 双源在 Chrome 下歧义。 */
+function stripInlineStrokeWidth(attrs: string): string {
+  return attrs.replace(/\sstroke-width="[^"]*"/gi, '');
 }
 
 function annotateTokenShapes(svg: string): string {
@@ -109,6 +114,7 @@ function annotateTokenShapes(svg: string): string {
     const classes: string[] = [];
     if (stroke) {
       classes.push('eds-i-s');
+      clean = stripInlineStrokeWidth(clean);
       clean = injectNonScalingStroke(clean);
     }
     if (fill) classes.push('eds-i-f');
