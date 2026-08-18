@@ -90,3 +90,9 @@ export function getIconKind(name: string): IconKind | undefined {
 export function getIconFillTone(name: string): IconFillTone | undefined {
   return getProcessedIcon(name)?.fillTone;
 }
+
+if (import.meta.hot) {
+  import.meta.hot.accept('./processSvg', () => {
+    processedCache.clear();
+  });
+}

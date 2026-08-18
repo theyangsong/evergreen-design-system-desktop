@@ -14,6 +14,10 @@ EverGreen Design System (Desktop) — **one npm package**, five pillars:
 
 ## Changelog
 
+### 0.1.3
+
+- **Revert:** Restore pre-0.1.1 icon stroke pipeline (`Icon.module.css` + `processSvg` without attribute injection / inline stroke-width stripping). `data-icon` unchanged.
+
 ### 0.1.2
 
 - **Fix:** Token stroke icons — single-source `stroke-width` via CSS `var(--stroke-lg)` only; inline SVG `stroke-width` removed in `processSvg`. `vector-effect` on attribute only (no CSS duplicate) for better Chrome/Safari parity at 1.4px.
