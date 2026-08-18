@@ -10,6 +10,19 @@ EverGreen Design System (Desktop) — **one npm package**, five pillars:
 | `@eds-evergreen/desktop/patterns` | Page-level compositions (expanding) |
 | `@eds-evergreen/desktop/workflows` | Business workflows (expanding) |
 
+**Docs:** [Consumer guide](https://github.com/theyangsong/evergreen-design-system-desktop/blob/main/docs/npm-desktop.md) · [Showcase](https://theyangsong.github.io/evergreen-design-system-desktop/)
+
+## Changelog
+
+### 0.1.1
+
+- **Fix:** `EgIcon` stroke icons — `processSvg` injects `vector-effect="non-scaling-stroke"` on each stroke shape (stable at 16/20/24px display; no consumer CSS workaround needed).
+- Animations extracted to `@eds/desktop-animations` inside the unified tarball.
+
+### 0.1.0
+
+- Initial public release (tokens, animations, components, patterns/workflows stubs).
+
 ## Install
 
 ```bash
