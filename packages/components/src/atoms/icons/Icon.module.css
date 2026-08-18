@@ -40,15 +40,9 @@
 }
 
 /*
- * token 图标：仅替换配色，不增删描边/填充结构。
- * eds-i-s / eds-i-f 由 processSvg 按 SVG 原结构标注。
+ * token 线稿：描边几何在 processSvg attribute（stroke-width 1.4 + vector-effect）；
+ * 颜色经 stroke="currentColor" 继承 EgIcon 的 color。勿再用 CSS stroke-width（Chrome 不稳）。
  */
-.tokenKind :global(.eds-i-s) {
-  stroke: currentColor;
-  stroke-width: var(--stroke-lg);
-  vector-effect: non-scaling-stroke;
-}
-
 .tokenFillPrimary :global(.eds-i-f) {
   fill: currentColor;
 }
@@ -57,9 +51,4 @@
   fill: var(--text-brand-primary);
 }
 
-/* fixed 彩色：保留 SVG 原 fill/stroke，仅统一描边缩放 */
-.fixedKind :global([stroke-width]),
-.fixedKind :global(line),
-.fixedKind :global(polyline) {
-  vector-effect: non-scaling-stroke;
-}
+/* fixed 彩色：non-scaling 由 processSvg attribute 注入 */

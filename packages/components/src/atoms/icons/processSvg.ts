@@ -86,6 +86,31 @@ function injectClass(attrs: string, className: string): string {
   return `${attrs} class="${className}"`;
 }
 
+/** 与 spec --stroke-lg 一致（1.4px @ 32 viewBox + non-scaling-stroke）。 */
+const TOKEN_STROKE_WIDTH = '1.4';
+const NON_SCALING_STROKE = 'non-scaling-stroke';
+
+function injectAttr(attrs: string, name: string, value: string): string {
+  if (new RegExp(`\\b${name}=`, 'i').test(attrs)) return attrs;
+  return `${attrs} ${name}="${value}"`;
+}
+
+/**
+ * Chrome 对 v-html 内 path 的 `stroke-width: var(--stroke-lg)` 支持不稳定；
+ * 描边几何走 SVG presentation attribute（精准 1.4，不加粗），颜色走 stroke="currentColor"。
+ */
+function annotateTokenStrokeGeometry(attrs: string): string {
+  let next = attrs;
+  next = injectAttr(next, 'stroke-width', TOKEN_STROKE_WIDTH);
+  next = injectAttr(next, 'stroke', 'currentColor');
+  next = injectAttr(next, 'vector-effect', NON_SCALING_STROKE);
+  return next;
+}
+
+function annotateFixedStrokeGeometry(attrs: string): string {
+  return injectAttr(attrs, 'vector-effect', NON_SCALING_STROKE);
+}
+
 /** 仅移除 token 色值；保留 stroke-width / linecap / fill-rule 等结构属性。 */
 function stripTokenColors(attrs: string): string {
   return attrs.replace(/\sstyle="[^"]*"/gi, '').replace(/\s(stroke|fill)="#[^"]*"/gi, '');
@@ -99,11 +124,25 @@ function annotateTokenShapes(svg: string): string {
     const fill = shapeHasTokenFill(attrs);
     let clean = stripTokenColors(attrs);
     const classes: string[] = [];
-    if (stroke) classes.push('eds-i-s');
+    if (stroke) {
+      classes.push('eds-i-s');
+      clean = annotateTokenStrokeGeometry(clean);
+    }
     if (fill) classes.push('eds-i-f');
     if (classes.length > 0) {
       clean = injectClass(clean, classes.join(' '));
     }
+    return `<${tag}${clean}${selfClose}>`;
+  });
+}
+
+/** fixed 调色板：保留原 stroke-width，仅补 non-scaling attribute。 */
+function annotateFixedStrokeShapes(svg: string): string {
+  const shapeRe = new RegExp(`<${SHAPE_TAG}\\b([^>]*?)(\\/?)>`, 'gi');
+
+  return svg.replace(shapeRe, (match, tag: string, attrs: string, selfClose: string) => {
+    if (!shapeHasStroke(tag, attrs)) return match;
+    const clean = annotateFixedStrokeGeometry(attrs);
     return `<${tag}${clean}${selfClose}>`;
   });
 }
@@ -129,6 +168,7 @@ function usesFixedPalette(raw: string, colors: Set<string>): boolean {
 function processFixedSvg(iconName: string, raw: string): ProcessedIcon {
   let svg = normalizeSvgShell(iconName, raw);
   svg = stripRedundantStylesOnly(svg);
+  svg = annotateFixedStrokeShapes(svg);
   return {
     markup: svg.trim(),
     colorMode: 'fixed',

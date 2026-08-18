@@ -52,6 +52,15 @@ export type IconName = (typeof iconNames)[number];
 export const iconFileNames = iconNames;
 
 const processedCache = new Map<string, ProcessedIcon>();
+/** Bump when processSvg output shape changes (invalidates in-memory cache in long dev sessions). */
+const PROCESSED_ICON_CACHE_VERSION = 3;
+let activeCacheVersion = 0;
+
+function ensureProcessedCacheFresh() {
+  if (activeCacheVersion === PROCESSED_ICON_CACHE_VERSION) return;
+  processedCache.clear();
+  activeCacheVersion = PROCESSED_ICON_CACHE_VERSION;
+}
 
 /** 对外 icon name → 磁盘文件名（修正历史文件名差异）。 */
 const ICON_NAME_ALIASES: Record<string, string> = {
@@ -69,6 +78,7 @@ export function resolveIconFileName(name: string): string | undefined {
 }
 
 export function getProcessedIcon(name: string): ProcessedIcon | undefined {
+  ensureProcessedCacheFresh();
   const fileName = resolveFileName(name);
   if (!fileName) return undefined;
 
