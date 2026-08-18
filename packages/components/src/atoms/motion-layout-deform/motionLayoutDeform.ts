@@ -44,6 +44,7 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
   contentDirection: Ref<MotionLayoutDeformDirection | null>;
   switchTo: (next: T) => void;
   toggleBetween: (left: T, right: T) => void;
+  whenIdle: () => Promise<void>;
 } {
   const activePage = ref(initial) as Ref<T>;
   const shellHeight = ref(pages[initial].shellHeight);
@@ -53,6 +54,7 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
 
   let swapTimer: ReturnType<typeof setTimeout> | undefined;
   let enterFrame = 0;
+  let idleResolvers: Array<() => void> = [];
 
   function clearSwapTimer() {
     if (swapTimer !== undefined) {
@@ -68,8 +70,27 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
     }
   }
 
+  function notifyIdle() {
+    if (contentExiting.value || contentEntering.value) {
+      return;
+    }
+    const pending = idleResolvers;
+    idleResolvers = [];
+    pending.forEach((resolve) => resolve());
+  }
+
+  function whenIdle(): Promise<void> {
+    if (!contentExiting.value && !contentEntering.value) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      idleResolvers.push(resolve);
+    });
+  }
+
   function switchTo(next: T) {
     if (next === activePage.value && !contentExiting.value && !contentEntering.value) {
+      notifyIdle();
       return;
     }
 
@@ -92,6 +113,7 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
         enterFrame = requestAnimationFrame(() => {
           contentEntering.value = false;
           enterFrame = 0;
+          notifyIdle();
         });
       });
 
@@ -106,6 +128,7 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
   onBeforeUnmount(() => {
     clearSwapTimer();
     clearEnterFrame();
+    idleResolvers = [];
   });
 
   return {
@@ -116,5 +139,6 @@ export function useMotionLayoutDeformPageSwitch<T extends string>(
     contentDirection,
     switchTo,
     toggleBetween,
+    whenIdle,
   };
 }

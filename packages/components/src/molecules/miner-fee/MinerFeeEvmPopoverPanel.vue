@@ -73,8 +73,8 @@ const {
   shellHeight,
   contentExiting,
   contentEntering,
-  contentDirection,
   switchTo,
+  whenIdle,
 } = useMotionLayoutDeformPageSwitch<MinerFeeScreen>(pageSpecs, 'list');
 
 const minerFeeConfirmDisabled = computed(() => minerFee.value === null);
@@ -127,8 +127,10 @@ onMounted(async () => {
 
 watch(customFeeSaved, async () => {
   await nextTick();
-  if (activePage.value !== 'list') return;
   measurePage('list');
+  if (activePage.value !== 'list' || contentExiting.value || contentEntering.value) {
+    return;
+  }
   shellHeight.value = pageSpecs.list.shellHeight;
 });
 
@@ -174,10 +176,16 @@ async function setMinerFeeScreen(screen: MinerFeeScreen) {
   await ensurePageHeight(activePage.value);
   await ensurePageHeight(screen);
   switchTo(screen);
+  await whenIdle();
+
+  if (screen === 'list') {
+    measurePage('list');
+    shellHeight.value = pageSpecs.list.shellHeight;
+  }
 }
 
 function openCustomMinerFee() {
-  setMinerFeeScreen('custom');
+  void setMinerFeeScreen('custom');
 }
 
 function goToMinerFeeList() {
@@ -190,7 +198,7 @@ async function onCustomSave(draft: MinerFeeCustomDraft) {
   minerFee.value = MINER_FEE_CUSTOM_ID;
   minerFeeBeforeCustomPopover.value = null;
   await nextTick();
-  await ensurePageHeight('list');
+  measurePage('list');
   if (!props.hideInlineConfirm) {
     await setMinerFeeScreen('list');
   }
@@ -200,7 +208,6 @@ function resetMinerFeeFlow() {
   activePage.value = 'list';
   contentExiting.value = false;
   contentEntering.value = false;
-  contentDirection.value = null;
   minerFee.value = DEFAULT_MINER_FEE_SPEED;
   minerFeeBeforeCustomPopover.value = null;
   customFeeDraft.value = defaultMinerFeeCustomDraft(shellVariant.value);
@@ -295,7 +302,6 @@ defineExpose({
       <div
         :class="[
           MOTION_LAYOUT_DEFORM_CONTENT,
-          contentDirection,
           contentExiting && MOTION_LAYOUT_DEFORM_CONTENT_EXITING,
           contentEntering && MOTION_LAYOUT_DEFORM_CONTENT_ENTERING,
         ]"

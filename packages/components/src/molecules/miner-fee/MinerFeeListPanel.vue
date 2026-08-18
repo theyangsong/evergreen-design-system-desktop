@@ -238,7 +238,7 @@ defineExpose({
               href="#"
               tabindex="-1"
               aria-hidden="true"
-              @click.prevent
+              @click.prevent.stop="openSavedCustom"
             >
               {{ ui('Edit') }}
             </EgLink>
