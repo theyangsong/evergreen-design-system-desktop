@@ -219,29 +219,87 @@ export const formSubmissionCustomizeDefaults = {
   linkLabel: 'Button',
   showLink: true,
 };
-export const formSubmissionCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'type',
-    label: '类型',
-    options: propLabelRows(['notes', 'danger', 'success'] as const, showcaseFormSubmissionTypeLabels).map(
-      (row) => ({ value: row.key, label: row.label }),
-    ),
-  },
-  { kind: 'text', key: 'text', label: '文案' },
-  {
-    kind: 'text',
-    key: 'linkLabel',
-    label: '链接文案',
-    visibleWhen: (s) => s.type === 'notes' || s.type === 'danger',
-  },
-  {
-    kind: 'boolean',
-    key: 'showLink',
-    label: '显示链接',
-    visibleWhen: (s) => s.type === 'notes' || s.type === 'danger',
-  },
-];
+export const formSubmissionCustomizeControls: DocCustomizeControl[] =
+  buildFormSubmissionExpandCustomizeControls();
+
+type FormSubmissionExpandOptions = {
+  row?: number;
+  /** 为 true 时才展示（如 Combo 勾选「反馈区」）。 */
+  visibleWhen?: (state: Record<string, unknown>) => boolean;
+  /** 避免与 EgInput `type` 等同名冲突（Combo Input）。 */
+  keyPrefix?: string;
+};
+
+function submissionKey(prefix: string | undefined, key: string): string {
+  return prefix ? `${prefix}${key[0]!.toUpperCase()}${key.slice(1)}` : key;
+}
+
+/** 反馈区展开项：类型 / 文案 / 链接（勾选反馈区后同行或续行展示）。 */
+export function buildFormSubmissionExpandCustomizeControls(
+  options: FormSubmissionExpandOptions = {},
+): DocCustomizeControl[] {
+  const { row, visibleWhen, keyPrefix } = options;
+  const gate = (state: Record<string, unknown>) =>
+    visibleWhen ? visibleWhen(state) : true;
+  const typeKey = submissionKey(keyPrefix, 'type');
+  const textKey = submissionKey(keyPrefix, 'text');
+  const linkLabelKey = submissionKey(keyPrefix, 'linkLabel');
+  const showLinkKey = submissionKey(keyPrefix, 'showLink');
+
+  return [
+    {
+      kind: 'select',
+      key: typeKey,
+      label: '类型',
+      row,
+      options: propLabelRows(['notes', 'danger', 'success'] as const, showcaseFormSubmissionTypeLabels).map(
+        (row) => ({ value: row.key, label: row.label }),
+      ),
+      visibleWhen: gate,
+    },
+    {
+      kind: 'text',
+      key: textKey,
+      label: '文案',
+      row,
+      visibleWhen: gate,
+    },
+    {
+      kind: 'text',
+      key: linkLabelKey,
+      label: '链接文案',
+      row,
+      visibleWhen: (s) => gate(s) && (s[typeKey] === 'notes' || s[typeKey] === 'danger'),
+    },
+    {
+      kind: 'boolean',
+      key: showLinkKey,
+      label: '显示链接',
+      row,
+      visibleWhen: (s) => gate(s) && (s[typeKey] === 'notes' || s[typeKey] === 'danger'),
+    },
+  ];
+}
+
+/** 从 customize 状态读取 EgFormSubmission props（支持 submission* 前缀键）。 */
+export function formSubmissionPropsFromCustomizeState(
+  state: Record<string, unknown>,
+  keyPrefix?: string,
+): Record<string, unknown> {
+  const type = String(state[submissionKey(keyPrefix, 'type')] ?? formSubmissionCustomizeDefaults.type);
+  const props: Record<string, unknown> = {
+    type,
+    text: String(state[submissionKey(keyPrefix, 'text')] ?? formSubmissionCustomizeDefaults.text),
+  };
+  if (type === 'notes' || type === 'danger') {
+    props.linkLabel = String(
+      state[submissionKey(keyPrefix, 'linkLabel')] ?? formSubmissionCustomizeDefaults.linkLabel,
+    );
+    props.showLink =
+      state[submissionKey(keyPrefix, 'showLink')] !== false;
+  }
+  return props;
+}
 
 export const streamerCustomizeDefaults = {
   type: 'info',
@@ -391,15 +449,13 @@ export function buildStreamerUsageSnippet(state: Record<string, unknown>): strin
   });
 }
 
-export function buildFormSubmissionUsageSnippet(state: Record<string, unknown>): string {
-  const type = String(state.type ?? formSubmissionCustomizeDefaults.type);
-  const props: Record<string, unknown> = {
-    type,
-    text: String(state.text ?? formSubmissionCustomizeDefaults.text),
-  };
+export function buildFormSubmissionUsageSnippet(
+  state: Record<string, unknown>,
+  keyPrefix?: string,
+): string {
+  const props = formSubmissionPropsFromCustomizeState(state, keyPrefix);
+  const type = String(props.type ?? formSubmissionCustomizeDefaults.type);
   if (type === 'notes' || type === 'danger') {
-    props.linkLabel = String(state.linkLabel ?? formSubmissionCustomizeDefaults.linkLabel);
-    props.showLink = state.showLink !== false;
     props.href = String(state.href ?? '#');
   }
   return buildVueSelfClosingSnippet('EgFormSubmission', props, {

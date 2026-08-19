@@ -84,6 +84,7 @@ const customizeDefaults = computed(() => buildDialogCustomizeDefaults(props.vari
             <EgDialog
               :type="variant"
               :title="String(customize.title)"
+              :show-secondary-text="customize.showSecondaryText !== false"
               :secondary-text="String(customize.secondaryText)"
               :confirm-label="String(customize.confirmLabel)"
               :cancel-label="String(customize.cancelLabel)"

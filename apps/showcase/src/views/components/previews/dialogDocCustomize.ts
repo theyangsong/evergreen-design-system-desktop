@@ -28,6 +28,7 @@ const COMPOSE_BODY_TEXT =
 const dialogNeutralCustomizeState = {
   type: 'symbol' as DialogCustomizeType,
   title: 'Title',
+  showSecondaryText: true,
   secondaryText: 'This is a description',
   symbolIcon: 'eds-warning-lonely',
   symbolBackground: 'default' as 'default' | 'danger' | 'success',
@@ -80,7 +81,13 @@ export function buildDialogCustomizeControls(
 
   if (type === 'symbol') {
     controls.push(
-      { kind: 'text', key: 'secondaryText', label: '副文案' },
+      { kind: 'boolean', key: 'showSecondaryText', label: '显示副文案' },
+      {
+        kind: 'text',
+        key: 'secondaryText',
+        label: '副文案',
+        visibleWhen: (s) => s.showSecondaryText !== false,
+      },
       {
         kind: 'text',
         key: 'symbolIcon',
@@ -99,10 +106,24 @@ export function buildDialogCustomizeControls(
       },
     );
   } else if (type === 'standard') {
-    controls.push({ kind: 'text', key: 'secondaryText', label: '正文' });
+    controls.push(
+      { kind: 'boolean', key: 'showSecondaryText', label: '显示正文' },
+      {
+        kind: 'text',
+        key: 'secondaryText',
+        label: '正文',
+        visibleWhen: (s) => s.showSecondaryText !== false,
+      },
+    );
   } else {
     controls.push(
-      { kind: 'text', key: 'secondaryText', label: 'Bar' },
+      { kind: 'boolean', key: 'showSecondaryText', label: '显示 Bar' },
+      {
+        kind: 'text',
+        key: 'secondaryText',
+        label: 'Bar',
+        visibleWhen: (s) => s.showSecondaryText !== false,
+      },
       { kind: 'text', key: 'composeText', label: 'Compose 内容' },
     );
   }

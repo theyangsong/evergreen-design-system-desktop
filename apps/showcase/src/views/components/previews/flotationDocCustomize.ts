@@ -24,7 +24,7 @@ import {
   widthModeTriggerFixedAdaptiveRows,
   tokenLabel,
 } from '@/data/showcasePropLabels';
-import { formSubmissionCustomizeDefaults } from './feedbackDocCustomize';
+import { formSubmissionCustomizeDefaults, buildFormSubmissionExpandCustomizeControls } from './feedbackDocCustomize';
 
 const flotationSymbolPositionInlineSelect = {
   key: 'symbolPosition',
@@ -1115,39 +1115,10 @@ export const flotationTriggerKindCustomizeControls: DocCustomizeControl[] = [
 
 /** Combo 字段壳：标题 / 反馈区（两行垂直；每行内勾选后水平展开） */
 export function buildFlotationTriggerFeedbackCustomizeControls(): DocCustomizeControl[] {
-  return [
-    {
-      kind: 'select',
-      key: 'type',
-      label: '类型',
-      row: 1,
-      options: propLabelRows(['notes', 'danger', 'success'] as const, showcaseFormSubmissionTypeLabels).map(
-        (row) => ({ value: row.key, label: row.label }),
-      ),
-      visibleWhen: (s) => Boolean(s.feedback),
-    },
-    {
-      kind: 'text',
-      key: 'text',
-      label: '文案',
-      row: 1,
-      visibleWhen: (s) => Boolean(s.feedback),
-    },
-    {
-      kind: 'text',
-      key: 'linkLabel',
-      label: '链接文案',
-      row: 1,
-      visibleWhen: (s) => Boolean(s.feedback) && s.type === 'notes',
-    },
-    {
-      kind: 'boolean',
-      key: 'showLink',
-      label: '显示链接',
-      row: 1,
-      visibleWhen: (s) => Boolean(s.feedback) && s.type === 'notes',
-    },
-  ];
+  return buildFormSubmissionExpandCustomizeControls({
+    row: 1,
+    visibleWhen: (s) => Boolean(s.feedback),
+  });
 }
 
 export const flotationTriggerShellCustomizeControls: DocCustomizeControl[] = [

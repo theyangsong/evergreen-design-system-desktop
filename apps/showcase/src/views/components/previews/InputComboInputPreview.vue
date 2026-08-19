@@ -2,7 +2,6 @@
 import { computed, reactive, ref } from 'vue';
 import { EgComboInputItem, EgFormSubmission, EgInput } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import styles from './InputPreview.module.css';
@@ -16,8 +15,8 @@ import {
   inputCustomizeDefaults,
 } from './inputDocCustomize';
 import {
-  formSubmissionCustomizeControls,
-  formSubmissionCustomizeDefaults,
+  buildFormSubmissionUsageSnippet,
+  formSubmissionPropsFromCustomizeState,
 } from './feedbackDocCustomize';
 import {
   buildWidthModeUsageSnippet,
@@ -31,11 +30,7 @@ const comboInputCustomize = reactive({
   type: comboInputItemCustomizeDefaults.type as 'standard' | 'amount',
   size: comboInputItemCustomizeDefaults.size as 'lg' | 'md' | 'sm',
   widthMode: comboInputItemCustomizeDefaults.widthMode as 'fixed' | 'full',
-});
-
-const formSubmissionCustomize = reactive({
-  ...formSubmissionCustomizeDefaults,
-  type: formSubmissionCustomizeDefaults.type as 'notes' | 'danger' | 'success',
+  submissionType: comboInputItemCustomizeDefaults.submissionType as 'notes' | 'danger' | 'success',
 });
 
 const comboInputPreviewStyle = computed(() =>
@@ -53,6 +48,10 @@ const comboInputPreviewUnit = computed(() => {
   if (unit) return unit;
   return comboInputCustomize.type === 'amount' ? 'ETH' : undefined;
 });
+
+const formSubmissionPreviewProps = computed(() =>
+  formSubmissionPropsFromCustomizeState(comboInputCustomize, 'submission'),
+);
 
 function onComboInputMax() {
   comboInputValue.value = '100';
@@ -79,7 +78,7 @@ const comboInputUsageSnippet = computed(() => {
   );
 
   const feedbackSlot = comboInputCustomize.feedback
-    ? `\n  <template #feedback>\n    <EgFormSubmission type="${formSubmissionCustomize.type}" text="${String(formSubmissionCustomize.text)}" />\n  </template>`
+    ? `\n  <template #feedback>\n    ${buildFormSubmissionUsageSnippet(comboInputCustomize, 'submission').replace(/^/gm, '    ').trim()}\n  </template>`
     : '';
 
   return `${openTag}>\n  ${inner}${feedbackSlot}\n</EgComboInputItem>`;
@@ -96,6 +95,8 @@ const comboInputUsageSnippet = computed(() => {
       :import-code="comboImportCode"
       :customize-controls="comboInputItemCustomizeControls"
       :customize-defaults="comboInputItemCustomizeDefaults"
+      :customize-sequential="true"
+      :customize-row-columns="5"
       :prop-rows="comboInputItemPropRows"
       :slot-rows="comboInputItemSlotRows"
       :usage-snippet-override="comboInputUsageSnippet"
@@ -139,24 +140,11 @@ const comboInputUsageSnippet = computed(() => {
               :max-label="String(comboInputCustomize.maxLabel)"
             />
             <template v-if="comboInputCustomize.feedback" #feedback>
-              <EgFormSubmission
-                :type="formSubmissionCustomize.type"
-                :text="String(formSubmissionCustomize.text)"
-                :link-label="String(formSubmissionCustomize.linkLabel)"
-                :show-link="Boolean(formSubmissionCustomize.showLink)"
-              />
+              <EgFormSubmission v-bind="formSubmissionPreviewProps" />
             </template>
           </EgComboInputItem>
         </div>
       </template>
-
-      <CustomizePanel
-        v-if="comboInputCustomize.feedback"
-        v-model="formSubmissionCustomize"
-        nested
-        title="EgFormSubmission"
-        :controls="formSubmissionCustomizeControls"
-      />
     </ComponentDocLayout>
   </div>
 </template>

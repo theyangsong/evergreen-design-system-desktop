@@ -2,7 +2,6 @@
 import { computed, reactive, ref } from 'vue';
 import { EgComboTextareaItem, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import styles from './InputPreview.module.css';
@@ -13,22 +12,25 @@ import {
   comboTextareaItemCustomizeDefaults,
 } from './inputDocCustomize';
 import {
-  formSubmissionCustomizeControls,
-  formSubmissionCustomizeDefaults,
+  buildFormSubmissionUsageSnippet,
+  formSubmissionPropsFromCustomizeState,
 } from './feedbackDocCustomize';
 
 const comboTextareaValue = ref('');
-const comboTextareaCustomize = reactive({ ...comboTextareaItemCustomizeDefaults });
-
-const formSubmissionCustomize = reactive({
-  ...formSubmissionCustomizeDefaults,
-  type: formSubmissionCustomizeDefaults.type as 'notes' | 'danger' | 'success',
+const comboTextareaCustomize = reactive({
+  ...comboTextareaItemCustomizeDefaults,
+  type: comboTextareaItemCustomizeDefaults.type as 'notes' | 'danger' | 'success',
 });
+
+const formSubmissionPreviewProps = computed(() =>
+  formSubmissionPropsFromCustomizeState(comboTextareaCustomize),
+);
 
 const comboTextareaUsageSnippet = computed(() => {
   const openTag = buildVueSelfClosingSnippet('EgComboTextareaItem', comboTextareaCustomize, {
     defaults: comboTextareaItemCustomizeDefaults,
     vModel: 'value',
+    omitKeys: ['type', 'text', 'linkLabel', 'showLink'],
   })
     .replace(/\s*\/>$/, '')
     .trim();
@@ -37,7 +39,11 @@ const comboTextareaUsageSnippet = computed(() => {
     return `${openTag} />`;
   }
 
-  return `${openTag}>\n  <template #feedback>\n    <EgFormSubmission type="${formSubmissionCustomize.type}" text="${String(formSubmissionCustomize.text)}" />\n  </template>\n</EgComboTextareaItem>`;
+  const feedbackInner = buildFormSubmissionUsageSnippet(comboTextareaCustomize)
+    .replace(/^/gm, '    ')
+    .trim();
+
+  return `${openTag}>\n  <template #feedback>\n    ${feedbackInner}\n  </template>\n</EgComboTextareaItem>`;
 });
 </script>
 
@@ -51,6 +57,8 @@ const comboTextareaUsageSnippet = computed(() => {
       :import-code="comboImportCode"
       :customize-controls="comboTextareaItemCustomizeControls"
       :customize-defaults="comboTextareaItemCustomizeDefaults"
+      :customize-sequential="true"
+      :customize-row-columns="5"
       :prop-rows="comboTextareaItemPropRows"
       :slot-rows="comboTextareaItemSlotRows"
       :usage-snippet-override="comboTextareaUsageSnippet"
@@ -65,24 +73,11 @@ const comboTextareaUsageSnippet = computed(() => {
             :placeholder="String(comboTextareaCustomize.placeholder)"
           >
             <template v-if="comboTextareaCustomize.feedback" #feedback>
-              <EgFormSubmission
-                :type="formSubmissionCustomize.type"
-                :text="String(formSubmissionCustomize.text)"
-                :link-label="String(formSubmissionCustomize.linkLabel)"
-                :show-link="Boolean(formSubmissionCustomize.showLink)"
-              />
+              <EgFormSubmission v-bind="formSubmissionPreviewProps" />
             </template>
           </EgComboTextareaItem>
         </div>
       </template>
-
-      <CustomizePanel
-        v-if="comboTextareaCustomize.feedback"
-        v-model="formSubmissionCustomize"
-        nested
-        title="EgFormSubmission"
-        :controls="formSubmissionCustomizeControls"
-      />
     </ComponentDocLayout>
   </div>
 </template>

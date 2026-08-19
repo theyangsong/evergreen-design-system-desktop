@@ -7,6 +7,10 @@ import {
   showcaseWidthModeLabels,
 } from '@/data/showcasePropLabels';
 import {
+  formSubmissionCustomizeDefaults,
+  buildFormSubmissionExpandCustomizeControls,
+} from './feedbackDocCustomize';
+import {
   INPUT_DOC_EVENTS,
   inputInteractionLabels,
 } from './inputDocPreview';
@@ -204,16 +208,34 @@ export const verifyInputCustomizeControls: DocCustomizeControl[] = [
 export const comboInputItemCustomizeDefaults = {
   label: 'Label',
   feedback: true,
+  submissionType: formSubmissionCustomizeDefaults.type,
+  submissionText: formSubmissionCustomizeDefaults.text,
+  submissionLinkLabel: formSubmissionCustomizeDefaults.linkLabel,
+  submissionShowLink: formSubmissionCustomizeDefaults.showLink,
   ...inputCustomizeDefaults,
 } as const;
 
 export const comboInputItemCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label },
-  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback },
-  ...inputCustomizeControls.filter((control) => control.key !== 'interaction'),
+  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label, row: 0 },
+  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback, row: 0 },
+  ...buildFormSubmissionExpandCustomizeControls({
+    row: 0,
+    visibleWhen: (s) => Boolean(s.feedback),
+    keyPrefix: 'submission',
+  }),
+  ...inputCustomizeControls
+    .filter((control) => control.key !== 'interaction')
+    .map((control) => ({ ...control, row: (control as { row?: number }).row ?? 1 })),
 ];
 
-const comboInputItemShellKeys = ['label', 'feedback'] as const;
+const comboInputItemShellKeys = [
+  'label',
+  'feedback',
+  'submissionType',
+  'submissionText',
+  'submissionLinkLabel',
+  'submissionShowLink',
+] as const;
 
 /** Props for EgComboInputItem from merged Combo customize state. */
 export function comboInputItemShellProps(state: Record<string, unknown>): Record<string, unknown> {
@@ -235,11 +257,16 @@ export function comboNestedInputProps(state: Record<string, unknown>): Record<st
 export const comboTextareaItemCustomizeDefaults = {
   label: 'Label',
   feedback: true,
+  ...formSubmissionCustomizeDefaults,
   placeholder: '请输入',
 } as const;
 
 export const comboTextareaItemCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label },
-  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback },
-  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
+  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label, row: 0 },
+  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback, row: 0 },
+  ...buildFormSubmissionExpandCustomizeControls({
+    row: 0,
+    visibleWhen: (s) => Boolean(s.feedback),
+  }),
+  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder, row: 1 },
 ];
