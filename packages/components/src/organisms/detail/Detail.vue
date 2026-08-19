@@ -20,7 +20,7 @@ import { hasAddressTags } from '../../molecules/crypto-combo/cryptoAddressTagUti
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import chromeScrimStyles from '../../styles/popupChromeScrim.module.css';
-import '../../styles/motionPageTransition.module.css';
+import '../../styles/motionPageTransition.css';
 import '../../styles/popupInnerBackdrop.css';
 import styles from './Detail.module.css';
 import {

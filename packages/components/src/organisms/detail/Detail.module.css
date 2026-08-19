@@ -75,7 +75,7 @@
   background: var(--box-page);
 }
 
-/* 翻页 stack flex；grid / Vue Transition glue 见 motionPageTransition.module.css */
+/* 翻页 stack flex；grid / Vue Transition glue 见 motionPageTransition.css */
 .scrollPageHost {
   flex: 1 1 auto;
 }

@@ -35,7 +35,7 @@ alwaysApply: false
    - **utilities**：`.motion-none`（focus/selected）。
    - **DS glue**（`packages/components/src/styles/*` 等）：框架 lifecycle（Vue `enter-from` / `leave-to`）、叠层布局、方向状态、`host` marker。**禁止**写入 `spec/motion/semantic.json`。
    - **Semantic 禁止**：`enter-from` / `leave-to` / `enter-active`、`host*`、direction modifier（`is-next` 等）、任何框架 lifecycle class名。
-   - DS glue 示例：`overlayGlassMicroFloat.module.css`、`motionPageTransition.module.css`（`.motion-page-stack` + `data-page-direction` + Transition `name="motion-page"`）、`motionLayoutDeformTransition.module.css`（`.motion-layout-deform` shell + `.motion-layout-deform-content` + `useMotionLayoutDeformPageSwitch` · 内容位移 **+offset→0**，见 `packages/components/docs/layout-deform-page-switch.md`）。
+   - DS glue 示例：`overlayGlassMicroFloat.module.css`、`motionPageTransition.css`（`.motion-page-stack` + `data-page-direction` + Transition `name="motion-page"`）、`motionLayoutDeformTransition.css`（`.motion-layout-deform` shell + `.motion-layout-deform-content` + `useMotionLayoutDeformPageSwitch` · 内容位移 **+offset→0**，见 `packages/components/docs/layout-deform-page-switch.md`）。
 
 **Overlay 微浮动（microFloat）— 毛玻璃不失效**
 

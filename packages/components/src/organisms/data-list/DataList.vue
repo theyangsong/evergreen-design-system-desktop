@@ -2,6 +2,7 @@
 import {
   computed,
   defineComponent,
+  Fragment,
   inject,
   nextTick,
   onBeforeUnmount,
@@ -378,14 +379,32 @@ function readProp(propsBag: Record<string, unknown> | null | undefined, key: str
   return fallback;
 }
 
+function columnTypeName(node: VNode): string | undefined {
+  const type = node.type as { name?: string; __name?: string } | string | null | undefined;
+  if (type == null || typeof type === 'string') return undefined;
+  return type.name || type.__name;
+}
+
 function isDataListColumnVNode(node: VNode): boolean {
-  const type = node.type as { name?: string } | string;
-  if (typeof type === 'string') return false;
-  return type?.name === 'EgDataListColumn' || type?.name === 'TableListColumn';
+  const name = columnTypeName(node);
+  return name === 'EgDataListColumn' || name === 'TableListColumn';
+}
+
+function flattenSlotVNodes(nodes: VNode[] | undefined): VNode[] {
+  if (!nodes?.length) return [];
+  const out: VNode[] = [];
+  for (const node of nodes) {
+    if (node.type === Fragment && Array.isArray(node.children)) {
+      out.push(...flattenSlotVNodes(node.children as VNode[]));
+      continue;
+    }
+    out.push(node);
+  }
+  return out;
 }
 
 function columnVNodes(): VNode[] {
-  return (slots.default?.() || []).filter(
+  return flattenSlotVNodes(slots.default?.() || []).filter(
     (node) => isDataListColumnVNode(node) && node.props?.hidden !== true && node.props?.hidden !== '',
   );
 }

@@ -1,6 +1,7 @@
 import './styles/global.css';
 import './styles/interactionHoverTooltip.css';
-import './styles/motionLayoutDeformTransition.module.css';
+import './styles/motionPageTransition.css';
+import './styles/motionLayoutDeformTransition.css';
 import './atoms/motion-hover-enter/motionHoverEnterOnly.css';
 import { initEdsDesktopRuntime } from './setup/initEdsDesktopRuntime';
 

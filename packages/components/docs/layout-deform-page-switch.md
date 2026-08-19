@@ -6,7 +6,7 @@
 
 | 场景 | 用 |
 |------|-----|
-| Detail 整页推动 | `.motion-page` + `motionPageTransition.module.css` |
+| Detail 整页推动 | `.motion-page` + `motionPageTransition.css` |
 | 浮层进出场 | `.motion-flotation` + microFloat |
 | Tab 滑块形变 | `.motion-deform` |
 
@@ -129,7 +129,7 @@ const {
 | `MOTION_LAYOUT_DEFORM_CONTENT_SWAP_MS` | 120 | composable 默认 swap |
 
 真源：`packages/tokens/spec/motion/{base,recipe,semantic}.json`  
-Glue：`packages/components/src/styles/motionLayoutDeformTransition.module.css`  
+Glue：`packages/components/src/styles/motionLayoutDeformTransition.css`  
 Composable：`packages/components/src/atoms/motion-layout-deform/motionLayoutDeform.ts`
 
 ---
@@ -174,5 +174,5 @@ switchTo('custom'); // pageSpecs.custom.shellHeight 仍是过时的 360
 |------|------|
 | `apps/showcase/.../LayoutDeformDemoPreview.vue` | DS 标准最小 demo |
 | `work-cregis-desktop/.../ApprovalRemarkPopoverPanel.vue` | 业务完整接入（预测量 + activePage） |
-| `motionLayoutDeformTransition.module.css` | glue CSS |
+| `motionLayoutDeformTransition.css` | glue CSS |
 | `motionLayoutDeform.ts` | composable |
