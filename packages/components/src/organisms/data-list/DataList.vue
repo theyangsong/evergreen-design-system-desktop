@@ -379,6 +379,25 @@ function readProp(propsBag: Record<string, unknown> | null | undefined, key: str
   return fallback;
 }
 
+/** Vue boolean attr：`is-action` 无值时为 `''`。 */
+function isPresentAttr(value: unknown): boolean {
+  return value === true || value === '';
+}
+
+/**
+ * 操作列须显式 `is-action`。
+ * 未标记时：仅当 DataList 传入 primaryAction，才把最后一列视为操作列。
+ * 避免记录类列表的尾列（状态等）被误当成 Action。
+ */
+function columnIsAction(
+  propsBag: Record<string, unknown>,
+  isLast: boolean,
+  hasPrimaryAction: boolean,
+): boolean {
+  if (isPresentAttr(readProp(propsBag, 'isAction'))) return true;
+  return isLast && hasPrimaryAction;
+}
+
 function columnTypeName(node: VNode): string | undefined {
   const type = node.type as { name?: string; __name?: string } | string | null | undefined;
   if (type == null || typeof type === 'string') return undefined;
@@ -420,7 +439,7 @@ function buildColumnMetas() {
       slotIndex,
       minWidthPx: resolveColumnMinWidthPx(readProp(p, 'minWidth') as string | undefined),
       displayOrder: Number(readProp(p, 'displayOrder') ?? slotIndex + 1),
-      isAction: Boolean(readProp(p, 'isAction')) || isLast,
+      isAction: columnIsAction(p, isLast, Boolean(props.primaryAction)),
     };
   });
 }
@@ -452,7 +471,7 @@ function mapColumnConfig(node: VNode) {
     | null;
   const slotIndex = allColumnNodes.value.indexOf(node);
   const isLast = slotIndex === allColumnNodes.value.length - 1;
-  const isAction = Boolean(readProp(p, 'isAction')) || isLast;
+  const isAction = columnIsAction(p, isLast, Boolean(props.primaryAction));
 
   return {
     label: (p.label as string) || '',
