@@ -281,6 +281,12 @@ const props = withDefaults(
     toolbarTotal?: string | number;
     /** motion-page 切换 key；省略时用 toolbarCurrent（同序号换条目时需传唯一值）。 */
     toolbarPageKey?: string | number;
+    /**
+     * 自定义 #toolbar 槽翻页时由宿主递增，配合 toolbarNavDirection 驱动 motion-page 方向。
+     * 内置翻页按钮会自行设置方向，无需传此 prop。
+     */
+    toolbarNavPulse?: number;
+    toolbarNavDirection?: 'prev' | 'next';
     toolbarPrevDisabled?: boolean;
     toolbarNextDisabled?: boolean;
     toolbarTone?: ComboActionPageTone;
@@ -546,6 +552,17 @@ watch(scrollRef, () => {
 watch(scrollContentRef, () => {
   observeScrollTargets();
 });
+
+watch(
+  () => props.toolbarNavPulse,
+  (pulse, previousPulse) => {
+    if (pulse == null || previousPulse == null || pulse === previousPulse) return;
+    const direction = props.toolbarNavDirection;
+    if (direction === 'prev' || direction === 'next') {
+      contentNavDirection.value = direction;
+    }
+  },
+);
 
 watch(
   () => [props.toolbarCurrent, resolvedToolbarPageKey.value] as const,
