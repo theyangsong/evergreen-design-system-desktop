@@ -4,6 +4,7 @@ import styles from './Avatar.module.css';
 import { AVATAR_NATIVE_PALETTE, avatarPaletteBackgroundVars } from './avatarPalette';
 import { getAvatarRobotMarkup } from './avatarRobot';
 import { pickAvatarColorIndex } from './pickAvatarColorIndex';
+import { resolveAvatarAssetName } from './resolveAvatarAssetName';
 import { resolveAvatarInitials } from './resolveAvatarInitials';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -42,6 +43,16 @@ const paletteIndex = computed(() =>
 
 const paletteColor = computed(() => AVATAR_NATIVE_PALETTE[paletteIndex.value]!);
 
+const assetName = computed(() =>
+  resolveAvatarAssetName({
+    variant: props.variant,
+    name: props.name,
+    colorSeed: props.colorSeed,
+    colorIndex: props.colorIndex,
+    randomColor: props.randomColor,
+  }),
+);
+
 const initialsStyle = computed(() => avatarPaletteBackgroundVars(paletteColor.value));
 
 const hostClass = computed(() => [styles.root, styles[props.size]]);
@@ -67,6 +78,7 @@ const robotMarkup = getAvatarRobotMarkup();
     :class="[hostClass, variant === 'robot' ? styles.robotHost : styles.initialsHost]"
     :style="variant === 'initials' ? initialsStyle : undefined"
     role="img"
+    :data-avatar="assetName"
     :aria-label="ariaLabel"
   >
     <span v-if="variant === 'robot'" class="eds-avatar-robot" :class="styles.robotSvgHost" v-html="robotMarkup" />

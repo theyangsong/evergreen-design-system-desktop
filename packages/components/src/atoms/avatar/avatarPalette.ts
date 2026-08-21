@@ -29,6 +29,14 @@ export const AVATAR_NATIVE_PALETTE: readonly AvatarPaletteColor[] = [
 
 export const AVATAR_NATIVE_PALETTE_SIZE = AVATAR_NATIVE_PALETTE.length;
 
+/** Figma 机器人资产名（variant=`robot`）。 */
+export const AVATAR_ROBOT_ASSET_NAME = 'eds-avatar-0' as const;
+
+/** Figma 元数据名：web3-avatar-1 … web3-avatar-20（index 0-based）。 */
+export function formatAvatarPaletteName(index: number): string {
+  return `web3-avatar-${index + 1}`;
+}
+
 export function avatarPaletteBackgroundVars(color: AvatarPaletteColor): Record<string, string> {
   return {
     '--eds-avatar-bg-hex': color.hex,
