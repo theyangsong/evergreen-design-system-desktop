@@ -466,6 +466,18 @@ export const componentCatalog: CatalogSection[] = [
           },
         ],
       },
+      {
+        title: 'Detail',
+        items: [
+          {
+            name: 'Detail',
+            slug: 'detail',
+            description: 'Popup detail layout for entity inspection (880px).',
+            status: 'implemented',
+            children: catalogFamilyBodyWithBusinessPresets('detail', 'Detail', 'detail'),
+          },
+        ],
+      },
     ],
   },
   {

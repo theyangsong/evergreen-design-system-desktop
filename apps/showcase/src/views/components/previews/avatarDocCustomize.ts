@@ -1,6 +1,6 @@
 import type { DocCustomizeControl } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
-import { AVATAR_NATIVE_PALETTE_SIZE } from '@eds/desktop-components';
+import { AVATAR_NATIVE_PALETTE_SIZE, formatAvatarPaletteName } from '@eds/desktop-components';
 
 export const avatarCustomizeDefaults = {
   name: 'Nancy',
@@ -12,45 +12,47 @@ export const avatarCustomizeDefaults = {
   randomColor: false,
 } as const;
 
+export const avatarSizeOptions = [
+  { value: 'xs', label: 'xs · 16px' },
+  { value: 'sm', label: 'sm · 24px' },
+  { value: 'md', label: 'md · 32px' },
+  { value: 'lg', label: 'lg · 36px' },
+  { value: 'xl', label: 'xl · 40px' },
+] as const;
+
 const colorIndexOptions = [
   { value: 'auto', label: '自动（按 name）' },
   ...Array.from({ length: AVATAR_NATIVE_PALETTE_SIZE }, (_, index) => ({
     value: String(index),
-    label: `原色 ${index + 1}`,
+    label: formatAvatarPaletteName(index),
   })),
 ];
 
 export const avatarCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'name', label: '名称' },
+  { kind: 'text', key: 'name', label: '姓名' },
   { kind: 'text', key: 'initials', label: '缩写', placeholder: '留空则取首字' },
   {
     kind: 'select',
     key: 'size',
     label: '尺寸',
-    options: [
-      { value: 'xs', label: 'xs (16px)' },
-      { value: 'sm', label: 'sm (24px)' },
-      { value: 'md', label: 'md (32px)' },
-      { value: 'lg', label: 'lg (36px)' },
-      { value: 'xl', label: 'xl (40px)' },
-    ],
+    options: [...avatarSizeOptions],
   },
   {
     kind: 'select',
     key: 'variant',
     label: '类型',
     options: [
-      { value: 'initials', label: '首字' },
-      { value: 'robot', label: '机器人' },
+      { value: 'initials', label: '首字（web3-avatar）' },
+      { value: 'robot', label: 'eds-avatar-0' },
     ],
   },
   {
     kind: 'select',
     key: 'colorIndexMode',
-    label: '原色',
+    label: '名称',
     options: colorIndexOptions,
   },
-  { kind: 'boolean', key: 'randomColor', label: '随机原色' },
+  { kind: 'boolean', key: 'randomColor', label: '随机 web3-avatar' },
 ];
 
 export function buildAvatarUsageSnippet(state: Record<string, unknown>): string {
@@ -79,10 +81,13 @@ export function buildAvatarUsageSnippet(state: Record<string, unknown>): string 
   });
 }
 
-export function resolveAvatarPreviewProps(state: Record<string, unknown>) {
+export function resolveAvatarPreviewProps(
+  state: Record<string, unknown>,
+  sizeOverride?: string,
+) {
   const props: Record<string, unknown> = {
     name: String(state.name ?? avatarCustomizeDefaults.name),
-    size: state.size ?? avatarCustomizeDefaults.size,
+    size: sizeOverride ?? state.size ?? avatarCustomizeDefaults.size,
     variant: state.variant ?? avatarCustomizeDefaults.variant,
     randomColor: Boolean(state.randomColor),
   };

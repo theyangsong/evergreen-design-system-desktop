@@ -12,7 +12,7 @@ EverGreen tokens are authored in `packages/tokens/spec/` and built to CSS via `p
 |--------|------|------------|
 | Scale | `spec/scale/` | `--spacing-*`, `--radius-*`, `--stroke-*`, `--icon-*` |
 | Typography | `spec/typography/` | `--eds-*` (semantic roles), `--eds-family-sans` |
-| Text (metadata) | `spec/text/styles.json` | JSON `textStyles` only; preview classes live in Showcase `text-style-preview.css` |
+| Text Styles | `spec/text/styles.json` | `.typography-*` classes via `@eds/desktop-tokens/text/styles` (also in main `typography` bundle) |
 | Color | `spec/color/` | `--text-*`, `--material-*`, `--box-*`, `--event-*` |
 | Tag | `spec/color/tag-palette.json` | `--tag-status-*`, `--tag-colorful-*`, `--tag-custom-*` (separate from Color System) |
 | EDS Effect | `spec/effect/` | `--eds-shadow-*`, `.effect-molde-level`, `.effect-flotation-box`, … |
@@ -38,7 +38,29 @@ Import order: `scale → typography → color → tag → effect`
 }
 ```
 
-Prefer semantic typography variables in CSS Modules (see above). Text style class names remain in `spec/text/styles.json` for documentation and the Showcase Tokens page only.
+Prefer **Text Style classes** when applying a full Figma role (size + weight + line-height together):
+
+```css
+/* HTML / Vue template */
+<p class="typography-body-medium">…</p>
+
+/* CSS Modules — compose global Text Style */
+.label {
+  composes: typography-body-medium from global;
+  color: var(--text-base-primary);
+}
+```
+
+Use individual semantic variables only when you need to override one axis (e.g. body-medium size with a different weight):
+
+```css
+.myComponent {
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
+}
+```
+
+Text Style classes ship from `@eds/desktop-tokens/text/styles` and are included in `@eds/desktop-tokens` / `@eds/desktop-tokens/typography`.
 
 ## Figma sync workflow
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterView } from 'vue-router';
 import styles from './ShowcaseLayout.module.css';
-import { navItems } from './nav';
+import ShowcaseNav from './ShowcaseNav.vue';
 import ThemeToggle from '@/components/shared/ThemeToggle.vue';
 </script>
 
@@ -17,16 +17,7 @@ import ThemeToggle from '@/components/shared/ThemeToggle.vue';
           </div>
         </div>
 
-        <nav :class="styles.nav">
-          <RouterLink
-            v-for="item in navItems"
-            :key="item.to"
-            :to="item.to"
-            :class="styles.navLink"
-          >
-            {{ item.label }}
-          </RouterLink>
-        </nav>
+        <ShowcaseNav />
       </div>
 
       <div :class="styles.sidebarFooter">

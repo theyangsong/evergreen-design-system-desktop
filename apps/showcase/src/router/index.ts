@@ -229,10 +229,6 @@ export const router = createRouter({
                   return { path: `/components/${buttonLegacySlugs[slug]}` };
                 }
 
-                if (slug === 'detail') {
-                  return { path: '/patterns/detail' };
-                }
-
                 if (slug === 'verify') {
                   return { path: '/components/verify-email' };
                 }
@@ -296,6 +292,9 @@ export const router = createRouter({
               props: true,
               beforeEnter: (to) => {
                 const slug = to.params.slug;
+                if (slug === 'detail') {
+                  return { path: '/components/detail' };
+                }
                 if (slug === 'list-fields') {
                   return {
                     name: 'pattern-detail',

@@ -5,6 +5,7 @@ import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.v
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
+import previewStyles from './FeedbackEndFeedbackCardPreview.module.css';
 import {
   endFeedbackCardCustomizeControls,
   endFeedbackCardCustomizeDefaults,
@@ -43,7 +44,7 @@ function onResetPreview() {
       @reset-preview="onResetPreview"
     >
       <template #preview>
-        <div class="desktopTokens" :class="docStyles.previewInputHost">
+        <div class="desktopTokens" :class="[docStyles.previewInputHost, previewStyles.host]">
           <EgEndFeedbackCard :key="previewKey" :text="String(customize.text)" />
         </div>
       </template>

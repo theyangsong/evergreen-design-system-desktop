@@ -21,7 +21,7 @@ import {
   tagStatusCustomizeControls,
   tagStatusPropRows,
 } from '@/views/components/previews/tagDocCustomize';
-import { resolveCryptoNameFromSymbol } from './listFieldCryptoResolve';
+import { resolveCryptoBusinessNameFromSymbol } from './listFieldCryptoResolve';
 import {
   appendCurrencySideVisibilityProps,
   buildCurrencySideAddressData,
@@ -230,13 +230,12 @@ function sceneProp(
 
 function buildCurrencyUsageSnippet(state: Record<string, unknown>): string {
   const symbol = String(state.symbol ?? 'ZEC');
-  const cryptoName =
-    resolveCryptoNameFromSymbol(symbol) ?? ('eds-zec-zcash' as const);
+  const cryptoSnippetName = resolveCryptoBusinessNameFromSymbol(symbol);
   const entryBadge = String(state.entryBadgeMode ?? 'none') as 'none' | 'in' | 'out';
   const addressTooltipTrigger = String(state.addressTooltipTrigger ?? 'hover') as 'hover' | 'focus';
 
   const props: Record<string, unknown> = {
-    cryptoName,
+    cryptoName: cryptoSnippetName,
     symbol,
     showChain: state.showNetwork !== false,
     chainLabel: String(state.networkLabel ?? 'Base'),
@@ -285,7 +284,7 @@ function buildCurrencyUsageSnippet(state: Record<string, unknown>): string {
 
   return buildVueSelfClosingSnippet('EgCryptoCombo', props, {
     defaults: {
-      cryptoName: 'eds-zec-zcash',
+      cryptoName: 'zec-zcash',
       symbol: 'ZEC',
       showChain: true,
       chainLabel: 'Base',
@@ -457,13 +456,13 @@ function buildAmountPrimaryRowSnippet(
   symbol: string,
   defaultCryptoValue: string,
 ): string {
-  const cryptoName = resolveCryptoNameFromSymbol(symbol) ?? 'eds-btc-bitcoin';
+  const cryptoSnippetName = resolveCryptoBusinessNameFromSymbol(symbol);
   const amountText = formatGroupedNumber(String(state.cryptoValue ?? defaultCryptoValue));
   const lines = ['<div class="list-field-amount-primary-row">'];
 
   if (state.showCryptoIcon !== false) {
     lines.push(
-      `  <EgCrypto name="${cryptoName}" fit class="list-field-amount-crypto-icon" label="${symbol}" />`,
+      `  <EgCrypto name="${cryptoSnippetName}" fit class="list-field-amount-crypto-icon" label="${symbol}" />`,
     );
   }
 
@@ -600,8 +599,8 @@ function buildCountdownUsageSnippet(state: Record<string, unknown>): string {
 function buildGeneralStructureCryptoSnippet(state: Record<string, unknown>): string {
   if (state.showCryptoIcon === false) return '';
   const symbol = String(state.cryptoSymbol ?? 'BTC');
-  const cryptoName = resolveCryptoNameFromSymbol(symbol) ?? 'eds-btc-bitcoin';
-  return `<EgCrypto name="${cryptoName}" fit class="list-field-general-structure-crypto-icon" label="${symbol}" />`;
+  const cryptoSnippetName = resolveCryptoBusinessNameFromSymbol(symbol);
+  return `<EgCrypto name="${cryptoSnippetName}" fit class="list-field-general-structure-crypto-icon" label="${symbol}" />`;
 }
 
 function buildGeneralStructureUsageSnippet(state: Record<string, unknown>): string {

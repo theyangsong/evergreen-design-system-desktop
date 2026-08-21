@@ -43,17 +43,6 @@ export const patternsCatalog: CatalogSection[] = [
     ],
   },
   {
-    title: 'Detail',
-    items: [
-      {
-        name: 'Detail',
-        slug: 'detail',
-        description: 'Popup detail layout for entity inspection (880px).',
-        status: 'implemented',
-      },
-    ],
-  },
-  {
     title: 'Consistency',
     items: [
       ...(scenesCatalog.find((section) => section.title === 'Consistency')?.items ?? []),

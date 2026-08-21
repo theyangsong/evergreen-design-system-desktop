@@ -2,7 +2,7 @@
 import { computed, provide, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { findCatalogChildPage, findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
-import { componentPreviewBySlug, usesCompactComponentPreview, usesTagComponentPreview } from './previews';
+import { componentPreviewBySlug, usesAvatarComponentPreview, usesCompactComponentPreview, usesTagComponentPreview } from './previews';
 import ShowcasePlaceholderPreview from './previews/ShowcasePlaceholderPreview.vue';
 import shared from '@/views/shared/showcase.module.css';
 
@@ -23,9 +23,11 @@ const preview = computed(() => componentPreviewBySlug[pageSlug.value]);
 
 const compactPreview = computed(() => usesCompactComponentPreview(pageSlug.value));
 const tagPreview = computed(() => usesTagComponentPreview(pageSlug.value));
+const avatarPreview = computed(() => usesAvatarComponentPreview(pageSlug.value));
 
 provide('componentDocCompactPreview', compactPreview);
 provide('componentDocTagPreview', tagPreview);
+provide('componentDocAvatarPreview', avatarPreview);
 
 async function scrollToHash(hash: string) {
   if (!hash.startsWith('#')) {

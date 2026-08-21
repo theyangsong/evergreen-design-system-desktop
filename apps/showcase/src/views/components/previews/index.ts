@@ -45,6 +45,7 @@ import DialogSymbolPreview from './DialogSymbolPreview.vue';
 import DialogComposePreview from './DialogComposePreview.vue';
 import BatchBarPreview from './BatchBarPreview.vue';
 import DataListPreview from './DataListPreview.vue';
+import DetailPreview from './DetailPreview.vue';
 import ContainerPreview from './ContainerPreview.vue';
 import LayoutPreview from './LayoutPreview.vue';
 import PopupPreview from './PopupPreview.vue';
@@ -108,8 +109,9 @@ export function usesCompactComponentPreview(slug: string): boolean {
   return compactComponentPreviewSlugs.has(slug);
 }
 
-/** Tag 文档页：480px 预览区 + 底部全量样式色板。 */
+/** Tag / Avatar 文档页：480px 预览区 + 底部样式色板 / 尺寸画廊。 */
 export const tagComponentPreviewSlugs = new Set<string>([
+  'avatar',
   'tag-system',
   'tag-status',
   'tag-colorful',
@@ -118,6 +120,13 @@ export const tagComponentPreviewSlugs = new Set<string>([
 
 export function usesTagComponentPreview(slug: string): boolean {
   return tagComponentPreviewSlugs.has(slug);
+}
+
+/** Avatar 文档：更高预览区以容纳原色盘。 */
+export const avatarComponentPreviewSlugs = new Set<string>(['avatar']);
+
+export function usesAvatarComponentPreview(slug: string): boolean {
+  return avatarComponentPreviewSlugs.has(slug);
 }
 
 export const componentPreviews: ComponentPreviewEntry[] = [
@@ -192,6 +201,7 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'tool-bar', title: 'ToolBar', component: ToolBarPreview, usesComponentDocHeader: true },
   { slug: 'paginer', title: 'Paginer', component: PaginerPreview, usesComponentDocHeader: true },
   { slug: 'data-list', title: 'DataList', component: DataListPreview, usesComponentDocHeader: true },
+  { slug: 'detail', title: 'Detail', component: DetailPreview, usesComponentDocHeader: true },
   { slug: 'batch-bar', title: 'BatchBar', component: BatchBarPreview, usesComponentDocHeader: true },
   { slug: 'container', title: 'Container', component: ContainerPreview, usesComponentDocHeader: true },
   { slug: 'layout', title: 'Layout', component: LayoutPreview, usesComponentDocHeader: true },

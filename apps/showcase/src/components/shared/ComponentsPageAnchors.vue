@@ -2,13 +2,14 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { componentAnchorItems } from '@/data/components';
+import { anchorItemsForFamily } from '@/data/components/anchorItemsForFamily';
+import { findComponentsSidebarFamilyId } from '@/layout/buildComponentsSidebarSections';
 import { buildCatalogNavSegments } from '@/data/buildCatalogNavSegments';
 import {
   findCatalogChildPage,
   findCatalogItem,
   getCatalogChildAnchorIds,
   getComponentRouteSlug,
-  getMoleculeLandingPageSlug,
   moleculeUsesChildPages,
 } from '@/data/components/navigation';
 import { useScrollSpy } from '@/composables/useScrollSpy';
@@ -19,7 +20,13 @@ const route = useRoute();
 
 const activeSlug = computed(() => getComponentRouteSlug(route.path, route.params.slug));
 
-const navSegments = computed(() => buildCatalogNavSegments(componentAnchorItems));
+const activeFamilySlug = computed(() => findComponentsSidebarFamilyId(activeSlug.value));
+
+const scopedAnchorItems = computed(() =>
+  anchorItemsForFamily(activeFamilySlug.value, componentAnchorItems),
+);
+
+const navSegments = computed(() => buildCatalogNavSegments(scopedAnchorItems.value));
 
 const childPage = computed(() => findCatalogChildPage(activeSlug.value));
 
@@ -109,42 +116,12 @@ function syncIndicatorWithAnimation(previousNavId = '') {
   indicatorVisible.value = true;
 }
 
-function moleculeNavTo(slug: string) {
-  const entry = findCatalogItem(slug);
-  if (entry && moleculeUsesChildPages(entry.item)) {
-    return `/components/${getMoleculeLandingPageSlug(entry.item)}`;
-  }
-  return { name: 'component-detail', params: { slug } };
-}
-
-function isFamilyNavItem(item: (typeof componentAnchorItems)[number]) {
-  return (
-    !item.kind &&
-    !item.standalonePage &&
-    (item.depth === 2 || item.depth === 3)
-  );
-}
-
 function isHiddenSidebarBody(item: (typeof componentAnchorItems)[number]) {
   return Boolean(item.hideSidebarBody);
 }
 
-function isLinkActive(item: (typeof componentAnchorItems)[number]) {
+function isLinkActive(item: (typeof scopedAnchorItems.value)[number]) {
   if (item.depth && item.depth >= 2 && item.depth <= 5 && item.standalonePage) {
-    return activeNavId.value === item.id;
-  }
-
-  if (isFamilyNavItem(item)) {
-    if (childPage.value) {
-      const bodySlug = getMoleculeLandingPageSlug(childPage.value.parent.item);
-      if (activeSlug.value !== bodySlug) {
-        return false;
-      }
-      return childPage.value.parent.item.slug === item.id;
-    }
-    if (childAnchorIds.value.length) {
-      return false;
-    }
     return activeNavId.value === item.id;
   }
 
@@ -222,27 +199,7 @@ onBeforeUnmount(() => {
       <template v-for="segment in navSegments" :key="segment.type === 'item' ? segment.item.id : `scene-branch-${segment.items[0]?.id}`">
         <template v-if="segment.type === 'item'">
           <span
-            v-if="segment.item.depth === 1"
-            :class="styles.sectionLabel"
-          >
-            {{ segment.item.label }}
-          </span>
-
-          <RouterLink
-            v-else-if="isFamilyNavItem(segment.item)"
-            :ref="(element) => setLinkRef(segment.item.id, element)"
-            :to="moleculeNavTo(segment.item.id)"
-            :class="[
-              styles.link,
-              styles.linkNested,
-              isLinkActive(segment.item) && styles.linkActive,
-            ]"
-          >
-            {{ segment.item.label }}
-          </RouterLink>
-
-          <span
-            v-else-if="segment.item.kind === 'navGroup'"
+            v-if="segment.item.kind === 'navGroup'"
             :class="[
               styles.navGroupLabel,
               segment.item.depth === 2 && styles.organGroupLabel,

@@ -35,6 +35,8 @@
   --showcase-doc-preview-height-compact: 280px;
   /** Tag 文档 previewShell 预览区高度（含底部全量样式色板）。 */
   --showcase-doc-preview-height-tag: 480px;
+  /** Avatar 文档：主预览 + 尺寸画廊 + 原色盘。 */
+  --showcase-doc-preview-height-avatar: 640px;
   --showcase-doc-preview-bg: #E8F0FC;
   --showcase-doc-preview-bg-organism: var(--showcase-doc-preview-bg);
   /** Popup 文档 inner 组件画布（客户端默认视口 1280×800）。 */

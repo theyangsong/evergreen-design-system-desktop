@@ -70,6 +70,28 @@
   color: var(--stroke-base-primary);
 }
 
+.iconCellKind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-05) var(--spacing-1);
+  border-radius: var(--radius-xs);
+  font-size: var(--eds-footnote-medium-size);
+  line-height: var(--eds-footnote-medium-line-height);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+}
+
+.iconCellKindCrypto {
+  color: var(--text-base-primary);
+  background: var(--material-card-deep);
+}
+
+.iconCellKindNetwork {
+  color: var(--text-base-secondary);
+  background: var(--material-card-shallow);
+  border: var(--stroke-xs) solid var(--stroke-divider-page);
+}
+
 .typeList {
   display: flex;
   flex-direction: column;

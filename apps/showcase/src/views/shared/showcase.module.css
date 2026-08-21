@@ -81,20 +81,15 @@
 }
 
 .bodyText {
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  color: inherit;
 }
 
 .codeText {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  font-family: var(--eds-family-mono);
   color: var(--text-base-secondary);
 }
 
 .mono {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  font-family: var(--eds-family-mono);
   color: var(--text-base-secondary);
 }

@@ -56,6 +56,8 @@
     "./tokens/typography/base": "./dist/tokens/css/typography/base.css",
     "./tokens/typography/semantic": "./dist/tokens/css/typography/semantic.css",
     "./tokens/typography/bar-subpixel": "./dist/tokens/css/typography/bar-subpixel.css",
+    "./tokens/text": "./dist/tokens/css/text/index.css",
+    "./tokens/text/styles": "./dist/tokens/css/text/styles.css",
     "./tokens/fonts": "./dist/tokens/css/typography/fonts.css",
     "./tokens/motion": "./dist/tokens/css/motion/index.css",
     "./tokens/motion/base": "./dist/tokens/css/motion/base.css",

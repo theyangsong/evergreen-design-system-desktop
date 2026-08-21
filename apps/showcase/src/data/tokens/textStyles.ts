@@ -1,4 +1,4 @@
-/** Desktop text style class order (spec/text/styles.json). Tokens 页预览类见 styles/text-style-preview.css。 */
+/** Desktop text style class order (spec/text/styles.json). CSS: @eds/desktop-tokens/text/styles */
 export const textStyleOrder = [
   'typography-display',
   'typography-headline',

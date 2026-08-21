@@ -7,11 +7,18 @@ export type TagGalleryOption = {
   label: string;
 };
 
-defineProps<{
-  options: TagGalleryOption[];
-  selected: string;
-  galleryLabel?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    options: TagGalleryOption[];
+    selected: string;
+    galleryLabel?: string;
+    /** false：内容区随 main / gallery / footer 自然增高（如 Avatar 原色盘）。 */
+    fillPreviewHeight?: boolean;
+  }>(),
+  {
+    fillPreviewHeight: true,
+  },
+);
 
 const emit = defineEmits<{
   select: [value: string];
@@ -19,7 +26,14 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="desktopTokens" :class="[docStyles.previewInputHost, galleryStyles.host]">
+  <div
+    class="desktopTokens"
+    :class="[
+      docStyles.previewInputHost,
+      galleryStyles.host,
+      !props.fillPreviewHeight && galleryStyles.hostNaturalHeight,
+    ]"
+  >
     <div :class="galleryStyles.main">
       <slot name="main" />
     </div>
@@ -44,6 +58,10 @@ const emit = defineEmits<{
         <slot name="item" :value="option.value" />
         <span :class="galleryStyles.galleryLabel">{{ option.label }}</span>
       </button>
+    </div>
+
+    <div v-if="$slots.footer" :class="galleryStyles.footer">
+      <slot name="footer" />
     </div>
   </div>
 </template>

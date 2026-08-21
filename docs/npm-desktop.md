@@ -204,7 +204,19 @@ const active = ref(true);
 import '@eds-evergreen/desktop/tokens';
 ```
 
-一次加载颜色、尺寸、字体、动效、效果等全部 Token。
+一次加载颜色、尺寸、字体（EDS Text + IBM Plex Mono）、排版、动效、效果等全部 Token。
+
+> `@eds/desktop-tokens` 已内置 `@font-face`（通过 `typography/index.css` → `fonts.css`），**无需**再单独 `import '…/tokens/fonts'`，除非只要字体文件。
+
+**字体标准**
+
+| 用途 | Token | 栈 |
+|------|-------|-----|
+| UI 正文 | `--eds-family-sans` | EDS Text, PingFang SC, SourceHanSansSC, Apple Color Emoji, Segoe UI Emoji |
+| 代码 / 等宽 | `--eds-family-mono` | IBM Plex Mono, ui-monospace, monospace |
+
+全局默认（`typography/global.css`）：`body, input, textarea, button` → `--eds-family-sans` + `text-rendering: geometricPrecision`。  
+代码元素（`code, pre, kbd, samp, .eds-code-text`）→ `--eds-family-mono`。
 
 ### 按需引入
 
@@ -222,8 +234,8 @@ import '@eds-evergreen/desktop/tokens/motion/semantic';
 // 效果（毛玻璃等）
 import '@eds-evergreen/desktop/tokens/effect/ready';
 
-// 字体
-import '@eds-evergreen/desktop/tokens/fonts';
+// 字体 — 已含于 tokens 主入口；仅需字体时可单独引：
+// import '@eds-evergreen/desktop/tokens/fonts';
 
 // 尺寸 / 排版
 import '@eds-evergreen/desktop/tokens/scale';
@@ -249,16 +261,32 @@ import tokens from '@eds-evergreen/desktop/tokens/json';
 
 ### 在 CSS 中使用
 
-Token 以 CSS 变量形式暴露，例如：
+**Text Styles（推荐）** — Figma 角色整组排版，类名与 `spec/text/styles.json` 一致；已随 `@eds/desktop-tokens` / `typography` 主入口加载，亦可单独引 `@eds/desktop-tokens/text/styles`：
+
+```html
+<p class="typography-body-medium">正文</p>
+```
+
+```css
+/* CSS Modules */
+.label {
+  composes: typography-body-medium from global;
+}
+```
+
+**Semantic 变量** — 仅需单轴覆盖时使用：
 
 ```css
 .my-card {
   background: var(--color-surface-elevated);
   border-radius: var(--radius-lg);
   padding: var(--spacing-4);
-  font: var(--text-body-medium);
+  font-size: var(--eds-body-medium-size);
+  line-height: var(--eds-body-medium-line-height);
 }
 ```
+
+旧写法（三行 size/weight/line-height）仍可用，新代码请优先 `.typography-*` 类。
 
 变量名以 Showcase **Tokens** 页为准。
 

@@ -2,8 +2,13 @@
   position: sticky;
   top: var(--spacing-4);
   align-self: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  box-sizing: border-box;
   width: max-content;
   max-width: 100%;
+  height: calc(100dvh - 2 * var(--spacing-4));
   max-height: calc(100dvh - 2 * var(--spacing-4));
   overflow: hidden;
   isolation: isolate;
@@ -79,7 +84,8 @@
 }
 
 .navScroll {
-  max-height: inherit;
+  flex: 0 1 auto;
+  max-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;

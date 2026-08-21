@@ -50,7 +50,7 @@ alwaysApply: false
 - **禁止**：为修闪烁去掉 opacity 动画；microFloat 路径每次 hover `v-if` 销毁 Teleport；改 `packages/tokens/spec/motion` 的 microFloat 参数（除非用户明确要求）。
 - **详案**：`packages/components/docs/overlay-microfloat-flash-fix.md`。
 - **滚动顶底毛玻璃（Top & Bottom Mask）**：单滚动容器 + sticky 顶/底 + `effect-mask` + `eds-blur-bg`；状态机见 `top&botton-mask.mdc`；优先 `EgSkid` / `EgToolBar` / Paginer，禁止业务手搓 sticky header。
-4. **Typography**：整组角色 token（size+weight+line-height）；`font-family` 仅在 `global.css` 的 `body`/`.desktopTokens`；组件只绑 size/weight/line-height。native 控件 reset 见 **§5.1**。
+4. **Typography**：整组角色 token（size+weight+line-height）→ 优先 **Text Style 类** `.typography-*`（`@eds/desktop-tokens/text/styles`，已含于主 typography 入口）；需单轴覆盖时再绑 `--eds-*-size/weight/line-height`。`font-family` 仅在 `global.css` 的 `body`/`.desktopTokens`；native 控件 reset 见 **§5.1**。
 5. **Bar 11px**：`.eds-bar-text-subpixel` 或 2×+scale；NavBar 用 `.moduleLabel`/`.moduleLabelPaint`/`.moduleLabelSizer`（§7）。
 6. **顶边距 %**：`height: var(--padding-top-*)` 或 flex 占位；**禁止** `padding-top: …%`。
 7. **数字展示**：`formatGroupedNumber()`（展示层）；动态数字区加 `tabular-nums`。不适用：输入态、纯文案。

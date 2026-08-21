@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { AVATAR_NATIVE_PALETTE, EgAvatar } from '@eds/desktop-components';
+import {
+  AVATAR_NATIVE_PALETTE,
+  AVATAR_ROBOT_ASSET_NAME,
+  EgAvatar,
+  formatAvatarPaletteName,
+} from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import previewPageStyles from './InputPreview.module.css';
-import styles from './AvatarPreview.module.css';
+import galleryStyles from './TagPreviewGallery.module.css';
+import TagPreviewGallery from './TagPreviewGallery.vue';
 import { avatarPropRows, avatarImportCode } from './avatarPreviewData';
 import {
   avatarCustomizeControls,
   avatarCustomizeDefaults,
+  avatarSizeOptions,
   buildAvatarUsageSnippet,
   resolveAvatarPreviewProps,
 } from './avatarDocCustomize';
@@ -25,6 +31,16 @@ const previewProps = computed(() => resolveAvatarPreviewProps(avatarCustomize));
 
 const previewRenderKey = ref(0);
 
+const selectedPaletteValue = computed(() => {
+  if (avatarCustomize.variant === 'robot') {
+    return AVATAR_ROBOT_ASSET_NAME;
+  }
+  if (avatarCustomize.colorIndexMode !== 'auto') {
+    return formatAvatarPaletteName(Number(avatarCustomize.colorIndexMode));
+  }
+  return '';
+});
+
 watch(
   () => [avatarCustomize.randomColor, avatarCustomize.name, avatarCustomize.colorIndexMode],
   () => {
@@ -38,6 +54,25 @@ function onResetPreview() {
   if (avatarCustomize.randomColor) {
     previewRenderKey.value += 1;
   }
+}
+
+function selectAvatarSize(value: string) {
+  avatarCustomize.size = value as typeof avatarCustomize.size;
+}
+
+function selectPaletteValue(value: string) {
+  if (value === AVATAR_ROBOT_ASSET_NAME) {
+    avatarCustomize.variant = 'robot';
+    avatarCustomize.randomColor = false;
+    return;
+  }
+
+  const match = /^web3-avatar-(\d+)$/.exec(value);
+  if (!match) return;
+
+  avatarCustomize.variant = 'initials';
+  avatarCustomize.colorIndexMode = String(Number(match[1]) - 1);
+  avatarCustomize.randomColor = false;
 }
 </script>
 
@@ -57,21 +92,65 @@ function onResetPreview() {
       @reset-preview="onResetPreview"
     >
       <template #preview>
-        <div class="desktopTokens" :class="[docStyles.previewInputHost, styles.host]">
-          <EgAvatar v-bind="previewProps" :key="previewRenderKey" />
-        </div>
+        <TagPreviewGallery
+          :options="[...avatarSizeOptions]"
+          :selected="avatarCustomize.size"
+          gallery-label="尺寸"
+          :fill-preview-height="false"
+          @select="selectAvatarSize"
+        >
+          <template #main>
+            <EgAvatar v-bind="previewProps" :key="previewRenderKey" />
+          </template>
+          <template #item="{ value }">
+            <EgAvatar
+              v-bind="resolveAvatarPreviewProps(avatarCustomize, value)"
+              :key="`${previewRenderKey}-${value}`"
+            />
+          </template>
+          <template #footer>
+            <div
+              id="avatar-palette"
+              :class="galleryStyles.nestedGallery"
+              role="listbox"
+              aria-label="web3-avatar"
+            >
+              <button
+                type="button"
+                role="option"
+                :aria-selected="selectedPaletteValue === AVATAR_ROBOT_ASSET_NAME"
+                :class="[
+                  galleryStyles.galleryItem,
+                  selectedPaletteValue === AVATAR_ROBOT_ASSET_NAME && galleryStyles.galleryItemSelected,
+                ]"
+                @click="selectPaletteValue(AVATAR_ROBOT_ASSET_NAME)"
+              >
+                <EgAvatar variant="robot" size="sm" />
+                <span :class="galleryStyles.galleryLabel">{{ AVATAR_ROBOT_ASSET_NAME }}</span>
+              </button>
+              <button
+                v-for="(color, index) in AVATAR_NATIVE_PALETTE"
+                :key="color.hex"
+                type="button"
+                role="option"
+                :aria-selected="selectedPaletteValue === formatAvatarPaletteName(index)"
+                :class="[
+                  galleryStyles.galleryItem,
+                  selectedPaletteValue === formatAvatarPaletteName(index) && galleryStyles.galleryItemSelected,
+                ]"
+                @click="selectPaletteValue(formatAvatarPaletteName(index))"
+              >
+                <EgAvatar
+                  initials="A"
+                  :color-index="index"
+                  size="sm"
+                />
+                <span :class="galleryStyles.galleryLabel">{{ formatAvatarPaletteName(index) }}</span>
+              </button>
+            </div>
+          </template>
+        </TagPreviewGallery>
       </template>
     </ComponentDocLayout>
-
-    <section id="avatar-palette" :class="styles.paletteSection">
-      <h3>原色盘（web3-avatar-1 … 20）</h3>
-      <p>Display P3 色值来自 Figma User 组件；未指定 colorIndex 时按 name 稳定映射。</p>
-      <div :class="styles.paletteGrid">
-        <div v-for="(color, index) in AVATAR_NATIVE_PALETTE" :key="color.hex" :class="styles.paletteCell">
-          <EgAvatar :name="String(index + 1)" :color-index="index" size="lg" />
-          <span :class="styles.paletteLabel">{{ index + 1 }}</span>
-        </div>
-      </div>
-    </section>
   </div>
 </template>

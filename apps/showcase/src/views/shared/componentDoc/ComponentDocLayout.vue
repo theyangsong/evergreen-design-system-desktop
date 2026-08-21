@@ -63,6 +63,7 @@ const slots = useSlots();
 
 const injectedCompactPreview = inject<ComputedRef<boolean>>('componentDocCompactPreview');
 const injectedTagPreview = inject<ComputedRef<boolean>>('componentDocTagPreview');
+const injectedAvatarPreview = inject<ComputedRef<boolean>>('componentDocAvatarPreview');
 
 const useCompactPreview = computed(
   () => props.compactPreview || injectedCompactPreview?.value === true,
@@ -70,6 +71,10 @@ const useCompactPreview = computed(
 
 const useTagPreview = computed(
   () => props.tagPreview || injectedTagPreview?.value === true,
+);
+
+const useAvatarPreview = computed(
+  () => injectedAvatarPreview?.value === true,
 );
 
 const useTallPreview = computed(() => props.tallPreview && !useCompactPreview.value);
@@ -199,6 +204,7 @@ async function copyAiPrompt() {
       useTallPreview && styles.docBlockTallPreview,
       useCompactPreview && styles.docBlockCompactPreview,
       useTagPreview && styles.docBlockTagPreview,
+      useAvatarPreview && styles.docBlockAvatarPreview,
     ]"
   >
     <header v-if="showDocTitle" :class="styles.docHeader">
