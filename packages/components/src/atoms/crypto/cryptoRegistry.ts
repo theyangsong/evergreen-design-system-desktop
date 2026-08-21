@@ -21,10 +21,38 @@ export type ProcessedCrypto = {
   markup: string;
 };
 
+/** `eds-*` 文件名前缀为币种图标；其余（如 `Ethereum Mainnet`）为网络链图标。 */
+export type CryptoAssetKind = 'Crypto' | 'Network';
+
+/** 按 SVG 文件名约定解析资产类型，不改变 `name` 本身。 */
+export function resolveCryptoAssetKind(name: string): CryptoAssetKind {
+  return name.toLowerCase().startsWith('eds-') ? 'Crypto' : 'Network';
+}
+
+/** 展示用名称：去掉 `eds-` 前缀，不改变 `EgCrypto` 的 `name` API。 */
+export function formatCryptoDisplayName(name: string): string {
+  return name.replace(/^eds-/i, '');
+}
+
+/** 业务侧 `name`：canonical 解析后再格式化为展示名。 */
+export function toCryptoBusinessName(name: string): string {
+  const fileName = resolveFileName(name.trim());
+  return formatCryptoDisplayName(fileName ?? name.trim());
+}
+
 const markupCache = new Map<string, ProcessedCrypto>();
 
 function resolveFileName(name: string): string | undefined {
-  if (cryptoSvgModules[`./${name}.svg`]) return name;
+  const trimmed = name.trim();
+  if (!trimmed) return undefined;
+
+  if (cryptoSvgModules[`./${trimmed}.svg`]) return trimmed;
+
+  if (!trimmed.toLowerCase().startsWith('eds-')) {
+    const withPrefix = `eds-${trimmed}`;
+    if (cryptoSvgModules[`./${withPrefix}.svg`]) return withPrefix;
+  }
+
   return undefined;
 }
 

@@ -4,6 +4,9 @@ export {
   cryptoNames,
   cryptoFileNames,
   resolveCryptoFileName,
+  resolveCryptoAssetKind,
+  formatCryptoDisplayName,
+  toCryptoBusinessName,
   getProcessedCrypto,
 } from './cryptoRegistry';
-export type { CryptoName, ProcessedCrypto } from './cryptoRegistry';
+export type { CryptoName, ProcessedCrypto, CryptoAssetKind } from './cryptoRegistry';
