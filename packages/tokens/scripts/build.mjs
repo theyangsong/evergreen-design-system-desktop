@@ -221,7 +221,13 @@ function writeTypographyBaseCssFile(destination, selector, baseSpec, headerLines
   writeFileSync(destination, lines.join('\n'));
 }
 
-function writeTypographySemanticCssFile(destination, selector, semanticSpec, headerLines = []) {
+function writeTypographySemanticCssFile(
+  destination,
+  selector,
+  semanticSpec,
+  textStylesSpec,
+  headerLines = [],
+) {
   const lines = [
     '/**',
     ' * Do not edit directly, this file was auto-generated from Figma tokens.',
@@ -229,19 +235,16 @@ function writeTypographySemanticCssFile(destination, selector, semanticSpec, hea
     ' */',
     '',
     `${selector} {`,
-    '',
-    '  /* ---- 语义角色令牌（Semantic Role Tokens） ---- */',
   ];
 
   for (const group of semanticSpec.groups) {
-    lines.push(`  /* ${group.comment} */`);
     for (const token of group.tokens) {
       lines.push(`  --${token.name}: ${token.value};`);
     }
-    lines.push('');
   }
 
   lines.push('}', '');
+  appendTextStyleClassLines(lines, textStylesSpec);
 
   mkdirSync(dirname(destination), { recursive: true });
   writeFileSync(destination, lines.join('\n'));
@@ -283,6 +286,36 @@ function writeBarSubpixelCssFile(destination, spec, headerLines = []) {
   }
 
   lines.push('}', '');
+
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, lines.join('\n'));
+}
+
+function appendTextStyleClassLines(lines, stylesSpec) {
+  lines.push('/* ---- Text Styles（Figma Text Styles） ---- */');
+  lines.push('');
+
+  for (const style of stylesSpec.styles ?? []) {
+    lines.push(`.${style.className} {`);
+
+    for (const [property, value] of Object.entries(style.properties ?? {})) {
+      lines.push(`  ${property}: ${value};`);
+    }
+
+    lines.push('}', '');
+  }
+}
+
+function writeTextStylesCssFile(destination, stylesSpec, headerLines = []) {
+  const lines = [
+    '/**',
+    ' * Do not edit directly, this file was auto-generated from Figma tokens.',
+    ...headerLines.map((line) => (line.startsWith(' *') ? line : ` * ${line}`)),
+    ' */',
+    '',
+  ];
+
+  appendTextStyleClassLines(lines, stylesSpec);
 
   mkdirSync(dirname(destination), { recursive: true });
   writeFileSync(destination, lines.join('\n'));
@@ -1080,31 +1113,51 @@ function buildTypographyFonts() {
     copyFileSync(join(srcFontsDir, fileName), join(distFontsDir, fileName));
   }
 
-  const faces = [
-    { weight: 400, file: 'EDSText-Regular.ttf' },
-    { weight: 500, file: 'EDSText-Medium.ttf' },
-    { weight: 600, file: 'EDSText-SemiBold.ttf' },
-    { weight: 700, file: 'EDSText-Bold.ttf' },
+  const fontFamilies = [
+    {
+      name: 'EDS Text',
+      comment: 'UI font (Regular / Medium / SemiBold / Bold).',
+      faces: [
+        { weight: 400, file: 'EDSText-Regular.ttf' },
+        { weight: 500, file: 'EDSText-Medium.ttf' },
+        { weight: 600, file: 'EDSText-SemiBold.ttf' },
+        { weight: 700, file: 'EDSText-Bold.ttf' },
+      ],
+    },
+    {
+      name: 'IBM Plex Mono',
+      comment: 'Code font (Regular / Medium / SemiBold / Bold).',
+      faces: [
+        { weight: 400, file: 'IBMPlexMono-Regular.ttf' },
+        { weight: 500, file: 'IBMPlexMono-Medium.ttf' },
+        { weight: 600, file: 'IBMPlexMono-SemiBold.ttf' },
+        { weight: 700, file: 'IBMPlexMono-Bold.ttf' },
+      ],
+    },
   ];
 
   const lines = [
     '/**',
-    ' * EDS Text — self-hosted UI font.',
-    ' * Import globally (@eds/desktop-tokens/fonts); do not scope under .desktopTokens.',
-    ' * Source: assets/fonts/EDSText-*.ttf',
+    ' * EverGreen Desktop — self-hosted UI + code fonts.',
+    ' * Bundled via @eds/desktop-tokens (typography/index.css).',
+    ' * Granular import: @eds/desktop-tokens/fonts',
+    ' * Source: assets/fonts/EDSText-*.ttf, IBMPlexMono-*.ttf',
     ' */',
     '',
   ];
 
-  for (const face of faces) {
-    lines.push('@font-face {');
-    lines.push("  font-family: 'EDS Text';");
-    lines.push('  font-style: normal;');
-    lines.push(`  font-weight: ${face.weight};`);
-    lines.push('  font-display: swap;');
-    lines.push(`  src: url('../../assets/fonts/${face.file}') format('truetype');`);
-    lines.push('}');
-    lines.push('');
+  for (const family of fontFamilies) {
+    lines.push(`/* ${family.name} — ${family.comment} */`);
+    for (const face of family.faces) {
+      lines.push('@font-face {');
+      lines.push(`  font-family: '${family.name}';`);
+      lines.push('  font-style: normal;');
+      lines.push(`  font-weight: ${face.weight};`);
+      lines.push('  font-display: swap;');
+      lines.push(`  src: url('../../assets/fonts/${face.file}') format('truetype');`);
+      lines.push('}');
+      lines.push('');
+    }
   }
 
   mkdirSync(join(cssDir, 'typography'), { recursive: true });
@@ -1343,6 +1396,7 @@ function buildTypographySystem() {
   const baseSpec = loadJson('typography/base.json');
   const semanticSpec = loadJson('typography/semantic.json');
   const globalSpec = loadJson('typography/global.json');
+  const codeGlobalSpec = loadJson('typography/code-global.json');
   const barSubpixelSpec = loadJson('typography/bar-subpixel.json');
 
   writeTypographyBaseCssFile(join(cssDir, 'typography/base.css'), ':root', baseSpec, [
@@ -1350,13 +1404,16 @@ function buildTypographySystem() {
     ' * Source: spec/typography/base.json',
   ]);
 
+  const textStylesSpec = loadJson('text/styles.json');
+
   writeTypographySemanticCssFile(
     join(cssDir, 'typography/semantic.css'),
     ':root',
     semanticSpec,
+    textStylesSpec,
     [
-      ' * Typography System — semantic role tokens (语义角色令牌 → base).',
-      ' * Source: spec/typography/semantic.json',
+      ' * Typography System — semantic role tokens + Text Style classes.',
+      ' * Source: spec/typography/semantic.json, spec/text/styles.json',
     ],
   );
 
@@ -1365,16 +1422,35 @@ function buildTypographySystem() {
     ' * Source: spec/typography/global.json',
   ]);
 
+  writeTypographyGlobalCssFile(join(cssDir, 'typography/code-global.css'), codeGlobalSpec, [
+    ' * Typography System — code / monospace defaults.',
+    ' * Source: spec/typography/code-global.json',
+  ]);
+
   writeBarSubpixelCssFile(join(cssDir, 'typography/bar-subpixel.css'), barSubpixelSpec, [
     ' * Bar 11px subpixel utility (2× + scale 0.5).',
     ' * Source: spec/typography/bar-subpixel.json',
   ]);
 
+  writeTextStylesCssFile(join(cssDir, 'text/styles.css'), textStylesSpec, [
+    ' * Text Styles — Figma Text Style classes (subset of typography/semantic.css).',
+    ' * Source: spec/text/styles.json',
+  ]);
+
   writeImportAggregator(
     join(cssDir, 'typography/index.css'),
-    ['./base.css', './semantic.css', './global.css', './bar-subpixel.css'],
+    [
+      './fonts.css',
+      './base.css',
+      './semantic.css',
+      './global.css',
+      './code-global.css',
+      './bar-subpixel.css',
+    ],
     'Typography System entry',
   );
+
+  writeImportAggregator(join(cssDir, 'text/index.css'), ['./styles.css'], 'Text Styles entry');
 }
 
 function buildEffectSystem() {

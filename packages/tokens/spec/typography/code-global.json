@@ -1,0 +1,8 @@
+{
+  "$description": "Monospace typography for inline code and preformatted text.",
+  "selector": "code, pre, kbd, samp, .eds-code-text",
+  "properties": {
+    "font-family": "var(--eds-family-mono)",
+    "text-rendering": "geometricPrecision"
+  }
+}

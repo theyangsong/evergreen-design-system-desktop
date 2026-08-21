@@ -7,7 +7,11 @@
   min-width: var(--scale-30);
   padding: var(--spacing-8) var(--spacing-4);
   border-radius: var(--radius-md);
+  border: var(--stroke-xs) solid var(--material-same-white-quaternary);
   background: var(--effect-prompt);
+  box-shadow: var(--eds-shadow-light);
+  -webkit-backdrop-filter: var(--eds-blur-bg);
+  backdrop-filter: var(--eds-blur-bg);
   color: var(--text-same-white-primary);
   font-size: var(--eds-body-medium-strong-size);
   line-height: var(--eds-body-medium-strong-line-height);

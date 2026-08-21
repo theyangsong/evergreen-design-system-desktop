@@ -38,7 +38,8 @@
     {
       "comment": "字体家族",
       "tokens": {
-        "eds-family-sans": "\"EDS Text\", \"PingFang SC\", \"Source Han Sans SC\", \"Microsoft YaHei\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif"
+        "eds-family-sans": "\"EDS Text\", \"PingFang SC\", SourceHanSansSC, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+        "eds-family-mono": "\"IBM Plex Mono\", ui-monospace, monospace"
       }
     }
   ]
