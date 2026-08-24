@@ -20,14 +20,19 @@ import {
   fillMinerFeeUiTemplate,
   resolveTronMinerFeeQuote,
 } from './minerFeeTronDisplay';
+import { buildTronMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
+import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
 import styles from './MinerFeePopoverPanel.module.css';
 
 const props = withDefaults(
   defineProps<{
     hideInlineConfirm?: boolean;
+    /** 多笔：>1 时在内容与底部确定之间展示预计总矿工费。 */
+    transactionCount?: number;
   }>(),
   {
     hideInlineConfirm: false,
+    transactionCount: 1,
   },
 );
 
@@ -81,6 +86,14 @@ function onConfirm() {
     displayValue: buildTronMinerFeeDisplay(feeQuote.value),
   });
 }
+
+const batchTotalDisplay = computed(() =>
+  buildTronMinerFeeBatchTotalDisplay(props.transactionCount),
+);
+
+const showBatchTotal = computed(
+  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
+);
 
 defineExpose({
   attemptConfirm: onConfirm,
@@ -233,6 +246,14 @@ defineExpose({
           </div>
         </div>
       </section>
+
+      <div v-if="showBatchTotal" :class="styles.minerFeeBatchTotalAppendix">
+        <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
+        <MinerFeeBatchTotalSummary
+          :total-display="batchTotalDisplay"
+          :transaction-count="transactionCount"
+        />
+      </div>
     </div>
 
     <div

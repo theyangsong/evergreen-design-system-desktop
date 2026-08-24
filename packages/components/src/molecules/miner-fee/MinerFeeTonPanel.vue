@@ -9,10 +9,13 @@ const props = withDefaults(
     translate: MinerFeeTranslate;
     hideInlineConfirm?: boolean;
     symbol?: string;
+    /** 多笔：>1 时在内容与底部确定之间展示预计总矿工费。 */
+    transactionCount?: number;
   }>(),
   {
     hideInlineConfirm: false,
     symbol: 'TON',
+    transactionCount: 1,
   },
 );
 
@@ -35,6 +38,7 @@ defineExpose({
     ref="panelRef"
     :symbol="symbol"
     :hide-inline-confirm="hideInlineConfirm"
+    :transaction-count="transactionCount"
     @confirm="emit('confirm', $event)"
   />
 </template>

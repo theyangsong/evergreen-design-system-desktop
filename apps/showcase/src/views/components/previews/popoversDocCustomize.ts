@@ -97,6 +97,7 @@ export const popoverComponentCustomizeDefaults = {
   remarkFeedback: 'Optional, Max. 256 characters',
   remarkConfirmLabel: 'Confirm',
   minerFeeNetwork: 'ethereum',
+  minerFeeMulti: false,
 } as const;
 
 export const popoverScensCustomizeDefaults = {
@@ -219,7 +220,7 @@ const POPOVER_SCENARIO_PRESETS: Record<
     presetWidth: '336',
     heightMode: 'adaptive',
     topTool: true,
-    topToolTitle: 'Gas fee',
+    topToolTitle: '矿工费',
     topToolClosable: true,
     triggerLabel: '矿工费',
     minerFeeNetwork: 'ethereum',
@@ -388,6 +389,12 @@ export const popoverScensCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: isPopoverMinerFeeScenario,
   },
   {
+    kind: 'boolean',
+    key: 'minerFeeMulti',
+    label: '多笔',
+    visibleWhen: isPopoverMinerFeeScenario,
+  },
+  {
     kind: 'text',
     key: 'topToolTitle',
     label: '标题',
@@ -412,6 +419,7 @@ const CUSTOMIZE_ONLY_KEYS = new Set([
   'remarkFeedback',
   'remarkConfirmLabel',
   'minerFeeNetwork',
+  'minerFeeMulti',
 ]);
 
 function parseOptionalPx(value: unknown): number | undefined {
@@ -582,9 +590,10 @@ export function buildPopoverScensUsageSnippet(state: Record<string, unknown>): s
 
   if (isPopoverMinerFeeScenario(state)) {
     const panelTag = resolveMinerFeePanelTag(state.minerFeeNetwork);
+    const transactionCount = Boolean(state.minerFeeMulti) ? 3 : 1;
     return buildAnchoredPopoverScensSnippet(
       state,
-      `<${panelTag}\n  :translate="ui"\n  @confirm="onMinerFeeConfirm"\n/>`,
+      `<${panelTag}\n  :translate="ui"\n  :transaction-count="${transactionCount}"\n  @confirm="onMinerFeeConfirm"\n/>`,
     );
   }
 

@@ -8,9 +8,12 @@ const props = withDefaults(
   defineProps<{
     translate: MinerFeeTranslate;
     hideInlineConfirm?: boolean;
+    /** 多笔：>1 时在内容与底部确定之间展示预计总矿工费。 */
+    transactionCount?: number;
   }>(),
   {
     hideInlineConfirm: false,
+    transactionCount: 1,
   },
 );
 
@@ -38,6 +41,7 @@ defineExpose({
     ref="panelRef"
     symbol="BTC"
     :hide-inline-confirm="hideInlineConfirm"
+    :transaction-count="transactionCount"
     @miner-fee-screen-change="emit('miner-fee-screen-change', $event)"
     @confirm="emit('confirm', $event)"
   />

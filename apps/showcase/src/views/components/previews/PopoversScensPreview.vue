@@ -29,6 +29,10 @@ import {
   type PopoverMinerFeeNetwork,
   type PopoverScensScenario,
 } from './popoversDocCustomize';
+import {
+  resolveShowcaseMinerFeePanelProps,
+  showcaseMinerFeeUi,
+} from './minerFeeShowcaseMock';
 
 const MINER_FEE_PANELS: Record<PopoverMinerFeeNetwork, Component> = {
   bitcoin: EgMinerFeeBitcoinPanel,
@@ -54,6 +58,7 @@ const customize = reactive({
   widthMode: popoverScensCustomizeDefaults.widthMode as 'fixed' | 'adaptive' | 'preset',
   heightMode: popoverScensCustomizeDefaults.heightMode as 'fixed' | 'adaptive',
   minerFeeNetwork: popoverScensCustomizeDefaults.minerFeeNetwork as PopoverMinerFeeNetwork,
+  minerFeeMulti: popoverScensCustomizeDefaults.minerFeeMulti,
 });
 
 const anchoredRef = ref<{ close: () => void } | null>(null);
@@ -72,6 +77,13 @@ const previewComponentTag = computed(() => {
 
 const minerFeePanel = computed(
   () => MINER_FEE_PANELS[customize.minerFeeNetwork] ?? EgMinerFeeEthereumPanel,
+);
+
+const minerFeePanelProps = computed(() =>
+  resolveShowcaseMinerFeePanelProps(
+    customize.minerFeeNetwork,
+    Boolean(customize.minerFeeMulti),
+  ),
 );
 
 const scensCustomizeControls = computed(() =>
@@ -105,7 +117,9 @@ const popoverShowTopTool = computed(
 );
 
 const popoverTopToolTitle = computed(() => {
-  if (isMinerFeeScenario.value) return String(customize.topToolTitle ?? 'Gas fee');
+  if (isMinerFeeScenario.value) {
+    return String(customize.topToolTitle ?? showcaseMinerFeeUi('Gas Fee'));
+  }
   return String(customize.topToolTitle ?? 'Title');
 });
 
@@ -164,7 +178,7 @@ function onTopToolClose() {
 
           <EgAnchoredTooltip
             v-else-if="isAnchoredScenario"
-            :key="`anchored-${customize.scenario}-${customize.placement}-${customize.align}-${customize.minerFeeNetwork}`"
+            :key="`anchored-${customize.scenario}-${customize.placement}-${customize.align}-${customize.minerFeeNetwork}-${customize.minerFeeMulti}`"
             ref="anchoredRef"
             :placement="customize.placement"
             :align="customize.align"
@@ -186,7 +200,7 @@ function onTopToolClose() {
               >
                 <component
                   :is="minerFeePanel"
-                  :translate="(key: string) => key"
+                  v-bind="minerFeePanelProps"
                 />
               </EgPopover>
 

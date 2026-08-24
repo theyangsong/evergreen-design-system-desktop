@@ -7,6 +7,12 @@ import { EgLink } from '../link';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import type { MinerFeeCustomDraft, MinerFeeCustomSaved } from './minerFeeCustomTypes';
 import MinerFeeCustomAnchoredPopover from './MinerFeeCustomAnchoredPopover.vue';
+import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
+import { buildEvmMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
+import {
+  formatMinerFeeOptionCryptoDisplay,
+  formatMinerFeeOptionUsdDisplay,
+} from './minerFeeEvmDisplay';
 import {
   minerFeeSpeedCryptoRangeKey,
   minerFeeSpeedUsdRangeKey,
@@ -39,12 +45,15 @@ const props = withDefaults(
     customViaAnchoredPopover?: boolean;
     customDraft?: MinerFeeCustomDraft;
     customPopoverBoundary?: string;
+    /** 多笔：>1 时在内容与底部确定之间展示预计总矿工费。 */
+    transactionCount?: number;
   }>(),
   {
     symbol: 'ETH',
     hideInlineConfirm: false,
     customViaAnchoredPopover: false,
     customPopoverBoundary: '.eds-popup',
+    transactionCount: 1,
   },
 );
 
@@ -72,6 +81,20 @@ const speedOptions = computed(() =>
     cryptoRangeKey: minerFeeSpeedCryptoRangeKey(shellVariant.value, id),
     usdRangeKey: minerFeeSpeedUsdRangeKey(shellVariant.value, id),
   })),
+);
+
+const batchTotalDisplay = computed(() =>
+  buildEvmMinerFeeBatchTotalDisplay(
+    props.minerFee,
+    props.customFeeSaved,
+    ui,
+    props.symbol,
+    props.transactionCount,
+  ),
+);
+
+const showBatchTotal = computed(
+  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
 );
 
 function dotToneClass(tone: 'success' | 'warning' | 'danger') {
@@ -137,12 +160,16 @@ defineExpose({
                 />
                 <span :class="styles.minerFeeOptionName">{{ ui(option.labelKey) }}</span>
               </span>
-              <span :class="styles.minerFeeEthRange">{{ ui(option.cryptoRangeKey) }}</span>
-              <span :class="styles.minerFeeUsdRange">{{ ui(option.usdRangeKey) }}</span>
+              <span :class="styles.minerFeeEthRange">{{
+                formatMinerFeeOptionCryptoDisplay(ui(option.cryptoRangeKey))
+              }}</span>
+              <span :class="styles.minerFeeUsdRange">{{
+                formatMinerFeeOptionUsdDisplay(ui(option.usdRangeKey))
+              }}</span>
             </button>
           </div>
 
-          <EgDivider type="page" :class="styles.minerFeeOptionsDivider" />
+          <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
 
           <div :class="styles.minerFeeCustomGroup">
           <div
@@ -177,7 +204,9 @@ defineExpose({
                     <span :class="styles.minerFeeOptionHeader">
                       <span :class="styles.minerFeeOptionName">{{ ui('Custom') }}</span>
                     </span>
-                    <span :class="styles.minerFeeEthRange">{{ customFeeSaved.cryptoRange }}</span>
+                    <span :class="styles.minerFeeEthRange">{{
+                      formatMinerFeeOptionCryptoDisplay(customFeeSaved.cryptoRange)
+                    }}</span>
                     <span :class="styles.minerFeeUsdRange">{{ customFeeSaved.usdRange }}</span>
                   </span>
                   <EgLink
@@ -229,7 +258,9 @@ defineExpose({
               <span :class="styles.minerFeeOptionHeader">
                 <span :class="styles.minerFeeOptionName">{{ ui('Custom') }}</span>
               </span>
-              <span :class="styles.minerFeeEthRange">{{ customFeeSaved.cryptoRange }}</span>
+              <span :class="styles.minerFeeEthRange">{{
+                formatMinerFeeOptionCryptoDisplay(customFeeSaved.cryptoRange)
+              }}</span>
               <span :class="styles.minerFeeUsdRange">{{ customFeeSaved.usdRange }}</span>
             </span>
             <EgLink
@@ -264,6 +295,14 @@ defineExpose({
           </button>
           </template>
           </div>
+
+          <template v-if="showBatchTotal">
+            <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
+            <MinerFeeBatchTotalSummary
+              :total-display="batchTotalDisplay"
+              :transaction-count="transactionCount"
+            />
+          </template>
         </div>
       </section>
     </div>

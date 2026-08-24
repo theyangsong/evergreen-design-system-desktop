@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { EgComboActionPopupWindow } from '../combo';
+import { EgDivider } from '../../atoms/divider';
 import { computed } from 'vue';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import {
   buildTonLikeMinerFeeDisplay,
   resolveTonLikeMinerFeeQuote,
 } from './minerFeeTonLikeDisplay';
+import { buildTonLikeMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
+import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
 import type { MinerFeeConfirmPayload } from './minerFeeTypes';
 import styles from './MinerFeePopoverPanel.module.css';
 
@@ -13,10 +16,13 @@ const props = withDefaults(
   defineProps<{
     symbol?: string;
     hideInlineConfirm?: boolean;
+    /** 多笔：>1 时在内容与底部确定之间展示预计总矿工费。 */
+    transactionCount?: number;
   }>(),
   {
     symbol: 'TON',
     hideInlineConfirm: false,
+    transactionCount: 1,
   },
 );
 
@@ -34,6 +40,14 @@ const primaryLine = computed(() => {
 });
 
 const usdApproxLine = computed(() => `≈ ${feeQuote.value.usdApprox}`);
+
+const batchTotalDisplay = computed(() =>
+  buildTonLikeMinerFeeBatchTotalDisplay(props.symbol, props.transactionCount),
+);
+
+const showBatchTotal = computed(
+  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
+);
 
 function onConfirm() {
   emit('confirm', {
@@ -55,6 +69,16 @@ defineExpose({
           <p :class="styles.minerFeeFixedQuoteLabel">{{ primaryLine }}</p>
           <p :class="styles.minerFeeFixedQuoteUsd">{{ usdApproxLine }}</p>
         </div>
+
+        <template v-if="showBatchTotal">
+          <div :class="styles.minerFeeBatchTotalAppendix">
+            <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
+            <MinerFeeBatchTotalSummary
+              :total-display="batchTotalDisplay"
+              :transaction-count="transactionCount"
+            />
+          </div>
+        </template>
       </section>
     </div>
 
