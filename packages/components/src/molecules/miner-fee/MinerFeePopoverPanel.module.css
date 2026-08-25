@@ -33,24 +33,12 @@
   padding: 0;
 }
 
+
 /** 矿工费 Popover（EVM/BTC / TON / TRON）：隐藏 topTool 底部分割线。 */
 :global(.eds-popover-content:has([data-miner-fee-popover]) > .eds-divider),
 :global(.eds-popover-content:has([data-miner-fee-ton-like]) > .eds-divider),
 :global(.eds-popover-content:has([data-miner-fee-tron]) > .eds-divider) {
   display: none;
-}
-
-/** 矿工费 Popover topTool 标题：上 spacing-3 / 左右 spacing-4 / 下 spacing-2。 */
-:global(.eds-popover-content:has([data-miner-fee-popover]) [class*='topToolTitle']),
-:global(.eds-popover-content:has([data-miner-fee-ton-like]) [class*='topToolTitle']),
-:global(.eds-popover-content:has([data-miner-fee-tron]) [class*='topToolTitle']) {
-  padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
-}
-
-:global(.eds-popover-content:has([data-miner-fee-popover]) [class*='topToolTitleWithClose']),
-:global(.eds-popover-content:has([data-miner-fee-ton-like]) [class*='topToolTitleWithClose']),
-:global(.eds-popover-content:has([data-miner-fee-tron]) [class*='topToolTitleWithClose']) {
-  padding-right: calc(var(--spacing-1) * 2 + var(--icon-md) + var(--spacing-4));
 }
 
 /** TON / TRON：contentSlot 随内容自然高度。 */
@@ -167,11 +155,12 @@
   overflow-y: auto;
 }
 
-/** contentSlot 内底部区：确定；相对选项区缩进至 spacing-4（对齐 contentSlot spacing-1）。 */
+/** contentSlot 内底部区：备注 + 确定；相对选项区缩进至 spacing-4。 */
 .minerFeeFooter {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  gap: var(--spacing-5);
   box-sizing: border-box;
   width: calc(100% - 2 * (var(--spacing-4) - var(--spacing-1)));
   margin-top: var(--spacing-2);
@@ -198,126 +187,30 @@
   padding-left: 0;
 }
 
-/** 矿工费 Popover 内 page 分割线：EVM 对齐 footer 缩进；TON/TRON spacing-1。 */
-.minerFeePageInsetDivider {
-  flex-shrink: 0;
-  width: calc(100% - 2 * (var(--spacing-4) - var(--spacing-1)));
-  margin-right: calc(var(--spacing-4) - var(--spacing-1));
-  margin-left: calc(var(--spacing-4) - var(--spacing-1));
-}
-
-.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeePageInsetDivider,
-.minerFeeListPage:global([data-miner-fee-tron]) .minerFeePageInsetDivider {
-  width: calc(100% - 2 * var(--spacing-1));
-  margin-right: var(--spacing-1);
-  margin-left: var(--spacing-1);
-}
-
-.minerFeeBatchTotal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1-5);
-  box-sizing: border-box;
-  width: calc(100% - 2 * (var(--spacing-4) - var(--spacing-1)));
-  margin-top: var(--spacing-2);
-  margin-right: calc(var(--spacing-4) - var(--spacing-1));
-  margin-left: calc(var(--spacing-4) - var(--spacing-1));
-}
-
-.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeeBatchTotal,
-.minerFeeListPage:global([data-miner-fee-tron]) .minerFeeBatchTotal {
-  width: calc(100% - 2 * var(--spacing-1));
-  margin-right: var(--spacing-1);
-  margin-left: var(--spacing-1);
-}
-
-.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFee {
-  gap: var(--spacing-4);
-}
-
-.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeeBatchTotalAppendix {
-  margin-top: 0;
-  gap: var(--spacing-4);
-}
-
-.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeeBatchTotal {
-  margin-top: 0;
-}
-
-.minerFeeListPage:global([data-miner-fee-tron]) .minerFeeRoot {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.minerFeeListPage:global([data-miner-fee-tron]) .minerFeeBatchTotalAppendix {
-  margin-top: 0;
-  gap: var(--spacing-4);
-}
-
-.minerFeeListPage:global([data-miner-fee-tron]) .minerFeeBatchTotal {
-  margin-top: 0;
-}
-
-.minerFeeBatchTotalTitle {
+.minerFeeListPagePopupToolbar .minerFeeFooterTron {
+  width: 100%;
   margin: 0;
-  color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-strong-size);
-  font-weight: var(--eds-footnote-strong-weight);
-  line-height: var(--eds-footnote-strong-line-height);
 }
 
-.minerFeeBatchTotalValueRow {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-025);
+.remarkField {
   width: 100%;
   min-width: 0;
 }
 
-.minerFeeBatchTotalAmount {
-  max-width: 100%;
-  min-width: 0;
-  color: var(--text-base-primary);
-  font-size: var(--eds-body-medium-size);
-  font-weight: var(--eds-body-medium-weight);
-  line-height: var(--eds-body-medium-line-height);
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
+/** 矿工费列表页备注 label：weight 500（body-small-strong）。 */
+.minerFeeFooter .remarkField :global([class*='label']) {
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-strong-line-height);
 }
 
-.minerFeeBatchTotalCountLine {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--spacing-05);
-  min-width: 0;
-  color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-size);
-  font-weight: var(--eds-footnote-weight);
-  line-height: var(--eds-footnote-line-height);
+/** 无矿工费时 Popover topTool 已承载标题，隐藏 Combo 内 label。 */
+.remarkFieldNoLabel :global([class*='label']) {
+  display: none;
 }
 
-.minerFeeBatchTotalCount {
-  color: var(--text-brand-primary);
-  font-size: var(--eds-footnote-strong-size);
-  font-weight: var(--eds-footnote-strong-weight);
-  line-height: var(--eds-footnote-strong-line-height);
-}
-
-.minerFeeBatchTotalCountPrefix,
-.minerFeeBatchTotalCountSuffix {
-  color: var(--text-base-primary);
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-}
-
-.minerFeeBatchTotalAppendix {
-  display: flex;
-  flex-direction: column;
+.confirm {
   width: 100%;
-  margin-top: var(--spacing-2);
 }
 
 .minerFee {
@@ -330,17 +223,8 @@
 .minerFeeOptions {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
-  width: 100%;
-}
-
-.minerFeeSpeedGroup,
-.minerFeeCustomGroup {
-  display: flex;
-  flex-direction: column;
   gap: var(--spacing-025);
   width: 100%;
-  min-width: 0;
 }
 
 /** AnchoredPopover 默认 inline-flex；自定义入口须铺满选项行宽。 */
@@ -409,9 +293,12 @@
   background: var(--stroke-divider-page);
 }
 
-/** @deprecated 使用 minerFeePageInsetDivider */
-.minerFeeOptionsDivider {
-  composes: minerFeePageInsetDivider;
+/** contentSlot 子节点：自定义与备注之间；相对选项区缩进至 spacing-4。 */
+.minerFeeDivider {
+  flex-shrink: 0;
+  width: calc(100% - 2 * (var(--spacing-4) - var(--spacing-1)));
+  margin-right: calc(var(--spacing-4) - var(--spacing-1));
+  margin-left: calc(var(--spacing-4) - var(--spacing-1));
 }
 
 .minerFeeOption,
@@ -541,7 +428,6 @@
   font-size: var(--eds-footnote-strong-size);
   font-weight: var(--eds-footnote-strong-weight);
   line-height: var(--eds-footnote-strong-line-height);
-  font-variant-numeric: tabular-nums;
 }
 
 .minerFeeUsdRange {
@@ -578,6 +464,25 @@
   line-height: var(--eds-footnote-line-height);
 }
 
+.minerFeeTonLikeDivider {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.minerFeeTonLikeFooter {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: var(--spacing-5);
+  width: 100%;
+}
+
+.minerFeeTonLikeFooter .remarkField :global([class*='label']) {
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-strong-line-height);
+}
+
 /** TRON：资源 + 支付模式独立布局。 */
 .minerFeeTronBody {
   display: flex;
@@ -599,6 +504,182 @@
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
+}
+
+.minerFeeTronResourcesRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+  margin-top: var(--spacing-1-5);
+}
+
+.minerFeeTronResourcesIcon {
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--material-base-primary);
+}
+
+.minerFeeTronResourcesIcon :global(.eds-icon svg),
+.minerFeeTronResourcesIcon :global(svg) {
+  width: 100%;
+  height: 100%;
+}
+
+.minerFeeTronResourcesIcon :global(path) {
+  fill: currentColor;
+}
+
+.minerFeeTronResourcesText {
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+.minerFeeTronActivationFeedback {
+  width: 100%;
+  margin-top: var(--spacing-2);
+}
+
+/** 对齐 EgComboInputItem #feedback 槽，不覆盖 EgFormSubmission 自持字阶/色。 */
+.minerFeeTronActivationFeedback:has(:global(.eds-form-submission)) {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.minerFeeTronInnerDivider {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.minerFeeTronPaymentLabel {
+  margin: 0;
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-small-strong-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-strong-line-height);
+}
+
+.minerFeeTronPaymentCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  background: var(--material-card-moderate);
+}
+
+.minerFeeTronPaymentHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.minerFeeTronPaymentModeName {
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+.minerFeeTronPaymentTags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.minerFeeTronProviderNote {
+  margin: var(--spacing-05) 0 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-weight);
+  line-height: var(--eds-footnote-line-height);
+}
+
+.minerFeeTronEstimatedCost {
+  margin: var(--spacing-3) 0 0;
+  color: var(--text-base-primary);
+  font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
+}
+
+.minerFeeTronEstimatedCostUsd {
+  color: var(--text-base-secondary);
+}
+
+.minerFeeStubMessage {
+  margin: 0;
+  padding: var(--spacing-4) var(--spacing-3);
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+  text-align: center;
+}
+
+/* --- DS extensions (batch / TRON redesign / popup toolbar) --- */
+
+
+.minerFeePageInsetDivider {
+  composes: minerFeeDivider;
+}
+
+.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeePageInsetDivider,
+.minerFeeListPage:global([data-miner-fee-tron]) .minerFeePageInsetDivider {
+  width: calc(100% - 2 * var(--spacing-1));
+  margin-right: var(--spacing-1);
+  margin-left: var(--spacing-1);
+}
+
+/** @deprecated 使用 minerFeePageInsetDivider */
+.minerFeeOptionsDivider {
+  composes: minerFeePageInsetDivider;
+}
+
+.minerFeeBatchTotal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+  box-sizing: border-box;
+  width: calc(100% - 2 * (var(--spacing-4) - var(--spacing-1)));
+  margin-top: var(--spacing-2);
+  margin-right: calc(var(--spacing-4) - var(--spacing-1));
+  margin-left: calc(var(--spacing-4) - var(--spacing-1));
+}
+
+.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeeBatchTotal,
+.minerFeeListPage:global([data-miner-fee-tron]) .minerFeeBatchTotal {
+  width: calc(100% - 2 * var(--spacing-1));
+  margin-right: var(--spacing-1);
+  margin-left: var(--spacing-1);
+}
+
+.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFee {
+  gap: var(--spacing-4);
+}
+
+.minerFeeListPage:global([data-miner-fee-ton-like]) .minerFeeBatchTotalAppendix {
+  margin-top: 0;
+  gap: var(--spacing-4);
+}
+
+.minerFeeSpeedGroup,
+.minerFeeCustomGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025);
+  width: 100%;
+  min-width: 0;
 }
 
 .minerFeeTronSectionTitleRow {
@@ -727,78 +808,9 @@
   background: var(--stroke-base-quaternary);
 }
 
-.minerFeeTronActivationFeedback {
+.minerFeeTronPaymentBalanceFeedback {
   width: 100%;
-}
-
-/** 对齐 EgComboInputItem #feedback 槽，不覆盖 EgFormSubmission 自持字阶/色。 */
-.minerFeeTronActivationFeedback:has(:global(.eds-form-submission)) {
-  color: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-}
-
-.minerFeeTronInnerDivider {
-  flex-shrink: 0;
-  width: 100%;
-}
-
-.minerFeeTronPaymentLabel {
-  margin: 0;
-  color: var(--text-base-primary);
-  font-size: var(--eds-body-small-strong-size);
-  font-weight: var(--eds-body-small-strong-weight);
-  line-height: var(--eds-body-small-strong-line-height);
-}
-
-.minerFeeTronPaymentCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-sizing: border-box;
-  width: 100%;
-  margin-top: var(--spacing-1);
-  padding: var(--spacing-2) var(--spacing-3) var(--spacing-3);
-  border-radius: var(--radius-sm);
-  background: var(--material-card-moderate);
-}
-
-.minerFeeTronPaymentHeader {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-1);
-}
-
-.minerFeeTronPaymentModeName {
-  color: var(--text-base-primary);
-  font-size: var(--eds-body-medium-size);
-  font-weight: var(--eds-body-medium-weight);
-  line-height: var(--eds-body-medium-line-height);
-}
-
-.minerFeeTronPaymentTags {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-1);
-}
-
-.minerFeeTronProviderNote {
-  margin: var(--spacing-05) 0 0;
-  color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-size);
-  font-weight: var(--eds-footnote-weight);
-  line-height: var(--eds-footnote-line-height);
-}
-
-.minerFeeTronEstimatedCost {
-  margin: var(--spacing-3) 0 0;
-  color: var(--text-base-primary);
-  font-size: var(--eds-footnote-strong-size);
-  font-weight: var(--eds-footnote-strong-weight);
-  line-height: var(--eds-footnote-strong-line-height);
+  margin-top: var(--spacing-2);
 }
 
 .minerFeeTronEstimatedCostOriginal {
@@ -808,27 +820,4 @@
   font-weight: var(--eds-footnote-weight);
   line-height: var(--eds-footnote-line-height);
   text-decoration: line-through;
-}
-
-.minerFeeTronPaymentBalanceFeedback {
-  width: 100%;
-  margin-top: var(--spacing-2);
-}
-
-/** 对齐 EgComboInputItem #feedback 槽，不覆盖 EgFormSubmission 自持字阶/色。 */
-.minerFeeTronPaymentBalanceFeedback:has(:global(.eds-form-submission)) {
-  color: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-}
-
-.minerFeeStubMessage {
-  margin: 0;
-  padding: var(--spacing-4) var(--spacing-3);
-  color: var(--text-base-secondary);
-  font-size: var(--eds-body-medium-size);
-  font-weight: var(--eds-body-medium-weight);
-  line-height: var(--eds-body-medium-line-height);
-  text-align: center;
 }
