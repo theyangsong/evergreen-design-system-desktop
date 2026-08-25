@@ -22,10 +22,15 @@
 
 .lead {
   margin: 0;
-  color: var(--text-base-secondary);
-  font-size: var(--eds-body-medium-size);
-  line-height: var(--eds-body-medium-line-height);
-  font-weight: var(--eds-body-medium-weight);
+  color: var(--text-base-primary);
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
+  font-weight: var(--eds-footnote-large-weight);
+}
+
+.afterLead {
+  width: 100%;
+  margin-top: var(--spacing-1);
 }
 
 .header::after {

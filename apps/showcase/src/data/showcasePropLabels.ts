@@ -413,6 +413,13 @@ export const showcaseComboPopupCountLabels = {
   '2': '2 个（确认+取消）',
 } as const;
 
+export const showcaseComboActionKindLabels = {
+  skid: tokenLabel('滑轨', 'Action-Skid'),
+  'popup-window': tokenLabel('弹窗', 'Popup Window'),
+  flotation: tokenLabel('浮层', 'Flotation'),
+  page: tokenLabel('页面', 'Page'),
+} as const;
+
 export const showcaseButtonCustomizeFieldLabels = {
   tone: '色调',
   variant: '风格',
@@ -440,16 +447,16 @@ export const showcaseButtonCustomizeFieldLabels = {
 } as const;
 
 export const showcaseInputCustomizeFieldLabels = {
-  type: '输入类型',
+  type: '类型',
   size: '尺寸',
-  widthMode: '宽度模式',
+  widthMode: '宽度',
   fixedWidth: '固定宽度',
   placeholder: '占位符',
   scenario: '场景化',
   disabled: '禁用',
   readonly: '只读',
   unit: '单位',
-  clearable: '可清空',
+  clearable: '清空',
   showMax: '显示 Max',
   maxLabel: 'Max 文案',
   pasteLabel: 'Paste 文案',
@@ -462,8 +469,8 @@ export const showcaseInputCustomizeFieldLabels = {
 export const showcaseTooltipCustomizeFieldLabels = {
   scenario: '场景化',
   panelRadius: '圆角',
-  widthMode: '宽度模式',
-  width: '宽度',
+  widthMode: '宽度',
+  width: '固定宽度',
   height: '高度',
   maxHeight: '最大高度',
   placement: '弹出方向',

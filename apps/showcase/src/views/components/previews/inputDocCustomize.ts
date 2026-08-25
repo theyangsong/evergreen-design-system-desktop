@@ -119,14 +119,10 @@ export const textareaCustomizeDefaults = {
   fixedWidth: '319',
   disabled: false,
   readonly: false,
-  pasteLabel: 'Paste',
-  clearLabel: 'Clear',
 } as const;
 
 export const textareaCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
-  { kind: 'text', key: 'pasteLabel', label: showcaseInputCustomizeFieldLabels.pasteLabel },
-  { kind: 'text', key: 'clearLabel', label: showcaseInputCustomizeFieldLabels.clearLabel },
   {
     kind: 'select',
     key: 'widthMode',

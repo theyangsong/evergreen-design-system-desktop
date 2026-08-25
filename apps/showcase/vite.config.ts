@@ -97,19 +97,19 @@ function scopeDesktopTokens() {
       if (/^\[data-theme=["']?dark["']?\]\s+/.test(selector)) {
         return selector.replace(
           /^\[data-theme=["']?dark["']?\]/,
-          'html[data-theme="dark"] .desktopTokens',
+          '[data-theme="dark"] .desktopTokens',
         );
       }
 
       if (/^\[data-theme=["']?light["']?\]\s+/.test(selector)) {
         return selector.replace(
           /^\[data-theme=["']?light["']?\]/,
-          'html[data-theme="light"] .desktopTokens',
+          '[data-theme="light"] .desktopTokens',
         );
       }
 
       if (selector === '[data-theme="dark"]' || selector === '[data-theme=dark]') {
-        return 'html[data-theme="dark"] .desktopTokens';
+        return '[data-theme="dark"] .desktopTokens';
       }
 
       if (

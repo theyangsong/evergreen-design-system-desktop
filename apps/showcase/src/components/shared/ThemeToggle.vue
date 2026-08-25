@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { useThemeProvider } from '@eds/website-components';
-import styles from './ThemeToggle.module.css';
+import { EgButton } from '@eds/website-components';
+import { useShowcaseContentTheme } from '@/composables/useShowcaseContentTheme';
 
-const { theme, toggleTheme } = useThemeProvider();
+const { theme, toggleTheme } = useShowcaseContentTheme();
 </script>
 
 <template>
-  <button type="button" :class="styles.button" @click="toggleTheme">
+  <EgButton
+    tone="sameWhite"
+    variant="outline"
+    size="sm"
+    @click="toggleTheme"
+  >
     {{ theme === 'light' ? 'Dark' : 'Light' }}
-  </button>
+  </EgButton>
 </template>

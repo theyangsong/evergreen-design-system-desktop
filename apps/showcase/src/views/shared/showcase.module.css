@@ -55,9 +55,20 @@
   border-bottom: var(--stroke-xs) solid var(--stroke-divider-page);
   text-align: left;
   vertical-align: top;
-  font-size: var(--eds-body-small-size);
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+
+.table th {
+  background: var(--material-card-shallow);
+  font-size: var(--eds-footnote-medium-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-line-height);
+}
+
+.table td {
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
 }
 
 .table th:nth-child(1),
@@ -73,11 +84,6 @@
 .table th:nth-child(3),
 .table td:nth-child(3) {
   width: 20%;
-}
-
-.table th {
-  background: var(--material-card-shallow);
-  font-weight: var(--eds-body-medium-strong-weight);
 }
 
 .bodyText {

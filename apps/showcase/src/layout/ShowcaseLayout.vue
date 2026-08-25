@@ -3,20 +3,20 @@ import { RouterView } from 'vue-router';
 import styles from './ShowcaseLayout.module.css';
 import ShowcaseNav from './ShowcaseNav.vue';
 import ThemeToggle from '@/components/shared/ThemeToggle.vue';
+import { provideShowcaseContentTheme } from '@/composables/useShowcaseContentTheme';
+
+const { contentRef, theme } = provideShowcaseContentTheme();
 </script>
 
 <template>
   <div :class="styles.shell">
     <aside :class="styles.sidebar">
-      <div :class="styles.sidebarBody">
-        <div :class="styles.brand">
-          <span :class="styles.brandMark">S</span>
-          <div>
-            <p :class="styles.brandTitle">ShowCase</p>
-            <p :class="styles.brandSub">v1.0</p>
-          </div>
-        </div>
+      <div :class="styles.brand">
+        <p :class="styles.brandTitle">EvergreenDesignSystem</p>
+        <p :class="styles.brandSub">@Desktop</p>
+      </div>
 
+      <div :class="styles.sidebarScroll">
         <ShowcaseNav />
       </div>
 
@@ -25,8 +25,10 @@ import ThemeToggle from '@/components/shared/ThemeToggle.vue';
       </div>
     </aside>
 
-    <main :class="styles.content">
-      <RouterView />
+    <main ref="contentRef" :class="styles.content" :data-theme="theme">
+      <div :class="styles.contentScroll">
+        <RouterView />
+      </div>
     </main>
   </div>
 </template>

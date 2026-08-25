@@ -106,7 +106,7 @@ const showAccessoryMessage = computed(() => Boolean(props.message?.trim()));
 
 function accessorySlotHasContent(): boolean {
   if (!slots.accessory) return false;
-  return slots.accessory().length > 0;
+  return slots.accessory({}).length > 0;
 }
 
 const showAccessoryReddot = computed(

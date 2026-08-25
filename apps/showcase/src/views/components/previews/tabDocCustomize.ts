@@ -3,6 +3,7 @@ import {
   countSelectOptions,
   inputSizeRows,
   propLabelRows,
+  showcaseInputCustomizeFieldLabels,
   showcaseTabShapeLabels,
   widthModeAdaptiveFixedRows,
 } from '@/data/showcasePropLabels';
@@ -101,7 +102,7 @@ export const segmentedControlCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'itemWidthMode',
-    label: '项宽模式',
+    label: showcaseInputCustomizeFieldLabels.widthMode,
     options: widthModeAdaptiveFixedRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {

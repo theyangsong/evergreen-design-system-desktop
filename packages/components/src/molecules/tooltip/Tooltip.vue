@@ -137,7 +137,7 @@ const panelContentClass = computed(() =>
 </script>
 
 <template>
-  <div :class="shellClass" :style="shellStyle">
+  <div :class="shellClass" :style="shellStyle" data-no-corner-smoothing>
     <div
       :class="[
         panelStyles.panel,

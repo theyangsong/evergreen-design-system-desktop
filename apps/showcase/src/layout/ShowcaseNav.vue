@@ -49,6 +49,21 @@ function onSectionClick(section: ComponentsSidebarSection) {
   setSectionExpanded(section.id, !isSectionExpanded(section.id));
 }
 
+function onComponentsNavClick(event: MouseEvent) {
+  if (!isComponentsRoute.value) return;
+  if (
+    event.button !== 0
+    || event.metaKey
+    || event.ctrlKey
+    || event.shiftKey
+    || event.altKey
+  ) {
+    return;
+  }
+  event.preventDefault();
+  expandedSections.value = new Set();
+}
+
 function isFamilyActive(familyId: string) {
   return activeFamilyId.value === familyId;
 }
@@ -67,7 +82,11 @@ watch(
 <template>
   <nav :class="styles.nav">
     <template v-for="item in navItems" :key="item.to">
-      <RouterLink :to="item.to" :class="styles.navLink">
+      <RouterLink
+        :to="item.to"
+        :class="styles.navLink"
+        @click="item.to === '/components' ? onComponentsNavClick($event) : undefined"
+      >
         {{ item.label }}
       </RouterLink>
 

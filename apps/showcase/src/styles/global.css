@@ -26,7 +26,7 @@ body {
   font-size: var(--eds-footnote-large-size);
   line-height: var(--eds-footnote-large-line-height);
   color: var(--text-base-primary);
-  background: var(--box-page);
+  background: var(--material-brand-primary);
 }
 
 a {

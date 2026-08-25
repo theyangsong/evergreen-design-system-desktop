@@ -2,8 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import type { AnchorItem } from '@/data/types';
-import { useNavScrollFade } from '@/composables/useNavScrollFade';
-import styles from './ComponentsPageAnchors.module.css';
+import styles from './PageAnchors.module.css';
 
 const props = withDefaults(
   defineProps<{
@@ -26,17 +25,12 @@ const activeSlug = computed(() => {
 const activeNavId = computed(() => activeSlug.value);
 
 const listRef = ref<HTMLElement | null>(null);
-const scrollRef = ref<HTMLElement | null>(null);
 const linkRefs = new Map<string, HTMLElement>();
 const indicatorTop = ref(0);
-const indicatorLeft = ref(0);
-const indicatorWidth = ref(0);
 const indicatorHeight = ref(0);
 const indicatorVisible = ref(false);
 const indicatorMoveTransition = ref(true);
 let resizeObserver: ResizeObserver | undefined;
-
-const { fadeTop, fadeBottom, updateFade } = useNavScrollFade(scrollRef);
 
 function setLinkRef(navId: string, element: Element | ComponentPublicInstance | null) {
   const node =
@@ -61,12 +55,8 @@ function syncIndicatorPosition() {
     return;
   }
 
-  const listRect = list.getBoundingClientRect();
-  const linkRect = link.getBoundingClientRect();
-  indicatorTop.value = linkRect.top - listRect.top;
-  indicatorLeft.value = linkRect.left - listRect.left;
-  indicatorWidth.value = linkRect.width;
-  indicatorHeight.value = linkRect.height;
+  indicatorTop.value = link.offsetTop;
+  indicatorHeight.value = link.offsetHeight;
   indicatorVisible.value = true;
 }
 
@@ -90,11 +80,15 @@ function isLinkActive(item: AnchorItem) {
   return item.depth === 2 && activeNavId.value === item.id;
 }
 
+function isNavLabel(item: AnchorItem) {
+  return item.depth === 1 || item.kind === 'navGroup' || item.kind === 'navSection' || item.kind === 'navSubgroup';
+}
+
 watch(activeNavId, (_nextId, previousId) => {
   nextTick(() => {
     syncIndicatorWithAnimation(previousId);
   });
-}, { flush: 'post' });
+});
 
 onMounted(() => {
   nextTick(() => {
@@ -108,8 +102,6 @@ onMounted(() => {
   if (listRef.value) {
     resizeObserver.observe(listRef.value);
   }
-
-  updateFade();
 });
 
 onBeforeUnmount(() => {
@@ -118,56 +110,42 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <aside
-    :class="[
-      styles.anchors,
-      fadeTop && styles.anchorsFadeTop,
-      fadeBottom && styles.anchorsFadeBottom,
-    ]"
-    :aria-label="ariaLabel"
-  >
-    <div
-      ref="scrollRef"
-      :class="styles.navScroll"
-      @scroll="updateFade"
-    >
-      <nav ref="listRef" :class="styles.nav">
-        <div
+  <aside :class="styles.anchors" :aria-label="ariaLabel">
+    <nav ref="listRef" :class="styles.nav">
+      <div
+        :class="[
+          styles.activeIndicator,
+          indicatorVisible && styles.activeIndicatorVisible,
+          indicatorMoveTransition && styles.activeIndicatorMove,
+        ]"
+        :style="{
+          transform: `translateY(${indicatorTop}px)`,
+          height: `${indicatorHeight}px`,
+        }"
+        aria-hidden="true"
+      />
+
+      <template v-for="item in items" :key="item.id">
+        <span
+          v-if="isNavLabel(item)"
+          :class="styles.navLabel"
+        >
+          {{ item.label }}
+        </span>
+
+        <RouterLink
+          v-else-if="item.depth === 2"
+          :ref="(element) => setLinkRef(item.id, element)"
+          :to="sceneNavTo(item.id)"
           :class="[
-            styles.activeIndicator,
-            indicatorVisible && styles.activeIndicatorVisible,
-            indicatorMoveTransition && styles.activeIndicatorMove,
+            styles.link,
+            styles.linkNested,
+            isLinkActive(item) && styles.linkActive,
           ]"
-          :style="{
-            transform: `translate(${indicatorLeft}px, ${indicatorTop}px)`,
-            width: `${indicatorWidth}px`,
-            height: `${indicatorHeight}px`,
-          }"
-          aria-hidden="true"
-        />
-
-        <template v-for="item in items" :key="item.id">
-          <span
-            v-if="item.depth === 1"
-            :class="styles.sectionLabel"
-          >
-            {{ item.label }}
-          </span>
-
-          <RouterLink
-            v-else-if="item.depth === 2"
-            :ref="(element) => setLinkRef(item.id, element)"
-            :to="sceneNavTo(item.id)"
-            :class="[
-              styles.link,
-              styles.linkNested,
-              isLinkActive(item) && styles.linkActive,
-            ]"
-          >
-            {{ item.label }}
-          </RouterLink>
-        </template>
-      </nav>
-    </div>
+        >
+          {{ item.label }}
+        </RouterLink>
+      </template>
+    </nav>
   </aside>
 </template>

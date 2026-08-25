@@ -53,5 +53,8 @@ onBeforeUnmount(() => {
   >
     <h1 :class="styles.title">{{ title }}</h1>
     <p v-if="lead" :class="styles.lead">{{ lead }}</p>
+    <div v-if="$slots.afterLead" :class="styles.afterLead">
+      <slot name="afterLead" />
+    </div>
   </header>
 </template>

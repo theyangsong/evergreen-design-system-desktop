@@ -26,10 +26,53 @@ export type ComponentsSidebarSection = {
   groups?: ComponentsSidebarGroup[];
 };
 
-/** Organisms · Data 组侧栏小标题（不含 DataGrid 族链接）。 */
+/** Organisms 侧栏分组小标题。 */
 const SIDEBAR_GROUP_LABELS: Partial<Record<string, string>> = {
-  Data: 'DataGrid',
+  Navigation: '导航',
+  Data: '数据表',
+  Verify: '安全',
+  Detail: '详情',
 };
+
+/** Molecules 侧栏分组（Showcase 导航小标题）。 */
+const MOLECULES_SIDEBAR_GROUPS: Array<{ label: string; slugs: string[] }> = [
+  {
+    label: '输入',
+    slugs: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'upload'],
+  },
+  {
+    label: '切换',
+    slugs: ['tab', 'segmented'],
+  },
+  {
+    label: '触发',
+    slugs: ['button', 'decide'],
+  },
+  {
+    label: '标记',
+    slugs: ['tag'],
+  },
+  {
+    label: '浮层提示',
+    slugs: ['tooltip', 'popover', 'flotation', 'dialog'],
+  },
+  {
+    label: '通知',
+    slugs: ['toast', 'message'],
+  },
+  {
+    label: '状态反馈',
+    slugs: [
+      'progress',
+      'loading',
+      'countdown',
+      'reddot',
+      'end-feedback-card',
+      'form-submission',
+      'streamer',
+    ],
+  },
+];
 
 /** 侧栏不展示的组件族（保留右侧 Scenes 等子路由）。 */
 const SIDEBAR_EXCLUDED_FAMILY_SLUGS = new Set(['data-grid']);
@@ -48,6 +91,21 @@ function mapSectionFamilies(items: CatalogItem[]): ComponentsSidebarFamily[] {
     .map(mapFamily);
 }
 
+function buildMoleculesGroups(section: CatalogSection): ComponentsSidebarGroup[] {
+  const bySlug = new Map(section.items.map((item) => [item.slug, item]));
+  const sectionId = catalogSectionId(section.title);
+
+  return MOLECULES_SIDEBAR_GROUPS.map((group, index) => ({
+    id: `${sectionId}:molecule-group:${index}`,
+    label: group.label,
+    families: group.slugs
+      .map((slug) => bySlug.get(slug))
+      .filter((item): item is CatalogItem => Boolean(item))
+      .filter((item) => !SIDEBAR_EXCLUDED_FAMILY_SLUGS.has(item.slug))
+      .map(mapFamily),
+  })).filter((group) => group.families.length > 0);
+}
+
 function buildSectionGroups(section: CatalogSection): ComponentsSidebarGroup[] | undefined {
   if (!section.groups?.length) return undefined;
 
@@ -62,6 +120,15 @@ function buildSectionGroups(section: CatalogSection): ComponentsSidebarGroup[] |
 export function buildComponentsSidebarSections(): ComponentsSidebarSection[] {
   return componentCatalog.map((section) => {
     const id = catalogSectionId(section.title);
+
+    if (section.title === 'Molecules') {
+      return {
+        id,
+        label: section.title,
+        groups: buildMoleculesGroups(section),
+      };
+    }
+
     const groups = buildSectionGroups(section);
 
     if (groups) {

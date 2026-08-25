@@ -77,3 +77,10 @@
 .hide {
   background: var(--stroke-hide);
 }
+
+.typePage.horizontal.hide,
+.typePage.vertical.hide,
+.typeNavigator.horizontal.hide,
+.typeNavigator.vertical.hide {
+  border-color: var(--stroke-hide);
+}

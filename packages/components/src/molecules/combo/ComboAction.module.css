@@ -70,7 +70,7 @@
   overflow: clip;
   border-bottom-left-radius: var(--radius-md);
   border-bottom-right-radius: var(--radius-md);
-  background: transparent;
+  background: var(--material-hide);
 }
 
 .flotationBarEnd {

@@ -53,7 +53,9 @@ const emit = defineEmits<{
 
 const slots = useSlots();
 const inputRef = ref<HTMLInputElement | null>(null);
-const focused = ref(false);
+const fieldRef = ref<HTMLElement | null>(null);
+const fieldFocused = ref(false);
+const suppressBlur = ref(false);
 const passwordVisible = ref(false);
 const unitLeftPx = ref(0);
 const valueWidthPx = ref(0);
@@ -108,7 +110,7 @@ const showClear = computed(
   () =>
     !props.secure &&
     props.clearable &&
-    focused.value &&
+    fieldFocused.value &&
     !props.disabled &&
     !props.readonly &&
     props.modelValue.length > 0,
@@ -242,20 +244,47 @@ function onInput(event: Event) {
   emit('update:modelValue', (event.target as HTMLInputElement).value);
 }
 
+function onFieldFocusIn() {
+  fieldFocused.value = true;
+}
+
+function onFieldFocusOut(event: FocusEvent) {
+  const field = event.currentTarget as HTMLElement;
+  if (field.contains(event.relatedTarget as Node)) {
+    return;
+  }
+
+  fieldFocused.value = false;
+}
+
 function onFocus(event: FocusEvent) {
-  focused.value = true;
   emit('focus', event);
 }
 
 function onBlur(event: FocusEvent) {
-  focused.value = false;
+  if (suppressBlur.value) {
+    return;
+  }
+
+  const field = fieldRef.value;
+  if (field?.contains(event.relatedTarget as Node)) {
+    return;
+  }
+
   emit('blur', event);
 }
 
 function onClear() {
+  suppressBlur.value = true;
   emit('update:modelValue', '');
   emit('clear');
-  inputRef.value?.focus();
+
+  void nextTick(() => {
+    inputRef.value?.focus({ preventScroll: true });
+    requestAnimationFrame(() => {
+      suppressBlur.value = false;
+    });
+  });
 }
 
 function onMax() {
@@ -309,16 +338,18 @@ onMounted(() => {
     ]"
   >
     <div
+      ref="fieldRef"
       :class="[
         'eds-input-field',
         styles.field,
         styles[size],
         isAmount && styles.amount,
         showAttachedMax && styles.fieldWithMax,
-        focused && styles.fieldFocused,
         disabled && styles.fieldDisabled,
       ]"
       @click="onFieldClick"
+      @focusin="onFieldFocusIn"
+      @focusout="onFieldFocusOut"
     >
       <div
         :class="[showAttachedMax ? styles.fieldMain : styles.fieldBody]"
@@ -376,8 +407,9 @@ onMounted(() => {
               :class="[styles.clearButton, !showClear && styles.clearButtonHidden]"
               aria-label="Clear"
               :aria-hidden="!showClear"
-              :tabindex="showClear ? 0 : -1"
+              tabindex="-1"
               @mousedown.prevent
+              @pointerdown.prevent
               @click="onClear"
             >
               <svg

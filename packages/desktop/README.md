@@ -14,6 +14,12 @@ EverGreen Design System (Desktop) — **one npm package**, five pillars:
 
 ## Changelog
 
+### 0.1.7
+
+- **Fix:** `EgTooltip` — `data-no-corner-smoothing` on flotation shell so `box-shadow` is not clipped by corner-smoothing `clip-path`.
+- **Fix:** `EgDivider` — `hide` on `page` / `navigator` types also clears `border-color` (not only `background`).
+- **Fix:** `EgInput` — field-level focus for clear button; clear no longer blurs input or steals focus ring.
+
 ### 0.1.4
 
 - **Fix (Chrome):** Token icon stroke geometry via SVG attributes (`stroke-width="1.4"`, `vector-effect`, `stroke="currentColor"`) instead of CSS `var(--stroke-lg)` on v-html paths.

@@ -30,6 +30,8 @@ const props = withDefaults(
     tallPreview?: boolean;
     /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock）。 */
     compactPreview?: boolean;
+    /** 预览区内 effect-* 玻璃（如 BatchBar）：避免 shell 裁切 box-shadow。Teleport 浮层（Tooltip/Popover）无需此项。 */
+    effectPanelPreview?: boolean;
     /** Tag 文档：预览区 480px + 底部样式色板。 */
     tagPreview?: boolean;
     /** 定制区按 control.row 分行排布（如 Module Menu 每组标题+顺序）。 */
@@ -48,9 +50,10 @@ const props = withDefaults(
     vModelKey: 'value',
     showCustomize: true,
     showProps: true,
-    showDocTitle: true,
+    showDocTitle: false,
     tallPreview: false,
     compactPreview: false,
+    effectPanelPreview: false,
     customizeSequential: false,
   },
 );
@@ -203,6 +206,7 @@ async function copyAiPrompt() {
       styles.docBlock,
       useTallPreview && styles.docBlockTallPreview,
       useCompactPreview && styles.docBlockCompactPreview,
+      props.effectPanelPreview && styles.docBlockEffectPanelPreview,
       useTagPreview && styles.docBlockTagPreview,
       useAvatarPreview && styles.docBlockAvatarPreview,
     ]"

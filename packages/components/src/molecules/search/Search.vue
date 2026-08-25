@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { EgIcon } from '../../atoms/icons';
 import styles from './Search.module.css';
 
@@ -30,27 +30,53 @@ const emit = defineEmits<{
 }>();
 
 const inputRef = ref<HTMLInputElement | null>(null);
-const focused = ref(false);
-
-const isEntering = computed(
-  () => focused.value && props.modelValue.length > 0,
-);
+const fieldRef = ref<HTMLElement | null>(null);
+const fieldFocused = ref(false);
+const suppressBlur = ref(false);
 
 const showClear = computed(
-  () => focused.value && !props.disabled && !props.readonly,
+  () =>
+    fieldFocused.value
+    && !props.disabled
+    && !props.readonly
+    && props.modelValue.length > 0,
 );
+
+const showClearSlot = computed(
+  () => fieldFocused.value && !props.disabled && !props.readonly,
+);
+
+function onFieldFocusIn() {
+  fieldFocused.value = true;
+}
+
+function onFieldFocusOut(event: FocusEvent) {
+  const field = event.currentTarget as HTMLElement;
+  if (field.contains(event.relatedTarget as Node)) {
+    return;
+  }
+
+  fieldFocused.value = false;
+}
 
 function onInput(event: Event) {
   emit('update:modelValue', (event.target as HTMLInputElement).value);
 }
 
 function onFocus(event: FocusEvent) {
-  focused.value = true;
   emit('focus', event);
 }
 
 function onBlur(event: FocusEvent) {
-  focused.value = false;
+  if (suppressBlur.value) {
+    return;
+  }
+
+  const field = fieldRef.value;
+  if (field?.contains(event.relatedTarget as Node)) {
+    return;
+  }
+
   emit('blur', event);
 }
 
@@ -68,10 +94,25 @@ function onFieldClick(event: MouseEvent) {
 }
 
 function onClear() {
+  suppressBlur.value = true;
   emit('update:modelValue', '');
   emit('clear');
+
+  void nextTick(() => {
+    inputRef.value?.focus({ preventScroll: true });
+    requestAnimationFrame(() => {
+      suppressBlur.value = false;
+    });
+  });
+}
+
+function focusInput() {
   inputRef.value?.focus();
 }
+
+defineExpose({
+  focus: focusInput,
+});
 </script>
 
 <template>
@@ -82,20 +123,22 @@ function onClear() {
     ]"
   >
     <div
+      ref="fieldRef"
       :class="[
+        'eds-input-field',
         styles.field,
-        focused && styles.fieldFocused,
-        isEntering && styles.fieldEntering,
         disabled && styles.fieldDisabled,
       ]"
       @click="onFieldClick"
+      @focusin="onFieldFocusIn"
+      @focusout="onFieldFocusOut"
     >
       <EgIcon :class="styles.icon" name="eds-search" size="sm" />
 
       <div :class="styles.inputWrap">
         <input
           ref="inputRef"
-          :class="styles.input"
+          :class="['eds-input-control', styles.input]"
           type="search"
           :value="modelValue"
           :placeholder="placeholder"
@@ -109,14 +152,31 @@ function onClear() {
       </div>
 
       <button
-        v-if="showClear"
+        v-if="showClearSlot"
         type="button"
-        :class="styles.clearButton"
+        :class="[styles.clearButton, !showClear && styles.clearButtonHidden]"
         aria-label="Clear"
+        :aria-hidden="!showClear"
+        tabindex="-1"
         @mousedown.prevent
+        @pointerdown.prevent
         @click="onClear"
       >
-        <EgIcon name="eds-close" size="sm" />
+        <svg
+          :class="styles.clearIcon"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <circle cx="8" cy="8" r="7" fill="currentColor" />
+          <path
+            d="M6 6l4 4m0-4-4 4"
+            stroke="var(--material-same-white-primary)"
+            stroke-width="1.2"
+            stroke-linecap="round"
+          />
+        </svg>
       </button>
     </div>
   </div>

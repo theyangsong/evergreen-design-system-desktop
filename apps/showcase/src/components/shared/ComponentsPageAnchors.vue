@@ -4,7 +4,6 @@ import { RouterLink, useRoute } from 'vue-router';
 import { componentAnchorItems } from '@/data/components';
 import { anchorItemsForFamily } from '@/data/components/anchorItemsForFamily';
 import { findComponentsSidebarFamilyId } from '@/layout/buildComponentsSidebarSections';
-import { buildCatalogNavSegments } from '@/data/buildCatalogNavSegments';
 import {
   findCatalogChildPage,
   findCatalogItem,
@@ -13,8 +12,7 @@ import {
   moleculeUsesChildPages,
 } from '@/data/components/navigation';
 import { useScrollSpy } from '@/composables/useScrollSpy';
-import { useNavScrollFade } from '@/composables/useNavScrollFade';
-import styles from './ComponentsPageAnchors.module.css';
+import styles from './PageAnchors.module.css';
 
 const route = useRoute();
 
@@ -25,8 +23,6 @@ const activeFamilySlug = computed(() => findComponentsSidebarFamilyId(activeSlug
 const scopedAnchorItems = computed(() =>
   anchorItemsForFamily(activeFamilySlug.value, componentAnchorItems),
 );
-
-const navSegments = computed(() => buildCatalogNavSegments(scopedAnchorItems.value));
 
 const childPage = computed(() => findCatalogChildPage(activeSlug.value));
 
@@ -60,17 +56,12 @@ const activeNavId = computed(() => {
 });
 
 const listRef = ref<HTMLElement | null>(null);
-const scrollRef = ref<HTMLElement | null>(null);
 const linkRefs = new Map<string, HTMLElement>();
 const indicatorTop = ref(0);
-const indicatorLeft = ref(0);
-const indicatorWidth = ref(0);
 const indicatorHeight = ref(0);
 const indicatorVisible = ref(false);
 const indicatorMoveTransition = ref(true);
 let resizeObserver: ResizeObserver | undefined;
-
-const { fadeTop, fadeBottom, updateFade } = useNavScrollFade(scrollRef);
 
 function setLinkRef(navId: string, element: Element | ComponentPublicInstance | null) {
   const node =
@@ -95,12 +86,8 @@ function syncIndicatorPosition() {
     return;
   }
 
-  const listRect = list.getBoundingClientRect();
-  const linkRect = link.getBoundingClientRect();
-  indicatorTop.value = linkRect.top - listRect.top;
-  indicatorLeft.value = linkRect.left - listRect.left;
-  indicatorWidth.value = linkRect.width;
-  indicatorHeight.value = linkRect.height;
+  indicatorTop.value = link.offsetTop;
+  indicatorHeight.value = link.offsetHeight;
   indicatorVisible.value = true;
 }
 
@@ -132,16 +119,24 @@ function isLinkActive(item: (typeof scopedAnchorItems.value)[number]) {
   return activeNavId.value === item.id;
 }
 
+function isNavLabel(item: (typeof scopedAnchorItems.value)[number]) {
+  return item.kind === 'navGroup' || item.kind === 'navSection' || item.kind === 'navSubgroup';
+}
+
+function anchorNavLabel(item: (typeof scopedAnchorItems.value)[number]) {
+  if (item.kind === 'navSection') return '场景化';
+  return item.label;
+}
+
 watch(activeNavId, (_nextId, previousId) => {
   nextTick(() => {
     syncIndicatorWithAnimation(previousId);
   });
-}, { flush: 'post' });
+});
 
 watch(activeSlug, () => {
   nextTick(() => {
     void refreshScrollSpy();
-    syncIndicatorWithAnimation('');
   });
 });
 
@@ -158,8 +153,6 @@ onMounted(() => {
   if (listRef.value) {
     resizeObserver.observe(listRef.value);
   }
-
-  updateFade();
 });
 
 onBeforeUnmount(() => {
@@ -168,20 +161,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <aside
-    :class="[
-      styles.anchors,
-      fadeTop && styles.anchorsFadeTop,
-      fadeBottom && styles.anchorsFadeBottom,
-    ]"
-    aria-label="Components navigation"
-  >
-    <div
-      ref="scrollRef"
-      :class="styles.navScroll"
-      @scroll="updateFade"
-    >
-      <nav ref="listRef" :class="styles.nav">
+  <aside :class="[styles.anchors, styles.componentsAnchors]" aria-label="Components navigation">
+    <span :class="styles.anchorsHeading">本体</span>
+    <nav ref="listRef" :class="styles.nav">
       <div
         :class="[
           styles.activeIndicator,
@@ -189,74 +171,39 @@ onBeforeUnmount(() => {
           indicatorMoveTransition && styles.activeIndicatorMove,
         ]"
         :style="{
-          transform: `translate(${indicatorLeft}px, ${indicatorTop}px)`,
-          width: `${indicatorWidth}px`,
+          transform: `translateY(${indicatorTop}px)`,
           height: `${indicatorHeight}px`,
         }"
         aria-hidden="true"
       />
 
-      <template v-for="segment in navSegments" :key="segment.type === 'item' ? segment.item.id : `scene-branch-${segment.items[0]?.id}`">
-        <template v-if="segment.type === 'item'">
-          <span
-            v-if="segment.item.kind === 'navGroup'"
-            :class="[
-              styles.navGroupLabel,
-              segment.item.depth === 2 && styles.organGroupLabel,
-            ]"
-          >
-            {{ segment.item.label }}
-          </span>
+      <template v-for="item in scopedAnchorItems" :key="item.id">
+        <span
+          v-if="isNavLabel(item)"
+          :class="[
+            styles.navLabel,
+            item.kind === 'navSection' && styles.navSectionLabel,
+          ]"
+        >
+          {{ anchorNavLabel(item) }}
+        </span>
 
-          <span
-            v-else-if="segment.item.kind === 'navSection' || segment.item.kind === 'navSubgroup'"
-            :class="[
-              styles.link,
-              styles.linkNested,
-              styles.linkNestedDeep,
-              styles.navSectionLabel,
-              segment.item.kind === 'navSubgroup' && styles.navSubgroupLabel,
-            ]"
-          >
-            {{ segment.item.label }}
-          </span>
-
-          <RouterLink
-            v-else-if="
-              segment.item.standalonePage &&
-              segment.item.pageSlug &&
-              !isHiddenSidebarBody(segment.item)
-            "
-            :ref="(element) => setLinkRef(segment.item.id, element)"
-            :to="`/components/${segment.item.pageSlug}`"
-            :class="[
-              styles.link,
-              styles.linkNested,
-              styles.linkNestedDeep,
-              isLinkActive(segment.item) && styles.linkActive,
-            ]"
-          >
-            {{ segment.item.label }}
-          </RouterLink>
-        </template>
-
-        <div v-else :class="styles.sceneBranch">
-          <RouterLink
-            v-for="item in segment.items"
-            :key="item.id"
-            :ref="(element) => setLinkRef(item.id, element)"
-            :to="`/components/${item.pageSlug}`"
-            :class="[
-              styles.link,
-              styles.linkNested,
-              isLinkActive(item) && styles.linkActive,
-            ]"
-          >
-            {{ item.label }}
-          </RouterLink>
-        </div>
+        <RouterLink
+          v-else-if="
+            item.standalonePage &&
+            item.pageSlug &&
+            !isHiddenSidebarBody(item)
+          "
+          :ref="(element) => setLinkRef(item.id, element)"
+          :to="`/components/${item.pageSlug}`"
+          :class="[
+            styles.link,
+            isLinkActive(item) && styles.linkActive,
+          ]"
+        >
+          {{ item.label }}
+        </RouterLink>
       </template>
-      </nav>
-    </div>
+    </nav>
   </aside>
 </template>

@@ -2,8 +2,24 @@
   position: sticky;
   top: var(--spacing-4);
   align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
   width: max-content;
+  min-width: 192px;
   max-width: 100%;
+}
+
+.anchorsHeading {
+  padding-inline: var(--spacing-3);
+  color: var(--text-base-secondary);
+  font-size: var(--eds-footnote-medium-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-line-height);
+}
+
+.componentsAnchors .link {
+  color: var(--text-base-primary);
 }
 
 .nav {
@@ -52,7 +68,7 @@
   align-items: center;
   box-sizing: border-box;
   width: 100%;
-  padding-block: var(--spacing-1-5);
+  padding-block: var(--spacing-1);
   padding-inline: var(--spacing-3);
   border: var(--stroke-xs) solid transparent;
   border-radius: var(--radius-full);
@@ -90,6 +106,23 @@
 .linkNested {
   padding-block: var(--spacing-05);
   padding-inline-start: calc(var(--spacing-3) + var(--spacing-2));
+}
+
+.navLabel {
+  display: block;
+  padding-block: var(--spacing-2) var(--spacing-05);
+  padding-inline: var(--spacing-3);
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-medium-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-line-height);
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
+.navSectionLabel {
+  color: var(--text-base-secondary);
 }
 
 .linkActive {

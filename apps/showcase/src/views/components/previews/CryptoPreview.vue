@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
+import { EgTag } from '@eds/website-components';
 import {
   EgCrypto,
   cryptoNames,
@@ -9,12 +10,13 @@ import {
 } from '@eds/desktop-components';
 import shared from '@/views/shared/showcase.module.css';
 import styles from '../ComponentsView.module.css';
+import { useAtomsGallerySearch } from './atomsGallerySearch';
 
 const registeredCryptoNames = computed(() =>
   cryptoNames.filter((name) => Boolean(getProcessedCrypto(name))),
 );
 
-const query = ref('');
+const query = useAtomsGallerySearch();
 
 const filteredCryptoNames = computed(() => {
   const q = query.value.trim().toLowerCase();
@@ -33,31 +35,19 @@ const filteredCryptoEntries = computed(() =>
 
 <template>
   <section id="crypto-gallery" :class="shared.section">
-    <h2 :class="shared.sectionTitle">Crypto Set</h2>
-    <p :class="shared.bodyText">
-      共 {{ registeredCryptoNames.length }} 个资产；<code>name</code> 与
-      <code>packages/components/src/atoms/crypto/*.svg</code> 文件名一致（不含 .svg）。画廊展示名通过
-      <code>formatCryptoDisplayName</code> 去掉 <code>eds-</code> 前缀；类型见
-      <code>resolveCryptoAssetKind</code>。SVG 原样渲染，不做换色或结构改写。
-    </p>
-    <label :class="styles.iconSearch">
-      <span :class="shared.mono">搜索</span>
-      <input v-model="query" type="search" placeholder="例如 eds-eth-ethereum" spellcheck="false" />
-    </label>
     <div :class="styles.iconGrid">
       <div v-for="entry in filteredCryptoEntries" :key="entry.name" :class="styles.iconCell">
         <div class="desktopTokens">
-          <EgCrypto :name="entry.name" size="lg" />
+          <EgCrypto :name="entry.name" :class="styles.iconCellCryptoIcon" />
         </div>
-        <span
-          :class="[
-            styles.iconCellKind,
-            entry.kind === 'Crypto' ? styles.iconCellKindCrypto : styles.iconCellKindNetwork,
-          ]"
+        <span :class="styles.iconCellName">{{ entry.displayName }}</span>
+        <EgTag
+          :class="styles.iconCellKindTag"
+          size="sm"
+          :system-type="entry.kind === 'Crypto' ? 'stroke-subtle' : 'stroke-solid'"
         >
           {{ entry.kind }}
-        </span>
-        <span :class="shared.mono">{{ entry.displayName }}</span>
+        </EgTag>
       </div>
     </div>
   </section>

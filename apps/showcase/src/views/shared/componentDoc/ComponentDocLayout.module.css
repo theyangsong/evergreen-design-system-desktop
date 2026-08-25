@@ -82,13 +82,19 @@
   --showcase-doc-preview-height: var(--showcase-doc-preview-height-tag);
 }
 
-.docBlockAvatarPreview {
-  --showcase-doc-preview-height: var(--showcase-doc-preview-height-avatar);
+.docBlockAvatarPreview .previewShell {
+  height: auto;
+  min-height: 0;
+  padding: var(--spacing-5) var(--spacing-6);
 }
 
 .docBlockAvatarPreview .previewInner {
-  overflow-y: auto;
-  align-items: flex-start;
+  overflow: visible;
+  align-items: stretch;
+}
+
+:global([data-theme="dark"]) .docBlock {
+  --showcase-doc-preview-bg: var(--showcase-doc-preview-bg-dark);
 }
 
 /** 280px 标记页：预览区 sticky，定制/Props 滚动时预览留在页头下方。 */
@@ -129,6 +135,13 @@
 .docBlockCompactPreview > :not(.previewStage) {
   position: relative;
   z-index: 0;
+}
+
+/** 预览区内 effect-* 玻璃（如 BatchBar）：不裁剪 eds-shadow-light。 */
+.docBlockEffectPanelPreview .previewStage,
+.docBlockEffectPanelPreview .previewShell,
+.docBlockEffectPanelPreview .previewInner {
+  overflow: visible;
 }
 
 .docBlockTallPreview .previewStage {
@@ -295,16 +308,16 @@
   flex-direction: column;
   gap: var(--spacing-1);
   min-width: 0;
-  min-height: calc(var(--eds-footnote-large-line-height) + var(--spacing-1) + var(--scale-4-5));
+  min-height: calc(var(--eds-footnote-medium-line-height) + var(--spacing-1) + var(--scale-4-5));
 }
 
 .customizeLabel {
   flex: 0 0 auto;
-  min-height: var(--eds-footnote-large-line-height);
+  min-height: var(--eds-footnote-medium-line-height);
   color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-large-size);
-  font-weight: var(--eds-footnote-large-strong-weight);
-  line-height: var(--eds-footnote-large-line-height);
+  font-size: var(--eds-footnote-medium-size);
+  font-weight: var(--eds-footnote-medium-strong-weight);
+  line-height: var(--eds-footnote-medium-line-height);
 }
 
 .customizeControlSlot {
@@ -377,15 +390,15 @@
 .propName {
   color: var(--text-base-primary);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
 }
 
 .propType {
   color: var(--text-base-secondary);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  font-size: var(--eds-footnote-large-size);
+  line-height: var(--eds-footnote-large-line-height);
 }
 
 .propGroupTitle {

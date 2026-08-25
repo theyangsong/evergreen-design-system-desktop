@@ -13,6 +13,7 @@ import {
   paginationKindRows,
   paginationToneRows,
   showcaseButtonCustomizeFieldLabels,
+  showcaseComboActionKindLabels,
   showcaseComboPopupCountLabels,
   showcaseInputCustomizeFieldLabels,
   directionLeftRightRows,
@@ -833,4 +834,146 @@ export function buildComboActionPageUsageSnippet(state: Record<string, unknown>)
   return buildVueSelfClosingSnippet('EgComboActionPage', state, {
     defaults: comboActionPageCustomizeDefaults,
   });
+}
+
+export const comboActionKindOptions = [
+  { value: 'skid', label: showcaseComboActionKindLabels.skid },
+  { value: 'popup-window', label: showcaseComboActionKindLabels['popup-window'] },
+  { value: 'flotation', label: showcaseComboActionKindLabels.flotation },
+  { value: 'page', label: showcaseComboActionKindLabels.page },
+] as const;
+
+export type ComboActionKindValue = (typeof comboActionKindOptions)[number]['value'];
+
+export const comboActionCustomizeDefaults = {
+  kind: 'skid' as ComboActionKindValue,
+  tone: 'brand',
+  divider: false,
+  count: 2,
+  clear: false,
+  direction: 'right',
+  confirmLabel: 'Confirm',
+  cancelLabel: 'Cancel',
+} as const;
+
+function comboActionKind(state: Record<string, unknown>): ComboActionKindValue {
+  const value = String(state.kind ?? comboActionCustomizeDefaults.kind);
+  return comboActionKindOptions.some((row) => row.value === value)
+    ? (value as ComboActionKindValue)
+    : comboActionCustomizeDefaults.kind;
+}
+
+const isComboActionKind = (state: Record<string, unknown>, kind: ComboActionKindValue) =>
+  comboActionKind(state) === kind;
+
+export const comboActionCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'kind',
+    label: showcaseButtonCustomizeFieldLabels.kind,
+    options: comboActionKindOptions.map(({ value, label }) => ({ value, label })),
+  },
+  {
+    kind: 'select',
+    key: 'tone',
+    label: showcaseButtonCustomizeFieldLabels.tone,
+    options: buttonToneRows
+      .filter((row) => ['brand', 'decor', 'danger'].includes(row.key))
+      .map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (state) => isComboActionKind(state, 'skid'),
+  },
+  {
+    kind: 'select',
+    key: 'tone',
+    label: showcaseButtonCustomizeFieldLabels.tone,
+    options: buttonToneRows
+      .filter((row) => ['brand', 'decor'].includes(row.key))
+      .map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (state) => !isComboActionKind(state, 'skid'),
+  },
+  {
+    kind: 'boolean',
+    key: 'divider',
+    label: showcaseButtonCustomizeFieldLabels.divider,
+    visibleWhen: (state) =>
+      isComboActionKind(state, 'skid') ||
+      isComboActionKind(state, 'flotation') ||
+      isComboActionKind(state, 'page'),
+  },
+  {
+    kind: 'select',
+    key: 'count',
+    label: showcaseButtonCustomizeFieldLabels.count,
+    options: [
+      { value: '2', label: showcaseComboPopupCountLabels['2'] },
+      { value: '1', label: showcaseComboPopupCountLabels['1'] },
+    ],
+    visibleWhen: (state) => isComboActionKind(state, 'popup-window'),
+  },
+  {
+    kind: 'boolean',
+    key: 'clear',
+    label: showcaseButtonCustomizeFieldLabels.clear,
+    visibleWhen: (state) => isComboActionKind(state, 'flotation'),
+  },
+  {
+    kind: 'select',
+    key: 'direction',
+    label: showcaseButtonCustomizeFieldLabels.direction,
+    options: directionLeftRightRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (state) => isComboActionKind(state, 'page'),
+  },
+  { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
+  {
+    kind: 'text',
+    key: 'cancelLabel',
+    label: showcaseButtonCustomizeFieldLabels.cancelLabel,
+    visibleWhen: (state) => !isComboActionKind(state, 'skid'),
+  },
+];
+
+export function resolveComboActionComponentTag(kind: ComboActionKindValue): string {
+  switch (kind) {
+    case 'popup-window':
+      return 'EgComboActionPopupWindow';
+    case 'flotation':
+      return 'EgComboActionFlotation';
+    case 'page':
+      return 'EgComboActionPage';
+    default:
+      return 'EgComboActionSkid';
+  }
+}
+
+export function resolveComboActionImportCode(kind: ComboActionKindValue): string {
+  switch (kind) {
+    case 'popup-window':
+      return comboActionPopupImportCode;
+    case 'flotation':
+      return comboActionFlotationImportCode;
+    case 'page':
+      return comboActionPageImportCode;
+    default:
+      return comboActionSkidImportCode;
+  }
+}
+
+export function resolveComboActionTitle(kind: ComboActionKindValue): string {
+  return comboActionKindOptions.find((row) => row.value === kind)?.label ?? 'Action-Skid';
+}
+
+export function buildComboActionUsageSnippet(state: Record<string, unknown>): string {
+  const { kind: _kind, ...payload } = state;
+  const kind = comboActionKind(state);
+
+  switch (kind) {
+    case 'popup-window':
+      return buildComboActionPopupUsageSnippet(payload);
+    case 'flotation':
+      return buildComboActionFlotationUsageSnippet(payload);
+    case 'page':
+      return buildComboActionPageUsageSnippet(payload);
+    default:
+      return buildComboActionSkidUsageSnippet(payload);
+  }
 }

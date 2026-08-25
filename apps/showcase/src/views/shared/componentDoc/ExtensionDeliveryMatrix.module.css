@@ -10,11 +10,12 @@
 }
 
 .layerName {
-  font-weight: var(--eds-body-medium-strong-weight);
+  font-weight: var(--eds-footnote-large-strong-weight);
 }
 
 .status {
-  font-size: var(--eds-body-small-size);
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .statusMet {

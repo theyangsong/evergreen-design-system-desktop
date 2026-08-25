@@ -12,6 +12,7 @@
   width: max-content;
   max-width: 100%;
   padding: var(--spacing-1);
+  overflow: visible;
 }
 
 .glassShell :global(.eds-tooltip-panel) {

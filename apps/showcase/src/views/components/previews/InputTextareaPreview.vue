@@ -60,8 +60,6 @@ const textareaUsageSnippet = computed(() =>
             :placeholder="String(textareaCustomize.placeholder)"
             :width-mode="textareaCustomize.widthMode as 'fixed' | 'full'"
             :readonly="Boolean(textareaCustomize.readonly)"
-            :paste-label="String(textareaCustomize.pasteLabel)"
-            :clear-label="String(textareaCustomize.clearLabel)"
           />
           <EgTextarea
             v-else
@@ -69,8 +67,6 @@ const textareaUsageSnippet = computed(() =>
             :style="textareaPreviewStyle"
             :placeholder="String(textareaCustomize.placeholder)"
             :width-mode="textareaCustomize.widthMode as 'fixed' | 'full'"
-            :paste-label="String(textareaCustomize.pasteLabel)"
-            :clear-label="String(textareaCustomize.clearLabel)"
             disabled
           />
         </div>
