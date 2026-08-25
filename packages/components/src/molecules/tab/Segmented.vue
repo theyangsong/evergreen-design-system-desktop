@@ -4,18 +4,18 @@ import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import styles from './Tab.module.css';
 import { useSlidingThumb } from './useSlidingThumb';
 
-export type SegmentedControlSize = 'lg' | 'md' | 'sm';
-export type SegmentedControlShape = 'circle' | 'square';
-export type SegmentedControlItemWidthMode = 'adaptive' | 'fixed';
+export type SegmentedSize = 'lg' | 'md' | 'sm';
+export type SegmentedShape = 'circle' | 'square';
+export type SegmentedItemWidthMode = 'adaptive' | 'fixed';
 
 const props = withDefaults(
   defineProps<{
     modelValue?: number;
-    size?: SegmentedControlSize;
-    shape?: SegmentedControlShape;
+    size?: SegmentedSize;
+    shape?: SegmentedShape;
     labels?: string[];
     /** Item 宽度：adaptive=内容 hug；fixed=父级定宽后 item 均分。 */
-    itemWidthMode?: SegmentedControlItemWidthMode;
+    itemWidthMode?: SegmentedItemWidthMode;
     /** itemWidthMode=fixed 时可指定容器宽度（px）；未传则 width:100% 跟随父级。 */
     width?: number;
   }>(),
@@ -66,7 +66,7 @@ function select(index: number) {
 <template>
   <div
     :class="[
-      'eds-segmented-control',
+      'eds-segmented',
       styles.segment,
       shape === 'square' && styles.segmentSquare,
       shape === 'square' && styles.square,

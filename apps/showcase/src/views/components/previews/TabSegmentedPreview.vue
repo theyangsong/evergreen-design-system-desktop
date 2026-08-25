@@ -1,28 +1,28 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { EgSegmentedControl } from '@eds/desktop-components';
+import { EgSegmented } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
-  buildSegmentedControlUsageSnippet,
+  buildSegmentedUsageSnippet,
   resolveTabLabels,
-  segmentedControlCustomizeControls,
-  segmentedControlCustomizeDefaults,
-  segmentedControlImportCode,
-  segmentedControlPropRows,
+  segmentedCustomizeControls,
+  segmentedCustomizeDefaults,
+  segmentedImportCode,
+  segmentedPropRows,
 } from './tabDocCustomize';
 
 const customize = reactive({
-  ...segmentedControlCustomizeDefaults,
-  size: segmentedControlCustomizeDefaults.size as 'lg' | 'md' | 'sm',
-  shape: segmentedControlCustomizeDefaults.shape as 'circle' | 'square',
-  itemWidthMode: segmentedControlCustomizeDefaults.itemWidthMode as 'adaptive' | 'fixed',
+  ...segmentedCustomizeDefaults,
+  size: segmentedCustomizeDefaults.size as 'lg' | 'md' | 'sm',
+  shape: segmentedCustomizeDefaults.shape as 'circle' | 'square',
+  itemWidthMode: segmentedCustomizeDefaults.itemWidthMode as 'adaptive' | 'fixed',
 });
 
 const selectedIndex = ref(0);
 const labels = computed(() => resolveTabLabels(customize.labels, customize.count));
-const usageSnippet = computed(() => buildSegmentedControlUsageSnippet(customize));
+const usageSnippet = computed(() => buildSegmentedUsageSnippet(customize));
 
 const isFixedItemWidth = computed(() => customize.itemWidthMode === 'fixed');
 
@@ -47,20 +47,20 @@ watch(
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="SegmentedControl"
+      title="Segmented"
       :show-doc-title="false"
-      component-tag="EgSegmentedControl"
-      :import-code="segmentedControlImportCode"
-      :customize-controls="segmentedControlCustomizeControls"
-      :customize-defaults="segmentedControlCustomizeDefaults"
+      component-tag="EgSegmented"
+      :import-code="segmentedImportCode"
+      :customize-controls="segmentedCustomizeControls"
+      :customize-defaults="segmentedCustomizeDefaults"
       :usage-snippet-override="usageSnippet"
-      :prop-rows="segmentedControlPropRows"
-      props-section-id="tab-segmented-control-props"
+      :prop-rows="segmentedPropRows"
+      props-section-id="tab-segmented-props"
     >
       <template #preview>
         <div class="desktopTokens" :class="docStyles.previewInputHost">
           <div :style="isFixedItemWidth && panelWidth ? { width: panelWidth } : undefined">
-            <EgSegmentedControl
+            <EgSegmented
               v-model="selectedIndex"
               :size="customize.size"
               :shape="customize.shape"

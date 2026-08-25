@@ -92,7 +92,7 @@ function watchDesktopTokens(): Plugin {
 function scopeDesktopTokens() {
   return prefixSelector({
     prefix: '.desktopTokens',
-    includeFiles: [/desktop-token-scope\.css$/, /desktop-components-scope\.css$/],
+    includeFiles: [/desktop-token-scope\.css$/, /desktop-components-scope\.css$/, /[\\/]tokens[\\/]dist[\\/]css[\\/]color[\\/]tag[\\/]/],
     transform(_prefix, selector, prefixedSelector) {
       if (/^\[data-theme=["']?dark["']?\]\s+/.test(selector)) {
         return selector.replace(

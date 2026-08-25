@@ -168,7 +168,7 @@ export const componentCatalog: CatalogSection[] = [
           [
             { id: 'tag-status', label: 'Status' },
             { id: 'tag-colorful', label: 'Colorful' },
-            { id: 'tag-custom', label: 'Label' },
+            { id: 'tag-palette', label: 'Palette' },
           ],
         ),
       },
@@ -212,7 +212,7 @@ export const componentCatalog: CatalogSection[] = [
         slug: 'segmented',
         description: 'Segmented control for compact option switching.',
         status: 'implemented',
-        children: catalogBodyWithScenesSection('tab-segmented-control', 'Segmented', 'segmented-scenes'),
+        children: catalogBodyWithScenesSection('tab-segmented', 'Segmented', 'segmented-scenes'),
       },
       {
         name: 'Toast',

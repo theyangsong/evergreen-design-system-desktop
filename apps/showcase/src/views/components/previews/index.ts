@@ -27,7 +27,7 @@ import ToggleCheckboxPreview from './ToggleCheckboxPreview.vue';
 import ToggleRadioPreview from './ToggleRadioPreview.vue';
 import ToggleDecidePreview from './ToggleDecidePreview.vue';
 import ToggleSwitchPreview from './ToggleSwitchPreview.vue';
-import TabSegmentedControlPreview from './TabSegmentedControlPreview.vue';
+import TabSegmentedPreview from './TabSegmentedPreview.vue';
 import TabTabsPreview from './TabTabsPreview.vue';
 import FeedbackEndFeedbackCardPreview from './FeedbackEndFeedbackCardPreview.vue';
 import FeedbackToastPreview from './FeedbackToastPreview.vue';
@@ -83,12 +83,12 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'tag-system',
   'tag-status',
   'tag-colorful',
-  'tag-custom',
+  'tag-palette',
   'toggle-checkbox',
   'toggle-radio',
   'toggle-decide',
   'toggle-switch',
-  'tab-segmented-control',
+  'tab-segmented',
   'tab-tabs',
   'feedback-end-feedback-card',
   'feedback-toast',
@@ -115,7 +115,7 @@ export const tagComponentPreviewSlugs = new Set<string>([
   'tag-system',
   'tag-status',
   'tag-colorful',
-  'tag-custom',
+  'tag-palette',
 ]);
 
 export function usesTagComponentPreview(slug: string): boolean {
@@ -162,15 +162,15 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'tag-system', title: 'Standard', component: TagSystemPreview, usesComponentDocHeader: true },
   { slug: 'tag-status', title: 'Status', component: TagStatusPreview, usesComponentDocHeader: true },
   { slug: 'tag-colorful', title: 'Colorful', component: TagColorfulPreview, usesComponentDocHeader: true },
-  { slug: 'tag-custom', title: 'Custom', component: TagCustomPreview, usesComponentDocHeader: true },
+  { slug: 'tag-palette', title: 'Palette', component: TagCustomPreview, usesComponentDocHeader: true },
   { slug: 'toggle-checkbox', title: 'Checkbox', component: ToggleCheckboxPreview, usesComponentDocHeader: true },
   { slug: 'toggle-radio', title: 'Radio', component: ToggleRadioPreview, usesComponentDocHeader: true },
   { slug: 'toggle-decide', title: 'Decide', component: ToggleDecidePreview, usesComponentDocHeader: true },
   { slug: 'toggle-switch', title: 'Switch', component: ToggleSwitchPreview, usesComponentDocHeader: true },
   {
-    slug: 'tab-segmented-control',
-    title: 'SegmentedControl',
-    component: TabSegmentedControlPreview,
+    slug: 'tab-segmented',
+    title: 'Segmented',
+    component: TabSegmentedPreview,
     usesComponentDocHeader: true,
   },
   { slug: 'tab-tabs', title: 'Standard', component: TabTabsPreview, usesComponentDocHeader: true },

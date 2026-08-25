@@ -72,7 +72,7 @@ export const tagCustomPropRows: DocPropRow[] = [
     name: 'family',
     type: "'custom'",
     defaultValue: "'custom'",
-    description: 'Custom 族 Tag；radius-xs、左侧竖线配色、material-card-deep 底。',
+    description: 'Palette 族 Tag；radius-xs、左侧竖线配色、material-card-deep 底。',
   },
   {
     name: 'customStyle',

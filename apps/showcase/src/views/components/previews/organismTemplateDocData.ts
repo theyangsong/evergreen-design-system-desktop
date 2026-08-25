@@ -1234,7 +1234,7 @@ export const paginerPropRows: OrganismPropRow[] = [
   },
   { name: 'settingsLevelLabel', type: 'string', defaultValue: "'Items Per Page'", description: '下拉设置 Level 标题。' },
   { name: 'settingsJumpLabel', type: 'string', defaultValue: "'Go to Page'", description: '下拉设置 Jump 标题。' },
-  { name: 'settingsLevelLabels', type: 'string[]', defaultValue: "['20','50','100']", description: 'Level Segmented Control 选项。' },
+  { name: 'settingsLevelLabels', type: 'string[]', defaultValue: "['20','50','100']", description: 'Level Segmented 选项。' },
   { name: 'settingsJumpPlaceholder', type: 'string', defaultValue: "'Please Enter'", description: 'Jump 输入框占位符。' },
   { name: 'settingsLevelIndex', type: 'number', defaultValue: '1', description: 'Level 选中索引（v-model）。' },
   { name: 'settingsJumpValue', type: 'string', defaultValue: "''", description: 'Jump 输入值（v-model）。' },

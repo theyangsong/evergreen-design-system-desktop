@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, ref, useSlots, type ComputedRef } from 'vue';
-import { EgButton, EgSegmentedControl, rescanCornerSmoothing } from '@eds/desktop-components';
+import { EgButton, EgSegmented, rescanCornerSmoothing } from '@eds/desktop-components';
 import { buildComponentAiPrompt, buildVueSelfClosingSnippet } from './buildUsageSnippet';
 import CustomizePanel from './CustomizePanel.vue';
 import ExtensionDeliveryMatrix from './ExtensionDeliveryMatrix.vue';
@@ -222,7 +222,7 @@ async function copyAiPrompt() {
           :class="styles.previewShellToolbar"
           :aria-label="`${title} 视图`"
         >
-          <EgSegmentedControl
+          <EgSegmented
             v-model="viewModeIndex"
             size="lg"
             :labels="['预览', '代码']"

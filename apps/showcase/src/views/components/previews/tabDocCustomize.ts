@@ -8,10 +8,10 @@ import {
   widthModeAdaptiveFixedRows,
 } from '@/data/showcasePropLabels';
 
-export const segmentedControlImportCode = `import { EgSegmentedControl } from '@eds/desktop-components';`;
+export const segmentedImportCode = `import { EgSegmented } from '@eds/desktop-components';`;
 export const tabsImportCode = `import { EgTabs } from '@eds/desktop-components';`;
 
-export const segmentedControlPropRows: DocPropRow[] = [
+export const segmentedPropRows: DocPropRow[] = [
   { name: 'modelValue', type: 'number', defaultValue: '0', description: '当前选中项索引。' },
   { name: 'size', type: "'lg' | 'md' | 'sm'", defaultValue: "'md'", description: '尺寸。' },
   { name: 'shape', type: "'circle' | 'square'", defaultValue: "'circle'", description: '圆角 / 方角容器。' },
@@ -74,7 +74,7 @@ export function resolveTabLabels(labelsRaw: unknown, countRaw: unknown, fallback
   return labels;
 }
 
-export const segmentedControlCustomizeDefaults = {
+export const segmentedCustomizeDefaults = {
   size: 'md',
   shape: 'circle',
   itemWidthMode: 'adaptive' as 'adaptive' | 'fixed',
@@ -83,7 +83,7 @@ export const segmentedControlCustomizeDefaults = {
   labels: 'Tab Tab Tab',
 };
 
-export const segmentedControlCustomizeControls: DocCustomizeControl[] = [
+export const segmentedCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
     key: 'size',
@@ -164,7 +164,7 @@ function formatLabelsLiteral(labels: string[]): string {
   return `[${labels.map((label) => `'${label.replace(/'/g, "\\'")}'`).join(', ')}]`;
 }
 
-export function buildSegmentedControlUsageSnippet(state: Record<string, unknown>): string {
+export function buildSegmentedUsageSnippet(state: Record<string, unknown>): string {
   const labels = resolveTabLabels(state.labels, state.count);
   const parts = [`v-model="selected"`];
   if (state.size !== 'md') parts.push(`size="${String(state.size)}"`);
@@ -177,7 +177,7 @@ export function buildSegmentedControlUsageSnippet(state: Record<string, unknown>
     }
   }
   parts.push(`:labels="${formatLabelsLiteral(labels)}"`);
-  return `<EgSegmentedControl\n  ${parts.join('\n  ')}\n/>`;
+  return `<EgSegmented\n  ${parts.join('\n  ')}\n/>`;
 }
 
 export function buildTabsUsageSnippet(state: Record<string, unknown>): string {

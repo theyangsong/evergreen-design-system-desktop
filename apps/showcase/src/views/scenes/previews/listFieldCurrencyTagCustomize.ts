@@ -38,7 +38,7 @@ function capitalizeKey(key: string): string {
 }
 
 function slotLabel(slot: CurrencyTagPanelSlot): string {
-  return slot === 'system' ? 'Risk' : 'Custom';
+  return slot === 'system' ? 'Risk' : 'Palette';
 }
 
 export function currencyTagShowKey(

@@ -2,7 +2,6 @@
 import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
 import { EgAnchoredTooltip } from '../../molecules/tooltip';
-import styles from './DetailValueActionIcon.module.css';
 
 withDefaults(
   defineProps<{
@@ -22,6 +21,7 @@ const emit = defineEmits<{
 
 <template>
   <EgAnchoredTooltip
+    :content="label"
     trigger="hover"
     placement="bottom"
     align="center"
@@ -43,8 +43,5 @@ const emit = defineEmits<{
     >
       <EgIcon :name="icon" fit />
     </EgIconButton>
-    <template #content>
-      <span :class="styles.tooltipLabel">{{ label }}</span>
-    </template>
   </EgAnchoredTooltip>
 </template>

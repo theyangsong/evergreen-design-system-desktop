@@ -740,13 +740,12 @@ onBeforeUnmount(() => {
                       )"
                     >
                       <div :class="styles.itemTitle">
-                        <EgIcon
+                        <span
                           v-if="itemShowsTitleIcon(item)"
                           :class="styles.itemTitleIcon"
-                          :name="item.titleIcon!"
-                          size="sm"
-                          fit
-                        />
+                        >
+                          <EgIcon :name="item.titleIcon!" fit />
+                        </span>
                         <span :class="styles.itemTitleText">{{ item.title }}</span>
                       </div>
                       <div
@@ -779,13 +778,15 @@ onBeforeUnmount(() => {
                             >
                               {{ itemValueTagText(item, entry) }}
                             </EgTag>
-                            <EgCrypto
+                            <span
                               v-if="itemShowsValueCrypto(item) && itemValueCryptoName(item)"
                               :class="styles.itemValueCrypto"
-                              :name="itemValueCryptoName(item)!"
-                              size="md"
-                              fit
-                            />
+                            >
+                              <EgCrypto
+                                :name="itemValueCryptoName(item)!"
+                                fit
+                              />
+                            </span>
                             <EgAvatar
                               v-else-if="itemShowsValueAvatar(item)"
                               size="xs"
@@ -895,13 +896,15 @@ onBeforeUnmount(() => {
                               :reveal-all="entry.valueAddressSideTagsRevealAll === true"
                               :class="styles.itemValueAddressTags"
                             />
-                            <EgCrypto
+                            <span
                               v-if="itemShowsValueCrypto(item) && itemValueCryptoName(item)"
                               :class="styles.itemValueCrypto"
-                              :name="itemValueCryptoName(item)!"
-                              size="md"
-                              fit
-                            />
+                            >
+                              <EgCrypto
+                                :name="itemValueCryptoName(item)!"
+                                fit
+                              />
+                            </span>
                             <EgAvatar
                               v-else-if="itemShowsValueAvatar(item)"
                               size="xs"
@@ -1244,8 +1247,9 @@ onBeforeUnmount(() => {
         </Transition>
       </div>
       </div>
+    </div>
 
-      <footer
+    <footer
         v-if="showToolbar || $slots.toolbar"
         :class="[
           styles.toolbar,
@@ -1333,6 +1337,5 @@ onBeforeUnmount(() => {
           </slot>
         </div>
       </footer>
-    </div>
   </div>
 </template>

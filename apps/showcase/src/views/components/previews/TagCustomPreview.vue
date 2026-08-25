@@ -31,7 +31,7 @@ function selectCustomStyle(value: string) {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Custom"
+      title="Palette"
       :show-doc-title="false"
       component-tag="EgTag"
       :import-code="tagImportCode"
@@ -39,7 +39,7 @@ function selectCustomStyle(value: string) {
       :customize-defaults="tagCustomCustomizeDefaults"
       :usage-snippet-override="usageSnippet"
       :prop-rows="tagCustomPropRows"
-      props-section-id="tag-custom-props"
+      props-section-id="tag-palette-props"
     >
       <template #preview>
         <TagPreviewGallery

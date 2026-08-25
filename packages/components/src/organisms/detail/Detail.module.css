@@ -11,6 +11,8 @@
   height: 100%;
   min-height: 0;
   box-sizing: border-box;
+  border-radius: inherit;
+  overflow: clip;
 }
 
 .systemBarClose {
@@ -283,15 +285,26 @@
 }
 
 .itemTitleIcon {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: var(--icon-md);
   height: var(--icon-md);
   color: var(--stroke-base-secondary);
   --eds-icon-stroke-screen: var(--stroke-md);
 }
 
+/* 压过 EgIcon .tokenKind 默认 stroke-lg（同属性后者 bundle 顺序会赢） */
+.itemTitleIcon > :global(span[role='img']) {
+  --eds-icon-stroke-screen: var(--stroke-md);
+}
+
 .itemValueCrypto {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: var(--icon-lg);
   height: var(--icon-lg);
 }
@@ -419,16 +432,14 @@
 }
 
 .toolbar {
-  position: sticky;
-  bottom: 0;
   z-index: 2;
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  border-bottom-right-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
   transition: var(--motion-recipe-scroll-fade-background);
 }
 

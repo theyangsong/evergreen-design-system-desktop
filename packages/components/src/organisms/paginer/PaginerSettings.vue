@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EgSegmentedControl } from '../../molecules/tab';
+import { EgSegmented } from '../../molecules/tab';
 import PaginerSetInput from './PaginerSetInput.vue';
 import styles from './Paginer.module.css';
 
@@ -38,7 +38,7 @@ function onLevelSelect(index: number) {
   <div class="eds-paginer-settings" :class="styles.settings" data-no-corner-smoothing>
     <div :class="styles.settingsSection">
       <span :class="styles.settingsLabel">{{ levelLabel }}</span>
-      <EgSegmentedControl
+      <EgSegmented
         v-model="levelIndexModel"
         size="md"
         shape="square"

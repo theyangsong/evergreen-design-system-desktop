@@ -38,39 +38,31 @@ const SIDEBAR_GROUP_LABELS: Partial<Record<string, string>> = {
 const MOLECULES_SIDEBAR_GROUPS: Array<{ label: string; slugs: string[] }> = [
   {
     label: '输入',
-    slugs: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'upload'],
+    slugs: ['input', 'textarea', 'upload'],
+  },
+  {
+    label: '输出',
+    slugs: ['button'],
   },
   {
     label: '切换',
-    slugs: ['tab', 'segmented'],
-  },
-  {
-    label: '触发',
-    slugs: ['button', 'decide'],
+    slugs: ['tab', 'segmented', 'checkbox', 'radio', 'switch', 'decide'],
   },
   {
     label: '标记',
-    slugs: ['tag'],
+    slugs: ['tag', 'streamer'],
   },
   {
-    label: '浮层提示',
+    label: '浮层',
     slugs: ['tooltip', 'popover', 'flotation', 'dialog'],
   },
   {
-    label: '通知',
-    slugs: ['toast', 'message'],
+    label: '反馈',
+    slugs: ['toast', 'message', 'reddot', 'end-feedback-card', 'form-submission'],
   },
   {
-    label: '状态反馈',
-    slugs: [
-      'progress',
-      'loading',
-      'countdown',
-      'reddot',
-      'end-feedback-card',
-      'form-submission',
-      'streamer',
-    ],
+    label: '进度',
+    slugs: ['progress', 'loading', 'countdown'],
   },
 ];
 

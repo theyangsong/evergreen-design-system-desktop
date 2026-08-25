@@ -100,7 +100,8 @@ export const router = createRouter({
                   'tag-system': 'tag-system',
                   'tag-status': 'tag-status',
                   'tag-colorful': 'tag-colorful',
-                  'tag-custom': 'tag-custom',
+                  'tag-palette': 'tag-palette',
+                  'tag-custom': 'tag-palette',
                 };
 
                 const toggleHashToPage: Record<string, string> = {
@@ -111,7 +112,8 @@ export const router = createRouter({
                 };
 
                 const tabHashToPage: Record<string, string> = {
-                  'tab-segmented-control': 'tab-segmented-control',
+                  'tab-segmented': 'tab-segmented',
+                  'tab-segmented-control': 'tab-segmented',
                   'tab-tabs': 'tab-tabs',
                 };
 
@@ -245,7 +247,7 @@ export const router = createRouter({
                   popovers: 'popovers-popover',
                   popover: 'popovers-popover',
                   textarea: 'input-textarea',
-                  segmented: 'tab-segmented-control',
+                  segmented: 'tab-segmented',
                   checkbox: 'toggle-checkbox',
                   radio: 'toggle-radio',
                   switch: 'toggle-switch',
@@ -262,6 +264,14 @@ export const router = createRouter({
 
                 if (slug in familyLegacySlugs) {
                   return { path: `/components/${familyLegacySlugs[slug]}` };
+                }
+
+                if (slug === 'tab-segmented-control') {
+                  return { path: '/components/tab-segmented' };
+                }
+
+                if (slug === 'tag-custom') {
+                  return { path: '/components/tag-palette' };
                 }
 
                 if (!isValidComponentSlug(slug)) {

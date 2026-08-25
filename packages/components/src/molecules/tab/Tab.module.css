@@ -65,13 +65,13 @@
   composes: motion-ease is-hover from global;
 }
 
-:global(.eds-segmented-control) .item {
+:global(.eds-segmented) .item {
   font-weight: var(--eds-footnote-strong-weight);
 }
 
-:global(.desktopTokens) :global(.eds-segmented-control) .itemLg,
-:global(.desktopTokens) :global(.eds-segmented-control) .itemMd,
-:global(.desktopTokens) :global(.eds-segmented-control) .itemSm {
+:global(.desktopTokens) :global(.eds-segmented) .itemLg,
+:global(.desktopTokens) :global(.eds-segmented) .itemMd,
+:global(.desktopTokens) :global(.eds-segmented) .itemSm {
   font-size: var(--eds-footnote-strong-size);
   line-height: var(--eds-footnote-strong-line-height);
 }

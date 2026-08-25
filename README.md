@@ -2,7 +2,11 @@
 
 Vue 3 design system with CSS Modules, Figma-synced design tokens, and Showcase documentation.
 
-**Live Showcase:** https://theyangsong.github.io/evergreen-design-system-desktop/
+| | |
+|---|---|
+| **GitHub** | [theyangsong/eds-desktop](https://github.com/theyangsong/eds-desktop) |
+| **Live Showcase** | https://theyangsong.github.io/eds-desktop/ |
+| **npm** | [`@eds-evergreen/desktop`](https://www.npmjs.com/package/@eds-evergreen/desktop)（当前 **0.1.8**） |
 
 ## Requirements
 
@@ -25,13 +29,13 @@ pnpm dev:storybook      # Storybook → http://localhost:6006
 eds-desktop/
 ├── packages/
 │   ├── desktop/         # @eds-evergreen/desktop — **唯一对外发布的 npm 总包**
-│   ├── tokens/          # 内部：tokens 构建产物
+│   ├── tokens/          # 内部：tokens 构建产物（含 Tag Colorful / Custom 色板）
 │   ├── animations/      # 内部：场景动画
 │   ├── components/      # 内部：Vue 组件
 │   ├── patterns/        # 内部：页面模式（持续扩展）
 │   └── workflows/       # 内部：业务流程（持续扩展）
 ├── apps/
-│   ├── showcase/        # Desktop 预览站（token + 组件画廊）
+│   ├── showcase/        # Desktop 预览站（token + 组件画廊）→ GitHub Pages
 │   └── storybook/       # 组件文档 + 设计规范（Storybook）
 └── figma.config.json    # Figma file configuration
 ```
@@ -49,11 +53,13 @@ pnpm add @eds-evergreen/desktop vue
 ```ts
 import '@eds-evergreen/desktop/tokens';
 import '@eds-evergreen/desktop/components/style.css';
-import { EgButton } from '@eds-evergreen/desktop/components';
+import { EgButton, EgTag } from '@eds-evergreen/desktop/components';
 import { EgVerifyRingDots } from '@eds-evergreen/desktop/animations';
 ```
 
-维护者发布流程（与 0.1.0 相同，终端会打开浏览器完成 npm 认证）：
+> **EgTag Colorful / Custom / Status** 依赖 Tag 色板 token（`spec/color/tag-palette.json` → `@eds-evergreen/desktop/tokens` 已包含；勿只引 color 子路径而漏 tag）。
+
+维护者发布流程：
 
 ```bash
 pnpm build:desktop
@@ -68,7 +74,14 @@ npm login --auth-type=web
 pnpm --filter @eds-evergreen/desktop publish --access public --no-git-checks
 ```
 
-详见 [packages/desktop/README.md](packages/desktop/README.md)。
+详见 [packages/desktop/README.md](packages/desktop/README.md) 与 [docs/npm-desktop.md](docs/npm-desktop.md)。
+
+## GitHub Pages（Showcase）
+
+- **URL：** https://theyangsong.github.io/eds-desktop/
+- **触发：** `main` 分支 push 自动部署（`.github/workflows/deploy-pages.yml`）
+- **构建：** `pnpm build:tokens` → `build:animations` → `build:components` → `apps/showcase build:pages`
+- 仓库由 `evergreen-design-system-desktop` 更名为 `eds-desktop` 后，旧 Pages URL 不再可用
 
 ## Scripts
 
