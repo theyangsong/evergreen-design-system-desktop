@@ -49,7 +49,7 @@ jobs:
         working-directory: ${{ github.workspace }}/../eds-website
         run: |
           pnpm install --frozen-lockfile
-          pnpm build:tokens && pnpm build:components
+          pnpm build:tokens && pnpm build:animations && pnpm build:components
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
