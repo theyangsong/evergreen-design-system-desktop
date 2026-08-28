@@ -138,6 +138,12 @@
   overflow: clip;
 }
 
+/* 业务插槽 wrapper（如 detailHost）须继承 Popup Box 圆角，否则 EgDetail.root 的 inherit 接到 0px */
+.detailShell :global(.eds-popup-box-content) > * {
+  border-radius: inherit;
+  overflow: clip;
+}
+
 .detailShell :global(.eds-detail) {
   flex: 1 1 auto;
   height: 100%;
