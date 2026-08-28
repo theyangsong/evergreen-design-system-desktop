@@ -15,6 +15,7 @@ import {
   propLabelRows,
   showcaseFlotationBoxTypeLabels,
   showcaseFlotationBoxKindLabels,
+  showcaseFlotationComboBoxSceneLabels,
   showcaseFlotationBoxSelectionModeLabels,
   showcaseFlotationTriggerKindLabels,
   showcaseFormSubmissionTypeLabels,
@@ -25,6 +26,8 @@ import {
   tokenLabel,
 } from '@/data/showcasePropLabels';
 import { formSubmissionCustomizeDefaults, buildFormSubmissionExpandCustomizeControls } from './feedbackDocCustomize';
+import { buildAnchoredContainerPanelControls } from './anchoredContainerDocCustomize';
+import { buildFlotationBoxSceneAddressPanelControls } from './flotationBoxSceneAddressCustomize';
 
 const flotationSymbolPositionInlineSelect = {
   key: 'symbolPosition',
@@ -134,9 +137,30 @@ export function parseFlotationItemCount(state: Record<string, unknown>): number 
   return Number.isFinite(parsed) ? Math.min(20, Math.max(1, parsed)) : 8;
 }
 
+export const flotationEditBoxNoneValue = '';
+
+export function isFlotationBoxEditingRow(state: Record<string, unknown>): boolean {
+  const raw = String(state.editBoxIndex ?? '').trim();
+  if (raw === '' || raw === 'none') return false;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed >= 1;
+}
+
+export function buildFlotationBoxEditRowSelectOptions(count: number) {
+  return [
+    { value: flotationEditBoxNoneValue, label: '选择行开始编辑' },
+    ...Array.from({ length: count }, (_, index) => {
+      const n = index + 1;
+      return { value: String(n), label: `第 ${n} 行` };
+    }),
+  ];
+}
+
 export function parseFlotationEditBoxIndex(state: Record<string, unknown>): number {
   const count = parseFlotationItemCount(state);
-  const parsed = Number.parseInt(String(state.editBoxIndex ?? '1'), 10);
+  const raw = String(state.editBoxIndex ?? '').trim();
+  if (raw === '' || raw === 'none') return 1;
+  const parsed = Number.parseInt(raw, 10);
   const index = Number.isFinite(parsed) ? parsed : 1;
   return Math.min(count, Math.max(1, index));
 }
@@ -179,6 +203,13 @@ export function parseFlotationCrossAxisOffset(
   state: Record<string, unknown>,
 ): number | undefined {
   const raw = String(state.crossAxisOffset ?? '').trim();
+  if (raw === '') return undefined;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function parseFlotationOffset(state: Record<string, unknown>): number | undefined {
+  const raw = String(state.offset ?? '').trim();
   if (raw === '') return undefined;
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) ? parsed : undefined;
@@ -255,7 +286,7 @@ export const flotationBoxPageDemoCustomizeState = {
   widthMode: 'fixed',
   width: '240',
   maxWidth: '480',
-  editBoxIndex: '1',
+  editBoxIndex: '',
   showAdd: true,
   addLabel: 'Add',
   ...createFlotationBoxPageDemoItemDefaults(),
@@ -271,10 +302,11 @@ export const moduleMenuTitleFlotationDemoState = {
 export const flotationCustomizeDefaults = {
   triggerKind: 'standard-dropdown',
   placement: 'bottom',
+  offset: '',
   crossAxisOffset: '',
   triggerLabel: 'Trigger',
   triggerStyle: 'subtle',
-  triggerSize: 'lg',
+  triggerSize: 'md',
   disabled: false,
   showReddot: false,
   showSymbol: false,
@@ -297,7 +329,8 @@ export const flotationCustomizeDefaults = {
   boxItemType: 'text',
   boxSelectionMode: 'single',
   itemCount: '8',
-  editBoxIndex: '1',
+  editBoxIndex: '',
+  boxKind: 'standard-menu',
   ...createFlotationBoxItemDefaults(),
 };
 
@@ -378,69 +411,13 @@ export const flotationTriggerPanelControls: DocCustomizeControl[] = [
   ...flotationTriggerOverviewDropdownControls,
 ];
 
-/** Menu — 宽/高；自定义宽度时可选对齐；主轴固定 spacing-025；crossAxisOffset 可定制 */
+/** Menu — 宽/高；自定义宽度时可选对齐；主轴默认 spacing-025，offset 可定制；crossAxisOffset 可定制 */
 export function buildFlotationMenuPanelControls(
   state: Record<string, unknown>,
 ): DocCustomizeControl[] {
-  const placement = String(state.placement ?? 'bottom');
-  const sidePlacement = placement === 'left' || placement === 'right';
-  const widthMode = String(state.widthMode ?? 'fixed');
-  const showCustomAlign = widthMode === 'fixed' || widthMode === 'adaptive';
-
-  return [
-    {
-      kind: 'select',
-      key: 'placement',
-      label: '弹出方向',
-      row: 0,
-      options: placementRows.map((row) => ({ value: row.key, label: row.label })),
-    },
-    { kind: 'text', key: 'crossAxisOffset', label: '交叉轴偏移', row: 0 },
-    {
-      kind: 'select',
-      key: 'widthMode',
-      label: '宽度',
-      row: 1,
-      options: widthModeTriggerFixedAdaptiveRows.map((row) => ({ value: row.key, label: row.label })),
-    },
-    {
-      kind: 'text',
-      key: 'width',
-      label: '宽度',
-      row: 1,
-      visibleWhen: (s) => String(s.widthMode ?? 'fixed') === 'fixed',
-    },
-    {
-      kind: 'select',
-      key: 'align',
-      label: '对齐',
-      row: 1,
-      options: alignStartEndRows.map((row) => ({ value: row.key, label: row.label })),
-      visibleWhen: () => showCustomAlign,
-    },
-    {
-      kind: 'select',
-      key: 'heightMode',
-      label: '高度',
-      row: 2,
-      options: heightModeRows.map((row) => ({ value: row.key, label: row.label })),
-    },
-    {
-      kind: 'text',
-      key: 'height',
-      label: '高度值',
-      row: 2,
-      visibleWhen: (s) => String(s.heightMode ?? 'adaptive') === 'fixed',
-    },
-    {
-      kind: 'text',
-      key: 'maxHeight',
-      label: '最大高度',
-      placeholder: '可选',
-      row: 2,
-      visibleWhen: (s) => String(s.heightMode ?? 'adaptive') === 'adaptive',
-    },
-  ];
+  return buildAnchoredContainerPanelControls(state, {
+    widthModeVariant: 'trigger-fixed-adaptive',
+  });
 }
 
 /** @deprecated 使用 buildFlotationMenuPanelControls */
@@ -499,6 +476,7 @@ export function buildFlotationItemRowControls(editIndex: number): DocCustomizeCo
       key: flotationBoxItemKey('ShowReddot', editIndex),
       label: '红点',
       row: 5,
+      exclusiveKey: showMessageKey,
     },
     {
       kind: 'boolean',
@@ -511,6 +489,7 @@ export function buildFlotationItemRowControls(editIndex: number): DocCustomizeCo
       key: showMessageKey,
       label: '显示消息',
       row: 6,
+      exclusiveKey: flotationBoxItemKey('ShowReddot', editIndex),
     },
     {
       kind: 'text',
@@ -552,9 +531,10 @@ export function buildFlotationBoxPanelControls(
   state: Record<string, unknown>,
 ): DocCustomizeControl[] {
   const count = parseFlotationItemCount(state);
+  const editing = isFlotationBoxEditingRow(state);
   const editIndex = parseFlotationEditBoxIndex(state);
 
-  return [
+  const controls: DocCustomizeControl[] = [
     {
       kind: 'select',
       key: 'itemCount',
@@ -595,14 +575,21 @@ export function buildFlotationBoxPanelControls(
       kind: 'select',
       key: 'editBoxIndex',
       label: '编辑行',
-      options: Array.from({ length: count }, (_, index) => {
-        const n = index + 1;
-        return { value: String(n), label: `第 ${n} 行` };
-      }),
-      row: 0,
+      options: buildFlotationBoxEditRowSelectOptions(count),
+      row: 1,
     },
-    ...buildFlotationItemRowControls(editIndex),
   ];
+
+  if (editing) {
+    controls.push(
+      ...buildFlotationItemRowControls(editIndex).map((control) => ({
+        ...control,
+        row: (control.row ?? 1) + 1,
+      })),
+    );
+  }
+
+  return controls;
 }
 
 /** @deprecated Overview 已拆为三面板；保留空数组以免旧引用报错 */
@@ -648,6 +635,11 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
     props.crossAxisOffset = crossAxisOffset;
   }
 
+  const offset = parseFlotationOffset(state);
+  if (offset != null) {
+    props.offset = offset;
+  }
+
   if (isFlotationTriggerModuleMenuKind(state)) {
     for (const key of [
       'triggerLabel',
@@ -691,7 +683,27 @@ export function buildFlotationUsageSnippet(state: Record<string, unknown>): stri
       heightMode: flotationCustomizeDefaults.heightMode,
       height: Number.parseInt(flotationCustomizeDefaults.height, 10),
     },
-    omitKeys: ['itemCount', 'editBoxIndex', ...(isFlotationTriggerModuleMenuKind(state) ? ['triggerLabel', 'triggerStyle', 'triggerSize', 'showSymbol', 'symbolIcon', 'symbolPosition', 'showTag', 'tagText', 'tagStatus', 'showMessage', 'messageText', 'messageType'] : [])],
+    omitKeys: [
+      'boxKind',
+      'itemCount',
+      'editBoxIndex',
+      ...(isFlotationTriggerModuleMenuKind(state)
+        ? [
+            'triggerLabel',
+            'triggerStyle',
+            'triggerSize',
+            'showSymbol',
+            'symbolIcon',
+            'symbolPosition',
+            'showTag',
+            'tagText',
+            'tagStatus',
+            'showMessage',
+            'messageText',
+            'messageType',
+          ]
+        : []),
+    ],
   });
 
   if (isFlotationTriggerModuleMenuKind(state)) {
@@ -718,7 +730,13 @@ export const flotationPropRows: DocPropRow[] = [
     name: 'placement / disabled',
     type: 'TooltipPlacement / boolean',
     defaultValue: "'bottom' / false",
-    description: '透传 EgAnchoredTooltip。主轴间距固定为 --spacing-025。',
+    description: '透传 EgAnchoredTooltip。',
+  },
+  {
+    name: 'offset',
+    type: 'number',
+    defaultValue: '--spacing-025 (1px)',
+    description: '主轴与触发器间距（px）；未传时读 --spacing-025。',
   },
   {
     name: 'crossAxisOffset',
@@ -738,7 +756,7 @@ export const flotationPropRows: DocPropRow[] = [
     type: 'trigger|fixed|adaptive / number / start|end / …',
     defaultValue: 'fixed / 280 / start / adaptive / 306 / —',
     description:
-      'trigger：宽=触发器+2×spacing-2，左右各扩 spacing-2。fixed/adaptive：宽自定义或自适应；align=start 时交叉轴 -spacing-2，align=end 时 +spacing-2。heightMode=adaptive 时可传 maxHeight（px，可选）。主轴间距固定 spacing-025。',
+      'trigger：宽=触发器+2×spacing-2，左右各扩 spacing-2。fixed/adaptive：宽自定义或自适应；align=start 时交叉轴 -spacing-2，align=end 时 +spacing-2。heightMode=adaptive 时可传 maxHeight（px，可选）。主轴间距默认 spacing-025，可经 offset 覆盖。',
   },
   {
     name: 'items / showAdd / addLabel',
@@ -796,6 +814,10 @@ export function buildFlotationPresetItems(
     const isSelected = Boolean(state?.[flotationBoxItemKey('Checked', n)]);
     const isMultiple = selectionMode === 'multiple';
 
+    const showReddot = Boolean(state?.[flotationBoxItemKey('ShowReddot', n)]);
+    const showMessage =
+      Boolean(state?.[flotationBoxItemKey('ShowMessage', n)]) && !showReddot;
+
     return {
       label,
       boxType: boxType as 'text' | 'symbol-text' | 'image-text',
@@ -808,9 +830,9 @@ export function buildFlotationPresetItems(
       showTag: Boolean(state?.[flotationBoxItemKey('ShowTag', n)]),
       tag: String(state?.[flotationBoxItemKey('TagText', n)] ?? 'Tag'),
       tagStatus,
-      showReddot: Boolean(state?.[flotationBoxItemKey('ShowReddot', n)]),
+      showReddot,
       showCascader: Boolean(state?.[flotationBoxItemKey('ShowCascader', n)]),
-      showMessage: Boolean(state?.[flotationBoxItemKey('ShowMessage', n)]),
+      showMessage,
       messageText: String(state?.[flotationBoxItemKey('MessageText', n)] ?? '0'),
       messageType: (['subtle', 'brand', 'danger'].includes(
         String(state?.[flotationBoxItemKey('MessageType', n)] ?? 'subtle'),
@@ -870,7 +892,7 @@ export function resolveFlotationComboTriggerProps(
 
   return {
     triggerStyle: state.triggerStyle ?? 'subtle',
-    size: state.triggerSize ?? 'lg',
+    size: state.triggerSize ?? 'md',
     widthMode: 'adaptive',
     label: selectedItem?.label ?? String(state.triggerLabel ?? 'Trigger'),
     disabled: Boolean(state.disabled),
@@ -963,6 +985,7 @@ export type FlotationComboEgFlotationProps = {
   closeOnScroll: boolean;
   showAdd: boolean;
   addLabel: string;
+  offset?: number;
   crossAxisOffset?: number;
 };
 
@@ -1005,6 +1028,8 @@ export function resolveFlotationComboEgFlotationProps(
   }
   const crossAxisOffset = parseFlotationCrossAxisOffset(menuState);
   if (crossAxisOffset != null) props.crossAxisOffset = crossAxisOffset;
+  const offset = parseFlotationOffset(menuState);
+  if (offset != null) props.offset = offset;
 
   return props;
 }
@@ -1084,7 +1109,7 @@ export const flotationTriggerCustomizeDefaults = {
   feedback: false,
   ...formSubmissionCustomizeDefaults,
   triggerStyle: 'subtle',
-  size: 'lg',
+  size: 'md',
   widthMode: 'adaptive',
   width: '280',
   label: 'Trigger',
@@ -1113,38 +1138,32 @@ export const flotationTriggerKindCustomizeControls: DocCustomizeControl[] = [
   },
 ];
 
-/** Combo 字段壳：标题 / 反馈区（两行垂直；每行内勾选后水平展开） */
-export function buildFlotationTriggerFeedbackCustomizeControls(): DocCustomizeControl[] {
-  return buildFormSubmissionExpandCustomizeControls({
-    row: 1,
-    visibleWhen: (s) => Boolean(s.feedback),
-  });
-}
-
+/** Combo 字段壳：标题 / 反馈区 */
 export const flotationTriggerShellCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'boolean',
     key: 'showFieldLabel',
     label: showcaseInputCustomizeFieldLabels.label,
-    row: 0,
   },
   {
     kind: 'text',
     key: 'fieldLabel',
     label: '标题文案',
-    row: 0,
     visibleWhen: (s) => Boolean(s.showFieldLabel),
   },
   {
     kind: 'boolean',
     key: 'feedback',
     label: showcaseInputCustomizeFieldLabels.feedback,
-    row: 1,
   },
-  ...buildFlotationTriggerFeedbackCustomizeControls(),
 ];
 
-/** 触发器本体：Style / Size / 文案 / Symbol */
+export const flotationTriggerFormSubmissionCustomizeControls: DocCustomizeControl[] =
+  buildFormSubmissionExpandCustomizeControls({
+    visibleWhen: (s) => Boolean(s.feedback),
+  });
+
+/** 触发器本体：Style / Size / 宽度 / 文案 / Symbol */
 export const flotationTriggerBodyCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
@@ -1152,6 +1171,13 @@ export const flotationTriggerBodyCustomizeControls: DocCustomizeControl[] = [
     label: '样式',
     row: 2,
     options: flotationTriggerStyleRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'size',
+    label: '尺寸',
+    row: 2,
+    options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
@@ -1166,13 +1192,6 @@ export const flotationTriggerBodyCustomizeControls: DocCustomizeControl[] = [
     label: '宽度值',
     row: 2,
     visibleWhen: (s) => String(s.widthMode ?? 'adaptive') === 'fixed',
-  },
-  {
-    kind: 'select',
-    key: 'size',
-    label: '尺寸',
-    row: 2,
-    options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   { kind: 'text', key: 'label', label: '文案', row: 2 },
   { kind: 'boolean', key: 'disabled', label: '禁用', row: 3 },
@@ -1223,6 +1242,11 @@ export const flotationTriggerDropdownCustomizeControls: DocCustomizeControl[] = 
   { kind: 'boolean', key: 'expanded', label: '展开态', row: 8 },
 ];
 
+export const flotationTriggerNestedBodyCustomizeControls: DocCustomizeControl[] = [
+  ...flotationTriggerBodyCustomizeControls,
+  ...flotationTriggerDropdownCustomizeControls,
+];
+
 /** 模块菜单 · Figma TriggerComboModuleTitle（2090:2655） */
 export const flotationTriggerModuleMenuCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'label', label: '文案', row: 0 },
@@ -1231,10 +1255,69 @@ export const flotationTriggerModuleMenuCustomizeControls: DocCustomizeControl[] 
   { kind: 'boolean', key: 'expanded', label: '展开态', row: 0 },
 ];
 
+function withCustomizeRow(
+  controls: DocCustomizeControl[],
+  row: number,
+): DocCustomizeControl[] {
+  return controls.map((control) => ({ ...control, row }));
+}
+
+/** `/components/flotation-trigger` — 基础定制（无触发器类型；侧栏切换场景）。 */
+export function buildFlotationTriggerPageCustomizeControls(
+  state: Record<string, unknown>,
+): DocCustomizeControl[] {
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    return withCustomizeRow(flotationTriggerModuleMenuCustomizeControls, 0);
+  }
+
+  const [
+    triggerStyle,
+    size,
+    widthMode,
+    width,
+    label,
+    disabled,
+    showSymbol,
+    symbolIcon,
+  ] = flotationTriggerBodyCustomizeControls;
+
+  const [
+    showTag,
+    tagText,
+    tagStatus,
+    showMessage,
+    messageText,
+    messageType,
+    expanded,
+  ] = flotationTriggerDropdownCustomizeControls;
+
+  const [showFieldLabel, fieldLabel, feedback] = flotationTriggerShellCustomizeControls;
+
+  return [
+    { ...triggerStyle!, row: 0 },
+    { ...size!, row: 0 },
+    { ...widthMode!, row: 0 },
+    { ...label!, row: 0 },
+    { ...width!, row: 1 },
+    { ...showFieldLabel!, row: 1 },
+    { ...fieldLabel!, row: 1 },
+    { ...disabled!, row: 2 },
+    { ...showSymbol!, row: 2 },
+    { ...showTag!, row: 2 },
+    { ...showMessage!, row: 2 },
+    { ...symbolIcon!, row: 3 },
+    { ...tagText!, row: 3 },
+    { ...tagStatus!, row: 3 },
+    { ...messageText!, row: 3 },
+    { ...messageType!, row: 3 },
+    { ...expanded!, row: 4 },
+    { ...feedback!, row: 5 },
+  ];
+}
+
 export const flotationTriggerCustomizeControls: DocCustomizeControl[] = [
   ...flotationTriggerShellCustomizeControls,
-  ...flotationTriggerBodyCustomizeControls,
-  ...flotationTriggerDropdownCustomizeControls,
+  ...flotationTriggerNestedBodyCustomizeControls,
 ];
 
 /** 纵览页 EgFlotation：触发器预置（标准下拉框） */
@@ -1262,6 +1345,7 @@ export function flotationTriggerShellProps(state: Record<string, unknown>): Reco
 }
 
 export function usesFlotationTriggerComboShell(state: Record<string, unknown>): boolean {
+  if (isFlotationTriggerModuleMenuKind(state)) return false;
   return Boolean(state.showFieldLabel) || Boolean(state.feedback);
 }
 
@@ -1314,6 +1398,10 @@ export function buildFlotationTriggerInnerSnippet(state: Record<string, unknown>
 }
 
 export function buildFlotationTriggerUsageSnippet(state: Record<string, unknown>): string {
+  if (isFlotationTriggerModuleMenuKind(state)) {
+    return buildFlotationTriggerInnerSnippet(state);
+  }
+
   const inner = buildFlotationTriggerInnerSnippet(state);
 
   if (!usesFlotationTriggerComboShell(state)) {
@@ -1438,6 +1526,60 @@ const flotationBoxKindOptions = propLabelRows(
   showcaseFlotationBoxKindLabels,
 );
 
+const flotationComboBoxSceneOptions = propLabelRows(
+  [
+    'standard-menu',
+    'standard-cascade-menu',
+    'scene-address-dropdown',
+    'scene-address-hover',
+  ] as const,
+  showcaseFlotationComboBoxSceneLabels,
+);
+
+/** Combo 页 EgFlotationTrigger：场景单独一行 + 纵览触发器控件。 */
+export function buildFlotationComboTriggerPanelControls(
+  state: Record<string, unknown>,
+): DocCustomizeControl[] {
+  const [triggerKindControl] = flotationTriggerKindCustomizeControls;
+  const bodyControls = isFlotationTriggerModuleMenuKind(state)
+    ? flotationTriggerOverviewModuleMenuControls
+    : flotationTriggerOverviewControls;
+
+  return [
+    { ...triggerKindControl!, label: '场景', row: 0 },
+    ...bodyControls.map((control) => ({
+      ...control,
+      row: (control.row ?? 0) + 1,
+    })),
+  ];
+}
+
+/** Combo 页 EgFlotationMenu：场景 + 插槽页同款控件。 */
+export function buildFlotationComboBoxPanelControls(
+  state: Record<string, unknown>,
+): DocCustomizeControl[] {
+  const panelControls = isFlotationBoxSceneAddressKind(state)
+    ? buildFlotationBoxSceneAddressPanelControls(state)
+    : buildFlotationBoxPanelControls(state);
+
+  return [
+    {
+      kind: 'select',
+      key: 'boxKind',
+      label: '场景',
+      row: 0,
+      options: flotationComboBoxSceneOptions.map((row) => ({
+        value: row.key,
+        label: row.label,
+      })),
+    },
+    ...panelControls.map((control) => ({
+      ...control,
+      row: (control.row ?? 0) + 1,
+    })),
+  ];
+}
+
 /** Showcase：盒子插槽类型 */
 export const flotationBoxKindCustomizeControls: DocCustomizeControl[] = [
   {
@@ -1469,7 +1611,7 @@ export const flotationBoxPageCustomizeDefaults = {
   boxSelectionMode: 'single',
   itemCount: '8',
   maxHeight: '306',
-  editBoxIndex: '1',
+  editBoxIndex: '',
   showAdd: true,
   addLabel: 'Add',
   ...createFlotationBoxItemDefaults(),

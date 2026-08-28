@@ -7,16 +7,16 @@ export type TagGalleryOption = {
   label: string;
 };
 
-const props = withDefaults(
+const props =   withDefaults(
   defineProps<{
     options: TagGalleryOption[];
     selected: string;
     galleryLabel?: string;
-    /** false：内容区随 main / gallery / footer 自然增高（如 Avatar 原色盘）。 */
+    /** true：撑满 Tag 文档固定预览高（480px）；默认随内容增高。 */
     fillPreviewHeight?: boolean;
   }>(),
   {
-    fillPreviewHeight: true,
+    fillPreviewHeight: false,
   },
 );
 

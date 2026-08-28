@@ -10,7 +10,7 @@
 }
 
 .layerName {
-  font-weight: var(--eds-footnote-large-strong-weight);
+  font-weight: var(--eds-body-small-strong-weight);
 }
 
 .status {

@@ -29,6 +29,7 @@ import {
   type PopoverMinerFeeNetwork,
   type PopoverScensScenario,
 } from './popoversDocCustomize';
+import { parseAnchoredContainerOptionalInt } from './anchoredContainerDocCustomize';
 import {
   resolveShowcaseMinerFeePanelProps,
   showcaseMinerFeeUi,
@@ -124,6 +125,9 @@ const popoverTopToolTitle = computed(() => {
 });
 
 const popoverTopToolClosable = computed(() => Boolean(customize.topToolClosable));
+const panelCrossAxisOffset = computed(() =>
+  parseAnchoredContainerOptionalInt(customize.crossAxisOffset),
+);
 const remarkPreviewProps = computed(() => buildRemarkPopoverProps(customize));
 const usageSnippet = computed(() => buildPopoverScensUsageSnippet(customize));
 
@@ -143,6 +147,7 @@ function onTopToolClose() {
       :import-code="popoverScensImportCode"
       :customize-controls="scensCustomizeControls"
       :customize-defaults="popoverScensCustomizeDefaults"
+      :customize-sequential="true"
       :usage-snippet-override="usageSnippet"
       :prop-rows="popoverPropRows"
       props-section-id="popovers-scens-props"
@@ -182,6 +187,7 @@ function onTopToolClose() {
             ref="anchoredRef"
             :placement="customize.placement"
             :align="customize.align"
+            :cross-axis-offset="panelCrossAxisOffset"
             :trigger="customize.trigger"
             :disabled="Boolean(customize.disabled)"
             :wrap-tooltip="false"

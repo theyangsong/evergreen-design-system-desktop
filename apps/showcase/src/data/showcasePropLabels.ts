@@ -16,6 +16,13 @@ export function tokenLabel(zh: string, token: string): string {
   return `${zh} ${token}`;
 }
 
+/** 预览画廊等场景：仅取 tokenLabel 的中文部分。 */
+export function galleryLabelFromTokenLabel(label: string): string {
+  const spaceIndex = label.lastIndexOf(' ');
+  if (spaceIndex <= 0) return label;
+  return label.slice(0, spaceIndex);
+}
+
 export function tokenOption(zh: string, value: string): SelectOption {
   return { value, label: tokenLabel(zh, value) };
 }
@@ -170,6 +177,14 @@ export const showcaseFlotationBoxKindLabels = {
   'standard-cascade-menu': '标准下拉级联菜单',
   'scene-address-dropdown': '场景化-下拉地址',
   'scene-address-hover': '场景化-地址悬浮',
+} as const;
+
+/** Combo 页 EgFlotationMenu「场景」— 对齐侧栏插槽 catalog 文案。 */
+export const showcaseFlotationComboBoxSceneLabels = {
+  'standard-menu': '标准菜单',
+  'standard-cascade-menu': '标准级联菜单',
+  'scene-address-dropdown': '下拉地址',
+  'scene-address-hover': '地址悬浮',
 } as const;
 
 export const showcaseFlotationBoxSelectionModeLabels = {
@@ -333,11 +348,11 @@ export const showcaseSearchScenarioLabels = {
 } as const;
 
 export const showcaseDialogTypeLabels = {
-  symbol: tokenLabel('符号', 'symbol'),
-  compose: tokenLabel('组合', 'compose'),
+  symbol: tokenLabel('带符号的对话', 'symbol'),
+  compose: tokenLabel('业务对话', 'compose'),
   standard: tokenLabel('标准', 'standard'),
   /** @deprecated Use compose */
-  slot: tokenLabel('组合', 'compose'),
+  slot: tokenLabel('业务对话', 'compose'),
 } as const;
 
 /** @deprecated Use showcaseDialogTypeLabels */
@@ -391,8 +406,16 @@ export const showcaseTooltipPanelKindLabels = {
   molde: tokenLabel('模块层级', 'molde'),
 } as const;
 
+/** Tooltip 本体页「类型」下拉 — panelKind 选项（中英）。 */
+export const showcaseTooltipPanelKindCustomizeLabels = {
+  flotation: tokenLabel('工具提示', 'flotation'),
+  container: tokenLabel('客户端容器', 'container'),
+  popup: tokenLabel('弹窗容器', 'popup'),
+  molde: tokenLabel('模块层级', 'molde'),
+} as const;
+
 export const showcaseTooltipFlotationScenarioLabels = {
-  component: '组件',
+  component: '类型',
   'text-overflow': '字段溢出',
   'paragraph-overflow-info': '段落溢出',
   'multi-address': '地址溢出（Item、可复制）',
@@ -431,8 +454,8 @@ export const showcaseButtonCustomizeFieldLabels = {
   iconPosition: '图标位置',
   iconName: '图标名',
   symbol: '图标',
-  shape: '形状',
-  event: '交互态',
+  shape: '类型',
+  event: '交互',
   badge: '角标',
   showBadge: '显示角标',
   showReddot: '显示红点',
@@ -471,6 +494,7 @@ export const showcaseTooltipCustomizeFieldLabels = {
   panelRadius: '圆角',
   widthMode: '宽度',
   width: '固定宽度',
+  heightMode: '高度',
   height: '高度',
   maxHeight: '最大高度',
   placement: '弹出方向',
@@ -494,13 +518,14 @@ export const showcaseFlotationCustomizeFieldLabels = {
   messageText: '消息文案',
   messageType: '消息类型',
   placement: '弹出方向',
+  offset: '主轴偏移',
   crossAxisOffset: '交叉轴偏移',
   showAdd: '显示 Add',
   addLabel: 'Add 文案',
-  widthMode: '宽度',
-  width: '宽度',
+  widthMode: '容器宽度',
+  width: '固定宽度',
   align: '对齐',
-  heightMode: '高度',
+  heightMode: '容器高度',
   height: '高度值',
   maxHeight: '最大高度',
   itemCount: '行数',

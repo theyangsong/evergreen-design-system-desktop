@@ -85,10 +85,12 @@ const rootClass = computed(() => [
   props.expanded && styles.triggerExpanded,
 ]);
 
-const iconSize = computed(() => {
+const arrowIconSize = computed(() => {
   if (props.moduleMenuTitle) return 'sm';
-  return props.size === 'xs' ? 'sm' : 'md';
+  return props.size === 'lg' ? 'md' : 'sm';
 });
+
+const symbolIconSize = computed(() => arrowIconSize.value);
 
 const rootStyle = computed(() => {
   if (props.widthMode !== 'fixed' || props.width == null || props.width <= 0) {
@@ -125,7 +127,7 @@ const symbolTrailing = computed(
   >
     <span v-if="symbolLeading" :class="styles.triggerSymbol">
       <slot name="symbol">
-        <EgIcon :name="symbolIcon" :size="iconSize" fit />
+        <EgIcon :name="symbolIcon" :size="symbolIconSize" fit />
       </slot>
     </span>
 
@@ -156,7 +158,7 @@ const symbolTrailing = computed(
 
     <span v-if="symbolTrailing" :class="styles.triggerSymbol">
       <slot name="symbol">
-        <EgIcon :name="symbolIcon" :size="iconSize" fit />
+        <EgIcon :name="symbolIcon" :size="symbolIconSize" fit />
       </slot>
     </span>
 
@@ -164,7 +166,7 @@ const symbolTrailing = computed(
       <slot name="arrow">
         <EgIcon
           :name="expanded ? 'eds-arrow-up-mini-ios' : 'eds-arrow-down-mini-ios'"
-          :size="iconSize"
+          :size="arrowIconSize"
           fit
         />
       </slot>

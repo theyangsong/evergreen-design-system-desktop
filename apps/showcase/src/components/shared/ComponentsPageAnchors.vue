@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { computed, nextTick, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { componentAnchorItems } from '@/data/components';
 import { anchorItemsForFamily } from '@/data/components/anchorItemsForFamily';
 import { findComponentsSidebarFamilyId } from '@/layout/buildComponentsSidebarSections';
@@ -11,8 +11,102 @@ import {
   getComponentRouteSlug,
   moleculeUsesChildPages,
 } from '@/data/components/navigation';
+import type { AnchorItem } from '@/data/types';
 import { useScrollSpy } from '@/composables/useScrollSpy';
+import PageAnchorLinkNav from './PageAnchorLinkNav.vue';
 import styles from './PageAnchors.module.css';
+
+type AnchorNavSection = {
+  id: string;
+  heading: string | null;
+  items: AnchorItem[];
+};
+
+type AnchorNavBlock = {
+  id: 'body' | 'scenes';
+  heading: string;
+  sections: AnchorNavSection[];
+};
+
+function splitBodyAndScenes(items: AnchorItem[]) {
+  const sectionIndex = items.findIndex((item) => item.kind === 'navSection');
+
+  if (sectionIndex < 0) {
+    return { body: items, scenes: [] as AnchorItem[] };
+  }
+
+  return {
+    body: items.slice(0, sectionIndex),
+    scenes: items.slice(sectionIndex + 1),
+  };
+}
+
+function groupAnchorNavSections(items: AnchorItem[]): AnchorNavSection[] {
+  const hasSubgroup = items.some((item) => item.kind === 'navSubgroup');
+
+  if (!hasSubgroup) {
+    return [{ id: 'default', heading: null, items }];
+  }
+
+  const sections: AnchorNavSection[] = [];
+
+  for (const item of items) {
+    if (item.kind === 'navSubgroup') {
+      sections.push({
+        id: item.id,
+        heading: item.label,
+        items: [],
+      });
+      continue;
+    }
+
+    const section = sections[sections.length - 1];
+    if (!section) {
+      sections.push({ id: 'default', heading: null, items: [item] });
+      continue;
+    }
+
+    section.items.push(item);
+  }
+
+  return sections;
+}
+
+function isVisibleAnchorLink(item: AnchorItem) {
+  return Boolean(item.standalonePage && item.pageSlug && !item.hideSidebarBody);
+}
+
+function sectionHasVisibleContent(
+  section: AnchorNavSection,
+  isNavLabel: (item: AnchorItem) => boolean,
+) {
+  if (section.heading) {
+    return section.items.some((item) => !isNavLabel(item) && isVisibleAnchorLink(item));
+  }
+
+  return section.items.some(
+    (item) =>
+      isVisibleAnchorLink(item)
+      || (isNavLabel(item) && item.kind !== 'navSubgroup' && item.kind !== 'navSection'),
+  );
+}
+
+function buildAnchorNavBlock(
+  id: AnchorNavBlock['id'],
+  heading: string,
+  items: AnchorItem[],
+  isNavLabel: (item: AnchorItem) => boolean,
+): AnchorNavBlock | null {
+  const sections = groupAnchorNavSections(items).filter((section) =>
+    sectionHasVisibleContent(section, isNavLabel),
+  );
+
+  if (!sections.length) {
+    return null;
+  }
+
+  return { id, heading, sections };
+}
 
 const route = useRoute();
 
@@ -21,7 +115,9 @@ const activeSlug = computed(() => getComponentRouteSlug(route.path, route.params
 const activeFamilySlug = computed(() => findComponentsSidebarFamilyId(activeSlug.value));
 
 const scopedAnchorItems = computed(() =>
-  anchorItemsForFamily(activeFamilySlug.value, componentAnchorItems),
+  anchorItemsForFamily(activeFamilySlug.value, componentAnchorItems).filter(
+    (item) => item.kind !== 'navGroup',
+  ),
 );
 
 const childPage = computed(() => findCatalogChildPage(activeSlug.value));
@@ -55,52 +151,25 @@ const activeNavId = computed(() => {
   return activeSlug.value;
 });
 
-const listRef = ref<HTMLElement | null>(null);
-const linkRefs = new Map<string, HTMLElement>();
-const indicatorTop = ref(0);
-const indicatorHeight = ref(0);
-const indicatorVisible = ref(false);
-const indicatorMoveTransition = ref(true);
-let resizeObserver: ResizeObserver | undefined;
+const anchorNavBlocks = computed((): AnchorNavBlock[] => {
+  const { body, scenes } = splitBodyAndScenes(scopedAnchorItems.value);
+  const blocks: AnchorNavBlock[] = [];
 
-function setLinkRef(navId: string, element: Element | ComponentPublicInstance | null) {
-  const node =
-    element instanceof HTMLElement
-      ? element
-      : (element as ComponentPublicInstance | null)?.$el;
-
-  if (node instanceof HTMLElement) {
-    linkRefs.set(navId, node);
-    return;
+  const bodyBlock = buildAnchorNavBlock('body', '本体', body, isNavLabel);
+  if (bodyBlock) {
+    blocks.push(bodyBlock);
   }
 
-  linkRefs.delete(navId);
-}
-
-function syncIndicatorPosition() {
-  const list = listRef.value;
-  const link = activeNavId.value ? linkRefs.get(activeNavId.value) : undefined;
-
-  if (!list || !link) {
-    indicatorVisible.value = false;
-    return;
+  const scenesBlock = buildAnchorNavBlock('scenes', '场景化', scenes, isNavLabel);
+  if (scenesBlock) {
+    blocks.push(scenesBlock);
   }
 
-  indicatorTop.value = link.offsetTop;
-  indicatorHeight.value = link.offsetHeight;
-  indicatorVisible.value = true;
-}
+  return blocks;
+});
 
-function syncIndicatorWithAnimation(previousNavId = '') {
-  if (!activeNavId.value) {
-    indicatorMoveTransition.value = false;
-    indicatorVisible.value = false;
-    return;
-  }
-
-  indicatorMoveTransition.value = Boolean(previousNavId);
-  syncIndicatorPosition();
-  indicatorVisible.value = true;
+function shouldShowBlockHeading(block: AnchorNavBlock) {
+  return !(block.id === 'body' && activeFamilySlug.value === 'flotation');
 }
 
 function isHiddenSidebarBody(item: (typeof componentAnchorItems)[number]) {
@@ -124,15 +193,8 @@ function isNavLabel(item: (typeof scopedAnchorItems.value)[number]) {
 }
 
 function anchorNavLabel(item: (typeof scopedAnchorItems.value)[number]) {
-  if (item.kind === 'navSection') return '场景化';
   return item.label;
 }
-
-watch(activeNavId, (_nextId, previousId) => {
-  nextTick(() => {
-    syncIndicatorWithAnimation(previousId);
-  });
-});
 
 watch(activeSlug, () => {
   nextTick(() => {
@@ -143,67 +205,45 @@ watch(activeSlug, () => {
 onMounted(() => {
   nextTick(() => {
     void refreshScrollSpy();
-    syncIndicatorWithAnimation('');
   });
-
-  resizeObserver = new ResizeObserver(() => {
-    syncIndicatorPosition();
-  });
-
-  if (listRef.value) {
-    resizeObserver.observe(listRef.value);
-  }
-});
-
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
 });
 </script>
 
 <template>
   <aside :class="[styles.anchors, styles.componentsAnchors]" aria-label="Components navigation">
-    <span :class="styles.anchorsHeading">本体</span>
-    <nav ref="listRef" :class="styles.nav">
-      <div
-        :class="[
-          styles.activeIndicator,
-          indicatorVisible && styles.activeIndicatorVisible,
-          indicatorMoveTransition && styles.activeIndicatorMove,
-        ]"
-        :style="{
-          transform: `translateY(${indicatorTop}px)`,
-          height: `${indicatorHeight}px`,
-        }"
-        aria-hidden="true"
-      />
+    <div
+      v-for="block in anchorNavBlocks"
+      :key="block.id"
+      :class="styles.navCategory"
+    >
+      <span
+        v-if="shouldShowBlockHeading(block)"
+        :class="styles.anchorsHeading"
+      >
+        {{ block.heading }}
+      </span>
 
-      <template v-for="item in scopedAnchorItems" :key="item.id">
+      <div
+        v-for="section in block.sections"
+        :key="section.id"
+        :class="styles.navSection"
+      >
         <span
-          v-if="isNavLabel(item)"
-          :class="[
-            styles.navLabel,
-            item.kind === 'navSection' && styles.navSectionLabel,
-          ]"
+          v-if="section.heading"
+          :class="styles.anchorsHeading"
         >
-          {{ anchorNavLabel(item) }}
+          {{ section.heading }}
         </span>
 
-        <RouterLink
-          v-else-if="
-            item.standalonePage &&
-            item.pageSlug &&
-            !isHiddenSidebarBody(item)
-          "
-          :ref="(element) => setLinkRef(item.id, element)"
-          :to="`/components/${item.pageSlug}`"
-          :class="[
-            styles.link,
-            isLinkActive(item) && styles.linkActive,
-          ]"
-        >
-          {{ item.label }}
-        </RouterLink>
-      </template>
-    </nav>
+        <PageAnchorLinkNav
+          :items="section.items"
+          :active-nav-id="activeNavId"
+          :is-link-active="isLinkActive"
+          :is-nav-label="isNavLabel"
+          :anchor-nav-label="anchorNavLabel"
+          :is-hidden-sidebar-body="isHiddenSidebarBody"
+        />
+      </div>
+    </div>
   </aside>
 </template>

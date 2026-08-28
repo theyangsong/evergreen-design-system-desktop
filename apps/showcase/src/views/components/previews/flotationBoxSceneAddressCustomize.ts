@@ -9,6 +9,8 @@ import {
   parseFlotationItemCount,
   parseFlotationMaxHeight,
   parseFlotationMenuMaxWidth,
+  buildFlotationBoxEditRowSelectOptions,
+  isFlotationBoxEditingRow,
 } from './flotationDocCustomize';
 import {
   SCENE_ADDRESS_DROPDOWN_ROWS,
@@ -55,6 +57,12 @@ export function parseSceneAddressEditBoxIndex(state: Record<string, unknown>): n
   });
 }
 
+export function isSceneAddressEditingRow(state: Record<string, unknown>): boolean {
+  return isFlotationBoxEditingRow({
+    editBoxIndex: state[sceneAddressStateKey.editBoxIndex],
+  });
+}
+
 export function parseSceneAddressMaxHeight(state: Record<string, unknown>): number | undefined {
   return parseFlotationMaxHeight({ maxHeight: state[sceneAddressStateKey.maxHeight] });
 }
@@ -98,7 +106,7 @@ export const flotationBoxSceneAddressCustomizeDefaults = {
   [sceneAddressStateKey.itemCount]: String(flotationSceneAddressDropdownItemCount),
   [sceneAddressStateKey.maxWidth]: '480',
   [sceneAddressStateKey.maxHeight]: '306',
-  [sceneAddressStateKey.editBoxIndex]: '1',
+  [sceneAddressStateKey.editBoxIndex]: '',
   [sceneAddressStateKey.selectionMode]: 'single',
   ...createFlotationBoxSceneAddressItemDefaults(),
 } as const;
@@ -151,6 +159,7 @@ export function buildFlotationBoxSceneAddressPanelControls(
   state: Record<string, unknown>,
 ): DocCustomizeControl[] {
   const count = parseSceneAddressItemCount(state);
+  const editing = isSceneAddressEditingRow(state);
   const editIndex = parseSceneAddressEditBoxIndex(state);
   const isHover = String(state.boxKind ?? '') === 'scene-address-hover';
 
@@ -188,19 +197,22 @@ export function buildFlotationBoxSceneAddressPanelControls(
     });
   }
 
-  controls.push(
-    {
-      kind: 'select',
-      key: sceneAddressStateKey.editBoxIndex,
-      label: '编辑行',
-      options: Array.from({ length: count }, (_, index) => {
-        const n = index + 1;
-        return { value: String(n), label: `第 ${n} 行` };
-      }),
-      row: 0,
-    },
-    ...buildSceneAddressItemRowControls(editIndex, !isHover),
-  );
+  controls.push({
+    kind: 'select',
+    key: sceneAddressStateKey.editBoxIndex,
+    label: '编辑行',
+    options: buildFlotationBoxEditRowSelectOptions(count),
+    row: 1,
+  });
+
+  if (editing) {
+    controls.push(
+      ...buildSceneAddressItemRowControls(editIndex, !isHover).map((control) => ({
+        ...control,
+        row: (control.row ?? 1) + 1,
+      })),
+    );
+  }
 
   return controls;
 }

@@ -117,15 +117,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--scale-4);
-  padding: var(--spacing-025) var(--spacing-1);
-  border-radius: var(--radius-full);
-  background-color: var(--material-brand-primary);
-  color: var(--text-same-white-primary);
-}
-
-.badgeText {
-  composes: barTextSubpixel from '../../styles/barTextSubpixel.module.css';
 }
 
 .reddot {

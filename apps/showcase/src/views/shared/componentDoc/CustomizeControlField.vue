@@ -1,8 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { EgCheckbox, EgInput } from '@eds/website-components';
+import {
+  EgDecide,
+  EgFlotation,
+  EgFlotationTrigger,
+  EgInput,
+} from '@eds/desktop-components';
+import { galleryLabelFromTokenLabel } from '@/data/showcasePropLabels';
 import styles from './ComponentDocLayout.module.css';
-import type { DocCustomizeBooleanControl, DocCustomizeControl } from './types';
+import type {
+  DocCustomizeBooleanControl,
+  DocCustomizeControl,
+  DocCustomizeSelectControl,
+} from './types';
 
 const props = defineProps<{
   control: DocCustomizeControl;
@@ -33,6 +43,64 @@ const inlineSelectModel = computed(
         ?? '',
     ),
 );
+
+function selectOptionIndex(
+  control: { options: DocCustomizeSelectControl['options'] },
+  currentValue: unknown,
+): number {
+  const index = control.options.findIndex(
+    (option) => option.value === String(currentValue ?? ''),
+  );
+  return index >= 0 ? index : 0;
+}
+
+function customizeSelectDisplayLabel(label: string): string {
+  return galleryLabelFromTokenLabel(label);
+}
+
+function selectFlotationItems(control: { options: DocCustomizeSelectControl['options'] }) {
+  return control.options.map((option) => ({
+    label: customizeSelectDisplayLabel(option.label),
+    boxType: 'text' as const,
+  }));
+}
+
+function selectCurrentLabel(
+  control: { options: DocCustomizeSelectControl['options'] },
+  currentValue: unknown,
+) {
+  const match = control.options.find(
+    (option) => option.value === String(currentValue ?? ''),
+  );
+  const label = match?.label ?? control.options[0]?.label ?? '';
+  return customizeSelectDisplayLabel(label);
+}
+
+function onSelectOption(
+  control: { options: DocCustomizeSelectControl['options'] },
+  index: number,
+  handler: (value: unknown) => void,
+) {
+  const option = control.options[index];
+  if (!option) return;
+  handler(option.value);
+}
+
+function emitSelectUpdate(control: DocCustomizeSelectControl, index: number) {
+  onSelectOption(control, index, (next) => emit('update', next));
+}
+
+function emitInlineSelectUpdate(
+  control: NonNullable<DocCustomizeBooleanControl['inlineSelect']>,
+  index: number,
+) {
+  onSelectOption(control, index, (next) => emit('inlineSelectUpdate', next));
+}
+
+function handleSelectItemClick(control: DocCustomizeControl, index: number) {
+  if (control.kind !== 'select') return;
+  emitSelectUpdate(control, index);
+}
 </script>
 
 <template>
@@ -45,48 +113,66 @@ const inlineSelectModel = computed(
       ]"
     >
       <template v-if="control.kind === 'boolean'">
-        <EgCheckbox
-          :id="`customize-${control.key}`"
-          size="sm"
-          :class="styles.customizeWebsiteCheckbox"
+        <EgDecide
+          :class="styles.customizeDecide"
           :model-value="Boolean(value)"
           @update:model-value="emit('update', $event)"
         />
         <div v-if="showInlineSelect && inlineSelect" :class="styles.customizeInlineSelectGroup">
           <span :class="styles.customizeInlineSelectLabel">{{ inlineSelect.label }}</span>
-          <select
-            :key="inlineSelect.key"
-            :class="[styles.customizeControl, styles.customizeInlineSelect]"
-            :value="inlineSelectModel"
-            @change="emit('inlineSelectUpdate', ($event.target as HTMLSelectElement).value)"
+          <EgFlotation
+            :key="`${inlineSelect.key}-${inlineSelectModel}`"
+            :class="styles.customizeInlineFlotation"
+            trigger-size="sm"
+            trigger-style="subtle"
+            width-mode="trigger"
+            :show-add="false"
+            :show-menu-divider="false"
+            :selected-index="selectOptionIndex(inlineSelect, inlineSelectModel)"
+            :items="selectFlotationItems(inlineSelect)"
+            @item-click="(_item, index) => emitInlineSelectUpdate(inlineSelect!, index)"
           >
-            <option
-              v-for="opt in inlineSelect.options"
-              :key="opt.value"
-              :value="opt.value"
-            >
-              {{ opt.label }}
-            </option>
-          </select>
+            <template #trigger="{ expanded }">
+              <EgFlotationTrigger
+                trigger-style="subtle"
+                size="sm"
+                width-mode="adaptive"
+                :label="selectCurrentLabel(inlineSelect, inlineSelectModel)"
+                :expanded="expanded"
+              />
+            </template>
+          </EgFlotation>
         </div>
       </template>
-      <select
+      <EgFlotation
         v-else-if="control.kind === 'select'"
-        :key="control.key"
-        :class="styles.customizeControl"
-        :value="String(value ?? '')"
-        @change="emit('update', ($event.target as HTMLSelectElement).value)"
+        :key="`${control.key}-${String(value ?? '')}`"
+        :class="styles.customizeFlotationSelect"
+        trigger-size="sm"
+        trigger-style="subtle"
+        width-mode="trigger"
+        :show-add="false"
+        :show-menu-divider="false"
+        :selected-index="selectOptionIndex(control, value)"
+        :items="selectFlotationItems(control)"
+        @item-click="(_item, index) => handleSelectItemClick(control, index)"
       >
-        <option v-for="opt in control.options" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </option>
-      </select>
+        <template #trigger="{ expanded }">
+          <EgFlotationTrigger
+            trigger-style="subtle"
+            size="sm"
+            width-mode="adaptive"
+            :label="selectCurrentLabel(control, value)"
+            :expanded="expanded"
+          />
+        </template>
+      </EgFlotation>
       <EgInput
         v-else-if="control.kind === 'text'"
         size="sm"
         width-mode="full"
-        :clearable="false"
-        :class="styles.customizeWebsiteInput"
+        clearable
+        :class="styles.customizeInput"
         :model-value="String(value ?? '')"
         :placeholder="control.placeholder"
         @update:model-value="emit('update', $event)"

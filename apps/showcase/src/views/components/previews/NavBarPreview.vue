@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
 import { EgNavBar } from '@eds/desktop-components';
-import {
-  cregisNavBarDeclarativeProps,
-} from '@/presets/nav/cregisNavBarDeclarative';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
@@ -11,7 +8,11 @@ import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import NavBarPreviewNest from './NavBarPreviewNest.vue';
-import { healNavBarCustomizeState } from './navBarPreviewCustomize';
+import {
+  buildCregisNavBarCustomizeDefaults,
+  buildNavBarDeclarativePropsFromCustomize,
+  healNavBarCustomizeState,
+} from './navBarPreviewCustomize';
 import {
   ORGANISM_IMPORT,
   cregisNavBarPropRows,
@@ -21,17 +22,47 @@ import {
   navBarModuleLabelCustomizeControls,
   navBarPropRows,
   navBarSlotRows,
+  type NavBarScenario,
 } from './organismTemplateDocData';
 
-const customize = reactive({ ...navBarCustomizeDefaults });
-healNavBarCustomizeState(customize);
+const props = withDefaults(
+  defineProps<{
+    initialScenario?: NavBarScenario;
+    pageTitle?: string;
+  }>(),
+  {},
+);
+
+const lockedScenario = computed(() => props.initialScenario);
+
+const customizeDefaults = computed(() =>
+  lockedScenario.value === 'cregis'
+    ? buildCregisNavBarCustomizeDefaults()
+    : navBarCustomizeDefaults,
+);
+
+const customize = reactive({
+  ...(lockedScenario.value === 'cregis'
+    ? buildCregisNavBarCustomizeDefaults()
+    : navBarCustomizeDefaults),
+  ...(props.initialScenario ? { scenario: props.initialScenario } : {}),
+});
+healNavBarCustomizeState(customize, customizeDefaults.value as Record<string, unknown>);
 
 watch(
   () => customize.appEntryCount,
-  () => healNavBarCustomizeState(customize),
+  () => healNavBarCustomizeState(customize, customizeDefaults.value as Record<string, unknown>),
 );
 
-const isNavBarScenario = computed(() => customize.scenario === 'nav-bar');
+const isNavBarScenario = computed(
+  () => (lockedScenario.value ?? customize.scenario) === 'nav-bar',
+);
+
+const docAnchorId = computed(() =>
+  lockedScenario.value === 'cregis' ? 'nav-bar-scene-cregis' : 'nav-bar',
+);
+
+const docTitle = computed(() => props.pageTitle ?? 'NavBar');
 
 const docComponentTag = computed(() => 'EgNavBar');
 
@@ -43,19 +74,19 @@ const docSlotRows = computed(() => (isNavBarScenario.value ? navBarSlotRows : []
 
 const isNavBarWide = computed(() => customize.navBarWidth === '210');
 
+const navBarDeclarativePreviewProps = computed(() =>
+  buildNavBarDeclarativePropsFromCustomize(customize, { wide: isNavBarWide.value }),
+);
+
 const docUsageSnippet = computed(() => {
+  const defaults = customizeDefaults.value as Record<string, unknown>;
+  const declarativeDefaults = buildNavBarDeclarativePropsFromCustomize(defaults, { wide: false });
+
   if (!isNavBarScenario.value) {
-    return buildVueSelfClosingSnippet(
-      'EgNavBar',
-      {
-        ...cregisNavBarDeclarativeProps,
-        wide: isNavBarWide.value,
-      },
-      {
-        defaults: { ...cregisNavBarDeclarativeProps, wide: false },
-        omitKeys: ['scenario', 'navBarWidth'],
-      },
-    );
+    return buildVueSelfClosingSnippet('EgNavBar', navBarDeclarativePreviewProps.value, {
+      defaults: declarativeDefaults,
+      omitKeys: ['scenario', 'navBarWidth'],
+    });
   }
 
   return buildVueSelfClosingSnippet(
@@ -70,55 +101,66 @@ const docUsageSnippet = computed(() => {
     },
   );
 });
+
+function resetNavBarCustomize() {
+  const defaults = customizeDefaults.value as Record<string, unknown>;
+  Object.keys(customize).forEach((key) => {
+    delete customize[key];
+  });
+  Object.assign(customize, defaults);
+  healNavBarCustomizeState(customize, defaults);
+}
 </script>
 
 <template>
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      anchor-id="nav-bar"
-      title="NavBar"
-      tall-preview
+      :anchor-id="docAnchorId"
+      :title="docTitle"
       :show-doc-title="false"
       :component-tag="docComponentTag"
       :import-code="docImportCode"
       :customize-controls="navBarCustomizeControls"
-      :customize-defaults="navBarCustomizeDefaults"
+      :customize-defaults="customizeDefaults"
       :usage-snippet-override="docUsageSnippet"
       :prop-rows="docPropRows"
       :slot-rows="docSlotRows"
           props-section-id="nav-bar-props"
-          @reset-preview="healNavBarCustomizeState(customize)"
+          @reset-preview="resetNavBarCustomize"
         >
       <template #preview>
         <div
           class="desktopTokens"
           :class="[
             docStyles.previewEffectPanelHost,
-            docStyles.previewEffectPanelHostTall,
             organismStyles.previewOrganismNavHost,
           ]"
         >
           <NavBarPreviewNest v-if="isNavBarScenario" :customize="customize" />
-          <EgNavBar v-else :wide="isNavBarWide" v-bind="cregisNavBarDeclarativeProps" />
+          <EgNavBar v-else v-bind="navBarDeclarativePreviewProps" />
         </div>
       </template>
 
-      <template v-if="isNavBarScenario" #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          title="模块名称"
-          nested
-          sequential
-          :controls="navBarModuleLabelCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="应用入口名称"
-          nested
-          sequential
-          :controls="navBarAppEntryLabelCustomizeControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            title="模块名称"
+            nested
+            embedded
+            sequential
+            :controls="navBarModuleLabelCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="应用入口名称"
+            nested
+            embedded
+            sequential
+            :controls="navBarAppEntryLabelCustomizeControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

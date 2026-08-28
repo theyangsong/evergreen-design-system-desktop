@@ -1,6 +1,7 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import {
+  galleryLabelFromTokenLabel,
   inputSizeRows,
   propLabelSelectOptions,
   showcaseTagColorfulStyleLabels,
@@ -101,6 +102,12 @@ export const tagSystemStyleOptions = propLabelSelectOptions(
   showcaseTagSystemTypeLabels,
 );
 
+/** 预览画廊：全部类型；标签仅中文（定制下拉仍用 tagSystemStyleOptions）。 */
+export const tagSystemGalleryOptions = tagSystemStyleOptions.map((option) => ({
+  value: option.value,
+  label: galleryLabelFromTokenLabel(option.label),
+}));
+
 export const tagColorfulStyleOptions = propLabelSelectOptions(
   [
     'apricot',
@@ -125,18 +132,23 @@ export const tagColorfulStyleOptions = propLabelSelectOptions(
   showcaseTagColorfulStyleLabels,
 );
 
+export const tagColorfulGalleryOptions = tagColorfulStyleOptions.map((option) => ({
+  value: option.value,
+  label: galleryLabelFromTokenLabel(option.label),
+}));
+
 export const tagSystemCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'size',
-    label: '尺寸',
-    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
-  },
   {
     kind: 'select',
     key: 'systemType',
     label: '类型',
     options: tagSystemStyleOptions,
+  },
+  {
+    kind: 'select',
+    key: 'size',
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   { kind: 'text', key: 'label', label: '文案' },
 ];
@@ -156,6 +168,11 @@ export const tagStatusStyleOptions = propLabelSelectOptions(
   ['danger', 'warning', 'success', 'ready', 'invalid'] as const,
   showcaseTagStatusLabels,
 );
+
+export const tagStatusGalleryOptions = tagStatusStyleOptions.map((option) => ({
+  value: option.value,
+  label: galleryLabelFromTokenLabel(option.label),
+}));
 
 export const tagStatusCustomizeDefaults = {
   size: 'md',
@@ -223,6 +240,11 @@ export const tagCustomStyleOptions = propLabelSelectOptions(
   ] as const,
   showcaseTagCustomStyleLabels,
 );
+
+export const tagCustomGalleryOptions = tagCustomStyleOptions.map((option) => ({
+  value: option.value,
+  label: galleryLabelFromTokenLabel(option.label),
+}));
 
 export const tagAmlStyleOptions = propLabelSelectOptions(
   ['aml-danger', 'aml-suspicious', 'aml-invalid'] as const,

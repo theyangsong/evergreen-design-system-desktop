@@ -63,6 +63,9 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  /* 贴 Popup Box 上沿；同时把圆角传给 .scrollTopEdge */
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
 }
 
 .scrollContent {
@@ -96,13 +99,14 @@
   height: 0;
 }
 
-/* 滚动时顶部内容边缘渐隐，避免硬切 */
+/* 滚动时顶部内容边缘渐隐（虚化），避免硬切 */
 .scrollFadeTop {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-4));
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-4));
   transition: var(--motion-recipe-scroll-fade);
 }
 
+/* 顶缘叠层：渐变虚化（非毛玻璃）；不用 backdrop-filter，避免滚动过渡时四角方角闪烁 */
 .scrollTopEdge {
   position: sticky;
   top: 0;
@@ -113,14 +117,15 @@
   margin-bottom: calc(-1 * var(--spacing-6));
   pointer-events: none;
   opacity: 0;
+  overflow: hidden;
   transition: var(--motion-recipe-scroll-fade);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   background: linear-gradient(
     to bottom,
     color-mix(in display-p3, var(--box-flotation) 88%, transparent),
     transparent
   );
-  backdrop-filter: saturate(120%) blur(var(--blur-subtle));
-  -webkit-backdrop-filter: saturate(120%) blur(var(--blur-subtle));
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
 }
@@ -260,7 +265,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  min-height: var(--scale-9);
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-sm);
   box-sizing: border-box;
@@ -375,10 +379,6 @@
   color: var(--text-base-secondary);
 }
 
-.itemSubRow {
-  min-height: var(--scale-9);
-}
-
 .itemTitleSpacer {
   flex-shrink: 0;
   width: calc(var(--scale-30) + var(--scale-6));
@@ -395,10 +395,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-}
-
-.itemAddressActionRow {
-  min-height: var(--scale-9);
 }
 
 .itemAddressDashRule {

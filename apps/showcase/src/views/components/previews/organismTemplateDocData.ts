@@ -15,7 +15,6 @@ import {
   showcaseModuleMenuTitleKindLabels,
   showcaseFeedbackMessageTypeLabels,
   showcaseMessageFocusBackgroundLabels,
-  showcaseNavBarScenarioLabels,
   showcasePageBgLabels,
   showcasePaginerDataVolumeLabels,
   showcasePopupUsesLabels,
@@ -35,6 +34,8 @@ import {
 import {
   DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
   buildModuleMenuBusinessTitleOptions,
+  moduleMenuBusinessTitleUsesFlotationTitle,
+  resolveModuleMenuBusinessTitleForScenario,
   type ModuleMenuBusinessScenario,
 } from '@/presets/module-menu/businessModuleTitles';
 import {
@@ -170,11 +171,6 @@ function navBarAppEntryReddotDefaults(show = false): Record<string, boolean> {
 
 export type NavBarScenario = 'nav-bar' | 'cregis';
 
-export const navBarScenarioOptions = propLabelSelectOptions(
-  ['nav-bar', 'cregis'] as const,
-  showcaseNavBarScenarioLabels,
-);
-
 export const navBarWidthOptions = propLabelSelectOptions(['74', '210'] as const, {
   '74': '74px（默认）',
   '210': '210px',
@@ -250,12 +246,6 @@ export const navBarCustomizeDefaults = {
 export const navBarCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
-    key: 'scenario',
-    label: '场景化',
-    options: navBarScenarioOptions,
-  },
-  {
-    kind: 'select',
     key: 'navBarWidth',
     label: '宽度',
     options: navBarWidthOptions,
@@ -265,44 +255,40 @@ export const navBarCustomizeControls: DocCustomizeControl[] = [
     key: 'moduleCount',
     label: '模块数量',
     options: navBarModuleCountOptions,
-    visibleWhen: (state) => state.scenario === 'nav-bar',
   },
   {
     kind: 'select',
     key: 'appEntryCount',
     label: '应用入口数量',
     options: navBarAppEntryCountOptions,
-    visibleWhen: (state) => state.scenario === 'nav-bar',
   },
   {
     kind: 'text',
     key: 'corporationLabel',
     label: '企业标识',
-    visibleWhen: (state) => state.scenario === 'nav-bar' && !isNavBarWideCustomize(state),
+    visibleWhen: (state) => !isNavBarWideCustomize(state),
   },
   {
     kind: 'text',
     key: 'corporationTitle',
     label: '企业名称',
-    visibleWhen: (state) => state.scenario === 'nav-bar' && isNavBarWideCustomize(state),
+    visibleWhen: (state) => isNavBarWideCustomize(state),
   },
   {
     kind: 'text',
     key: 'corporationSubtitle',
     label: '版本',
-    visibleWhen: (state) => state.scenario === 'nav-bar' && isNavBarWideCustomize(state),
+    visibleWhen: (state) => isNavBarWideCustomize(state),
   },
   {
     kind: 'text',
     key: 'avatarInitials',
     label: '头像缩写',
-    visibleWhen: (state) => state.scenario === 'nav-bar',
   },
   {
     kind: 'boolean',
     key: 'showDivider',
     label: '右侧分割线',
-    visibleWhen: (state) => state.scenario === 'nav-bar',
   },
 ];
 
@@ -529,18 +515,35 @@ export function isModuleMenuDsScenario(state: Record<string, unknown>): boolean 
 
 export const moduleMenuBusinessTitleOptions = buildModuleMenuBusinessTitleOptions('cregis');
 
+function isModuleMenuBusinessFlotationTitleState(state: Record<string, unknown>): boolean {
+  const scenario: ModuleMenuBusinessScenario =
+    String(state.scenario ?? 'module-menu') === 'udun' ? 'udun' : 'cregis';
+  const title = resolveModuleMenuBusinessTitleForScenario(scenario, state.moduleBusinessTitle);
+  return moduleMenuBusinessTitleUsesFlotationTitle(scenario, title);
+}
+
 export function buildModuleMenuBusinessTitleCustomizeControls(
   scenario: ModuleMenuBusinessScenario,
 ): DocCustomizeControl[] {
-  return [
-    {
-      kind: 'select',
-      key: 'moduleBusinessTitle',
-      label: '模块',
-      options: buildModuleMenuBusinessTitleOptions(scenario),
-      row: 0,
-    },
-  ];
+  const moduleControl: DocCustomizeControl = {
+    kind: 'select',
+    key: 'moduleBusinessTitle',
+    label: '模块',
+    options: buildModuleMenuBusinessTitleOptions(scenario),
+    row: 0,
+  };
+
+  const flotationTriggerControls: DocCustomizeControl[] =
+    flotationTriggerOverviewModuleMenuControls.map((control) => ({
+      ...control,
+      row: 1,
+      visibleWhen: (state: Record<string, unknown>) => {
+        if (!isModuleMenuBusinessFlotationTitleState(state)) return false;
+        return control.visibleWhen ? control.visibleWhen(state) : true;
+      },
+    }));
+
+  return [moduleControl, ...flotationTriggerControls];
 }
 
 export function moduleMenuGroupTitleKey(index: number): string {
@@ -686,19 +689,13 @@ export const moduleMenuGroupCountOptions = countSelectOptions(MODULE_MENU_MAX_GR
 export const moduleMenuCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
-    key: 'scenario',
-    label: '场景化',
-    options: moduleMenuScenarioOptions,
-  },
-  { kind: 'boolean', key: 'wide', label: 'NavBar展开' },
-  {
-    kind: 'select',
     key: 'groupCount',
     label: '组数量',
     options: moduleMenuGroupCountOptions,
     visibleWhen: isModuleMenuDsScenario,
   },
   { kind: 'boolean', key: 'showEdgeDivider', label: '右侧分割线' },
+  { kind: 'boolean', key: 'wide', label: 'NavBar展开' },
 ];
 
 const moduleMenuTitleTriggerCustomizeControls: DocCustomizeControl[] =
@@ -1784,7 +1781,7 @@ export const popupCustomBoxHeightControl: DocCustomizeControl = {
 export const popupDialogTypeCustomizeControl: DocCustomizeControl = {
   kind: 'select',
   key: 'dialogType',
-  label: '内容类型',
+  label: '场景',
   options: propLabelSelectOptions(DIALOG_TYPES, showcaseDialogTypeLabels),
   visibleWhen: (state) => state.uses === 'dialog',
 };
@@ -1792,16 +1789,45 @@ export const popupDialogTypeCustomizeControl: DocCustomizeControl = {
 /** @deprecated Use popupDialogTypeCustomizeControl */
 export const popupReminderTypeCustomizeControl = popupDialogTypeCustomizeControl;
 
-export const popupCustomizeControls: DocCustomizeControl[] = [
-  popupUsesCustomizeControl,
-  popupAlertVerticalAlignCustomizeControl,
-  popupCustomBoxSizePresetControl,
-  popupCustomContentInsetPresetControl,
-  popupCustomBoxWidthControl,
-  popupCustomBoxHeightControl,
-  popupDialogTypeCustomizeControl,
-  ...popupVerifyCustomizeControls,
-];
+export type PopupSceneUses = 'detail' | 'dialog' | 'verify';
+
+export type PopupCustomizeUses = 'custom' | PopupSceneUses;
+
+export function buildPopupCustomizeDefaults(uses: PopupCustomizeUses = 'custom') {
+  return {
+    ...popupCustomizeDefaults,
+    uses,
+    alertVerticalAlign: uses === 'custom' ? ('center' as const) : ('offset-top' as const),
+    ...(uses === 'dialog' ? { dialogType: 'standard' as const } : {}),
+  };
+}
+
+export function buildPopupCustomizeControls(uses: PopupCustomizeUses): DocCustomizeControl[] {
+  if (uses === 'custom') {
+    return [
+      popupAlertVerticalAlignCustomizeControl,
+      popupCustomBoxSizePresetControl,
+      popupCustomContentInsetPresetControl,
+      popupCustomBoxWidthControl,
+      popupCustomBoxHeightControl,
+    ];
+  }
+
+  if (uses === 'detail') {
+    return [];
+  }
+
+  const controls: DocCustomizeControl[] = [popupAlertVerticalAlignCustomizeControl];
+
+  if (uses === 'dialog') {
+    return [popupDialogTypeCustomizeControl, popupAlertVerticalAlignCustomizeControl];
+  }
+
+  return [...controls, ...popupVerifyCustomizeControls];
+}
+
+/** Popup 本体页 — 仅 Custom 外壳定制（场景化 uses 走侧栏 Scenes）。 */
+export const popupCustomizeControls: DocCustomizeControl[] = buildPopupCustomizeControls('custom');
 
 export const popupPropRows: OrganismPropRow[] = [
   {
@@ -1846,8 +1872,8 @@ export const popupPropRows: OrganismPropRow[] = [
   {
     name: 'dialogType',
     type: "'symbol' | 'compose' | 'standard'",
-    defaultValue: "'symbol'",
-    description: 'uses=dialog 时 EgDialog 内容类型（Symbol 280px / Compose·Standard 460px）。',
+    defaultValue: "dialog → 'standard'；其它 → 'symbol'",
+    description: 'uses=dialog 时 EgDialog 场景（带符号的对话 / 标准 / 业务对话；Symbol 280px / Compose·Standard 460px）。',
   },
   {
     name: 'microFloat',

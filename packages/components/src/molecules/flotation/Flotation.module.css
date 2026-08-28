@@ -104,6 +104,21 @@
   gap: var(--spacing-2);
 }
 
+/*
+ * eds-flotation-menu--box-doc（Flotation Box 文档页 / CryptoAddress Side Menu）：
+ * 外壳不承担 padding，改由 menuBody 提供 spacing-1 inset，使滚动 mask 贴到玻璃边缘。
+ * 主题选择器需显式带上，才能盖过 tokens 的 [data-theme] .effect-flotation-box。
+ */
+:global(.eds-flotation-menu--box-doc.desktopTokens.effect-flotation-box),
+:global(html[data-theme='light'] .eds-flotation-menu--box-doc.desktopTokens.effect-flotation-box),
+:global(html[data-theme='dark'] .eds-flotation-menu--box-doc.desktopTokens.effect-flotation-box) {
+  padding: 0;
+}
+
+:global(.eds-flotation-menu--box-doc) :global(.eds-flotation-menu-body) {
+  padding: var(--spacing-1);
+}
+
 .menuHeader {
   position: relative;
   z-index: 10;
@@ -202,7 +217,7 @@
   box-sizing: border-box;
   min-width: 0;
   max-width: 100%;
-  border: var(--stroke-xs) solid transparent;
+  border: 0;
   border-radius: var(--radius-sm);
   background-color: var(--material-hide);
   color: var(--text-base-primary);
@@ -232,28 +247,25 @@
 }
 
 .triggerSizeLg {
-  padding: var(--spacing-2) var(--spacing-2) var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-3);
 }
 
 .triggerSizeMd {
-  padding: var(--spacing-1-5) var(--spacing-2) var(--spacing-1-5) var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3);
 }
 
 .triggerSizeSm {
-  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--spacing-2);
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
+  padding: var(--spacing-1) var(--spacing-3);
 }
 
 .triggerSizeXs {
-  padding: var(--spacing-05) var(--spacing-2) var(--spacing-05) var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
 }
 
 .triggerStyleSubtle {
   background-color: var(--material-card-moderate);
-  border-color: transparent;
 }
 
 .triggerStyleSubtle:hover:not(:disabled) {
@@ -268,7 +280,7 @@
 
 .triggerStyleOutline {
   background-color: var(--material-hide);
-  border-color: var(--stroke-outline-shallow);
+  border: var(--stroke-xs) solid var(--stroke-outline-shallow);
 }
 
 .triggerStyleOutline:hover:not(:disabled) {
@@ -283,7 +295,6 @@
 
 .triggerStyleText {
   background-color: var(--material-hide);
-  border-color: transparent;
   width: auto;
 }
 
@@ -373,14 +384,14 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--icon-md);
-  height: var(--icon-md);
+  width: var(--icon-sm);
+  height: var(--icon-sm);
   color: var(--stroke-base-secondary);
 }
 
-.triggerSizeXs .triggerArrow {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+.triggerSizeLg .triggerArrow {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
 }
 
 .triggerArrow :global(.eds-i-f) {
@@ -535,11 +546,6 @@
   font-size: var(--eds-body-medium-size);
   font-weight: var(--eds-body-medium-weight);
   line-height: var(--eds-body-medium-line-height);
-}
-
-:global(.desktopTokens) .triggerSizeSm {
-  font-size: var(--eds-body-small-size);
-  line-height: var(--eds-body-small-line-height);
 }
 
 :global(.desktopTokens) .triggerSizeXs {

@@ -2,14 +2,17 @@
 import { computed, reactive, ref } from 'vue';
 import { EgComboInputItem, EgFormSubmission, EgInput } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import styles from './InputPreview.module.css';
 import { comboInputItemPropRows, comboInputItemSlotRows } from './inputSubPreviewData';
 import {
   comboImportCode,
-  comboInputItemCustomizeControls,
   comboInputItemCustomizeDefaults,
+  comboInputItemFormSubmissionCustomizeControls,
+  comboInputItemNestedInputCustomizeControls,
+  comboInputItemShellCustomizeControls,
   comboInputItemShellProps,
   comboNestedInputProps,
   inputCustomizeDefaults,
@@ -21,6 +24,8 @@ import {
 import {
   buildWidthModeUsageSnippet,
   previewFixedWidthStyle,
+  resolveEgInputWidthMode,
+  type ShowcaseInputWidthMode,
 } from './inputPreviewWidth';
 
 const comboInputValue = ref('');
@@ -29,7 +34,7 @@ const comboInputCustomize = reactive({
   ...comboInputItemCustomizeDefaults,
   type: comboInputItemCustomizeDefaults.type as 'standard' | 'amount',
   size: comboInputItemCustomizeDefaults.size as 'lg' | 'md' | 'sm',
-  widthMode: comboInputItemCustomizeDefaults.widthMode as 'fixed' | 'full',
+  widthMode: comboInputItemCustomizeDefaults.widthMode as ShowcaseInputWidthMode,
   submissionType: comboInputItemCustomizeDefaults.submissionType as 'notes' | 'danger' | 'success',
 });
 
@@ -93,10 +98,8 @@ const comboInputUsageSnippet = computed(() => {
       doc-tier="scenes"
       component-tag="EgComboInputItem"
       :import-code="comboImportCode"
-      :customize-controls="comboInputItemCustomizeControls"
+      :customize-controls="comboInputItemShellCustomizeControls"
       :customize-defaults="comboInputItemCustomizeDefaults"
-      :customize-sequential="true"
-      :customize-row-columns="5"
       :prop-rows="comboInputItemPropRows"
       :slot-rows="comboInputItemSlotRows"
       :usage-snippet-override="comboInputUsageSnippet"
@@ -115,7 +118,7 @@ const comboInputUsageSnippet = computed(() => {
               :style="comboInputPreviewStyle"
               :type="comboInputCustomize.type as 'standard' | 'amount'"
               :size="comboInputCustomize.size as 'lg' | 'md' | 'sm'"
-              :width-mode="comboInputCustomize.widthMode as 'fixed' | 'full'"
+              :width-mode="resolveEgInputWidthMode(comboInputCustomize.widthMode)"
               :placeholder="String(comboInputCustomize.placeholder)"
               :readonly="Boolean(comboInputCustomize.readonly)"
               :unit="comboInputPreviewUnit"
@@ -130,7 +133,7 @@ const comboInputUsageSnippet = computed(() => {
               :style="comboInputPreviewStyle"
               :type="comboInputCustomize.type as 'standard' | 'amount'"
               :size="comboInputCustomize.size as 'lg' | 'md' | 'sm'"
-              :width-mode="comboInputCustomize.widthMode as 'fixed' | 'full'"
+              :width-mode="resolveEgInputWidthMode(comboInputCustomize.widthMode)"
               :placeholder="String(comboInputCustomize.placeholder)"
               disabled
               :readonly="Boolean(comboInputCustomize.readonly)"
@@ -143,6 +146,26 @@ const comboInputUsageSnippet = computed(() => {
               <EgFormSubmission v-bind="formSubmissionPreviewProps" />
             </template>
           </EgComboInputItem>
+        </div>
+      </template>
+
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="comboInputCustomize"
+            title="EgInput"
+            nested
+            embedded
+            :controls="comboInputItemNestedInputCustomizeControls"
+          />
+          <CustomizePanel
+            v-if="comboInputCustomize.feedback"
+            v-model="comboInputCustomize"
+            title="EgFormSubmission"
+            nested
+            embedded
+            :controls="comboInputItemFormSubmissionCustomizeControls"
+          />
         </div>
       </template>
     </ComponentDocLayout>

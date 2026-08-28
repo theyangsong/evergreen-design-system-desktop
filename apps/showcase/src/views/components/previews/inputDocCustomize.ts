@@ -73,6 +73,7 @@ export const inputCustomizeControls: DocCustomizeControl[] = [
     key: 'widthMode',
     label: showcaseInputCustomizeFieldLabels.widthMode,
     options: [
+      { value: 'adaptive', label: showcaseWidthModeLabels.adaptive },
       { value: 'fixed', label: showcaseWidthModeLabels.fixed },
       { value: 'full', label: showcaseWidthModeLabels.full },
     ],
@@ -85,6 +86,7 @@ export const inputCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (s) => s.widthMode === 'fixed',
   },
   { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
+  { kind: 'text', key: 'unit', label: showcaseInputCustomizeFieldLabels.unit },
   {
     kind: 'boolean',
     key: 'disabled',
@@ -97,7 +99,6 @@ export const inputCustomizeControls: DocCustomizeControl[] = [
     label: showcaseInputCustomizeFieldLabels.readonly,
     visibleWhen: (s) => s.interaction === 'full',
   },
-  { kind: 'text', key: 'unit', label: showcaseInputCustomizeFieldLabels.unit },
   { kind: 'boolean', key: 'clearable', label: showcaseInputCustomizeFieldLabels.clearable },
   {
     kind: 'boolean',
@@ -122,7 +123,6 @@ export const textareaCustomizeDefaults = {
 } as const;
 
 export const textareaCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
   {
     kind: 'select',
     key: 'widthMode',
@@ -139,6 +139,7 @@ export const textareaCustomizeControls: DocCustomizeControl[] = [
     placeholder: '319 或 319px',
     visibleWhen: (s) => s.widthMode === 'fixed',
   },
+  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder },
   { kind: 'boolean', key: 'disabled', label: showcaseInputCustomizeFieldLabels.disabled },
   { kind: 'boolean', key: 'readonly', label: showcaseInputCustomizeFieldLabels.readonly },
 ];
@@ -211,18 +212,49 @@ export const comboInputItemCustomizeDefaults = {
   ...inputCustomizeDefaults,
 } as const;
 
-export const comboInputItemCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label, row: 0 },
-  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback, row: 0 },
-  ...buildFormSubmissionExpandCustomizeControls({
-    row: 0,
+const comboInputNestedControlKeys = [
+  'type',
+  'size',
+  'widthMode',
+  'fixedWidth',
+  'placeholder',
+  'unit',
+  'disabled',
+  'readonly',
+  'clearable',
+  'showMax',
+  'maxLabel',
+] as const;
+
+function pickCustomizeControls(
+  controls: DocCustomizeControl[],
+  keys: readonly string[],
+): DocCustomizeControl[] {
+  const byKey = new Map(controls.map((control) => [control.key, control]));
+  return keys
+    .map((key) => byKey.get(key))
+    .filter((control): control is DocCustomizeControl => control != null);
+}
+
+export const comboInputItemShellCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label },
+  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback },
+];
+
+export const comboInputItemFormSubmissionCustomizeControls: DocCustomizeControl[] =
+  buildFormSubmissionExpandCustomizeControls({
     visibleWhen: (s) => Boolean(s.feedback),
     keyPrefix: 'submission',
-  }),
-  ...inputCustomizeControls
-    .filter((control) => control.key !== 'interaction')
-    .map((control) => ({ ...control, row: (control as { row?: number }).row ?? 1 })),
-];
+  });
+
+export const comboInputItemNestedInputCustomizeControls: DocCustomizeControl[] =
+  pickCustomizeControls(inputCustomizeControls, comboInputNestedControlKeys).map((control) => ({
+    ...control,
+    visibleWhen:
+      control.key === 'disabled' || control.key === 'readonly'
+        ? undefined
+        : control.visibleWhen,
+  }));
 
 const comboInputItemShellKeys = [
   'label',
@@ -254,15 +286,19 @@ export const comboTextareaItemCustomizeDefaults = {
   label: 'Label',
   feedback: true,
   ...formSubmissionCustomizeDefaults,
-  placeholder: '请输入',
+  ...textareaCustomizeDefaults,
 } as const;
 
-export const comboTextareaItemCustomizeControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label, row: 0 },
-  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback, row: 0 },
-  ...buildFormSubmissionExpandCustomizeControls({
-    row: 0,
+export const comboTextareaItemShellCustomizeControls: DocCustomizeControl[] = [
+  { kind: 'text', key: 'label', label: showcaseInputCustomizeFieldLabels.label },
+  { kind: 'boolean', key: 'feedback', label: showcaseInputCustomizeFieldLabels.feedback },
+];
+
+export const comboTextareaItemFormSubmissionCustomizeControls: DocCustomizeControl[] =
+  buildFormSubmissionExpandCustomizeControls({
     visibleWhen: (s) => Boolean(s.feedback),
-  }),
-  { kind: 'text', key: 'placeholder', label: showcaseInputCustomizeFieldLabels.placeholder, row: 1 },
+  });
+
+export const comboTextareaItemNestedTextareaCustomizeControls: DocCustomizeControl[] = [
+  ...textareaCustomizeControls,
 ];

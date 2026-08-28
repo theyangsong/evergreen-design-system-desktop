@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { EgTag } from '@eds/website-components';
+import { EgTag } from '@eds/desktop-components';
 import {
   EgCrypto,
   cryptoNames,
@@ -41,13 +41,15 @@ const filteredCryptoEntries = computed(() =>
           <EgCrypto :name="entry.name" :class="styles.iconCellCryptoIcon" />
         </div>
         <span :class="styles.iconCellName">{{ entry.displayName }}</span>
-        <EgTag
-          :class="styles.iconCellKindTag"
-          size="sm"
-          :system-type="entry.kind === 'Crypto' ? 'stroke-subtle' : 'stroke-solid'"
-        >
-          {{ entry.kind }}
-        </EgTag>
+        <span class="desktopTokens">
+          <EgTag
+            :class="styles.iconCellKindTag"
+            size="sm"
+            :system-type="entry.kind === 'Crypto' ? 'stroke-subtle' : 'stroke-solid'"
+          >
+            {{ entry.kind }}
+          </EgTag>
+        </span>
       </div>
     </div>
   </section>

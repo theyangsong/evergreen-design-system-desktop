@@ -21,10 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout eds-website
-        run: |
-          git clone --depth 1 "https://github.com/${{ github.repository_owner }}/eds-website.git" "${GITHUB_WORKSPACE}/../eds-website"
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -45,12 +41,6 @@ jobs:
             echo "VITE_BASE_PATH=/${REPO}/" >> "$GITHUB_ENV"
           fi
 
-      - name: Install and build eds-website
-        working-directory: ${{ github.workspace }}/../eds-website
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm build:tokens && pnpm build:animations && pnpm build:components
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -64,6 +54,8 @@ jobs:
           test ! -d apps/storybook/storybook-static || test ! -f apps/storybook/storybook-static/index.html
           grep -q "Desktop ShowCase" apps/showcase/dist/index.html
           ! grep -qi "storybook" apps/showcase/dist/index.html
+          ! grep -qi "eds-website" apps/showcase/dist/assets/*.css
+          ! grep -qi "@eds/website" apps/showcase/dist/assets/*.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

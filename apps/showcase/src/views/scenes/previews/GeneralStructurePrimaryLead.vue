@@ -16,11 +16,7 @@ const cryptoName = computed(
 </script>
 
 <template>
-  <EgCrypto
-    v-if="showCryptoIcon"
-    :name="cryptoName"
-    fit
-    :class="styles.generalStructureCryptoIcon"
-    :label="cryptoSymbol"
-  />
+  <span v-if="showCryptoIcon" :class="styles.cryptoInlineIcon">
+    <EgCrypto :name="cryptoName" fit :label="cryptoSymbol" />
+  </span>
 </template>

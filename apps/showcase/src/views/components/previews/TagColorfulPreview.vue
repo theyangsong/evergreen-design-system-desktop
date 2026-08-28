@@ -10,8 +10,8 @@ import {
   tagImportCode,
   tagColorfulCustomizeControls,
   tagColorfulCustomizeDefaults,
+  tagColorfulGalleryOptions,
   tagColorfulPropRows,
-  tagColorfulStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
@@ -43,7 +43,7 @@ function selectColorfulStyle(value: string) {
     >
       <template #preview>
         <TagPreviewGallery
-          :options="tagColorfulStyleOptions"
+          :options="tagColorfulGalleryOptions"
           :selected="customize.colorfulStyle"
           gallery-label="样式"
           @select="selectColorfulStyle"

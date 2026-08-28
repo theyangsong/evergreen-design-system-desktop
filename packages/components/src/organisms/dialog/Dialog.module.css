@@ -1,6 +1,7 @@
 /**
  * Dialog — Popup Box 内容 organism（Figma 2769:8357）。
  * Symbol：280px 固定宽、居中；Compose / Standard：460px 固定宽、左对齐 + 滚动 + sticky 工具栏。
+ * border-radius: inherit 用于把 Popup Box 圆角传给 sticky .dialogToolbar（见其注释）。
  */
 .root {
   display: flex;
@@ -9,6 +10,7 @@
   height: auto;
   min-height: 0;
   max-height: 100%;
+  border-radius: inherit;
 }
 
 .symbolLayout {
@@ -180,14 +182,15 @@
   box-sizing: border-box;
 }
 
+/* 贴 Popup Box 下沿：backdrop-filter/scroll-fade 不受祖先圆角裁切，须自带同值圆角（经 .root inherit 取自 Popup Box） */
 .dialogToolbar {
   position: sticky;
   bottom: 0;
   z-index: 2;
   flex-shrink: 0;
   width: 100%;
-  border-bottom-right-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
   transition: var(--motion-recipe-scroll-fade-background);
 }
 

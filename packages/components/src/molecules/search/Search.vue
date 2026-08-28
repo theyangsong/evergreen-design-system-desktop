@@ -42,10 +42,6 @@ const showClear = computed(
     && props.modelValue.length > 0,
 );
 
-const showClearSlot = computed(
-  () => fieldFocused.value && !props.disabled && !props.readonly,
-);
-
 function onFieldFocusIn() {
   fieldFocused.value = true;
 }
@@ -133,9 +129,11 @@ defineExpose({
       @focusin="onFieldFocusIn"
       @focusout="onFieldFocusOut"
     >
-      <EgIcon :class="styles.icon" name="eds-search" size="sm" />
+      <span :class="styles.icon">
+        <EgIcon name="eds-search" fit />
+      </span>
 
-      <div :class="styles.inputWrap">
+      <div :class="[styles.inputWrap, showClear && styles.inputWrapWithClear]">
         <input
           ref="inputRef"
           :class="['eds-input-control', styles.input]"
@@ -152,11 +150,10 @@ defineExpose({
       </div>
 
       <button
-        v-if="showClearSlot"
+        v-if="showClear"
         type="button"
-        :class="[styles.clearButton, !showClear && styles.clearButtonHidden]"
+        :class="styles.clearButton"
         aria-label="Clear"
-        :aria-hidden="!showClear"
         tabindex="-1"
         @mousedown.prevent
         @pointerdown.prevent

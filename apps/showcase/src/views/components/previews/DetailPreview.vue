@@ -155,7 +155,6 @@ function closeOrdersPopup() {
       :slot-rows="detailSlotRows"
       :usage-snippet-override="usageSnippet"
       props-section-id="detail-props"
-      tall-preview
     >
       <template #preview>
         <div class="desktopTokens" :class="organismStyles.previewOrganismPopupBoxHost">
@@ -265,7 +264,7 @@ function closeOrdersPopup() {
           />
           <CustomizePanel
             v-model="customize"
-            title="工具栏 · EgComboActionPage"
+            title="EgComboActionPage"
             nested
             embedded
             :controls="detailToolbarCustomizeControls"

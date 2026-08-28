@@ -4,18 +4,38 @@
   align-self: start;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-05);
+  gap: var(--spacing-4);
   width: max-content;
   min-width: 192px;
   max-width: 100%;
 }
 
 .anchorsHeading {
-  padding-inline: var(--spacing-3);
+  padding-inline: var(--spacing-4);
   color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-medium-size);
-  font-weight: var(--eds-footnote-medium-strong-weight);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-line-height);
+}
+
+.navCategory {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025);
+}
+
+.navSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025);
+}
+
+.componentsAnchors .navCategory:has(> .navSection + .navSection) {
+  gap: var(--spacing-4);
+}
+
+.navSection .nav {
+  padding-top: 0;
 }
 
 .componentsAnchors .link {
@@ -68,15 +88,15 @@
   align-items: center;
   box-sizing: border-box;
   width: 100%;
-  padding-block: var(--spacing-1);
-  padding-inline: var(--spacing-3);
+  padding-block: var(--spacing-2);
+  padding-inline: var(--spacing-4);
   border: var(--stroke-xs) solid transparent;
   border-radius: var(--radius-full);
   background-color: transparent;
   color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-large-size);
-  line-height: var(--eds-footnote-large-line-height);
-  font-weight: var(--eds-footnote-large-strong-weight);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+  font-weight: var(--eds-body-small-strong-weight);
   white-space: nowrap;
   transition:
     background-color var(--eds-motion-hover-duration) ease,
@@ -99,7 +119,7 @@
 .link.linkNested.linkActive:focus-visible {
   background-color: var(--event-focus);
   color: var(--text-base-primary);
-  font-weight: var(--eds-footnote-large-strong-weight);
+  font-weight: var(--eds-body-small-strong-weight);
   border-color: var(--stroke-color-brand);
 }
 
@@ -113,9 +133,9 @@
   padding-block: var(--spacing-2) var(--spacing-05);
   padding-inline: var(--spacing-3);
   color: var(--text-base-tertiary);
-  font-size: var(--eds-footnote-medium-size);
-  font-weight: var(--eds-footnote-medium-strong-weight);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-line-height);
   cursor: default;
   pointer-events: none;
   user-select: none;
@@ -127,7 +147,7 @@
 
 .linkActive {
   color: var(--text-base-primary);
-  font-weight: var(--eds-footnote-large-strong-weight);
+  font-weight: var(--eds-body-small-strong-weight);
 }
 
 .linkActive:hover:not(:focus-visible) {

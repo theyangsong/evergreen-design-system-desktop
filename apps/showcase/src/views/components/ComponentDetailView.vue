@@ -2,7 +2,8 @@
 import { computed, provide, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { findCatalogChildPage, findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
-import { componentPreviewBySlug, usesAvatarComponentPreview, usesCompactComponentPreview, usesTagComponentPreview } from './previews';
+import { componentPreviewBySlug, usesAvatarComponentPreview, usesCompactComponentPreview, usesScrollComponentPreview, usesTagComponentPreview } from './previews';
+import SceneExtendingPlaceholder from './previews/SceneExtendingPlaceholder.vue';
 import ShowcasePlaceholderPreview from './previews/ShowcasePlaceholderPreview.vue';
 import shared from '@/views/shared/showcase.module.css';
 
@@ -22,10 +23,12 @@ const familyLocation = computed(() => {
 const preview = computed(() => componentPreviewBySlug[pageSlug.value]);
 
 const compactPreview = computed(() => usesCompactComponentPreview(pageSlug.value));
+const scrollPreview = computed(() => usesScrollComponentPreview(pageSlug.value));
 const tagPreview = computed(() => usesTagComponentPreview(pageSlug.value));
 const avatarPreview = computed(() => usesAvatarComponentPreview(pageSlug.value));
 
 provide('componentDocCompactPreview', compactPreview);
+provide('componentDocScrollPreview', scrollPreview);
 provide('componentDocTagPreview', tagPreview);
 provide('componentDocAvatarPreview', avatarPreview);
 
@@ -72,7 +75,7 @@ watch(
 
 <template>
   <component :is="preview.component" v-if="preview" :key="pageSlug" />
-  <template v-else-if="childLocation?.child.emptyScenesPlaceholder" />
+  <SceneExtendingPlaceholder v-else-if="childLocation?.child.emptyScenesPlaceholder" :key="pageSlug" />
   <ShowcasePlaceholderPreview
     v-else-if="childLocation"
     :key="pageSlug"

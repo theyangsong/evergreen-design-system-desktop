@@ -13,11 +13,12 @@
   width: 100%;
 }
 
-/* 与 EgInput md 一致：高度、聚焦 inset、Clear 交互 */
+/* Figma Search 2059:2281 — 32px 高、body-small、不对称内边距 */
 .field {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--spacing-1-5);
+  gap: var(--spacing-2);
   box-sizing: border-box;
   overflow: hidden;
   border: 0;
@@ -26,13 +27,11 @@
   cursor: text;
   box-shadow: inset 0 0 0 var(--stroke-xl) transparent;
   transition: var(--motion-recipe-hover), padding var(--motion-duration-shift) var(--motion-easing-standard);
-  --eds-input-field-size: calc(2 * var(--spacing-2) + var(--eds-body-medium-line-height));
-  padding: var(--spacing-2) var(--spacing-3);
-  min-height: var(--eds-input-field-size);
-  max-height: var(--eds-input-field-size);
-  font-size: var(--eds-body-medium-size);
-  font-weight: var(--eds-body-medium-weight);
-  line-height: var(--eds-body-medium-line-height);
+  padding: var(--spacing-1-5) var(--spacing-1) var(--spacing-1-5) var(--spacing-2);
+  max-height: var(--scale-8);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .field:focus-within:not(.fieldDisabled) {
@@ -46,7 +45,10 @@
 }
 
 .icon {
+  display: inline-flex;
   flex-shrink: 0;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
   color: var(--text-base-secondary);
 }
 
@@ -55,6 +57,10 @@
   flex: 1 1 auto;
   align-items: center;
   min-width: 0;
+}
+
+.inputWrapWithClear {
+  padding-right: calc(var(--icon-md) + 2 * var(--spacing-1));
 }
 
 .input {
@@ -66,9 +72,9 @@
   border: 0;
   background: transparent;
   color: var(--text-base-primary);
-  font-size: var(--eds-body-medium-size);
-  font-weight: var(--eds-body-medium-weight);
-  line-height: var(--eds-body-medium-line-height);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
   -webkit-appearance: none;
   appearance: none;
   outline: none;
@@ -97,21 +103,25 @@
 }
 
 .clearButton {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-1);
+  z-index: 1;
   display: inline-flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 0;
+  padding: var(--spacing-1);
   border: 0;
   background: transparent;
   color: var(--text-base-secondary);
   cursor: default;
   box-sizing: border-box;
-  width: calc(var(--icon-sm) + 2 * var(--spacing-1));
-  height: calc(var(--icon-sm) + 2 * var(--spacing-1));
+  width: calc(var(--icon-md) + 2 * var(--spacing-1));
+  height: calc(var(--icon-md) + 2 * var(--spacing-1));
   border-radius: var(--radius-sm);
   opacity: 1;
+  transform: translateY(-50%);
   composes: motion-ease is-hover from global;
 }
 
@@ -124,14 +134,8 @@
   outline-offset: 1px;
 }
 
-.clearButtonHidden {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .clearIcon {
   display: block;
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  width: var(--icon-md);
+  height: var(--icon-md);
 }

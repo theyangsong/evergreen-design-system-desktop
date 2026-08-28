@@ -20,8 +20,8 @@
   padding: var(--spacing-2);
   text-align: center;
   color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-large-size);
-  line-height: var(--eds-footnote-large-line-height);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .textOverflowScene {

@@ -3,9 +3,13 @@ import { defineComponent, h, type Component } from 'vue';
 import type { ComponentPreviewEntry } from './componentPreviewTypes';
 import FlotationBoxPreview from './FlotationBoxPreview.vue';
 import FlotationTriggerPreview from './FlotationTriggerPreview.vue';
+import ModuleMenuPreview from './ModuleMenuPreview.vue';
+import NavBarPreview from './NavBarPreview.vue';
+import PopupPreview from './PopupPreview.vue';
 import PopoversScensPreview from './PopoversScensPreview.vue';
 import VerifyPreview from './VerifyPreview.vue';
 import type { FlotationBoxKind } from './flotationDocCustomize';
+import type { ModuleMenuScenario, NavBarScenario, PopupSceneUses } from './organismTemplateDocData';
 import type { PopoverScensScenario } from './popoversDocCustomize';
 
 function defineScenePreview(
@@ -66,7 +70,53 @@ const flotationBoxScenePages: Array<{
   },
 ];
 
+const popupScenePages: Array<{
+  slug: string;
+  title: string;
+  lockedUses: PopupSceneUses;
+}> = [
+  { slug: 'popup-scene-detail', title: '详情', lockedUses: 'detail' },
+  { slug: 'popup-scene-dialog', title: '提醒', lockedUses: 'dialog' },
+  { slug: 'popup-scene-verify', title: '安全', lockedUses: 'verify' },
+];
+
 export const splitScenePreviewEntries: ComponentPreviewEntry[] = [
+  {
+    slug: 'nav-bar-scene-cregis',
+    title: 'Cregis',
+    component: defineScenePreview('NavBarCregisPreview', NavBarPreview, {
+      initialScenario: 'cregis' satisfies NavBarScenario,
+      pageTitle: 'Cregis',
+    }),
+    usesComponentDocHeader: true,
+  },
+  {
+    slug: 'module-menu-scene-cregis',
+    title: 'Cregis',
+    component: defineScenePreview('ModuleMenuCregisPreview', ModuleMenuPreview, {
+      initialScenario: 'cregis' satisfies Exclude<ModuleMenuScenario, 'module-menu'>,
+      pageTitle: 'Cregis',
+    }),
+    usesComponentDocHeader: true,
+  },
+  {
+    slug: 'module-menu-scene-udun',
+    title: 'UDun',
+    component: defineScenePreview('ModuleMenuUdunPreview', ModuleMenuPreview, {
+      initialScenario: 'udun' satisfies Exclude<ModuleMenuScenario, 'module-menu'>,
+      pageTitle: 'UDun',
+    }),
+    usesComponentDocHeader: true,
+  },
+  ...popupScenePages.map(({ slug, title, lockedUses }) => ({
+    slug,
+    title,
+    component: defineScenePreview(`PopupScenePreview_${slug}`, PopupPreview, {
+      lockedUses,
+      pageTitle: title,
+    }),
+    usesComponentDocHeader: true,
+  })),
   ...popoverScenePages.map(({ slug, title, scenario }) => ({
     slug,
     title,
@@ -95,7 +145,6 @@ export const splitScenePreviewEntries: ComponentPreviewEntry[] = [
       {
         initialTriggerKind: 'module-menu',
         pageTitle: 'ModuleMenu',
-        lockTriggerKind: true,
       },
     ),
     usesComponentDocHeader: true,
@@ -106,7 +155,6 @@ export const splitScenePreviewEntries: ComponentPreviewEntry[] = [
     component: defineScenePreview(`FlotationBoxScenePreview_${slug}`, FlotationBoxPreview, {
       initialBoxKind: boxKind,
       pageTitle: title,
-      lockBoxKind: true,
     }),
     usesComponentDocHeader: true,
   })),

@@ -1,4 +1,5 @@
 import { showcaseDefaultIconName } from '@/views/shared/showcaseIcons';
+import { cregisNavBarDeclarativeProps } from '@/presets/nav/cregisNavBarDeclarative';
 import { navBarCustomizeDefaults } from './organismTemplateDocData';
 
 const GENERIC_ICON_NAMES = new Set<string>([showcaseDefaultIconName, 'eds-add']);
@@ -9,19 +10,62 @@ export const NAV_BAR_DEMO_APP_ENTRIES = [
   { label: 'MetaMask', icon: 'eds-application-5' },
 ] as const;
 
-function canonicalValue(key: string): unknown {
-  return (navBarCustomizeDefaults as Record<string, unknown>)[key];
+export function buildCregisNavBarCustomizeDefaults(): Record<string, unknown> {
+  return {
+    ...navBarCustomizeDefaults,
+    ...cregisNavBarDeclarativeProps,
+    scenario: 'cregis',
+    navBarWidth: '74',
+    moduleCount: String(cregisNavBarDeclarativeProps.moduleCount),
+    appEntryCount: String(cregisNavBarDeclarativeProps.appEntryCount),
+    showDivider: true,
+  };
 }
 
-function canonicalString(key: string): string {
-  const value = canonicalValue(key);
+export function buildNavBarDeclarativePropsFromCustomize(
+  state: Record<string, unknown>,
+  options?: { wide?: boolean },
+): Record<string, unknown> {
+  const props: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(state)) {
+    if (key === 'scenario' || key === 'navBarWidth') continue;
+    props[key] = value;
+  }
+
+  if (state.moduleCount != null && String(state.moduleCount).trim() !== '') {
+    props.moduleCount = Number(state.moduleCount);
+  }
+
+  if (state.appEntryCount != null && String(state.appEntryCount).trim() !== '') {
+    props.appEntryCount = Number(state.appEntryCount);
+  }
+
+  if ('showDivider' in state) {
+    props.showDivider = Boolean(state.showDivider);
+  }
+
+  if (options?.wide != null) {
+    props.wide = options.wide;
+  }
+
+  return props;
+}
+
+function canonicalValue(key: string, defaults: Record<string, unknown>): unknown {
+  return defaults[key];
+}
+
+function canonicalString(key: string, defaults: Record<string, unknown>): string {
+  const value = canonicalValue(key, defaults);
   return typeof value === 'string' ? value.trim() : '';
 }
 
 /** 补齐缺失项，并把仍停留在占位 icon（eds-add）的应用入口同步到当前 canonical defaults。 */
-export function healNavBarCustomizeState(state: Record<string, unknown>) {
-  const defaults = navBarCustomizeDefaults as Record<string, unknown>;
-
+export function healNavBarCustomizeState(
+  state: Record<string, unknown>,
+  defaults: Record<string, unknown> = navBarCustomizeDefaults as Record<string, unknown>,
+) {
   for (const [key, value] of Object.entries(defaults)) {
     if (!(key in state)) {
       state[key] = value;
@@ -35,7 +79,7 @@ export function healNavBarCustomizeState(state: Record<string, unknown>) {
     const demo = NAV_BAR_DEMO_APP_ENTRIES[index - 1];
     for (const prefix of ['appEntryIcon', 'appEntryFocusIcon'] as const) {
       const key = `${prefix}${index}`;
-      const canonicalName = canonicalString(key) || demo?.icon || '';
+      const canonicalName = canonicalString(key, defaults) || demo?.icon || '';
       const stateName = String(state[key] ?? '').trim();
       if (!canonicalName) continue;
       if (!stateName || GENERIC_ICON_NAMES.has(stateName)) {
@@ -54,7 +98,7 @@ export function resolveNavBarPreviewIconName(
   order: number,
 ): string {
   const key = `${prefix}${order}`;
-  const canonicalName = canonicalString(key);
+  const canonicalName = canonicalString(key, navBarCustomizeDefaults as Record<string, unknown>);
   const stateName = String(customize[key] ?? '').trim();
   const demoIcon = NAV_BAR_DEMO_APP_ENTRIES[order - 1]?.icon;
 

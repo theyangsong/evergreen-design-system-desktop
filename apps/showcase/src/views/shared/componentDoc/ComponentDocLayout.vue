@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, inject, ref, useSlots, type ComputedRef } from 'vue';
+import { computed, inject, onMounted, ref, useSlots, type ComputedRef } from 'vue';
 import { EgButton, EgSegmented, rescanCornerSmoothing } from '@eds/desktop-components';
+import CodeSnippet from '@/components/shared/CodeSnippet.vue';
 import { buildComponentAiPrompt, buildVueSelfClosingSnippet } from './buildUsageSnippet';
 import CustomizePanel from './CustomizePanel.vue';
 import ExtensionDeliveryMatrix from './ExtensionDeliveryMatrix.vue';
@@ -28,8 +29,10 @@ const props = withDefaults(
     showProps?: boolean;
     /** Organism 等纵向组合：previewShell 1024px，inner 组件画布 800px。 */
     tallPreview?: boolean;
-    /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock）。 */
+    /** 分子级等紧凑预览：预览区 280px（仅覆盖本页 docBlock），预览壳 sticky。 */
     compactPreview?: boolean;
+    /** Organism / Template 等高预览：圆角壳、随页滚动（不 sticky）。 */
+    scrollPreview?: boolean;
     /** 预览区内 effect-* 玻璃（如 BatchBar）：避免 shell 裁切 box-shadow。Teleport 浮层（Tooltip/Popover）无需此项。 */
     effectPanelPreview?: boolean;
     /** Tag 文档：预览区 480px + 底部样式色板。 */
@@ -53,6 +56,7 @@ const props = withDefaults(
     showDocTitle: false,
     tallPreview: false,
     compactPreview: false,
+    scrollPreview: false,
     effectPanelPreview: false,
     customizeSequential: false,
   },
@@ -65,11 +69,17 @@ const emit = defineEmits<{
 const slots = useSlots();
 
 const injectedCompactPreview = inject<ComputedRef<boolean>>('componentDocCompactPreview');
+const injectedScrollPreview = inject<ComputedRef<boolean>>('componentDocScrollPreview');
 const injectedTagPreview = inject<ComputedRef<boolean>>('componentDocTagPreview');
 const injectedAvatarPreview = inject<ComputedRef<boolean>>('componentDocAvatarPreview');
 
+const useScrollPreview = computed(
+  () => props.scrollPreview || injectedScrollPreview?.value === true,
+);
+
 const useCompactPreview = computed(
-  () => props.compactPreview || injectedCompactPreview?.value === true,
+  () =>
+    (props.compactPreview || injectedCompactPreview?.value === true) && !useScrollPreview.value,
 );
 
 const useTagPreview = computed(
@@ -80,7 +90,11 @@ const useAvatarPreview = computed(
   () => injectedAvatarPreview?.value === true,
 );
 
-const useTallPreview = computed(() => props.tallPreview && !useCompactPreview.value);
+const useTallPreview = computed(
+  () => props.tallPreview && !useCompactPreview.value && !useScrollPreview.value,
+);
+
+const useOrganismPreviewInner = computed(() => useTallPreview.value || useScrollPreview.value);
 
 const customizeState = defineModel<Record<string, unknown>>('customizeState', {
   default: () => ({}),
@@ -125,6 +139,19 @@ type DocViewMode = 'preview' | 'code';
 const viewMode = ref<DocViewMode>('preview');
 const copyFeedback = ref('');
 const refreshFeedback = ref('');
+const previewStageRef = ref<HTMLElement | null>(null);
+
+function rescanPreviewCornerSmoothing() {
+  requestAnimationFrame(() => {
+    if (previewStageRef.value) {
+      rescanCornerSmoothing(previewStageRef.value);
+    }
+  });
+}
+
+onMounted(() => {
+  rescanPreviewCornerSmoothing();
+});
 
 /** Read control keys so computed tracks in-place reactive updates on customizeState. */
 function trackedCustomizeState(): Record<string, unknown> {
@@ -146,8 +173,6 @@ const usageSnippet = computed(() => {
   });
 });
 
-const codeDisplay = computed(() => `${props.importCode}\n\n${usageSnippet.value}`);
-
 const aiPrompt = computed(() =>
   buildComponentAiPrompt({
     componentTag: props.componentTag,
@@ -158,7 +183,7 @@ const aiPrompt = computed(() =>
 
 function setViewMode(mode: DocViewMode) {
   viewMode.value = mode;
-  requestAnimationFrame(() => rescanCornerSmoothing());
+  rescanPreviewCornerSmoothing();
 }
 
 const viewModeIndex = computed({
@@ -183,7 +208,7 @@ function onResetPreview() {
   window.setTimeout(() => {
     refreshFeedback.value = '';
   }, 1500);
-  requestAnimationFrame(() => rescanCornerSmoothing());
+  rescanPreviewCornerSmoothing();
 }
 
 async function copyAiPrompt() {
@@ -205,6 +230,7 @@ async function copyAiPrompt() {
     :class="[
       styles.docBlock,
       useTallPreview && styles.docBlockTallPreview,
+      useScrollPreview && styles.docBlockScrollPreview,
       useCompactPreview && styles.docBlockCompactPreview,
       props.effectPanelPreview && styles.docBlockEffectPanelPreview,
       useTagPreview && styles.docBlockTagPreview,
@@ -215,8 +241,15 @@ async function copyAiPrompt() {
       <h2 :class="styles.docTitle">{{ title }}</h2>
     </header>
 
-    <div :class="styles.previewStage">
-      <div :class="[styles.previewShell, useTallPreview && styles.previewShellTall]">
+    <div
+      ref="previewStageRef"
+      :class="styles.previewStage"
+      data-no-corner-smoothing
+    >
+      <div
+        :class="[styles.previewShell, useTallPreview && styles.previewShellTall]"
+        data-no-corner-smoothing
+      >
         <div
           class="desktopTokens"
           :class="styles.previewShellToolbar"
@@ -247,11 +280,14 @@ async function copyAiPrompt() {
           </div>
         </div>
 
-        <div v-if="viewMode === 'preview'" :class="[styles.previewInner, useTallPreview && styles.previewInnerTall]">
+        <div v-if="viewMode === 'preview'" :class="[styles.previewInner, useOrganismPreviewInner && styles.previewInnerTall]">
           <slot name="preview" />
         </div>
         <div v-else :class="styles.codeInner">
-          <pre :class="styles.codeBlock"><code>{{ codeDisplay }}</code></pre>
+          <div :class="styles.codeStack">
+            <CodeSnippet :code="importCode" language="typescript" />
+            <CodeSnippet :code="usageSnippet" language="xml" />
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { inject, onMounted, provide, ref, watch, type InjectionKey, type Ref } from 'vue';
-import { applyTheme, getPreferredTheme, type ThemeMode } from '@eds/website-components';
+import { applyTheme, getPreferredTheme, type ThemeMode } from '@eds/desktop-components';
 
 const STORAGE_KEY = 'evergreen-theme';
 
@@ -27,7 +27,7 @@ function pinChromeThemeLight() {
 
 export function provideShowcaseContentTheme() {
   const theme = ref<ThemeMode>(
-    typeof window !== 'undefined' ? readStoredTheme() : 'light',
+    typeof window === 'undefined' ? 'light' : readStoredTheme(),
   );
   const contentRef = ref<HTMLElement | null>(null);
 

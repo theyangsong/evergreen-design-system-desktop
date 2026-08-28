@@ -10,6 +10,7 @@ import {
 } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import organismStyles from './OrganismPreview.module.css';
 import {
@@ -55,13 +56,14 @@ const customizeDefaults = computed(() => buildDialogCustomizeDefaults(props.vari
     <ComponentDocLayout
       v-model:customize-state="customize"
       :title="title"
-      tall-preview
       doc-tier="molecule"
       :show-doc-title="false"
       component-tag="EgDialog"
       :import-code="dialogImportCode"
       :customize-controls="customizeControls"
       :customize-defaults="customizeDefaults"
+      :customize-sequential="true"
+      :customize-row-columns="4"
       :prop-rows="dialogPropRows"
       :event-rows="dialogEventRows"
       :slot-rows="dialogSlotRows"
@@ -92,6 +94,7 @@ const customizeDefaults = computed(() => buildDialogCustomizeDefaults(props.vari
               :show-clear="Boolean(customize.showClear)"
               :clear-label="String(customize.clearLabel)"
               :toolbar-tone="customize.toolbarTone as 'brand' | 'decor'"
+              :toolbar-variant="customize.toolbarVariant as 'solid' | 'outline' | 'text'"
               :toolbar-divider-pinned="Boolean(customize.toolbarDividerPinned)"
               :style="dialogSymbolStyle"
             >
@@ -107,30 +110,38 @@ const customizeDefaults = computed(() => buildDialogCustomizeDefaults(props.vari
       </template>
 
       <template #customize-extra>
-        <CustomizePanel
-          v-if="variant === 'symbol'"
-          v-model="customize"
-          title="EgComboActionPopupWindow"
-          nested
-          embedded
-          :controls="dialogPopupWindowControls"
-        />
-        <CustomizePanel
-          v-else-if="variant === 'compose'"
-          v-model="customize"
-          title="工具栏 · EgComboActionFlotation"
-          nested
-          embedded
-          :controls="dialogComposeFlotationToolbarControls"
-        />
-        <CustomizePanel
-          v-else
-          v-model="customize"
-          title="工具栏 · EgComboActionFlotation"
-          nested
-          embedded
-          :controls="dialogStandardFlotationToolbarControls"
-        />
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-if="variant === 'symbol'"
+            v-model="customize"
+            title="EgComboActionPopupWindow"
+            nested
+            embedded
+            sequential
+            :row-columns="4"
+            :controls="dialogPopupWindowControls"
+          />
+          <CustomizePanel
+            v-else-if="variant === 'compose'"
+            v-model="customize"
+            title="EgComboActionFlotation"
+            nested
+            embedded
+            sequential
+            :row-columns="4"
+            :controls="dialogComposeFlotationToolbarControls"
+          />
+          <CustomizePanel
+            v-else
+            v-model="customize"
+            title="EgComboActionFlotation"
+            nested
+            embedded
+            sequential
+            :row-columns="4"
+            :controls="dialogStandardFlotationToolbarControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

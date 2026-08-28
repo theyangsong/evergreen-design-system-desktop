@@ -33,7 +33,6 @@
 
 .control {
   align-self: stretch;
-  min-height: var(--scale-13);
   margin: 0;
   padding: 0;
   border: 0;

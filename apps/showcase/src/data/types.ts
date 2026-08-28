@@ -11,7 +11,7 @@ export type CatalogChildItem = {
   navSubgroup?: boolean;
   /** Groups scene pages under a `navSection` id in the sidebar. */
   navParent?: string;
-  /** Empty Scenes row — routable placeholder (`场景拓展中…`). */
+  /** Empty Scenes row — routable placeholder（`场景化拓展中...`）。 */
   emptyScenesPlaceholder?: boolean;
   /** Standalone showcase route slug (defaults to `id`). */
   pageSlug?: string;

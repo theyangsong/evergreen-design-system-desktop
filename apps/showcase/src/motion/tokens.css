@@ -41,6 +41,8 @@
   --showcase-doc-preview-bg-organism: var(--showcase-doc-preview-bg);
   /** 组件文档 previewShell 深色背景。 */
   --showcase-doc-preview-bg-dark: #252c36;
+  /** Popup 文档 preview 内 EgPopup 遮罩舞台最小高度（alert offset-top + 面板）。 */
+  --showcase-popup-preview-min-height: 420px;
   /** Popup 文档 inner 组件画布（客户端默认视口 1280×800）。 */
   --showcase-popup-preview-width: 1280px;
   --showcase-popup-preview-height: var(--showcase-organism-page-height-fixed);

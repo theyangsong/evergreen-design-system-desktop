@@ -15,15 +15,28 @@ const props = defineProps<{
   title?: string;
   /** Nested component customize: smaller mono heading (two type steps below section title). */
   nested?: boolean;
+  /**
+   * 嵌套标题圆点：引用组件（默认）→ 品红；普通标题 → 紫色。
+   */
+  nestedTitleVariant?: 'referenced-component' | 'simple-title';
   /** Single-column stack (e.g. Nav Bar module names top-to-bottom). */
   sequential?: boolean;
   /** Fields per horizontal row when sequential + control.row groups (default 4). */
   rowColumns?: number;
   /** Render inside a parent customize section (no outer section wrapper). */
   embedded?: boolean;
+  /** Omit section heading (e.g. nested panel when parent field already labels the slot). */
+  hideTitle?: boolean;
 }>();
 
 const rowColumns = computed(() => Math.max(1, props.rowColumns ?? 4));
+
+const nestedTitleClass = computed(() => {
+  if (!props.nested && !props.embedded) return undefined;
+  return props.nestedTitleVariant === 'simple-title'
+    ? styles.customizeNestedTitleSimple
+    : styles.customizeNestedTitleReferenced;
+});
 
 const sequentialRowsStyle = computed(() => ({
   '--customize-row-columns': String(rowColumns.value),
@@ -88,10 +101,17 @@ function patchInlineSelect(control: DocCustomizeControl, value: unknown) {
 <template>
   <component
     :is="embedded ? 'div' : 'section'"
-    :class="embedded ? styles.customizeEmbedded : [shared.section, styles.customizeSection]"
+    :class="[
+      embedded ? styles.customizeEmbedded : [shared.section, styles.customizeSection],
+      'desktopTokens',
+    ]"
   >
     <h2
-      :class="nested || embedded ? styles.customizeNestedTitle : shared.sectionTitle"
+      v-if="!hideTitle"
+      :class="[
+        nested || embedded ? styles.customizeNestedTitle : shared.sectionTitle,
+        nestedTitleClass,
+      ]"
     >
       {{ title ?? '定制' }}
     </h2>

@@ -69,13 +69,13 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'button-link',
   'button-pagination',
   'button-combo',
-  'tooltip-container',
   'tooltip-flotation',
-  'tooltip-popup',
-  'tooltip-subtle',
-  'tooltip-molde',
+  'tooltip-scene-text-overflow',
+  'tooltip-scene-paragraph-overflow',
+  'tooltip-scene-multi-address',
   'flotation-trigger',
   'flotation-trigger-scene-module-menu',
+  'flotation-container-tooltip',
   'flotation-box-cascade-menu',
   'flotation-box-address-dropdown',
   'flotation-box-address-hover',
@@ -103,10 +103,42 @@ export const compactComponentPreviewSlugs = new Set<string>([
   'avatar',
   'tool-bar',
   'paginer',
+  'batch-bar',
+  'verify-email',
+  'verify-google',
+  'verify-login-password',
+  'verify-transaction-password',
+  'verify-passkey',
+  'verify-locked',
+]);
+
+/** Organism / Template 等高预览：圆角壳 + 随页滚动（不 sticky）。 */
+export const scrollComponentPreviewSlugs = new Set<string>([
+  'nav-bar',
+  'nav-bar-scene-cregis',
+  'module-menu',
+  'module-menu-scene-cregis',
+  'module-menu-scene-udun',
+  'data-list',
+  'container',
+  'layout',
+  'skid',
+  'popup',
+  'popup-scene-detail',
+  'popup-scene-dialog',
+  'popup-scene-verify',
+  'detail',
+  'dialog-standard',
+  'dialog-symbol',
+  'dialog-compose',
 ]);
 
 export function usesCompactComponentPreview(slug: string): boolean {
   return compactComponentPreviewSlugs.has(slug);
+}
+
+export function usesScrollComponentPreview(slug: string): boolean {
+  return scrollComponentPreviewSlugs.has(slug);
 }
 
 /** Tag / Avatar 文档页：480px 预览区 + 底部样式色板 / 尺寸画廊。 */
@@ -215,10 +247,18 @@ export const componentPreviews: ComponentPreviewEntry[] = [
   { slug: 'crypto', title: 'Crypto', component: CryptoPreview },
   ...([
     { slug: 'tooltip-flotation', title: 'StandardBox' },
-    { slug: 'tooltip-container', title: 'ContainerBox' },
-    { slug: 'tooltip-popup', title: 'PopupBox' },
+    { slug: 'flotation-container-tooltip', title: 'Tooltip' },
     { slug: 'tooltip-subtle', title: 'SubtleCard' },
-    { slug: 'tooltip-molde', title: 'ModeLevel' },
+  ] as const).map(({ slug, title }) => ({
+    slug,
+    title,
+    component: TooltipPanelKindPreview,
+    usesComponentDocHeader: true,
+  })),
+  ...([
+    { slug: 'tooltip-scene-text-overflow', title: '字段溢出' },
+    { slug: 'tooltip-scene-paragraph-overflow', title: '段落溢出' },
+    { slug: 'tooltip-scene-multi-address', title: '地址溢出' },
   ] as const).map(({ slug, title }) => ({
     slug,
     title,

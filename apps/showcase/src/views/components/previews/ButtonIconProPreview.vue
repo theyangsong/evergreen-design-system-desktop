@@ -43,6 +43,7 @@ const iconButtonProUsageSnippet = computed(() =>
             :label="String(iconButtonProCustomize.label)"
             :badge="iconButtonProCustomize.badge"
             :show-badge="Boolean(iconButtonProCustomize.showBadge)"
+            :message-type="String(iconButtonProCustomize.messageType) as 'subtle' | 'brand' | 'danger'"
             :show-reddot="Boolean(iconButtonProCustomize.showReddot)"
             :disabled="Boolean(iconButtonProCustomize.disabled)"
           >

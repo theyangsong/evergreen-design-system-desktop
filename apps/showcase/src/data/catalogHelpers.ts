@@ -12,7 +12,7 @@ export function catalogScenesSection(id: string): CatalogChildItem {
   return { id, label: 'Scenes', navSection: true };
 }
 
-export const catalogSceneExtendingLabel = '场景拓展中...';
+export const catalogSceneExtendingLabel = '场景化拓展中...';
 
 /** Placeholder scene child when a Scenes section has no real routes yet. */
 export function catalogExtendingScene(scenesSectionId: string): CatalogChildItem {
@@ -74,11 +74,32 @@ export function catalogBodyWithScenesSection(
 export function catalogBusinessPresetScenes(
   scenesSectionId: string,
   slugPrefix: string,
+  presets: readonly ('cregis' | 'udun')[] = ['cregis', 'udun'],
 ): CatalogChildItem[] {
-  return [
-    catalogScene(`${slugPrefix}-scene-cregis`, 'Cregis', scenesSectionId),
-    catalogScene(`${slugPrefix}-scene-udun`, 'UDun', scenesSectionId),
-  ];
+  return presets.map((preset) =>
+    catalogScene(
+      `${slugPrefix}-scene-${preset}`,
+      preset === 'cregis' ? 'Cregis' : 'UDun',
+      scenesSectionId,
+    ),
+  );
+}
+
+/** Body + Scenes；仅注册已有实现的 Cregis / UDun 路由，无 preset 时走 `catalogExtendingScene`。 */
+export function catalogFamilyBodyWithSelectiveBusinessPresets(
+  bodyId: string,
+  bodyLabel: string,
+  familySlug: string,
+  presets: readonly ('cregis' | 'udun')[],
+  pageSlug?: string,
+): CatalogChildItem[] {
+  const sectionId = `${familySlug}-scenes`;
+  const sceneItems =
+    presets.length > 0
+      ? catalogBusinessPresetScenes(sectionId, familySlug, presets)
+      : [catalogExtendingScene(sectionId)];
+
+  return [catalogBody(bodyId, bodyLabel, pageSlug), catalogScenesSection(sectionId), ...sceneItems];
 }
 
 export function catalogFamilyBodyWithBusinessPresets(
@@ -87,12 +108,13 @@ export function catalogFamilyBodyWithBusinessPresets(
   familySlug: string,
   pageSlug?: string,
 ): CatalogChildItem[] {
-  const sectionId = `${familySlug}-scenes`;
-  return [
-    { ...catalogBody(bodyId, bodyLabel, pageSlug), hideSidebarBody: true },
-    catalogScenesSection(sectionId),
-    ...catalogBusinessPresetScenes(sectionId, familySlug),
-  ];
+  return catalogFamilyBodyWithSelectiveBusinessPresets(
+    bodyId,
+    bodyLabel,
+    familySlug,
+    ['cregis', 'udun'],
+    pageSlug,
+  );
 }
 
 /** Scene page nested under a `navSubgroup` row (e.g. Flotation Box → Slot). */

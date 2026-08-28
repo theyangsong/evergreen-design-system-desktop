@@ -15,8 +15,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
+  border-radius: inherit;
   background: var(--effect-mask);
   -webkit-backdrop-filter: var(--eds-blur-bg);
   backdrop-filter: var(--eds-blur-bg);

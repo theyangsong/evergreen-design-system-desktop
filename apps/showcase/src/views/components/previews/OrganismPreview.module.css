@@ -4,7 +4,7 @@
   align-items: stretch;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: var(--showcase-organism-page-height-fixed);
   min-height: var(--showcase-organism-page-height-min);
   box-sizing: border-box;
 }
@@ -59,14 +59,21 @@
 }
 
 .previewOrganismPopupHost {
+  position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: stretch;
-  justify-content: stretch;
-  width: var(--showcase-popup-preview-width);
-  height: var(--showcase-popup-preview-height);
-  min-height: var(--showcase-organism-page-height-min);
+  justify-content: center;
+  width: 100%;
+  min-height: var(--showcase-popup-preview-min-height);
   box-sizing: border-box;
+}
+
+.previewOrganismPopupHost :deep(.eds-popup) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .previewOrganismPopupHost :deep(.eds-popup) {
@@ -114,15 +121,13 @@
   min-height: 0;
 }
 
-/* Detail 文档 — 仅 Popup Box（880×620），不含 EgPopup 遮罩 / stage */
+/* Detail / Dialog / Verify — Popup Box 文档预览（内容 hug，与 compact 预览壳居中一致） */
 .previewOrganismPopupBoxHost {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: var(--showcase-popup-preview-width);
-  height: var(--showcase-popup-preview-height);
-  min-height: var(--showcase-organism-page-height-min);
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -137,6 +142,12 @@
   height: 100%;
   min-height: 0;
   padding: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+}
+
+.previewOrganismPopupBoxHost :global(.eds-popup-box-content) {
   overflow: hidden;
   border-radius: inherit;
 }

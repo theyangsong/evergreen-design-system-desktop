@@ -3,6 +3,7 @@ import { computed, reactive } from 'vue';
 import { EgIcon, EgIconButtonPro, EgToolBar } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
   readIconButtonProZoneItem,
@@ -127,34 +128,39 @@ const sectionItems = computed(() => {
         </EgToolBar>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-if="customize.showOperation && !customize.showSection"
-          v-model="customize"
-          nested
-          sequential
-          :row-columns="iconButtonProNestedRowColumns"
-          title="右区 EgIconButtonPro"
-          :controls="toolBarSectionCustomizeControls"
-        />
-        <template v-else-if="customize.showOperation && customize.showSection">
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
           <CustomizePanel
+            v-if="customize.showOperation && !customize.showSection"
             v-model="customize"
             nested
+            embedded
             sequential
             :row-columns="iconButtonProNestedRowColumns"
-            title="左区 EgIconButtonPro"
-            :controls="toolBarFunctionalCustomizeControls"
-          />
-          <CustomizePanel
-            v-model="customize"
-            nested
-            sequential
-            :row-columns="iconButtonProNestedRowColumns"
-            title="右区 EgIconButtonPro"
+            title="EgIconButtonPro"
             :controls="toolBarSectionCustomizeControls"
           />
-        </template>
+          <template v-else-if="customize.showOperation && customize.showSection">
+            <CustomizePanel
+              v-model="customize"
+              nested
+              embedded
+              sequential
+              :row-columns="iconButtonProNestedRowColumns"
+              title="EgIconButtonPro"
+              :controls="toolBarFunctionalCustomizeControls"
+            />
+            <CustomizePanel
+              v-model="customize"
+              nested
+              embedded
+              sequential
+              :row-columns="iconButtonProNestedRowColumns"
+              title="EgIconButtonPro"
+              :controls="toolBarSectionCustomizeControls"
+            />
+          </template>
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

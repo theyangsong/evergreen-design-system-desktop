@@ -10,8 +10,8 @@ import {
   tagImportCode,
   tagSystemCustomizeControls,
   tagSystemCustomizeDefaults,
+  tagSystemGalleryOptions,
   tagSystemPropRows,
-  tagSystemStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
@@ -43,7 +43,7 @@ function selectSystemType(value: string) {
     >
       <template #preview>
         <TagPreviewGallery
-          :options="tagSystemStyleOptions"
+          :options="tagSystemGalleryOptions"
           :selected="customize.systemType"
           gallery-label="类型"
           @select="selectSystemType"

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import '@/styles/desktop-components-scope.css';
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
-import { EgSearch } from '@eds/website-components';
+import { EgSearch } from '@eds/desktop-components';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import ComponentsPageAnchors from '@/components/shared/ComponentsPageAnchors.vue';
 import { findCatalogChildPage, findCatalogItem, getComponentRouteSlug } from '@/data/components/navigation';
@@ -10,7 +9,7 @@ import { componentAnchorItems } from '@/data/components';
 import { anchorItemsForFamily } from '@/data/components/anchorItemsForFamily';
 import { buildCatalogNavSegments } from '@/data/buildCatalogNavSegments';
 import { findComponentsSidebarFamilyId } from '@/layout/buildComponentsSidebarSections';
-import { componentPreviewBySlug } from '@/views/components/previews';
+import { componentPreviewBySlug, usesCompactComponentPreview, usesScrollComponentPreview } from '@/views/components/previews';
 import { getIconsPageLead } from '@/views/components/previews/iconPreviewData';
 import { getCryptoPageLead } from '@/views/components/previews/cryptoPreviewData';
 import {
@@ -62,6 +61,12 @@ const showPageAnchors = computed(() => {
   return buildCatalogNavSegments(items).length > 0;
 });
 
+const usesCompactDocPreview = computed(
+  () =>
+    usesCompactComponentPreview(activeSlug.value) ||
+    usesScrollComponentPreview(activeSlug.value),
+);
+
 watch(activeSlug, () => {
   window.scrollTo(0, 0);
   gallerySearchQuery.value = '';
@@ -71,13 +76,19 @@ watch(activeSlug, () => {
 <template>
   <div :class="[styles.pageWithAnchors, showPageAnchors && styles.pageWithAnchorsWithAside]">
     <div :class="[shared.page, styles.componentPage]">
-      <PageHeader :title="headerTitle" :lead="headerLead">
+      <PageHeader
+        :class="usesCompactDocPreview && styles.pageHeaderCompactDoc"
+        :title="headerTitle"
+        :lead="headerLead"
+      >
         <template v-if="isGallerySearchPage" #afterLead>
-          <EgSearch
-            v-model="gallerySearchQuery"
-            :placeholder="gallerySearchPlaceholder"
-            width-mode="full"
-          />
+          <div class="desktopTokens">
+            <EgSearch
+              v-model="gallerySearchQuery"
+              :placeholder="gallerySearchPlaceholder"
+              width-mode="full"
+            />
+          </div>
         </template>
       </PageHeader>
 

@@ -2,14 +2,17 @@
 import { computed, reactive, ref } from 'vue';
 import { EgComboTextareaItem, EgFormSubmission } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
+import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import { buildVueSelfClosingSnippet } from '@/views/shared/componentDoc/buildUsageSnippet';
 import styles from './InputPreview.module.css';
 import { comboTextareaItemPropRows, comboTextareaItemSlotRows } from './inputSubPreviewData';
 import {
   comboImportCode,
-  comboTextareaItemCustomizeControls,
   comboTextareaItemCustomizeDefaults,
+  comboTextareaItemFormSubmissionCustomizeControls,
+  comboTextareaItemNestedTextareaCustomizeControls,
+  comboTextareaItemShellCustomizeControls,
 } from './inputDocCustomize';
 import {
   buildFormSubmissionUsageSnippet,
@@ -55,10 +58,8 @@ const comboTextareaUsageSnippet = computed(() => {
       doc-tier="scenes"
       component-tag="EgComboTextareaItem"
       :import-code="comboImportCode"
-      :customize-controls="comboTextareaItemCustomizeControls"
+      :customize-controls="comboTextareaItemShellCustomizeControls"
       :customize-defaults="comboTextareaItemCustomizeDefaults"
-      :customize-sequential="true"
-      :customize-row-columns="5"
       :prop-rows="comboTextareaItemPropRows"
       :slot-rows="comboTextareaItemSlotRows"
       :usage-snippet-override="comboTextareaUsageSnippet"
@@ -76,6 +77,26 @@ const comboTextareaUsageSnippet = computed(() => {
               <EgFormSubmission v-bind="formSubmissionPreviewProps" />
             </template>
           </EgComboTextareaItem>
+        </div>
+      </template>
+
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="comboTextareaCustomize"
+            title="EgTextarea"
+            nested
+            embedded
+            :controls="comboTextareaItemNestedTextareaCustomizeControls"
+          />
+          <CustomizePanel
+            v-if="comboTextareaCustomize.feedback"
+            v-model="comboTextareaCustomize"
+            title="EgFormSubmission"
+            nested
+            embedded
+            :controls="comboTextareaItemFormSubmissionCustomizeControls"
+          />
         </div>
       </template>
     </ComponentDocLayout>

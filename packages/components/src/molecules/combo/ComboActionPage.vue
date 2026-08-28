@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { EgButton } from '../button';
 import { EgDivider } from '../../atoms/divider';
+import type { ButtonVariant } from '../button/Button.vue';
 import styles from './ComboAction.module.css';
 
 export type ComboActionPageTone = 'brand' | 'decor';
@@ -8,6 +9,7 @@ export type ComboActionPageTone = 'brand' | 'decor';
 withDefaults(
   defineProps<{
     tone?: ComboActionPageTone;
+    variant?: ButtonVariant;
     divider?: boolean;
     direction?: 'left' | 'right';
     confirmLabel?: string;
@@ -15,6 +17,7 @@ withDefaults(
   }>(),
   {
     tone: 'brand',
+    variant: 'solid',
     divider: false,
     direction: 'right',
     confirmLabel: 'Confirm',
@@ -54,7 +57,7 @@ const emit = defineEmits<{
       <EgButton :tone="tone" variant="text" size="md" @click="emit('cancel')">
         {{ cancelLabel }}
       </EgButton>
-      <EgButton :tone="tone" variant="solid" size="md" @click="emit('confirm')">
+      <EgButton :tone="tone" :variant="variant" size="md" @click="emit('confirm')">
         {{ confirmLabel }}
       </EgButton>
     </div>

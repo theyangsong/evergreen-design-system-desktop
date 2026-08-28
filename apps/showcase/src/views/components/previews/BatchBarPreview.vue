@@ -78,14 +78,17 @@ function onLabelClick(_label: string, index: number) {
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          title="Label 项"
-          :controls="labelPanelControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            title="Label 项"
+            :controls="labelPanelControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

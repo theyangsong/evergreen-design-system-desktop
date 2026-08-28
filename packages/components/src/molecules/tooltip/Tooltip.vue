@@ -120,9 +120,12 @@ const shellStyle = computed((): CSSProperties => {
   }
 
   const radiusToken = resolvedPanelRadius.value;
+  const radiusValue = radiusToken ? tooltipPanelRadiusCssVar(radiusToken) : '0px';
   if (radiusToken) {
-    style.borderRadius = tooltipPanelRadiusCssVar(radiusToken);
+    style.borderRadius = radiusValue;
   }
+  /* 供内层贴角 chrome 读取：backdrop-filter 不受祖先圆角裁切，须自带同值圆角。 */
+  style['--eds-surface-radius'] = radiusValue;
 
   if (props.panelFlush) {
     style.padding = '0';

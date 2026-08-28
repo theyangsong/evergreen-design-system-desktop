@@ -30,6 +30,7 @@ const props = withDefaults(
     showClear?: boolean;
     clearLabel?: string;
     toolbarTone?: 'brand' | 'decor';
+    toolbarVariant?: 'solid' | 'outline' | 'text';
     /** Compose / Standard · true 时工具栏顶部分割线常驻；false 时仅在底部仍有内容被裁切时显示。未传时 Compose 默认 true、Standard 默认 false。 */
     toolbarDividerPinned?: boolean;
   }>(),
@@ -44,6 +45,7 @@ const props = withDefaults(
     showClear: false,
     clearLabel: 'Clear',
     toolbarTone: 'decor',
+    toolbarVariant: 'solid',
   },
 );
 
@@ -143,6 +145,7 @@ watch(
           <slot name="actions">
             <EgComboActionPopupWindow
               :tone="toolbarTone"
+              :variant="toolbarVariant"
               :count="actionCount"
               :confirm-label="confirmLabel"
               :cancel-label="cancelLabel"
@@ -182,6 +185,7 @@ watch(
               <EgComboActionFlotation
                 bar-padding="inset-5"
                 :tone="toolbarTone"
+                :variant="toolbarVariant"
                 :divider="showToolbarDivider"
                 :clear="showClear"
                 :confirm-label="confirmLabel"
@@ -223,6 +227,7 @@ watch(
             <slot name="actions">
               <EgComboActionFlotation
                 :tone="toolbarTone"
+                :variant="toolbarVariant"
                 :divider="showToolbarDivider"
                 :clear="showClear"
                 :confirm-label="confirmLabel"

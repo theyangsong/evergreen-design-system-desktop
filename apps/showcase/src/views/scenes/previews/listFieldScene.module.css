@@ -1,76 +1,11 @@
-.currencyCombo {
+/* 纵向堆叠预览（主行 + 副行）；amount / time 在此基础上只改宽度。 */
+.stackPreview {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.cryptoSymbolWrap {
-  position: relative;
-  flex-shrink: 0;
-  width: var(--icon-xl);
-  height: var(--icon-xl);
-}
-
-.entryBadge {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--scale-3);
-  height: var(--scale-3);
-  border: var(--stroke-xl) solid var(--stroke-face-primary);
-  border-radius: var(--radius-full);
-  background: var(--status-success);
-  color: var(--text-same-white-primary);
-  overflow: hidden;
-}
-
-.entryBadge :global(svg) {
-  width: var(--scale-1-5);
-  height: var(--scale-1-5);
-}
-
-.currencyBody {
-  display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   gap: var(--spacing-05);
+  align-items: flex-start;
   min-width: 0;
-}
-
-.titleRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  min-width: 0;
-}
-
-.symbolText {
-  overflow: hidden;
-  color: var(--text-base-primary);
-  font-size: var(--eds-body-medium-size);
-  line-height: var(--eds-body-medium-line-height);
-  font-weight: var(--eds-body-medium-weight);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.networkSuffix {
-  color: var(--text-base-secondary);
-  font-size: var(--eds-body-medium-size);
-  line-height: var(--eds-body-medium-line-height);
-}
-
-.addressRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  min-width: 0;
-  height: var(--scale-4);
+  max-width: 100%;
 }
 
 .addressPreview {
@@ -79,50 +14,24 @@
   gap: var(--spacing-1);
   min-width: 0;
   max-width: 100%;
-  width: auto;
 }
 
-.addressText {
-  composes: cap from '../../../../../../packages/components/src/molecules/list-field/ListFieldSecondary.module.css';
-  overflow: hidden;
-  color: var(--text-base-secondary);
-  font-family: var(--eds-family-sans);
-  font-size: var(--eds-footnote-size);
-  line-height: var(--eds-footnote-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.addressTextAdaptive {
-  composes: cap from '../../../../../../packages/components/src/molecules/list-field/ListFieldSecondary.module.css';
-  color: var(--text-base-secondary);
-  font-family: var(--eds-family-sans);
-  font-size: var(--eds-footnote-size);
-  line-height: var(--eds-footnote-line-height);
-  white-space: nowrap;
-}
-
-.addressPreviewItem {
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.addressArrow {
+/*
+ * 行内币种图标 —— 固定尺寸 wrapper，内部 EgCrypto 用 fit 撑满。
+ * 勿把 fit 与尺寸类打在 EgCrypto 根节点上：会与 Crypto.module.css 的 .fill
+ * 同特异性相撞，尺寸取决于样式加载顺序（对齐 Detail.module.css .itemValueCrypto）。
+ */
+.cryptoInlineIcon {
+  display: inline-flex;
   flex-shrink: 0;
-  width: var(--scale-3);
-  height: var(--scale-3);
-  color: var(--text-base-secondary);
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-xs);
+  height: var(--avatar-xs);
 }
 
 .amountPreview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-05);
-  align-items: flex-start;
-  min-width: 0;
-  max-width: 100%;
-  width: auto;
+  composes: stackPreview;
 }
 
 .amountPrimaryRow {
@@ -133,12 +42,6 @@
   max-width: 100%;
 }
 
-.amountCryptoIcon {
-  flex-shrink: 0;
-  width: var(--avatar-xs);
-  height: var(--avatar-xs);
-}
-
 .amountPrimaryRow :global(.eds-anchored-tooltip) {
   flex: 0 1 auto;
   min-width: 0;
@@ -147,23 +50,6 @@
 
 .amountPrimaryRow :global(.eds-tag) {
   flex-shrink: 0;
-}
-
-.generalStructureCryptoIcon {
-  flex-shrink: 0;
-  width: var(--avatar-xs);
-  height: var(--avatar-xs);
-}
-
-.amountPrimary {
-  color: var(--text-base-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.amountSecondary {
-  composes: cap from '../../../../../../packages/components/src/molecules/list-field/ListFieldSecondary.module.css';
-  color: var(--text-base-secondary);
-  font-variant-numeric: tabular-nums;
 }
 
 .amountSecondaryRow {
@@ -189,23 +75,8 @@
 }
 
 .timePreview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-05);
-  align-items: flex-start;
-  min-width: 0;
-  max-width: 100%;
+  composes: stackPreview;
   width: 100%;
-}
-
-.timeCell {
-  color: var(--text-base-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.timeSecondary {
-  color: var(--text-base-primary);
-  font-variant-numeric: tabular-nums;
 }
 
 .statusPreview {
@@ -218,15 +89,6 @@
 }
 
 .statusPreview :global(.eds-tag) {
-  max-width: 100%;
-}
-
-.stackPreview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-05);
-  align-items: flex-start;
-  min-width: 0;
   max-width: 100%;
 }
 
@@ -256,20 +118,6 @@
 
 .generalStructureSingleStackAlignRight {
   align-items: flex-end;
-}
-
-.tagPreview {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.feedbackPreview {
-  display: flex;
-  align-items: flex-start;
-  min-width: 0;
-  max-width: 100%;
 }
 
 .generalStructureCountdown {

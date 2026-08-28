@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, watch } from 'vue';
 import { EgFlotationMenu } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
-import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
@@ -10,12 +9,11 @@ import {
   buildFlotationBoxUsageSnippet,
   enforceFlotationSingleSelection,
   flotationBoxImportCode,
-  flotationBoxKindCustomizeControls,
   flotationBoxDocPropRows,
   flotationBoxDocSlotRows,
   flotationBoxPageCustomizeDefaults,
-  getFlotationBoxKindPanelTitle,
   isFlotationBoxSceneAddressKind,
+  isFlotationBoxEditingRow,
   parseFlotationEditBoxIndex,
   parseFlotationItemCount,
   parseFlotationBoxSelectionMode,
@@ -27,7 +25,6 @@ import { applyFlotationBoxSceneAddressPreset } from './flotationBoxSceneAddressC
 import FlotationBoxSceneAddressPreview from './FlotationBoxSceneAddressPreview.vue';
 import FlotationBoxStandardPreview from './FlotationBoxStandardPreview.vue';
 import { useFlotationBoxMenuShellProps } from './flotationBoxPreviewShell';
-import './FlotationBoxPreview.module.css';
 import './FlotationBoxSceneAddressPreview.module.css';
 import {
   buildFlotationBoxSceneAddressPanelControls,
@@ -37,16 +34,10 @@ import {
   sceneAddressStateKey,
 } from './flotationBoxSceneAddressCustomize';
 
-const props = withDefaults(
-  defineProps<{
-    initialBoxKind?: FlotationBoxKind;
-    pageTitle?: string;
-    lockBoxKind?: boolean;
-  }>(),
-  {
-    lockBoxKind: false,
-  },
-);
+const props = defineProps<{
+  initialBoxKind?: FlotationBoxKind;
+  pageTitle?: string;
+}>();
 
 const customize = reactive({
   ...flotationBoxPageCustomizeDefaults,
@@ -57,6 +48,7 @@ watch(
   () => customize.itemCount,
   () => {
     if (isFlotationBoxSceneAddressKind(customize)) return;
+    if (!isFlotationBoxEditingRow(customize)) return;
     customize.editBoxIndex = String(parseFlotationEditBoxIndex(customize));
   },
 );
@@ -65,6 +57,9 @@ watch(
   () => customize[sceneAddressStateKey.itemCount],
   () => {
     if (!isFlotationBoxSceneAddressKind(customize)) return;
+    if (!isFlotationBoxEditingRow({ editBoxIndex: customize[sceneAddressStateKey.editBoxIndex] })) {
+      return;
+    }
     customize[sceneAddressStateKey.editBoxIndex] = String(
       parseFlotationEditBoxIndex({
         editBoxIndex: customize[sceneAddressStateKey.editBoxIndex],
@@ -89,7 +84,7 @@ watch(
 watch(
   () => customize.boxKind,
   (kind, prevKind) => {
-    if (kind === 'standard-cascade-menu') {
+    if (kind === 'standard-cascade-menu' && isFlotationBoxEditingRow(customize)) {
       const editIndex = parseFlotationEditBoxIndex(customize);
       customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
       return;
@@ -137,8 +132,6 @@ watch(
 
 const usageSnippet = computed(() => buildFlotationBoxUsageSnippet(customize));
 
-const boxPanelTitle = computed(() => getFlotationBoxKindPanelTitle(customize.boxKind));
-
 const isSceneAddressKind = computed(() => isFlotationBoxSceneAddressKind(customize));
 
 const isSceneAddressDropdown = computed(
@@ -153,16 +146,13 @@ const boxPanelControls = computed(() =>
 
 const menuShell = useFlotationBoxMenuShellProps(customize);
 
-const boxKindControls = computed(() =>
-  props.lockBoxKind
-    ? flotationBoxKindCustomizeControls.filter((control) => control.key !== 'boxKind')
-    : flotationBoxKindCustomizeControls,
-);
-
 const pageTitle = computed(() => props.pageTitle ?? 'Box');
 
 onMounted(() => {
-  if (customize.boxKind === 'standard-cascade-menu') {
+  if (
+    customize.boxKind === 'standard-cascade-menu' &&
+    isFlotationBoxEditingRow(customize)
+  ) {
     const editIndex = parseFlotationEditBoxIndex(customize);
     customize[flotationBoxItemKey('ShowCascader', editIndex)] = true;
   }
@@ -181,7 +171,9 @@ onMounted(() => {
       :show-doc-title="false"
       component-tag="EgFlotationMenu"
       :import-code="flotationBoxImportCode"
-      :customize-controls="boxKindControls"
+      :customize-controls="boxPanelControls"
+      :customize-sequential="true"
+      :customize-row-columns="5"
       :customize-defaults="{ ...flotationBoxPageCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationBoxDocPropRows"
@@ -194,7 +186,7 @@ onMounted(() => {
           :class="[docStyles.subPreviewWidth, docStyles.previewEffectPanelHost]"
         >
           <EgFlotationMenu
-            :class="[menuShell.menuClass, 'glassMicroFloatHostActive']"
+            :class="menuShell.menuClass"
             :width-mode="menuShell.widthMode"
             :width="menuShell.width"
             :max-width="menuShell.maxWidth"
@@ -211,20 +203,6 @@ onMounted(() => {
             />
             <FlotationBoxStandardPreview v-else v-model:customize="customize" />
           </EgFlotationMenu>
-        </div>
-      </template>
-
-      <template #customize-extra>
-        <div :class="docStyles.customizeExtraStack">
-          <CustomizePanel
-            v-model="customize"
-            :title="boxPanelTitle"
-            nested
-            embedded
-            sequential
-            :row-columns="5"
-            :controls="boxPanelControls"
-          />
         </div>
       </template>
     </ComponentDocLayout>

@@ -165,14 +165,12 @@ const docSlotRows = computed(() => layoutSlotRowsForType(customize.type));
       :slot-rows="docSlotRows"
       :usage-snippet-override="usageSnippet"
       props-section-id="layout-props"
-      tall-preview
     >
       <template #preview>
         <div
           class="desktopTokens"
           :class="[
             docStyles.previewEffectPanelHost,
-            docStyles.previewEffectPanelHostTall,
             previewStyles.previewLayoutHost,
           ]"
         >

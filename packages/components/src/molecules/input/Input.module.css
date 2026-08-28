@@ -109,11 +109,8 @@
 
 /* Lg — Figma 2056:1209: p spacing-3, gap spacing-1-5 */
 .lg {
-  --eds-input-field-size: calc(2 * var(--spacing-3) + var(--eds-body-medium-line-height));
   gap: var(--spacing-1-5);
   padding: var(--spacing-3);
-  min-height: var(--eds-input-field-size);
-  max-height: var(--eds-input-field-size);
   box-sizing: border-box;
 }
 
@@ -128,11 +125,8 @@
 
 /* Md — Figma 2056:1207: px spacing-3 py spacing-2 */
 .md {
-  --eds-input-field-size: calc(2 * var(--spacing-2) + var(--eds-body-medium-line-height));
   gap: var(--spacing-1-5);
   padding: var(--spacing-2) var(--spacing-3);
-  min-height: var(--eds-input-field-size);
-  max-height: var(--eds-input-field-size);
   box-sizing: border-box;
 }
 
@@ -146,11 +140,8 @@
 
 /* Sm — Figma 2056:1203: px spacing-3 py spacing-1 */
 .sm {
-  --eds-input-field-size: calc(2 * var(--spacing-1) + var(--eds-body-medium-line-height));
   gap: var(--spacing-1-5);
   padding: var(--spacing-1) var(--spacing-3);
-  min-height: var(--eds-input-field-size);
-  max-height: var(--eds-input-field-size);
   box-sizing: border-box;
 }
 

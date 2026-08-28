@@ -28,7 +28,6 @@ import {
   ORGANISM_IMPORT,
   MODULE_MENU_MAX_GROUPS,
   MODULE_MENU_MAX_SUB_ITEMS,
-  buildModuleMenuCustomizeDefaults,
   cregisModuleMenuPropRows,
   udunModuleMenuPropRows,
   buildModuleMenuBusinessTitleCustomizeControls,
@@ -60,6 +59,8 @@ import type { ModuleMenuBusinessScenario } from '@/presets/module-menu/businessM
 import {
   buildModuleMenuBusinessUsageSnippet,
   buildModuleMenuComponentUsageSnippet,
+  buildCregisModuleMenuCustomizeDefaults,
+  buildUdunModuleMenuCustomizeDefaults,
   isModuleMenuBusinessScenario,
   moduleMenuBusinessTitleUsesFlotationTrigger,
   resolveModuleMenuBusinessGroups,
@@ -70,7 +71,38 @@ import {
 } from './moduleMenuPreviewCustomize';
 import { resolveModuleMenuPreviewTitle } from './moduleMenuPreviewGroups';
 
-const customize = reactive({ ...moduleMenuCustomizeDefaults });
+const props = withDefaults(
+  defineProps<{
+    initialScenario?: Exclude<ModuleMenuScenario, 'module-menu'>;
+    pageTitle?: string;
+  }>(),
+  {},
+);
+
+const lockedScenario = computed(() => props.initialScenario);
+
+const customizeDefaults = computed(() => {
+  if (lockedScenario.value === 'cregis') return buildCregisModuleMenuCustomizeDefaults();
+  if (lockedScenario.value === 'udun') return buildUdunModuleMenuCustomizeDefaults();
+  return moduleMenuCustomizeDefaults;
+});
+
+const customize = reactive({
+  ...(lockedScenario.value === 'cregis'
+    ? buildCregisModuleMenuCustomizeDefaults()
+    : lockedScenario.value === 'udun'
+      ? buildUdunModuleMenuCustomizeDefaults()
+      : moduleMenuCustomizeDefaults),
+  ...(props.initialScenario ? { scenario: props.initialScenario } : {}),
+});
+
+function resetModuleMenuCustomize() {
+  const defaults = customizeDefaults.value as Record<string, unknown>;
+  Object.keys(customize).forEach((key) => {
+    delete customize[key];
+  });
+  Object.assign(customize, defaults);
+}
 
 const businessModuleTitle = computed(() => resolveModuleMenuBusinessTitle(customize));
 
@@ -91,13 +123,31 @@ const moduleMenuTitleEgFlotationProps = computed(() =>
   }),
 );
 
-const isDsScenario = computed(() => isModuleMenuDsScenario(customize));
+const isDsScenario = computed(() =>
+  lockedScenario.value ? false : isModuleMenuDsScenario(customize),
+);
 
-const isBusinessScenario = computed(() => isModuleMenuBusinessScenario(customize.scenario));
+const isBusinessScenario = computed(() =>
+  lockedScenario.value
+    ? isModuleMenuBusinessScenario(lockedScenario.value)
+    : isModuleMenuBusinessScenario(customize.scenario),
+);
+
+const businessScenario = computed((): ModuleMenuBusinessScenario =>
+  String(lockedScenario.value ?? customize.scenario) === 'udun' ? 'udun' : 'cregis',
+);
+
+const docAnchorId = computed(() => {
+  if (lockedScenario.value === 'cregis') return 'module-menu-scene-cregis';
+  if (lockedScenario.value === 'udun') return 'module-menu-scene-udun';
+  return 'module-menu';
+});
+
+const docTitle = computed(() => props.pageTitle ?? 'ModuleMenu');
 
 const businessModuleUsesFlotationTitle = computed(
   () =>
-    isModuleMenuBusinessScenario(customize.scenario) &&
+    isBusinessScenario.value &&
     moduleMenuBusinessTitleUsesFlotationTrigger(customize),
 );
 
@@ -115,15 +165,11 @@ const moduleMenuTitleFlotationTriggerState = computed(() => {
 
 const moduleMenuTitleUsesTrigger = computed(() => {
   if (businessModuleUsesFlotationTitle.value) return true;
-  if (isModuleMenuBusinessScenario(customize.scenario)) {
+  if (isBusinessScenario.value) {
     return false;
   }
   return isModuleMenuTitlePresetKind(customize);
 });
-
-const businessScenario = computed((): ModuleMenuBusinessScenario =>
-  String(customize.scenario) === 'udun' ? 'udun' : 'cregis',
-);
 
 const moduleMenuBusinessTitleControls = computed(() =>
   buildModuleMenuBusinessTitleCustomizeControls(businessScenario.value),
@@ -164,6 +210,10 @@ const moduleMenuTitle = computed(() => {
 
 const moduleTitleRowColumns = computed(() =>
   isModuleMenuTitlePresetKind(customize) ? 4 : 2,
+);
+
+const moduleTitleNestedVariant = computed(() =>
+  moduleMenuTitleUsesTrigger.value ? 'referenced-component' : 'simple-title',
 );
 
 const docImportCode = computed(() => {
@@ -325,24 +375,24 @@ const previewGroups = computed((): PreviewGroup[] => {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="ModuleMenu"
-      tall-preview
+      :anchor-id="docAnchorId"
+      :title="docTitle"
       :show-doc-title="false"
       component-tag="EgModuleMenu"
       :import-code="docImportCode"
       :customize-controls="moduleMenuCustomizeControls"
-      :customize-defaults="buildModuleMenuCustomizeDefaults()"
+      :customize-defaults="customizeDefaults"
       :usage-snippet-override="docUsageSnippet"
       :prop-rows="docPropRows"
       :slot-rows="moduleMenuSlotRows"
       props-section-id="module-menu-props"
+      @reset-preview="resetModuleMenuCustomize"
     >
       <template #preview>
         <div
           class="desktopTokens"
           :class="[
             docStyles.previewEffectPanelHost,
-            docStyles.previewEffectPanelHostTall,
             organismStyles.previewOrganismPanelHost,
           ]"
         >
@@ -452,35 +502,43 @@ const previewGroups = computed((): PreviewGroup[] => {
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-if="isDsScenario"
-          v-model="customize"
-          title="模块标题"
-          nested
-          sequential
-          :row-columns="moduleTitleRowColumns"
-          :controls="moduleMenuTitleCustomizeControls"
-        />
-        <CustomizePanel
-          v-else-if="isBusinessScenario"
-          v-model="customize"
-          title="模块标题"
-          nested
-          sequential
-          :controls="moduleMenuBusinessTitleControls"
-        />
-        <template v-if="isDsScenario">
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
           <CustomizePanel
-            v-for="groupIndex in groupCountNum"
-            :key="`group-panel-${groupIndex}`"
+            v-if="isDsScenario"
             v-model="customize"
-            :title="`组${groupIndex}`"
+            title="模块标题"
             nested
+            embedded
             sequential
-            :controls="moduleMenuGroupCustomizeControlsList[groupIndex - 1]"
+            :nested-title-variant="moduleTitleNestedVariant"
+            :row-columns="moduleTitleRowColumns"
+            :controls="moduleMenuTitleCustomizeControls"
           />
-        </template>
+          <CustomizePanel
+            v-else-if="isBusinessScenario"
+            v-model="customize"
+            title="模块标题"
+            nested
+            embedded
+            sequential
+            :nested-title-variant="moduleTitleNestedVariant"
+            :controls="moduleMenuBusinessTitleControls"
+          />
+          <template v-if="isDsScenario">
+            <CustomizePanel
+              v-for="groupIndex in groupCountNum"
+              :key="`group-panel-${groupIndex}`"
+              v-model="customize"
+              :title="`组${groupIndex}`"
+              nested
+              embedded
+              sequential
+              nested-title-variant="simple-title"
+              :controls="moduleMenuGroupCustomizeControlsList[groupIndex - 1]"
+            />
+          </template>
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

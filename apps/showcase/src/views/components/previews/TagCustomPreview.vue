@@ -10,8 +10,8 @@ import {
   tagImportCode,
   tagCustomCustomizeControls,
   tagCustomCustomizeDefaults,
+  tagCustomGalleryOptions,
   tagCustomPropRows,
-  tagCustomStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
@@ -43,7 +43,7 @@ function selectCustomStyle(value: string) {
     >
       <template #preview>
         <TagPreviewGallery
-          :options="tagCustomStyleOptions"
+          :options="tagCustomGalleryOptions"
           :selected="customize.customStyle"
           gallery-label="竖线色"
           @select="selectCustomStyle"

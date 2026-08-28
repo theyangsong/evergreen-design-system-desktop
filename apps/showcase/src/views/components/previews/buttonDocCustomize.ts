@@ -16,7 +16,10 @@ import {
   showcaseComboActionKindLabels,
   showcaseComboPopupCountLabels,
   showcaseInputCustomizeFieldLabels,
+  showcaseWidthModeLabels,
   directionLeftRightRows,
+  propLabelRows,
+  showcaseMessageTypeLabels,
 } from '@/data/showcasePropLabels';
 import {
   showcaseArrowIconSnippet,
@@ -27,6 +30,7 @@ import {
 } from '@/views/shared/showcaseIcons';
 import { iconButtonEventRows } from './iconButtonDocPreview';
 import { readBorderArrowDocEvent, type BorderArrowDocEvent } from './borderArrowDocPreview';
+import { normalizeFixedWidth } from './inputPreviewWidth';
 
 export const buttonTextImportCode = `import { EgButton, EgIcon } from '@eds/desktop-components';`;
 
@@ -66,6 +70,8 @@ export const buttonCustomizeDefaults = {
   tone: 'brand',
   variant: 'solid',
   size: 'lg',
+  widthMode: 'adaptive',
+  fixedWidth: '319',
   disabled: false,
   loading: false,
   label: 'Button',
@@ -93,8 +99,23 @@ export const buttonCustomizeControls: DocCustomizeControl[] = [
     label: showcaseButtonCustomizeFieldLabels.size,
     options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'boolean', key: 'disabled', label: showcaseButtonCustomizeFieldLabels.disabled },
-  { kind: 'boolean', key: 'loading', label: showcaseButtonCustomizeFieldLabels.loading },
+  {
+    kind: 'select',
+    key: 'widthMode',
+    label: showcaseInputCustomizeFieldLabels.widthMode,
+    options: [
+      { value: 'adaptive', label: showcaseWidthModeLabels.adaptive },
+      { value: 'fixed', label: showcaseWidthModeLabels.fixed },
+      { value: 'full', label: showcaseWidthModeLabels.full },
+    ],
+  },
+  {
+    kind: 'text',
+    key: 'fixedWidth',
+    label: showcaseInputCustomizeFieldLabels.fixedWidth,
+    placeholder: '319 或 319px',
+    visibleWhen: (s) => s.widthMode === 'fixed',
+  },
   { kind: 'text', key: 'label', label: showcaseButtonCustomizeFieldLabels.label },
   {
     kind: 'boolean',
@@ -108,12 +129,28 @@ export const buttonCustomizeControls: DocCustomizeControl[] = [
     label: showcaseButtonCustomizeFieldLabels.iconName,
     visibleWhen: (state) => Boolean(state.showIcon),
   },
+  { kind: 'boolean', key: 'disabled', label: showcaseButtonCustomizeFieldLabels.disabled },
+  { kind: 'boolean', key: 'loading', label: showcaseButtonCustomizeFieldLabels.loading },
 ];
 
 export function buildButtonUsageSnippet(state: Record<string, unknown>): string {
   const label = String(state.label ?? buttonCustomizeDefaults.label);
-  const omitKeys = ['label', 'showIcon', 'iconName', 'type'];
+  const widthMode = state.widthMode;
+  const omitKeys = ['label', 'showIcon', 'iconName', 'type', 'widthMode', 'fixedWidth'];
   const props = { ...state };
+  delete props.widthMode;
+  delete props.fixedWidth;
+
+  if (widthMode === 'full') {
+    props.style = 'width: 100%';
+  } else if (widthMode === 'fixed') {
+    const width = normalizeFixedWidth(String(state.fixedWidth ?? ''));
+    if (width) {
+      props.style = `width: ${width}`;
+    }
+  }
+
+  let snippet: string;
 
   if (state.showIcon) {
     const iconName = String(state.iconName ?? buttonCustomizeDefaults.iconName);
@@ -124,13 +161,15 @@ export function buildButtonUsageSnippet(state: Record<string, unknown>): string 
       .replace(/\s*\/>$/, '')
       .trim();
     const iconBlock = `  <template #icon>\n    ${showcaseEgIconSnippet(iconName, { fit: true, size: 'md' }).replace(/\n/g, '\n    ')}\n  </template>`;
-    return `${open}>\n${iconBlock}\n  ${label}\n</EgButton>`;
+    snippet = `${open}>\n${iconBlock}\n  ${label}\n</EgButton>`;
+  } else {
+    snippet = buildVueDefaultSlotSnippet('EgButton', props, label, {
+      defaults: buttonCustomizeDefaults,
+      omitKeys,
+    });
   }
 
-  return buildVueDefaultSlotSnippet('EgButton', props, label, {
-    defaults: buttonCustomizeDefaults,
-    omitKeys,
-  });
+  return snippet;
 }
 
 export const iconButtonCustomizeDefaults = {
@@ -158,6 +197,12 @@ export const iconButtonCustomizeControls: DocCustomizeControl[] = [
   },
   {
     kind: 'select',
+    key: 'size',
+    label: showcaseButtonCustomizeFieldLabels.size,
+    options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
     key: 'motion',
     label: '动效',
     options: [
@@ -166,12 +211,6 @@ export const iconButtonCustomizeControls: DocCustomizeControl[] = [
       { value: 'asym', label: 'is-hover-enter-only（asym 别名）' },
       { value: 'none', label: 'none' },
     ],
-  },
-  {
-    kind: 'select',
-    key: 'size',
-    label: showcaseButtonCustomizeFieldLabels.size,
-    options: buttonSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   { kind: 'text', key: 'symbol', label: showcaseButtonCustomizeFieldLabels.symbol },
   { kind: 'boolean', key: 'disabled', label: showcaseButtonCustomizeFieldLabels.disabled },
@@ -194,8 +233,14 @@ export const iconButtonProCustomizeDefaults = {
   badge: '0',
   showBadge: false,
   showReddot: false,
+  messageType: 'brand',
   disabled: false,
 } as const;
+
+const iconButtonProMessageTypeOptions = propLabelRows(
+  ['subtle', 'brand', 'danger'] as const,
+  showcaseMessageTypeLabels,
+).map((row) => ({ value: row.key, label: row.label }));
 
 export const iconButtonProCustomizeControls: DocCustomizeControl[] = [
   { kind: 'text', key: 'label', label: showcaseButtonCustomizeFieldLabels.label, row: 1 },
@@ -220,6 +265,14 @@ export const iconButtonProCustomizeControls: DocCustomizeControl[] = [
     key: 'badge',
     label: showcaseButtonCustomizeFieldLabels.badge,
     row: 1,
+    visibleWhen: (s) => Boolean(s.showBadge),
+  },
+  {
+    kind: 'select',
+    key: 'messageType',
+    label: '消息类型',
+    row: 1,
+    options: iconButtonProMessageTypeOptions,
     visibleWhen: (s) => Boolean(s.showBadge),
   },
 ];
@@ -504,9 +557,9 @@ export const linkCustomizeControls: DocCustomizeControl[] = [
     label: showcaseButtonCustomizeFieldLabels.size,
     options: linkSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
+  { kind: 'text', key: 'label', label: showcaseButtonCustomizeFieldLabels.label },
   { kind: 'text', key: 'href', label: showcaseButtonCustomizeFieldLabels.href },
   { kind: 'boolean', key: 'disabled', label: showcaseButtonCustomizeFieldLabels.disabled },
-  { kind: 'text', key: 'label', label: showcaseButtonCustomizeFieldLabels.label },
 ];
 
 export function buildLinkUsageSnippet(state: Record<string, unknown>): string {
@@ -715,6 +768,7 @@ export const paginerPaginationNestedRowColumns = 4;
 
 export const comboActionSkidCustomizeDefaults = {
   tone: 'brand',
+  variant: 'solid',
   divider: false,
   confirmLabel: 'Confirm',
 } as const;
@@ -728,8 +782,14 @@ export const comboActionSkidCustomizeControls: DocCustomizeControl[] = [
       .filter((row) => ['brand', 'decor', 'danger'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'boolean', key: 'divider', label: showcaseButtonCustomizeFieldLabels.divider },
+  {
+    kind: 'select',
+    key: 'variant',
+    label: showcaseButtonCustomizeFieldLabels.variant,
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
+  },
   { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
+  { kind: 'boolean', key: 'divider', label: showcaseButtonCustomizeFieldLabels.divider },
 ];
 
 export function buildComboActionSkidUsageSnippet(state: Record<string, unknown>): string {
@@ -740,6 +800,7 @@ export function buildComboActionSkidUsageSnippet(state: Record<string, unknown>)
 
 export const comboActionPopupCustomizeDefaults = {
   tone: 'brand',
+  variant: 'solid',
   count: 2,
   confirmLabel: 'Confirm',
   cancelLabel: 'Cancel',
@@ -747,24 +808,43 @@ export const comboActionPopupCustomizeDefaults = {
 
 export const comboActionPopupCustomizeControls: DocCustomizeControl[] = [
   {
+    kind: 'text',
+    key: 'confirmLabel',
+    label: showcaseButtonCustomizeFieldLabels.confirmLabel,
+    row: 0,
+  },
+  {
+    kind: 'text',
+    key: 'cancelLabel',
+    label: showcaseButtonCustomizeFieldLabels.cancelLabel,
+    row: 0,
+  },
+  {
+    kind: 'select',
+    key: 'count',
+    label: showcaseButtonCustomizeFieldLabels.count,
+    row: 0,
+    options: [
+      { value: '2', label: showcaseComboPopupCountLabels['2'] },
+      { value: '1', label: showcaseComboPopupCountLabels['1'] },
+    ],
+  },
+  {
     kind: 'select',
     key: 'tone',
     label: showcaseButtonCustomizeFieldLabels.tone,
+    row: 1,
     options: buttonToneRows
       .filter((row) => ['brand', 'decor'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',
-    key: 'count',
-    label: showcaseButtonCustomizeFieldLabels.count,
-    options: [
-      { value: '2', label: showcaseComboPopupCountLabels['2'] },
-      { value: '1', label: showcaseComboPopupCountLabels['1'] },
-    ],
+    key: 'variant',
+    label: showcaseButtonCustomizeFieldLabels.variant,
+    row: 1,
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
-  { kind: 'text', key: 'cancelLabel', label: showcaseButtonCustomizeFieldLabels.cancelLabel },
 ];
 
 export function buildComboActionPopupUsageSnippet(state: Record<string, unknown>): string {
@@ -775,6 +855,7 @@ export function buildComboActionPopupUsageSnippet(state: Record<string, unknown>
 
 export const comboActionFlotationCustomizeDefaults = {
   tone: 'brand',
+  variant: 'solid',
   divider: false,
   clear: false,
   confirmLabel: 'Confirm',
@@ -783,18 +864,84 @@ export const comboActionFlotationCustomizeDefaults = {
 
 export const comboActionFlotationCustomizeControls: DocCustomizeControl[] = [
   {
+    kind: 'text',
+    key: 'confirmLabel',
+    label: showcaseButtonCustomizeFieldLabels.confirmLabel,
+    row: 0,
+  },
+  {
+    kind: 'text',
+    key: 'cancelLabel',
+    label: showcaseButtonCustomizeFieldLabels.cancelLabel,
+    row: 0,
+  },
+  {
+    kind: 'boolean',
+    key: 'divider',
+    label: showcaseButtonCustomizeFieldLabels.divider,
+    row: 0,
+  },
+  {
+    kind: 'boolean',
+    key: 'clear',
+    label: showcaseButtonCustomizeFieldLabels.clear,
+    row: 0,
+  },
+  {
     kind: 'select',
     key: 'tone',
     label: showcaseButtonCustomizeFieldLabels.tone,
+    row: 1,
     options: buttonToneRows
       .filter((row) => ['brand', 'decor'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'boolean', key: 'divider', label: showcaseButtonCustomizeFieldLabels.divider },
-  { kind: 'boolean', key: 'clear', label: showcaseButtonCustomizeFieldLabels.clear },
-  { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
-  { kind: 'text', key: 'cancelLabel', label: showcaseButtonCustomizeFieldLabels.cancelLabel },
+  {
+    kind: 'select',
+    key: 'variant',
+    label: showcaseButtonCustomizeFieldLabels.variant,
+    row: 1,
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
+  },
 ];
+
+function remapCustomizeControls(
+  controls: DocCustomizeControl[],
+  keyMap: Record<string, string>,
+  options?: { omitKeys?: string[] },
+): DocCustomizeControl[] {
+  const omit = new Set(options?.omitKeys ?? []);
+
+  return controls
+    .filter((control) => !omit.has(control.key))
+    .map((control) => ({
+      ...control,
+      key: keyMap[control.key] ?? control.key,
+    }));
+}
+
+/** Dialog · EgComboActionFlotation 嵌套定制（与 comboActionFlotationCustomizeControls 字段/布局一致，映射 EgDialog state 键）。 */
+export const dialogStandardFlotationToolbarControls = remapCustomizeControls(
+  comboActionFlotationCustomizeControls,
+  { tone: 'toolbarTone', variant: 'toolbarVariant', divider: 'toolbarDividerPinned' },
+  { omitKeys: ['clear'] },
+);
+
+export const dialogComposeFlotationToolbarControls = remapCustomizeControls(
+  comboActionFlotationCustomizeControls,
+  {
+    tone: 'toolbarTone',
+    variant: 'toolbarVariant',
+    divider: 'toolbarDividerPinned',
+    clear: 'showClear',
+  },
+);
+
+/** Dialog · EgComboActionPopupWindow 嵌套定制（与 comboActionPopupCustomizeControls 一致，映射 EgDialog state 键）。 */
+export const dialogPopupWindowControls = remapCustomizeControls(
+  comboActionPopupCustomizeControls,
+  { tone: 'toolbarTone', variant: 'toolbarVariant', count: 'actionCount' },
+);
 
 export function buildComboActionFlotationUsageSnippet(state: Record<string, unknown>): string {
   return buildVueSelfClosingSnippet('EgComboActionFlotation', state, {
@@ -804,6 +951,7 @@ export function buildComboActionFlotationUsageSnippet(state: Record<string, unkn
 
 export const comboActionPageCustomizeDefaults = {
   tone: 'brand',
+  variant: 'solid',
   divider: false,
   direction: 'right',
   confirmLabel: 'Confirm',
@@ -819,7 +967,12 @@ export const comboActionPageCustomizeControls: DocCustomizeControl[] = [
       .filter((row) => ['brand', 'decor'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
   },
-  { kind: 'boolean', key: 'divider', label: showcaseButtonCustomizeFieldLabels.divider },
+  {
+    kind: 'select',
+    key: 'variant',
+    label: showcaseButtonCustomizeFieldLabels.variant,
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
+  },
   {
     kind: 'select',
     key: 'direction',
@@ -828,6 +981,7 @@ export const comboActionPageCustomizeControls: DocCustomizeControl[] = [
   },
   { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
   { kind: 'text', key: 'cancelLabel', label: showcaseButtonCustomizeFieldLabels.cancelLabel },
+  { kind: 'boolean', key: 'divider', label: showcaseButtonCustomizeFieldLabels.divider },
 ];
 
 export function buildComboActionPageUsageSnippet(state: Record<string, unknown>): string {
@@ -848,6 +1002,7 @@ export type ComboActionKindValue = (typeof comboActionKindOptions)[number]['valu
 export const comboActionCustomizeDefaults = {
   kind: 'skid' as ComboActionKindValue,
   tone: 'brand',
+  variant: 'solid',
   divider: false,
   count: 2,
   clear: false,
@@ -871,12 +1026,14 @@ export const comboActionCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'kind',
     label: showcaseButtonCustomizeFieldLabels.kind,
+    row: 0,
     options: comboActionKindOptions.map(({ value, label }) => ({ value, label })),
   },
   {
     kind: 'select',
     key: 'tone',
     label: showcaseButtonCustomizeFieldLabels.tone,
+    row: 1,
     options: buttonToneRows
       .filter((row) => ['brand', 'decor', 'danger'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
@@ -886,24 +1043,32 @@ export const comboActionCustomizeControls: DocCustomizeControl[] = [
     kind: 'select',
     key: 'tone',
     label: showcaseButtonCustomizeFieldLabels.tone,
+    row: 1,
     options: buttonToneRows
       .filter((row) => ['brand', 'decor'].includes(row.key))
       .map((row) => ({ value: row.key, label: row.label })),
     visibleWhen: (state) => !isComboActionKind(state, 'skid'),
   },
   {
-    kind: 'boolean',
-    key: 'divider',
-    label: showcaseButtonCustomizeFieldLabels.divider,
-    visibleWhen: (state) =>
-      isComboActionKind(state, 'skid') ||
-      isComboActionKind(state, 'flotation') ||
-      isComboActionKind(state, 'page'),
+    kind: 'select',
+    key: 'variant',
+    label: showcaseButtonCustomizeFieldLabels.variant,
+    row: 1,
+    options: buttonVariantRows.map((row) => ({ value: row.key, label: row.label })),
+  },
+  {
+    kind: 'select',
+    key: 'direction',
+    label: showcaseButtonCustomizeFieldLabels.direction,
+    row: 1,
+    options: directionLeftRightRows.map((row) => ({ value: row.key, label: row.label })),
+    visibleWhen: (state) => isComboActionKind(state, 'page'),
   },
   {
     kind: 'select',
     key: 'count',
     label: showcaseButtonCustomizeFieldLabels.count,
+    row: 1,
     options: [
       { value: '2', label: showcaseComboPopupCountLabels['2'] },
       { value: '1', label: showcaseComboPopupCountLabels['1'] },
@@ -911,24 +1076,34 @@ export const comboActionCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (state) => isComboActionKind(state, 'popup-window'),
   },
   {
-    kind: 'boolean',
-    key: 'clear',
-    label: showcaseButtonCustomizeFieldLabels.clear,
-    visibleWhen: (state) => isComboActionKind(state, 'flotation'),
+    kind: 'text',
+    key: 'confirmLabel',
+    label: showcaseButtonCustomizeFieldLabels.confirmLabel,
+    row: 1,
   },
-  {
-    kind: 'select',
-    key: 'direction',
-    label: showcaseButtonCustomizeFieldLabels.direction,
-    options: directionLeftRightRows.map((row) => ({ value: row.key, label: row.label })),
-    visibleWhen: (state) => isComboActionKind(state, 'page'),
-  },
-  { kind: 'text', key: 'confirmLabel', label: showcaseButtonCustomizeFieldLabels.confirmLabel },
   {
     kind: 'text',
     key: 'cancelLabel',
     label: showcaseButtonCustomizeFieldLabels.cancelLabel,
+    row: 1,
     visibleWhen: (state) => !isComboActionKind(state, 'skid'),
+  },
+  {
+    kind: 'boolean',
+    key: 'divider',
+    label: showcaseButtonCustomizeFieldLabels.divider,
+    row: 1,
+    visibleWhen: (state) =>
+      isComboActionKind(state, 'skid') ||
+      isComboActionKind(state, 'flotation') ||
+      isComboActionKind(state, 'page'),
+  },
+  {
+    kind: 'boolean',
+    key: 'clear',
+    label: showcaseButtonCustomizeFieldLabels.clear,
+    row: 1,
+    visibleWhen: (state) => isComboActionKind(state, 'flotation'),
   },
 ];
 

@@ -44,14 +44,12 @@ const usageSnippet = computed(() => buildSkidUsageSnippet(customize));
       :slot-rows="skidSlotRows"
       :usage-snippet-override="usageSnippet"
       props-section-id="skid-props"
-      tall-preview
     >
       <template #preview>
         <div
           class="desktopTokens"
           :class="[
             docStyles.previewEffectPanelHost,
-            docStyles.previewEffectPanelHostTall,
             previewStyles.previewSkidHost,
           ]"
         >
@@ -68,20 +66,24 @@ const usageSnippet = computed(() => buildSkidUsageSnippet(customize));
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          title="溢出测试"
-          nested
-          :controls="skidDemoContentCustomizeControls"
-        />
-        <CustomizePanel
-          v-if="customize.showButton"
-          v-model="customize"
-          title="Action"
-          nested
-          :controls="skidActionCustomizeControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            title="溢出测试"
+            :controls="skidDemoContentCustomizeControls"
+          />
+          <CustomizePanel
+            v-if="customize.showButton"
+            v-model="customize"
+            title="Action"
+            nested
+            embedded
+            :controls="skidActionCustomizeControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

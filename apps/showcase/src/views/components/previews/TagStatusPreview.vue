@@ -10,8 +10,8 @@ import {
   tagImportCode,
   tagStatusCustomizeControls,
   tagStatusCustomizeDefaults,
+  tagStatusGalleryOptions,
   tagStatusPropRows,
-  tagStatusStyleOptions,
 } from './tagDocCustomize';
 
 const customize = reactive({
@@ -43,7 +43,7 @@ function selectStatus(value: string) {
     >
       <template #preview>
         <TagPreviewGallery
-          :options="tagStatusStyleOptions"
+          :options="tagStatusGalleryOptions"
           :selected="customize.status"
           gallery-label="状态"
           @select="selectStatus"

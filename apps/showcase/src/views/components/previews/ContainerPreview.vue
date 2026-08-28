@@ -30,12 +30,11 @@ const customize = reactive({
       :customize-defaults="containerCustomizeDefaults"
       :prop-rows="containerPropRows"
       props-section-id="container-props"
-      tall-preview
     >
       <template #preview>
         <div
           class="desktopTokens"
-          :class="[docStyles.previewEffectPanelHost, docStyles.previewEffectPanelHostTall]"
+          :class="[docStyles.previewEffectPanelHost]"
         >
           <ContainerBoxPreviewShell>
             <EgContainer

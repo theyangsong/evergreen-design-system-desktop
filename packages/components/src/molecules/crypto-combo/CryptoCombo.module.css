@@ -180,7 +180,6 @@
   align-items: center;
   gap: var(--spacing-1);
   width: 100%;
-  min-height: var(--scale-4);
   min-width: 0;
 }
 
@@ -341,23 +340,6 @@
   font-weight: var(--eds-footnote-strong-weight);
 }
 
-/* CryptoAddress 浮层 Menu：shell padding 0 + menuBody spacing-1（对齐 Flotation Box box-doc） */
-:global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box) {
-  padding: 0;
-}
-
-:global(html[data-theme='light'])
-  :global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box),
-:global(html[data-theme='dark'])
-  :global(.eds-crypto-address-tooltip-menu.desktopTokens.effect-flotation-box) {
-  padding: 0;
-}
-
-:global(.eds-crypto-address-tooltip-menu) :global(.eds-flotation-menu-body) {
-  padding: var(--spacing-1);
-  box-sizing: border-box;
-}
-
 /* 浮层 Menu 行 — 对齐 FlotationBoxSceneAddressPreview rowContent / rowMain / rowTags */
 .menuRowContent {
   display: flex;
@@ -448,16 +430,13 @@
   transform: scaleY(-1);
 }
 
+/* 压过 EgIcon .tokenKind 默认 stroke-lg → --stroke-md（1.1px） */
+.cryptoAddressArrow > :global(span[role='img']) {
+  --eds-icon-stroke-screen: var(--stroke-md);
+}
+
 .cryptoAddressArrow :global(svg) {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.cryptoAddressArrow :global(.eds-i-s),
-.cryptoAddressArrow :global(path),
-.cryptoAddressArrow :global(line) {
-  stroke: currentColor;
-  stroke-width: var(--stroke-md);
-  vector-effect: non-scaling-stroke;
 }

@@ -2,11 +2,13 @@ import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDo
 import { buildVueOpeningTag } from '@/views/shared/componentDoc/buildUsageSnippet';
 import type { PopoverAlign, PopoverPlacement } from '@eds/desktop-components';
 import {
-  heightModeRows,
-  placementRows,
   showcaseTooltipCustomizeFieldLabels,
   triggerRows,
 } from '@/data/showcasePropLabels';
+import {
+  buildAnchoredContainerPanelControls,
+  parseAnchoredContainerOptionalInt,
+} from './anchoredContainerDocCustomize';
 
 export const popoverComponentImportCode = `import {
   EgAnchoredPopover,
@@ -79,7 +81,7 @@ export const popoverComponentCustomizeDefaults = {
   align: 'center',
   trigger: 'hover',
   disabled: false,
-  triggerLabel: '悬浮我',
+  triggerLabel: '触发',
   slotContent: 'Popover 内容',
   guideBody: '引导说明文案',
   guideActionLabel: '知道了',
@@ -90,6 +92,7 @@ export const popoverComponentCustomizeDefaults = {
   height: '490',
   maxWidth: '',
   maxHeight: '',
+  crossAxisOffset: '',
   topTool: true,
   topToolTitle: 'Title',
   topToolClosable: true,
@@ -178,7 +181,7 @@ const POPOVER_SCENARIO_PRESETS: Record<
     topTool: true,
     topToolTitle: 'Title',
     topToolClosable: true,
-    triggerLabel: '悬浮我',
+    triggerLabel: '触发',
     slotContent: 'Popover 内容',
   },
   guide: {
@@ -239,118 +242,88 @@ function isPopoverTopToolClosableVisible(state: Record<string, unknown>): boolea
     isPopoverTopToolEnabled(state)
     || isPopoverRemarkScenario(state)
     || isPopoverMinerFeeScenario(state)
-    || (isPopoverComponentScenario(state) && isPopoverPlacementTop(state))
+    || isPopoverComponentScenario(state)
   );
 }
 
-const popoverLayoutCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'placement',
-    label: L.placement,
-    options: placementRows.map((row) => ({ value: row.key, label: row.label })),
-  },
-  {
-    kind: 'select',
-    key: 'align',
-    label: '对齐',
-    options: popoverAlignOptions.map((row) => ({ value: row.value, label: row.label })),
-  },
-  {
-    kind: 'select',
-    key: 'trigger',
-    label: L.trigger,
-    options: triggerRows.map((row) => ({ value: row.key, label: row.label })),
-  },
+function buildPopoverPanelCustomizeControls(
+  state: Record<string, unknown>,
+  rowOffset = 0,
+): DocCustomizeControl[] {
+  const metaRow = rowOffset + 3;
+  const geometry = buildAnchoredContainerPanelControls(state, {
+    rowOffset,
+    includeOffset: false,
+    alignVisibleWhen: () => true,
+    widthModeOptions: popoverWidthModeOptions.map((row) => ({
+      key: row.value,
+      label: row.label.replace(/\s+\w+$/, ''),
+    })),
+  });
+
+  return [
+    ...geometry,
+    {
+      kind: 'select',
+      key: 'presetWidth',
+      label: '预置宽度',
+      row: rowOffset + 1,
+      options: popoverPresetWidthOptions.map((row) => ({ value: row.value, label: row.label })),
+      visibleWhen: isPopoverWidthPreset,
+    },
+    {
+      kind: 'text',
+      key: 'maxWidth',
+      label: '最大宽度',
+      row: rowOffset + 1,
+      visibleWhen: (s) => !isPopoverWidthFixedOrPreset(s),
+    },
+    {
+      kind: 'select',
+      key: 'trigger',
+      label: L.trigger,
+      row: metaRow,
+      options: triggerRows.map((row) => ({ value: row.key, label: row.label })),
+    },
+  ];
+}
+
+const popoverPanelCustomizeControls: DocCustomizeControl[] = buildPopoverPanelCustomizeControls(
+  popoverComponentCustomizeDefaults,
+);
+
+const popoverTopToolCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'boolean',
     key: 'topToolClosable',
     label: '显示关闭',
+    row: 4,
     visibleWhen: isPopoverTopToolClosableVisible,
-  },
-  {
-    kind: 'select',
-    key: 'widthMode',
-    label: L.widthMode,
-    options: popoverWidthModeOptions.map((row) => ({ value: row.value, label: row.label })),
-  },
-  {
-    kind: 'select',
-    key: 'presetWidth',
-    label: '预置宽度',
-    options: popoverPresetWidthOptions.map((row) => ({ value: row.value, label: row.label })),
-    visibleWhen: isPopoverWidthPreset,
-  },
-  {
-    kind: 'text',
-    key: 'width',
-    label: L.width,
-    visibleWhen: isPopoverWidthFixed,
-  },
-  {
-    kind: 'text',
-    key: 'maxWidth',
-    label: '最大宽度',
-    visibleWhen: (state) => !isPopoverWidthFixedOrPreset(state),
-  },
-  {
-    kind: 'select',
-    key: 'heightMode',
-    label: L.heightMode,
-    options: heightModeRows.map((row) => ({ value: row.key, label: row.label })),
-  },
-  {
-    kind: 'text',
-    key: 'height',
-    label: L.height,
-    visibleWhen: isPopoverHeightFixed,
-  },
-  {
-    kind: 'text',
-    key: 'maxHeight',
-    label: L.maxHeight,
-    visibleWhen: (state) => !isPopoverHeightFixed(state),
-  },
-  {
-    kind: 'boolean',
-    key: 'topTool',
-    label: 'TopTool',
-    visibleWhen: (state) => isPopoverPlacementTop(state) && isPopoverComponentScenario(state),
   },
 ];
 
+/** @deprecated 使用 popoverPanelCustomizeControls */
+const popoverLayoutCustomizeControls = popoverPanelCustomizeControls;
+
 export const popoverComponentCustomizeControls: DocCustomizeControl[] = [
+  ...buildPopoverPanelCustomizeControls(popoverComponentCustomizeDefaults),
   {
     kind: 'text',
-    key: 'triggerLabel',
-    label: L.triggerLabel,
+    key: 'topToolTitle',
+    label: '标题',
+    row: 4,
+    visibleWhen: isPopoverTopToolEnabled,
   },
   {
     kind: 'text',
     key: 'slotContent',
     label: '插槽内容',
+    row: 4,
   },
-  {
-    kind: 'text',
-    key: 'topToolTitle',
-    label: '标题',
-    visibleWhen: isPopoverTopToolEnabled,
-  },
-  ...popoverLayoutCustomizeControls,
+  ...popoverTopToolCustomizeControls,
 ];
 
-export const popoverScensCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'scenario',
-    label: '场景',
-    options: popoverScensScenarioOptions.map((row) => ({ value: row.value, label: row.label })),
-  },
-  {
-    kind: 'text',
-    key: 'triggerLabel',
-    label: L.triggerLabel,
-  },
+const popoverScensScenarioCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'text',
     key: 'guideBody',
@@ -394,16 +367,35 @@ export const popoverScensCustomizeControls: DocCustomizeControl[] = [
     label: '多笔',
     visibleWhen: isPopoverMinerFeeScenario,
   },
+];
+
+export const popoverScensCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'scenario',
+    label: '场景',
+    row: 0,
+    options: popoverScensScenarioOptions.map((row) => ({ value: row.value, label: row.label })),
+  },
+  ...buildPopoverPanelCustomizeControls(popoverScensCustomizeDefaults, 1),
   {
     kind: 'text',
     key: 'topToolTitle',
     label: '标题',
+    row: 5,
     visibleWhen: (state) =>
       isPopoverTopToolEnabled(state)
       || isPopoverRemarkScenario(state)
       || isPopoverMinerFeeScenario(state),
   },
-  ...popoverLayoutCustomizeControls,
+  ...popoverScensScenarioCustomizeControls,
+  {
+    kind: 'text',
+    key: 'triggerLabel',
+    label: L.triggerLabel,
+    row: 5,
+  },
+  ...popoverTopToolCustomizeControls,
 ];
 
 /** @deprecated Use popoverComponentCustomizeControls or popoverScensCustomizeControls */
@@ -447,6 +439,11 @@ function buildPopoverProps(state: Record<string, unknown>): Record<string, unkno
     widthMode: isPopoverWidthFixedOrPreset(state) ? 'fixed' : state.widthMode,
     heightMode: state.heightMode,
   };
+
+  const crossAxisOffset = parseAnchoredContainerOptionalInt(state.crossAxisOffset);
+  if (crossAxisOffset !== undefined) {
+    props.crossAxisOffset = crossAxisOffset;
+  }
 
   const width = resolvePopoverWidthPx(state);
   const height = parseOptionalPx(state.height);
@@ -763,4 +760,11 @@ export const POPOVER_PLACEMENTS = ['top', 'bottom', 'left', 'right'] as const sa
 
 export const POPOVER_ALIGNS = ['start', 'center', 'end'] as const satisfies readonly PopoverAlign[];
 
-export { buildPopoverProps, isPopoverHeightFixed, isPopoverRemarkScenario, isPopoverWidthFixed, isPopoverWidthPreset };
+export {
+  buildPopoverPanelCustomizeControls,
+  buildPopoverProps,
+  isPopoverHeightFixed,
+  isPopoverRemarkScenario,
+  isPopoverWidthFixed,
+  isPopoverWidthPreset,
+};

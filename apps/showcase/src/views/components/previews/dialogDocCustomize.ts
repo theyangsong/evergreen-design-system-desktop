@@ -1,8 +1,15 @@
 import type { DocCustomizeControl, DocPropRow } from '@/views/shared/componentDoc/types';
 import {
-  buttonToneRows,
-  showcaseComboPopupCountLabels,
-} from '@/data/showcasePropLabels';
+  dialogComposeFlotationToolbarControls,
+  dialogPopupWindowControls,
+  dialogStandardFlotationToolbarControls,
+} from './buttonDocCustomize';
+
+export {
+  dialogComposeFlotationToolbarControls,
+  dialogPopupWindowControls,
+  dialogStandardFlotationToolbarControls,
+} from './buttonDocCustomize';
 
 export const DIALOG_TYPES = ['symbol', 'standard', 'compose'] as const;
 export type DialogCustomizeType = (typeof DIALOG_TYPES)[number];
@@ -38,6 +45,7 @@ const dialogNeutralCustomizeState = {
   showClear: false,
   clearLabel: 'Clear',
   toolbarTone: 'decor',
+  toolbarVariant: 'solid',
   toolbarDividerPinned: false,
   composeText: COMPOSE_BODY_TEXT,
 };
@@ -77,7 +85,9 @@ export function applyDialogTypeLayout(
 export function buildDialogCustomizeControls(
   type: DialogCustomizeType,
 ): DocCustomizeControl[] {
-  const controls: DocCustomizeControl[] = [{ kind: 'text', key: 'title', label: '标题' }];
+  const controls: DocCustomizeControl[] = [
+    { kind: 'text', key: 'title', label: '标题', row: 0 },
+  ];
 
   if (type === 'symbol') {
     controls.push(
@@ -107,11 +117,12 @@ export function buildDialogCustomizeControls(
     );
   } else if (type === 'standard') {
     controls.push(
-      { kind: 'boolean', key: 'showSecondaryText', label: '显示正文' },
+      { kind: 'boolean', key: 'showSecondaryText', label: '显示正文', row: 0 },
       {
         kind: 'text',
         key: 'secondaryText',
         label: '正文',
+        row: 0,
         visibleWhen: (s) => s.showSecondaryText !== false,
       },
     );
@@ -157,59 +168,11 @@ export function buildDialogSymbolStyle(
 /** @deprecated Use buildDialogSymbolStyle */
 export const buildReminderSymbolStyle = buildDialogSymbolStyle;
 
-export const dialogPopupWindowControls: DocCustomizeControl[] = [
-  { kind: 'text', key: 'confirmLabel', label: '主按钮（Confirm）' },
-  { kind: 'text', key: 'cancelLabel', label: '次按钮（Cancel）' },
-  {
-    kind: 'select',
-    key: 'actionCount',
-    label: '按钮数',
-    options: [
-      { value: '2', label: showcaseComboPopupCountLabels['2'] },
-      { value: '1', label: showcaseComboPopupCountLabels['1'] },
-    ],
-  },
-  {
-    kind: 'select',
-    key: 'toolbarTone',
-    label: '按钮 Tone',
-    options: buttonToneRows.map((row) => ({ value: row.key, label: row.label })),
-  },
-];
-
-/** @deprecated Use dialogPopupWindowControls */
-export const reminderPopupWindowControls = dialogPopupWindowControls;
-
-const dialogFlotationToneControl: DocCustomizeControl = {
-  kind: 'select',
-  key: 'toolbarTone',
-  label: '按钮 Tone',
-  options: buttonToneRows.map((row) => ({ value: row.key, label: row.label })),
-};
-
-export const dialogComposeFlotationToolbarControls: DocCustomizeControl[] = [
-  { kind: 'boolean', key: 'toolbarDividerPinned', label: '分割线常驻' },
-  { kind: 'text', key: 'confirmLabel', label: '主按钮（Confirm）' },
-  { kind: 'text', key: 'cancelLabel', label: '次按钮（Cancel）' },
-  { kind: 'boolean', key: 'showClear', label: '显示 Clear' },
-  {
-    kind: 'text',
-    key: 'clearLabel',
-    label: 'Clear 文案',
-    visibleWhen: (state) => Boolean(state.showClear),
-  },
-  dialogFlotationToneControl,
-];
-
 /** @deprecated Use dialogComposeFlotationToolbarControls */
 export const dialogSlotFlotationToolbarControls = dialogComposeFlotationToolbarControls;
 
-export const dialogStandardFlotationToolbarControls: DocCustomizeControl[] = [
-  { kind: 'boolean', key: 'toolbarDividerPinned', label: '分割线常驻' },
-  { kind: 'text', key: 'confirmLabel', label: '主按钮（Confirm）' },
-  { kind: 'text', key: 'cancelLabel', label: '次按钮（Cancel）' },
-  dialogFlotationToneControl,
-];
+/** @deprecated Use dialogPopupWindowControls */
+export const reminderPopupWindowControls = dialogPopupWindowControls;
 
 /** @deprecated Use dialogStandardFlotationToolbarControls */
 export const reminderStandardFlotationToolbarControls = dialogStandardFlotationToolbarControls;

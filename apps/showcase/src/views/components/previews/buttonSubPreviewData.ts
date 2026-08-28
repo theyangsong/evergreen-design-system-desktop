@@ -67,7 +67,13 @@ export const iconButtonProPropRows: DocPropRow[] = [
     name: 'badge',
     type: 'string | number',
     defaultValue: '0',
-    description: '角标数字或文案。',
+    description: '角标数字或文案；渲染为 EgMessage。',
+  },
+  {
+    name: 'messageType',
+    type: "'subtle' | 'brand' | 'danger'",
+    defaultValue: "'brand'",
+    description: 'showBadge 时 EgMessage 的 type。',
   },
   {
     name: 'showBadge',

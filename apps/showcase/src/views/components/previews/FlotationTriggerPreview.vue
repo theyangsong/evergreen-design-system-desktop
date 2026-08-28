@@ -6,12 +6,11 @@ import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
 import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
+  buildFlotationTriggerPageCustomizeControls,
   buildFlotationTriggerUsageSnippet,
-  flotationTriggerCustomizeControls,
   flotationTriggerCustomizeDefaults,
+  flotationTriggerFormSubmissionCustomizeControls,
   flotationTriggerImportCode,
-  flotationTriggerKindCustomizeControls,
-  flotationTriggerModuleMenuCustomizeControls,
   flotationTriggerModuleMenuDefaults,
   flotationTriggerPropRows,
   flotationTriggerSlotRows,
@@ -20,16 +19,10 @@ import {
   type FlotationTriggerKind,
 } from './flotationDocCustomize';
 
-const props = withDefaults(
-  defineProps<{
-    initialTriggerKind?: FlotationTriggerKind;
-    pageTitle?: string;
-    lockTriggerKind?: boolean;
-  }>(),
-  {
-    lockTriggerKind: false,
-  },
-);
+const props = defineProps<{
+  initialTriggerKind?: FlotationTriggerKind;
+  pageTitle?: string;
+}>();
 
 const customize = reactive({
   ...flotationTriggerCustomizeDefaults,
@@ -57,22 +50,18 @@ watch(
     customize.showReddot = Boolean(flotationTriggerModuleMenuDefaults.showReddot);
     customize.triggerStyle = 'text';
     customize.widthMode = 'trigger';
+    customize.showFieldLabel = false;
+    customize.feedback = false;
   },
 );
 
 const isModuleMenuKind = computed(() => isFlotationTriggerModuleMenuKind(customize));
 
-const triggerKindPanelTitle = computed(() =>
-  isModuleMenuKind.value ? '模块菜单' : '标准下拉框',
+const triggerPageControls = computed(() =>
+  buildFlotationTriggerPageCustomizeControls(customize),
 );
 
-const triggerKindPanelControls = computed(() =>
-  isModuleMenuKind.value
-    ? flotationTriggerModuleMenuCustomizeControls
-    : flotationTriggerCustomizeControls,
-);
-
-const triggerKindRowColumns = computed(() => (isModuleMenuKind.value ? 4 : 5));
+const pageTitle = computed(() => props.pageTitle ?? 'Trigger');
 
 const usageSnippet = computed(() => buildFlotationTriggerUsageSnippet(customize));
 
@@ -81,20 +70,14 @@ const previewHostStyle = computed(() => ({
   maxWidth: isModuleMenuKind.value ? 'none' : 'var(--scale-50)',
 }));
 
-const triggerKindControls = computed(() =>
-  props.lockTriggerKind
-    ? flotationTriggerKindCustomizeControls.filter((control) => control.key !== 'triggerKind')
-    : flotationTriggerKindCustomizeControls,
-);
-
-const pageTitle = computed(() => props.pageTitle ?? 'Trigger');
-
 onMounted(() => {
   if (customize.triggerKind !== 'module-menu') return;
   customize.label = String(flotationTriggerModuleMenuDefaults.label);
   customize.showReddot = Boolean(flotationTriggerModuleMenuDefaults.showReddot);
   customize.triggerStyle = 'text';
   customize.widthMode = 'trigger';
+  customize.showFieldLabel = false;
+  customize.feedback = false;
 });
 
 const triggerFixedWidth = computed(() => {
@@ -137,7 +120,9 @@ const triggerProps = computed(() => {
   };
 });
 
-const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize));
+const usesComboShell = computed(
+  () => !isModuleMenuKind.value && usesFlotationTriggerComboShell(customize),
+);
 </script>
 
 <template>
@@ -149,7 +134,9 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
       :show-doc-title="false"
       component-tag="EgFlotationTrigger"
       :import-code="flotationTriggerImportCode"
-      :customize-controls="triggerKindControls"
+      :customize-controls="triggerPageControls"
+      :customize-sequential="true"
+      :customize-row-columns="4"
       :customize-defaults="{ ...flotationTriggerCustomizeDefaults }"
       :usage-snippet-override="usageSnippet"
       :prop-rows="flotationTriggerPropRows"
@@ -180,15 +167,13 @@ const usesComboShell = computed(() => usesFlotationTriggerComboShell(customize))
       </template>
 
       <template #customize-extra>
-        <div :class="docStyles.customizeExtraStack">
+        <div v-if="customize.feedback && !isModuleMenuKind" :class="docStyles.customizeExtraStack">
           <CustomizePanel
             v-model="customize"
-            :title="triggerKindPanelTitle"
+            title="EgFormSubmission"
             nested
             embedded
-            sequential
-            :row-columns="triggerKindRowColumns"
-            :controls="triggerKindPanelControls"
+            :controls="flotationTriggerFormSubmissionCustomizeControls"
           />
         </div>
       </template>

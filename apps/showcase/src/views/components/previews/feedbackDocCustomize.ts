@@ -265,18 +265,21 @@ export function buildFormSubmissionExpandCustomizeControls(
       visibleWhen: gate,
     },
     {
-      kind: 'text',
-      key: linkLabelKey,
-      label: '链接文案',
-      row,
-      visibleWhen: (s) => gate(s) && (s[typeKey] === 'notes' || s[typeKey] === 'danger'),
-    },
-    {
       kind: 'boolean',
       key: showLinkKey,
       label: '显示链接',
       row,
       visibleWhen: (s) => gate(s) && (s[typeKey] === 'notes' || s[typeKey] === 'danger'),
+    },
+    {
+      kind: 'text',
+      key: linkLabelKey,
+      label: '按钮文案',
+      row,
+      visibleWhen: (s) =>
+        gate(s) &&
+        (s[typeKey] === 'notes' || s[typeKey] === 'danger') &&
+        Boolean(s[showLinkKey]),
     },
   ];
 }
@@ -317,18 +320,6 @@ export const streamerCustomizeDefaults = {
   linkSize: 'md',
 };
 
-export const streamerCustomizeControls: DocCustomizeControl[] = [
-  {
-    kind: 'select',
-    key: 'type',
-    label: '类型',
-    options: propLabelRows(['info', 'warning', 'danger'] as const, showcaseStreamerTypeLabels).map(
-      (row) => ({ value: row.key, label: row.label }),
-    ),
-  },
-  { kind: 'text', key: 'text', label: '文案' },
-];
-
 export const streamerVisualCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
@@ -342,6 +333,20 @@ export const streamerVisualCustomizeControls: DocCustomizeControl[] = [
 
 export const streamerSymbolCustomizeControls: DocCustomizeControl[] = [
   { kind: 'boolean', key: 'showSymbol', label: '显示符号' },
+];
+
+export const streamerCustomizeControls: DocCustomizeControl[] = [
+  {
+    kind: 'select',
+    key: 'type',
+    label: '类型',
+    options: propLabelRows(['info', 'warning', 'danger'] as const, showcaseStreamerTypeLabels).map(
+      (row) => ({ value: row.key, label: row.label }),
+    ),
+  },
+  { kind: 'text', key: 'text', label: '文案' },
+  ...streamerVisualCustomizeControls,
+  ...streamerSymbolCustomizeControls,
 ];
 
 const streamerButtonToneOptions = buttonToneRows

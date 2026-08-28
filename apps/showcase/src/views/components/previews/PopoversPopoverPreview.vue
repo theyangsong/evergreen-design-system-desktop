@@ -26,6 +26,7 @@ import {
   popoverPropRows,
   popoverSlotRows,
 } from './popoversDocCustomize';
+import { parseAnchoredContainerOptionalInt } from './anchoredContainerDocCustomize';
 
 const customize = reactive({
   ...popoverComponentCustomizeDefaults,
@@ -56,6 +57,10 @@ const popoverShowTopTool = computed(
 );
 
 const popoverTopToolClosable = computed(() => Boolean(customize.topToolClosable));
+
+const panelCrossAxisOffset = computed(() =>
+  parseAnchoredContainerOptionalInt(customize.crossAxisOffset),
+);
 
 function onTopToolClose() {
   anchoredRef.value?.close();
@@ -113,6 +118,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
       :import-code="popoverComponentImportCode"
       :customize-controls="popoverComponentCustomizeControls"
       :customize-defaults="popoverComponentCustomizeDefaults"
+      :customize-sequential="true"
       :usage-snippet-override="usageSnippet"
       :prop-rows="popoverPropRows"
       :slot-rows="popoverSlotRows"
@@ -131,6 +137,7 @@ function matrixLabel(placement: PopoverPlacement, align: PopoverAlign): string {
             ref="anchoredRef"
             :placement="customize.placement"
             :align="customize.align"
+            :cross-axis-offset="panelCrossAxisOffset"
             :trigger="customize.trigger"
             :disabled="Boolean(customize.disabled)"
             :wrap-tooltip="false"

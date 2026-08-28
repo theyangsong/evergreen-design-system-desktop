@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import '@/styles/desktop-components-scope.css';
 import '@/styles/text-style-preview.css';
 import {
   EgAnchoredTooltip,
@@ -535,7 +534,6 @@ const actionMinWidthStyle = computed(() => {
             <EgListFieldHashLikeLine
               :text="hashLikeValue"
               variant="primary"
-              :identifier-mode="slug === 'list-field-identifier'"
               :copy-on-row-hover="hashLikeCopyOnRowHover"
               :tooltip-trigger="hashLikeTooltipTrigger"
             />
@@ -569,7 +567,6 @@ const actionMinWidthStyle = computed(() => {
             <EgListFieldHashLikeLine
               :text="hashLikeValue"
               variant="primary"
-              :identifier-mode="slug === 'list-field-identifier'"
               :copy-on-row-hover="hashLikeCopyOnRowHover"
               :tooltip-trigger="hashLikeTooltipTrigger"
             />
@@ -608,13 +605,9 @@ const actionMinWidthStyle = computed(() => {
       </div>
       <div v-else-if="amountType() === 'crypto'" :class="styles.amountPreview" :style="cellMinWidthStyle">
         <div :class="styles.amountPrimaryRow">
-          <EgCrypto
-            v-if="showAmountCryptoIcon"
-            :name="cryptoAmountCryptoName"
-            fit
-            :class="styles.amountCryptoIcon"
-            :label="cryptoAmountSymbol"
-          />
+          <span v-if="showAmountCryptoIcon" :class="styles.cryptoInlineIcon">
+            <EgCrypto :name="cryptoAmountCryptoName" fit :label="cryptoAmountSymbol" />
+          </span>
           <EgListFieldOverflowText
             :text="cryptoAmountText"
             variant="primary"
@@ -636,13 +629,9 @@ const actionMinWidthStyle = computed(() => {
       </div>
       <div v-else :class="styles.amountPreview" :style="cellMinWidthStyle">
         <div :class="styles.amountPrimaryRow">
-          <EgCrypto
-            v-if="showAmountCryptoIcon"
-            :name="cryptoAmountCryptoName"
-            fit
-            :class="styles.amountCryptoIcon"
-            :label="cryptoAmountSymbol"
-          />
+          <span v-if="showAmountCryptoIcon" :class="styles.cryptoInlineIcon">
+            <EgCrypto :name="cryptoAmountCryptoName" fit :label="cryptoAmountSymbol" />
+          </span>
           <EgListFieldOverflowText
             :text="cryptoAmountText"
             variant="primary"

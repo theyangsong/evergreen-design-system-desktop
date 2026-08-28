@@ -20,7 +20,7 @@ alwaysApply: true
 
 ## 1. Token 与样式
 
-**作用域**：Desktop 组件 + `.desktopTokens` → Desktop token；Showcase **壳层** → `@eds/website-tokens`（§5）。
+**作用域**：Showcase 全站 + Desktop 组件 → `@eds/desktop-tokens` / `@eds/desktop-components`；组件预览 subtree 加 `.desktopTokens` 锁排版基线。
 
 1. **语义优先**：查 `packages/tokens/spec/**`、`dist/css/**`。禁止用 `--scale-*` 顶替 `--radius-*` / `--spacing-*` / `--stroke-*`。
 2. **禁止私造 `--*`**、局部 alias、手拼 shadow/玻璃（用 `--eds-shadow-*`、`.effect-*`、`.eds-shadow-*-stack`）。
@@ -62,10 +62,10 @@ alwaysApply: true
 
 | 层 | 用 |
 |----|-----|
-| Showcase 壳 | `@eds/website-tokens` / `@eds/website-components` |
-| Desktop | 组件实现、`.desktopTokens` 包 subtree、`/tokens` |
+| Showcase（全站） | `@eds/desktop-tokens` / `@eds/desktop-components` |
+| 组件预览 subtree | `.desktopTokens` 包 subtree |
 
-**禁止**：壳层 Desktop 排版 token；label 进 `.desktopTokens`；`desktopTokens` 打在 Eg* 根上；Desktop CSS 用 Website token。
+**禁止**：`eds-website` / `@eds/website-*` 进入本仓 showcase；`desktopTokens` 打在 Eg* 根上；Desktop CSS 用非 desktop token。
 
 **HMR**：`packages/components/**` → alias+HMR；`tokens/spec/**` → watch rebuild+reload。未生效先查 HMR/dist/specificity，勿先说 build。
 
@@ -166,5 +166,6 @@ Variants → Props+Slots → Composition → Scenarios。最低：atom→Props+S
 
 ## 9. 变更记录
 
+- 2026-08-25：Showcase 全 desktop 自包含 — 移除 `@eds/website-*` 依赖；与 eds-website 零关联。
 - 2026-08-24：规则整合为单文件；全文精简浓缩。
 - 更早见 git history。

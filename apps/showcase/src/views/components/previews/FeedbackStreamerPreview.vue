@@ -14,8 +14,6 @@ import {
   streamerImportCode,
   streamerLinkCustomizeControls,
   streamerPropRows,
-  streamerSymbolCustomizeControls,
-  streamerVisualCustomizeControls,
 } from './feedbackDocCustomize';
 
 const customize = reactive({
@@ -70,34 +68,22 @@ const usageSnippet = computed(() => buildStreamerUsageSnippet(customize));
       </template>
 
       <template #customize-extra>
-        <CustomizePanel
-          v-model="customize"
-          title="视觉"
-          nested
-          embedded
-          :controls="streamerVisualCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="显示符号"
-          nested
-          embedded
-          :controls="streamerSymbolCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="显示按钮"
-          nested
-          embedded
-          :controls="streamerButtonCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          title="Link"
-          nested
-          embedded
-          :controls="streamerLinkCustomizeControls"
-        />
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            title="EgButton"
+            nested
+            embedded
+            :controls="streamerButtonCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="EgLink"
+            nested
+            embedded
+            :controls="streamerLinkCustomizeControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

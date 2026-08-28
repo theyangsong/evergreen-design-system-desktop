@@ -162,10 +162,7 @@ onBeforeUnmount(() => {
       @scroll="onScroll"
     >
       <div
-        :class="[
-          styles.scrollTopEdge,
-          scrollFadeTop && styles.scrollTopEdgeVisible,
-        ]"
+        :class="[styles.scrollTopEdge, scrollFadeTop && styles.scrollTopEdgeVisible]"
         aria-hidden="true"
       />
 

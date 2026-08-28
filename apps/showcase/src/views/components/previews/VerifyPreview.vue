@@ -153,7 +153,6 @@ const pageTitle = computed(() => props.pageTitle ?? 'Verify');
       v-model:customize-state="customize"
       :title="pageTitle"
       doc-tier="organism"
-      tall-preview
       :show-doc-title="false"
       component-tag="EgVerify"
       import-code="import { EgVerify, EgPopup, useVerifySubmit } from '@eds/desktop-components';"

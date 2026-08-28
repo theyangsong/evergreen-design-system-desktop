@@ -307,22 +307,6 @@
   min-width: 5.5rem;
 }
 
-.lg.loading {
-  min-height: 2.375rem;
-}
-
-.md.loading {
-  min-height: 1.875rem;
-}
-
-.sm.loading {
-  min-height: 1.375rem;
-}
-
-.xs.loading {
-  min-height: 1.25rem;
-}
-
 .spinner {
   display: inline-flex;
   align-items: center;

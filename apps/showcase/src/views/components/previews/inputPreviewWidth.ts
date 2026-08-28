@@ -1,6 +1,13 @@
 /** Showcase：width-mode=fixed 时由使用方指定根节点宽度（非 EgInput prop）。 */
 
+export type ShowcaseInputWidthMode = 'adaptive' | 'fixed' | 'full';
+
 const FIXED_WIDTH_UNIT_SUFFIX = /(px|%|rem|em|ch|vw|vh|vmin|vmax)$/i;
+
+/** EgInput 仅支持 fixed | full；Showcase「自适应」映射为 fixed 且不包固定宽外壳。 */
+export function resolveEgInputWidthMode(widthMode: unknown): 'fixed' | 'full' {
+  return widthMode === 'full' ? 'full' : 'fixed';
+}
 
 export function normalizeFixedWidth(raw: string): string | undefined {
   const trimmed = raw.trim();
@@ -51,14 +58,26 @@ export function buildWidthModeUsageSnippet(
     opts?: { vModel?: string; defaults?: Record<string, unknown>; omitKeys?: string[] },
   ) => string,
 ): string {
-  const omitKeys = options.omitKeys ?? ['fixedWidth'];
-  const snippet = buildSnippet(tag, state, {
-    vModel: options.vModel,
-    defaults: options.defaults,
-    omitKeys,
-  });
+  const showcaseWidthMode = state.widthMode;
+  const omitKeys = [...(options.omitKeys ?? []), 'fixedWidth'];
+  if (showcaseWidthMode === 'adaptive') {
+    omitKeys.push('widthMode');
+  }
 
-  if (state.widthMode === 'fixed') {
+  const snippet = buildSnippet(
+    tag,
+    {
+      ...state,
+      widthMode: resolveEgInputWidthMode(showcaseWidthMode),
+    },
+    {
+      vModel: options.vModel,
+      defaults: options.defaults,
+      omitKeys,
+    },
+  );
+
+  if (showcaseWidthMode === 'fixed') {
     const width = normalizeFixedWidth(String(state.fixedWidth ?? ''));
     if (width) {
       return wrapUsageSnippetWithWidth(snippet, width);

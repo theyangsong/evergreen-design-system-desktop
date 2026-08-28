@@ -86,18 +86,18 @@ export const segmentedCustomizeDefaults = {
 export const segmentedCustomizeControls: DocCustomizeControl[] = [
   {
     kind: 'select',
-    key: 'size',
-    label: '尺寸',
-    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
-  },
-  {
-    kind: 'select',
     key: 'shape',
-    label: '形状',
+    label: showcaseInputCustomizeFieldLabels.type,
     options: propLabelRows(['circle', 'square'] as const, showcaseTabShapeLabels).map((row) => ({
       value: row.key,
       label: row.label,
     })),
+  },
+  {
+    kind: 'select',
+    key: 'size',
+    label: '尺寸',
+    options: inputSizeRows.map((row) => ({ value: row.key, label: row.label })),
   },
   {
     kind: 'select',

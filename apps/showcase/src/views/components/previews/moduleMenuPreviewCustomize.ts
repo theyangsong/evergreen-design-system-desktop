@@ -9,8 +9,15 @@ import {
   type ModuleMenuBusinessScenario,
 } from '@/presets/module-menu/businessModuleTitles';
 import { getUdunModuleMenuGroups } from '@/presets/module-menu/udunModuleMenuGroups';
+import {
+  DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
+  DEFAULT_UDUN_MODULE_MENU_BUSINESS_TITLE,
+} from '@/presets/module-menu/businessModuleTitles';
 import type { ModuleMenuScenario } from './organismTemplateDocData';
-import { isModuleMenuTitlePresetKind } from './organismTemplateDocData';
+import {
+  buildModuleMenuCustomizeDefaults,
+  isModuleMenuTitlePresetKind,
+} from './organismTemplateDocData';
 import {
   buildModuleMenuPreviewGroups,
   resolveModuleMenuPreviewTitle,
@@ -30,6 +37,22 @@ import {
 
 export function isModuleMenuBusinessScenario(scenario: unknown): scenario is Exclude<ModuleMenuScenario, 'module-menu'> {
   return scenario === 'cregis' || scenario === 'udun';
+}
+
+export function buildCregisModuleMenuCustomizeDefaults(): Record<string, unknown> {
+  return {
+    ...buildModuleMenuCustomizeDefaults(),
+    scenario: 'cregis',
+    moduleBusinessTitle: DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
+  };
+}
+
+export function buildUdunModuleMenuCustomizeDefaults(): Record<string, unknown> {
+  return {
+    ...buildModuleMenuCustomizeDefaults(),
+    scenario: 'udun',
+    moduleBusinessTitle: DEFAULT_UDUN_MODULE_MENU_BUSINESS_TITLE,
+  };
 }
 
 export function resolveModuleMenuBusinessGroups(

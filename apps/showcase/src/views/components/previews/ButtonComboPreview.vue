@@ -28,6 +28,7 @@ const customize = reactive({
   ...comboActionCustomizeDefaults,
   kind: comboActionCustomizeDefaults.kind,
   tone: comboActionCustomizeDefaults.tone as 'brand' | 'decor' | 'danger',
+  variant: comboActionCustomizeDefaults.variant as 'solid' | 'outline' | 'text',
   count: comboActionCustomizeDefaults.count as 1 | 2,
   direction: comboActionCustomizeDefaults.direction as 'left' | 'right',
 });
@@ -68,6 +69,8 @@ const comboToneBrandDecor = computed(() =>
       :import-code="comboImportCode"
       :customize-controls="comboActionCustomizeControls"
       :customize-defaults="comboActionCustomizeDefaults"
+      :customize-sequential="true"
+      :customize-row-columns="4"
       :usage-snippet-override="comboUsageSnippet"
       :prop-rows="comboPropRows"
       :event-rows="comboEventRows"
@@ -79,12 +82,14 @@ const comboToneBrandDecor = computed(() =>
           <EgComboActionSkid
             v-if="comboKind === 'skid'"
             :tone="customize.tone as 'brand' | 'decor' | 'danger'"
+            :variant="customize.variant as 'solid' | 'outline' | 'text'"
             :divider="Boolean(customize.divider)"
             :confirm-label="String(customize.confirmLabel)"
           />
           <EgComboActionPopupWindow
             v-else-if="comboKind === 'popup-window'"
             :tone="comboToneBrandDecor"
+            :variant="customize.variant as 'solid' | 'outline' | 'text'"
             :count="customize.count"
             :confirm-label="String(customize.confirmLabel)"
             :cancel-label="String(customize.cancelLabel)"
@@ -92,6 +97,7 @@ const comboToneBrandDecor = computed(() =>
           <EgComboActionFlotation
             v-else-if="comboKind === 'flotation'"
             :tone="comboToneBrandDecor"
+            :variant="customize.variant as 'solid' | 'outline' | 'text'"
             :divider="Boolean(customize.divider)"
             :clear="Boolean(customize.clear)"
             :confirm-label="String(customize.confirmLabel)"
@@ -100,6 +106,7 @@ const comboToneBrandDecor = computed(() =>
           <EgComboActionPage
             v-else
             :tone="comboToneBrandDecor"
+            :variant="customize.variant as 'solid' | 'outline' | 'text'"
             :divider="Boolean(customize.divider)"
             :direction="customize.direction"
             :confirm-label="String(customize.confirmLabel)"

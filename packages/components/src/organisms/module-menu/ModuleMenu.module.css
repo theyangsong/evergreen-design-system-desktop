@@ -54,9 +54,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-height: var(--scale-15);
-  max-height: var(--scale-15);
-  padding: var(--spacing-0) var(--spacing-2);
+  padding: var(--spacing-4) var(--spacing-2);
   box-sizing: border-box;
 }
 

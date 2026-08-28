@@ -1,5 +1,5 @@
 .shell {
-  --showcase-sidebar-width: 256px;
+  --showcase-sidebar-width: 240px;
   display: grid;
   grid-template-columns: var(--showcase-sidebar-width) minmax(0, 1fr);
   height: 100dvh;
@@ -11,11 +11,11 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-6);
   box-sizing: border-box;
   width: var(--showcase-sidebar-width);
   height: 100dvh;
-  padding: var(--spacing-5) var(--spacing-2) var(--spacing-0);
+  padding: var(--spacing-7) var(--spacing-2-5) var(--spacing-0);
   color: var(--text-same-white-primary);
   overflow: hidden;
   overscroll-behavior: none;
@@ -46,25 +46,24 @@
 
 .brandTitle {
   margin: 0;
-  padding-inline: var(--spacing-2);
-  font-size: var(--size-body-small);
-  font-weight: var(--weight-medium);
-  line-height: var(--line-height-body-small-strong);
+  padding-inline: var(--spacing-5);
+  font-size: var(--eds-body-medium-strong-size);
+  font-weight: var(--eds-body-medium-strong-weight);
+  line-height: var(--eds-body-medium-strong-line-height);
 }
 
 .brandSub {
   margin: 0;
-  padding-inline: var(--spacing-2);
+  padding-inline: var(--spacing-5);
   color: var(--text-same-white-secondary);
-  font-size: var(--eds-footnote-medium-size);
-  font-weight: var(--eds-footnote-medium-weight);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-weight);
+  line-height: var(--eds-footnote-line-height);
 }
 
 .sidebarFooter {
   flex-shrink: 0;
-  padding-top: var(--spacing-0);
-  padding-bottom: var(--spacing-3);
+  padding: var(--spacing-0) var(--spacing-5) var(--spacing-7);
 }
 
 .sidebarFooter :global(.eds-button) {
@@ -74,11 +73,11 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-05);
+  gap: var(--spacing-025);
 }
 
 .navLink {
-  padding: var(--spacing-1) var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-same-white-primary);
@@ -128,8 +127,8 @@
   flex-direction: column;
   gap: var(--spacing-05);
   margin-top: var(--spacing-05);
-  margin-left: var(--spacing-4);
-  padding-left: var(--spacing-1);
+  margin-left: var(--spacing-8);
+  padding-left: var(--spacing-2);
 }
 
 .navSubPanel::before {
@@ -155,20 +154,20 @@
 
 .navSubGroupLabel {
   display: block;
-  padding: var(--spacing-1) var(--spacing-2) var(--spacing-05);
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-05);
   color: var(--text-same-white-secondary);
-  font-size: var(--eds-footnote-medium-size);
-  font-weight: var(--eds-footnote-medium-strong-weight);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-line-height);
 }
 
 .navSubLink {
   display: block;
-  padding: var(--spacing-1) var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--radius-full);
   color: var(--text-same-white-primary);
-  font-size: var(--eds-footnote-medium-size);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
   font-weight: var(--weight-medium);
   text-decoration: none;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -200,9 +199,9 @@
 .navSubToggle {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   width: 100%;
-  padding: var(--spacing-1) var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
@@ -236,8 +235,8 @@
 .navSubChevron {
   flex-shrink: 0;
   box-sizing: border-box;
-  width: var(--spacing-05);
-  height: var(--spacing-05);
+  width: var(--scale-1);
+  height: var(--scale-1);
   border-right: var(--stroke-sm) solid var(--text-same-white-primary);
   border-bottom: var(--stroke-sm) solid var(--text-same-white-primary);
   transform: rotate(-45deg);
@@ -254,12 +253,12 @@
 
 .content {
   min-width: 0;
-  margin: var(--spacing-2) var(--spacing-2) var(--spacing-2) var(--spacing-0);
-  height: calc(100dvh - 2 * var(--spacing-2));
-  border-radius: var(--radius-lg);
+  margin: var(--spacing-3) var(--spacing-3) var(--spacing-3) var(--spacing-0);
+  height: calc(100dvh - 2 * var(--spacing-3));
+  border-radius: var(--scale-6);
   background: var(--box-page);
   color: var(--text-base-primary);
-  padding: var(--spacing-4) var(--spacing-5) 0;
+  padding: var(--spacing-8) var(--spacing-10) 0;
   box-sizing: border-box;
   overflow: hidden;
   display: flex;
@@ -307,7 +306,7 @@
   }
 
   .content {
-    margin: var(--spacing-2) var(--spacing-2) var(--spacing-2) var(--spacing-0);
+    margin: var(--spacing-3) var(--spacing-3) var(--spacing-3) var(--spacing-0);
     height: auto;
     padding: var(--spacing-5);
   }

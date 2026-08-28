@@ -64,7 +64,6 @@ const eventRows = [
       v-model:customize-state="customize"
       anchor-id="data-list"
       title="DataList"
-      tall-preview
       :show-doc-title="false"
       component-tag="EgDataList"
       :import-code="ORGANISM_IMPORT"
@@ -81,7 +80,6 @@ const eventRows = [
           class="desktopTokens"
           :class="[
             docStyles.previewEffectPanelHost,
-            docStyles.previewEffectPanelHostTall,
             previewStyles.previewOrganismDataListHost,
           ]"
         >
@@ -98,39 +96,45 @@ const eventRows = [
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          :row-columns="iconButtonProNestedRowColumns"
-          title="工具栏 · EgIconButtonPro"
-          :controls="dataListToolbarCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          :row-columns="3"
-          title="列设置"
-          :controls="dataListColumnSettingControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          :row-columns="paginerPaginationNestedRowColumns"
-          title="分页 · EgPaginationItem"
-          :controls="dataListPaginationCustomizeControls"
-        />
-        <CustomizePanel
-          v-if="showStatistics"
-          v-model="customize"
-          nested
-          sequential
-          title="数据统计"
-          :controls="paginerStatisticsCustomizeControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            :row-columns="iconButtonProNestedRowColumns"
+            title="EgIconButtonPro"
+            :controls="dataListToolbarCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            :row-columns="3"
+            title="列设置"
+            :controls="dataListColumnSettingControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            :row-columns="paginerPaginationNestedRowColumns"
+            title="EgPaginationItem"
+            :controls="dataListPaginationCustomizeControls"
+          />
+          <CustomizePanel
+            v-if="showStatistics"
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            title="数据统计"
+            :controls="paginerStatisticsCustomizeControls"
+          />
+        </div>
       </template>
 
       <section id="data-list-column-props" :class="shared.section">

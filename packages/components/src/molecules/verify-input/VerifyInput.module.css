@@ -70,8 +70,9 @@
   box-sizing: border-box;
   width: auto;
   height: var(--spacing-12);
+  padding: var(--spacing-2);
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
   background: var(--material-card-moderate);
   color: var(--text-base-primary);
   font-size: var(--eds-headline-size);

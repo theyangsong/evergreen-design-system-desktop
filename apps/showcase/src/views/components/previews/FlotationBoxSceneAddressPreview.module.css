@@ -1,4 +1,4 @@
-/* 场景化地址：列表区保留 spacing-1 内边距（外壳 padding 见 FlotationBoxPreview.module.css） */
+/* 场景化地址：列表区保留 spacing-1 内边距（外壳 padding 见 Flotation.module.css eds-flotation-menu--box-doc） */
 
 .root {
   display: flex;

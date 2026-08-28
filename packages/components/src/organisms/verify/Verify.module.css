@@ -98,7 +98,6 @@
 }
 
 .statusLine {
-  min-height: var(--eds-footnote-line-height);
   margin: 0 0 var(--spacing-6);
   text-align: center;
   color: var(--text-base-secondary);
@@ -111,7 +110,6 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  min-height: var(--eds-footnote-strong-line-height);
   margin: 0 0 var(--spacing-6);
 }
 

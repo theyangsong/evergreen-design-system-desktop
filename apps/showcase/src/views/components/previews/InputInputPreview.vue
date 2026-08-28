@@ -23,6 +23,8 @@ import {
 import {
   buildWidthModeUsageSnippet,
   previewFixedWidthStyle,
+  resolveEgInputWidthMode,
+  type ShowcaseInputWidthMode,
 } from './inputPreviewWidth';
 
 const heroValue = ref('');
@@ -32,7 +34,7 @@ const inputCustomize = reactive({
   type: inputCustomizeDefaults.type as 'standard' | 'amount',
   interaction: inputCustomizeDefaults.interaction as string,
   size: inputCustomizeDefaults.size as 'lg' | 'md' | 'sm',
-  widthMode: inputCustomizeDefaults.widthMode as 'fixed' | 'full',
+  widthMode: inputCustomizeDefaults.widthMode as ShowcaseInputWidthMode,
 });
 
 const inputPreviewStyle = computed(() =>
@@ -90,7 +92,7 @@ const sharedInputProps = computed(() => ({
   style: inputPreviewStyle.value,
   type: inputCustomize.type as 'standard' | 'amount',
   size: inputCustomize.size as 'lg' | 'md' | 'sm',
-  widthMode: inputCustomize.widthMode as 'fixed' | 'full',
+  widthMode: resolveEgInputWidthMode(inputCustomize.widthMode),
   placeholder: String(inputCustomize.placeholder),
   disabled: previewDisabled.value,
   readonly: previewReadonly.value,

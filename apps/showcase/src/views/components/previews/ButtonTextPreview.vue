@@ -12,10 +12,27 @@ import {
   buttonCustomizeDefaults,
   buttonTextImportCode,
 } from './buttonDocCustomize';
+import {
+  previewFixedWidthStyle,
+  type ShowcaseInputWidthMode,
+} from './inputPreviewWidth';
 
-const buttonCustomize = reactive({ ...buttonCustomizeDefaults });
+const buttonCustomize = reactive({
+  ...buttonCustomizeDefaults,
+  widthMode: buttonCustomizeDefaults.widthMode as ShowcaseInputWidthMode,
+});
 
 const buttonUsageSnippet = computed(() => buildButtonUsageSnippet(buttonCustomize));
+
+const buttonPreviewStyle = computed(() => {
+  if (buttonCustomize.widthMode === 'fixed') {
+    return previewFixedWidthStyle('fixed', buttonCustomize.fixedWidth);
+  }
+  if (buttonCustomize.widthMode === 'full') {
+    return { width: '100%' };
+  }
+  return undefined;
+});
 
 const previewHostClass = computed(() =>
   String(buttonCustomize.tone) === 'sameWhite'
@@ -42,6 +59,7 @@ const previewHostClass = computed(() =>
       <template #preview>
         <div class="desktopTokens" :class="previewHostClass">
           <EgButton
+            :style="buttonPreviewStyle"
             :tone="buttonCustomize.tone as 'brand' | 'danger' | 'decor' | 'subtle' | 'sameWhite'"
             :variant="buttonCustomize.variant as 'solid' | 'outline' | 'text'"
             :size="buttonCustomize.size as 'lg' | 'md' | 'sm' | 'xs'"

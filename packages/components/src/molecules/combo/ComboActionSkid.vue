@@ -3,16 +3,20 @@ import { EgDivider } from '../../atoms/divider';
 import { EgButton } from '../button';
 import styles from './ComboAction.module.css';
 
+import type { ButtonVariant } from '../button/Button.vue';
+
 export type ComboActionSkidTone = 'brand' | 'decor' | 'danger';
 
 withDefaults(
   defineProps<{
     tone?: ComboActionSkidTone;
+    variant?: ButtonVariant;
     divider?: boolean;
     confirmLabel?: string;
   }>(),
   {
     tone: 'brand',
+    variant: 'solid',
     divider: false,
     confirmLabel: 'Confirm',
   },
@@ -30,7 +34,7 @@ const emit = defineEmits<{
       <EgButton
         :class="styles.fullWidth"
         :tone="tone"
-        variant="solid"
+        :variant="variant"
         size="md"
         @click="emit('confirm')"
       >

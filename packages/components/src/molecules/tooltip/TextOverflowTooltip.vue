@@ -159,7 +159,7 @@ const targetShellMotionClass = computed(() => {
 });
 
 const tokenScopeClass = computed(() =>
-  [TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE, styles.panel, props.panelScopeClass]
+  [TEXT_OVERFLOW_TOOLTIP_TOKEN_SCOPE, props.panelScopeClass]
     .filter(Boolean)
     .join(' '),
 );

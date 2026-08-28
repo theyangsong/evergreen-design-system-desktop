@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { EgIcon, EgPaginer } from '@eds/desktop-components';
 import ComponentDocLayout from '@/views/shared/componentDoc/ComponentDocLayout.vue';
 import CustomizePanel from '@/views/shared/componentDoc/CustomizePanel.vue';
+import docStyles from '@/views/shared/componentDoc/ComponentDocLayout.module.css';
 import styles from './InputPreview.module.css';
 import {
   ORGANISM_IMPORT,
@@ -309,30 +310,35 @@ const lastPagination = computed(() => paginerPagination('last'));
         </EgPaginer>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          :row-columns="paginerPaginationNestedRowColumns"
-          title="分页 · EgPaginationItem"
-          :controls="paginerPaginationCustomizeControls"
-        />
-        <CustomizePanel
-          v-model="customize"
-          nested
-          sequential
-          title="下拉设置"
-          :controls="paginerSettingsCustomizeControls"
-        />
-        <CustomizePanel
-          v-if="customize.showStatistics"
-          v-model="customize"
-          nested
-          sequential
-          title="数据统计"
-          :controls="paginerStatisticsCustomizeControls"
-        />
+      <template #customize-extra>
+        <div :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            :row-columns="paginerPaginationNestedRowColumns"
+            title="EgPaginationItem"
+            :controls="paginerPaginationCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            title="下拉设置"
+            :controls="paginerSettingsCustomizeControls"
+          />
+          <CustomizePanel
+            v-if="customize.showStatistics"
+            v-model="customize"
+            nested
+            embedded
+            sequential
+            title="数据统计"
+            :controls="paginerStatisticsCustomizeControls"
+          />
+        </div>
       </template>
     </ComponentDocLayout>
   </div>

@@ -11,11 +11,15 @@ import tooltipStyles from './TooltipPreview.module.css';
 import { getComponentRouteSlug } from '@/data/components/navigation';
 import {
   anchoredTooltipPropRows,
+  buildTooltipBodyCustomizeControls,
   buildTooltipPanelKindPageUsageSnippet,
   buildTooltipSectionCustomizeDefaults,
+  findTooltipOverflowSceneSection,
   findTooltipPanelKindSection,
-  tooltipCustomizeControls,
+  isTooltipOverflowSceneSlug,
   tooltipImportCode,
+  tooltipOverflowSceneCustomizeControls,
+  tooltipPanelKindSections,
   tooltipPanelPropsForPreview,
   tooltipPropRows,
   tooltipSlotRows,
@@ -29,21 +33,75 @@ const route = useRoute();
 
 const pageSlug = computed(() => getComponentRouteSlug(route.path, route.params.slug));
 
-const section = computed(() => findTooltipPanelKindSection(pageSlug.value));
+const isOverflowScene = computed(() => isTooltipOverflowSceneSlug(pageSlug.value));
 
-const panelKind = computed(
-  () => (section.value?.panelKind ?? 'container') as TooltipPanelKindValue,
+const isStandardContainerPage = computed(
+  () => pageSlug.value === 'flotation-container-tooltip',
 );
 
-const customize = reactive(buildTooltipSectionCustomizeDefaults('container'));
+const isTooltipBodyPage = computed(
+  () =>
+    pageSlug.value === 'tooltip-flotation' || isStandardContainerPage.value,
+);
+
+const overflowScene = computed(() => findTooltipOverflowSceneSection(pageSlug.value));
+
+const customize = reactive(buildTooltipSectionCustomizeDefaults('flotation'));
 
 watch(
-  panelKind,
-  (kind) => {
-    Object.assign(customize, buildTooltipSectionCustomizeDefaults(kind));
+  pageSlug,
+  (slug) => {
+    if (isTooltipOverflowSceneSlug(slug)) {
+      Object.assign(customize, buildTooltipSectionCustomizeDefaults('flotation'));
+      return;
+    }
+    if (slug === 'flotation-container-tooltip') {
+      Object.assign(customize, {
+        ...buildTooltipSectionCustomizeDefaults('container'),
+        panelKind: 'container',
+      });
+      return;
+    }
+    if (slug === 'tooltip-flotation') {
+      const kind = String(customize.panelKind ?? 'flotation') as TooltipPanelKindValue;
+      Object.assign(customize, {
+        ...buildTooltipSectionCustomizeDefaults(kind),
+        panelKind: kind,
+      });
+    }
   },
   { immediate: true },
 );
+
+const panelKind = computed(() => {
+  if (isOverflowScene.value) {
+    return 'flotation' as const;
+  }
+  return String(customize.panelKind ?? 'flotation') as TooltipPanelKindValue;
+});
+
+const section = computed(() => {
+  if (overflowScene.value) {
+    return {
+      id: overflowScene.value.id,
+      label: overflowScene.value.label,
+      panelKind: 'flotation' as const,
+    };
+  }
+  return (
+    tooltipPanelKindSections.find((item) => item.panelKind === panelKind.value) ??
+    tooltipPanelKindSections[0]
+  );
+});
+
+const customizeControls = computed(() => {
+  if (isOverflowScene.value) {
+    return tooltipOverflowSceneCustomizeControls;
+  }
+  return buildTooltipBodyCustomizeControls(customize, {
+    hidePanelKind: isStandardContainerPage.value,
+  });
+});
 
 const usageSnippet = computed(() =>
   buildTooltipPanelKindPageUsageSnippet(panelKind.value, customize),
@@ -53,34 +111,37 @@ const panelProps = computed(() =>
   tooltipPanelPropsForPreview({ ...customize, panelKind: panelKind.value }),
 );
 
-const customizeDefaults = computed(() => buildTooltipSectionCustomizeDefaults(panelKind.value));
+const customizeDefaults = computed(() =>
+  isOverflowScene.value
+    ? buildTooltipSectionCustomizeDefaults('flotation')
+    : buildTooltipSectionCustomizeDefaults(panelKind.value),
+);
 
 const isTextOverflowScenario = computed(
-  () =>
-    panelKind.value === 'flotation' &&
-    String(customize.scenario ?? 'component') === 'text-overflow',
+  () => pageSlug.value === 'tooltip-scene-text-overflow',
 );
 
 const isParagraphOverflowInfoScenario = computed(
-  () =>
-    panelKind.value === 'flotation' &&
-    String(customize.scenario ?? 'component') === 'paragraph-overflow-info',
+  () => pageSlug.value === 'tooltip-scene-paragraph-overflow',
 );
 
 const isMultiAddressScenario = computed(
-  () =>
-    panelKind.value === 'flotation' &&
-    String(customize.scenario ?? 'component') === 'multi-address',
-);
-
-const isFlotationPresetScenario = computed(
-  () =>
-    isTextOverflowScenario.value ||
-    isParagraphOverflowInfoScenario.value ||
-    isMultiAddressScenario.value,
+  () => pageSlug.value === 'tooltip-scene-multi-address',
 );
 
 const propsSectionId = computed(() => `${pageSlug.value}-props`);
+
+const anchorId = computed(() => section.value?.id ?? pageSlug.value);
+
+const pageTitle = computed(() => {
+  if (overflowScene.value) {
+    return overflowScene.value.label;
+  }
+  if (isTooltipBodyPage.value) {
+    return 'Tooltip';
+  }
+  return section.value?.label ?? 'Tooltip';
+});
 </script>
 
 <template>
@@ -88,13 +149,14 @@ const propsSectionId = computed(() => `${pageSlug.value}-props`);
     <ComponentDocLayout
       v-if="section"
       v-model:customize-state="customize"
-      :anchor-id="section.id"
-      :title="section.label"
+      :anchor-id="anchorId"
+      :title="pageTitle"
       :show-doc-title="false"
       component-tag="EgAnchoredTooltip"
       :import-code="tooltipImportCode"
-      :customize-controls="tooltipCustomizeControls"
+      :customize-controls="customizeControls"
       :customize-defaults="customizeDefaults"
+      :customize-sequential="isTooltipBodyPage"
       :usage-snippet-override="usageSnippet"
       :prop-rows="tooltipPropRows"
       :slot-rows="tooltipSlotRows"
@@ -122,8 +184,9 @@ const propsSectionId = computed(() => `${pageSlug.value}-props`);
             :tooltip-trigger="String(customize.tooltipTrigger ?? 'hover') as 'hover' | 'focus'"
           />
           <EgAnchoredTooltip
-            v-else-if="!isFlotationPresetScenario"
+            v-else
             :placement="customize.placement as 'top' | 'bottom' | 'left' | 'right'"
+            :align="customize.align as 'start' | 'center' | 'end'"
             :trigger="customize.trigger as 'click' | 'hover'"
             :disabled="Boolean(customize.disabled)"
             v-bind="panelProps"

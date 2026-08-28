@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { EgIconButton } from '../icon-button';
+import { EgMessage, type MessageType } from '../feedback';
 import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import styles from './IconButtonPro.module.css';
 
@@ -12,6 +13,8 @@ const props = withDefaults(
     showReddot?: boolean;
     disabled?: boolean;
     type?: 'button' | 'submit' | 'reset';
+    /** showBadge 时 EgMessage 的 type。 */
+    messageType?: MessageType;
   }>(),
   {
     badge: 0,
@@ -19,6 +22,7 @@ const props = withDefaults(
     showReddot: false,
     disabled: false,
     type: 'button',
+    messageType: 'brand',
   },
 );
 
@@ -47,7 +51,7 @@ const showReddotIndicator = computed(() => props.showReddot && !props.showBadge)
         <slot />
       </EgIconButton>
       <span v-if="showBadgeIndicator" :class="styles.badge" aria-hidden="true">
-        <span :class="styles.badgeText">{{ formattedBadge }}</span>
+        <EgMessage :type="messageType" :text="formattedBadge" />
       </span>
       <span v-if="showReddotIndicator" :class="styles.reddot" aria-hidden="true" />
     </span>

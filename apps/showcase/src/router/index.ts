@@ -127,11 +127,14 @@ export const router = createRouter({
                 };
 
                 const tooltipHashToPage: Record<string, string> = {
-                  'tooltip-container': 'tooltip-container',
                   'tooltip-flotation': 'tooltip-flotation',
-                  'tooltip-popup': 'tooltip-popup',
+                  'tooltip-scene-text-overflow': 'tooltip-scene-text-overflow',
+                  'tooltip-scene-paragraph-overflow': 'tooltip-scene-paragraph-overflow',
+                  'tooltip-scene-multi-address': 'tooltip-scene-multi-address',
                   'tooltip-subtle': 'tooltip-subtle',
-                  'tooltip-molde': 'tooltip-molde',
+                  'tooltip-container': 'tooltip-flotation',
+                  'tooltip-popup': 'tooltip-flotation',
+                  'tooltip-molde': 'tooltip-flotation',
                 };
 
                 const popoversHashToPage: Record<string, string> = {
@@ -272,6 +275,14 @@ export const router = createRouter({
 
                 if (slug === 'tag-custom') {
                   return { path: '/components/tag-palette' };
+                }
+
+                if (
+                  slug === 'tooltip-container' ||
+                  slug === 'tooltip-popup' ||
+                  slug === 'tooltip-molde'
+                ) {
+                  return { path: '/components/tooltip-flotation' };
                 }
 
                 if (!isValidComponentSlug(slug)) {

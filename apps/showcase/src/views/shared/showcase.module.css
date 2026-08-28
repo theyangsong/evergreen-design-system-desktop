@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: var(--spacing-10);
   --showcase-page-header-offset: calc(
-    var(--spacing-4) + var(--eds-headline-small-line-height) + var(--spacing-1) +
+    var(--spacing-4) + var(--eds-headline-line-height) + var(--spacing-1) +
       var(--eds-body-medium-line-height) + var(--spacing-05) + var(--spacing-2)
   );
 }
@@ -19,9 +19,9 @@
 
 .sectionTitle {
   margin: 0;
-  font-size: var(--eds-title-small-size);
-  line-height: var(--eds-title-small-line-height);
-  font-weight: var(--eds-title-small-weight);
+  font-size: var(--eds-title-size);
+  line-height: var(--eds-title-line-height);
+  font-weight: var(--eds-title-weight);
 }
 
 .grid {
@@ -46,29 +46,53 @@
 .table {
   width: 100%;
   table-layout: fixed;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 var(--spacing-1);
 }
 
 .table th,
 .table td {
-  padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: var(--stroke-xs) solid var(--stroke-divider-page);
+  padding: var(--spacing-3) var(--spacing-4);
   text-align: left;
   vertical-align: top;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
+.table thead th:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.table thead th:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.table tbody tr td {
+  transition: var(--motion-recipe-hover);
+}
+
+.table tbody tr td:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.table tbody tr td:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.table tbody tr:hover td {
+  background-color: var(--event-hover);
+}
+
 .table th {
   background: var(--material-card-shallow);
-  font-size: var(--eds-footnote-medium-size);
-  font-weight: var(--eds-footnote-medium-strong-weight);
-  line-height: var(--eds-footnote-medium-line-height);
+  font-size: var(--eds-footnote-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-line-height);
 }
 
 .table td {
-  font-size: var(--eds-footnote-large-size);
-  line-height: var(--eds-footnote-large-line-height);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .table th:nth-child(1),

@@ -13,6 +13,8 @@
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
+  /* 把 Popup Box 圆角往下传给 .scroll / .toolbar（贴角 chrome 须自带圆角） */
+  border-radius: inherit;
 }
 
 .systemBarClose {
@@ -64,6 +66,9 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  /* 贴 Popup Box 上沿；同时把圆角传给 .scrollTopEdge */
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
 }
 
 .scroll::-webkit-scrollbar {
@@ -72,12 +77,14 @@
   height: 0;
 }
 
+/* 滚动时顶部内容边缘渐隐（虚化），避免硬切 */
 .scrollFadeTop {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-4));
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--spacing-4));
   transition: var(--motion-recipe-scroll-fade);
 }
 
+/* 顶缘叠层：渐变虚化（非毛玻璃）；不用 backdrop-filter，避免滚动过渡时四角方角闪烁 */
 .scrollTopEdge {
   position: sticky;
   top: 0;
@@ -88,14 +95,15 @@
   margin-bottom: calc(-1 * var(--spacing-6));
   pointer-events: none;
   opacity: 0;
+  overflow: hidden;
   transition: var(--motion-recipe-scroll-fade);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   background: linear-gradient(
     to bottom,
     color-mix(in display-p3, var(--box-flotation) 88%, transparent),
     transparent
   );
-  backdrop-filter: saturate(120%) blur(var(--blur-subtle));
-  -webkit-backdrop-filter: saturate(120%) blur(var(--blur-subtle));
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
 }
@@ -128,6 +136,7 @@
   box-sizing: border-box;
 }
 
+/* 贴 Popup Box 下沿：圆角须与 Popup Box 一致（radius-lg），硬编码 radius-md 会短 4px */
 .toolbar {
   position: relative;
   z-index: 2;
@@ -136,8 +145,8 @@
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  border-bottom-right-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
   background: var(--box-page);
   transition: var(--motion-recipe-scroll-fade-background);
 }

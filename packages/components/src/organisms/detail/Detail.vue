@@ -1002,7 +1002,7 @@ onBeforeUnmount(() => {
                         :class="styles.itemAddressDashRule"
                         aria-hidden="true"
                       />
-                      <div :class="[styles.itemRow, styles.itemAddressActionRow]">
+                      <div :class="styles.itemRow">
                         <div
                           :class="styles.itemTitleSpacer"
                           aria-hidden="true"
@@ -1032,7 +1032,6 @@ onBeforeUnmount(() => {
                         <div
                           :class="[
                             styles.itemRow,
-                            styles.itemSubRow,
                             itemRowCopyable(item, entry) && styles.itemRowCopyable,
                           ]"
                           :role="itemRowCopyable(item, entry) ? 'button' : undefined"

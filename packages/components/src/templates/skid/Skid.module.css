@@ -61,11 +61,7 @@
   gap: var(--spacing-2);
   width: 100%;
   box-sizing: border-box;
-  height: var(--scale-15);
-  min-height: var(--scale-15);
-  max-height: var(--scale-15);
-  padding-left: var(--spacing-4);
-  padding-right: var(--spacing-2);
+  padding: var(--spacing-4) var(--spacing-2) var(--spacing-4) var(--spacing-4);
   overflow: hidden;
 }
 

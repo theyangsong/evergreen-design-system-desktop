@@ -3,7 +3,7 @@ import { EgDivider } from '../../atoms/divider';
 import { EgButton } from '../button';
 import styles from './ComboAction.module.css';
 
-import type { ButtonSize } from '../button/Button.vue';
+import type { ButtonSize, ButtonVariant } from '../button/Button.vue';
 
 export type ComboActionFlotationTone = 'brand' | 'decor';
 
@@ -12,6 +12,7 @@ export type ComboActionFlotationBarPadding = 'default' | 'inset-5';
 withDefaults(
   defineProps<{
     tone?: ComboActionFlotationTone;
+    variant?: ButtonVariant;
     divider?: boolean;
     clear?: boolean;
     confirmLabel?: string;
@@ -21,6 +22,7 @@ withDefaults(
   }>(),
   {
     tone: 'brand',
+    variant: 'solid',
     divider: false,
     clear: false,
     confirmLabel: 'Confirm',
@@ -69,7 +71,7 @@ const emit = defineEmits<{
         <EgButton :tone="tone" variant="text" :size="buttonSize" @click="emit('cancel')">
           {{ cancelLabel }}
         </EgButton>
-        <EgButton :tone="tone" variant="solid" :size="buttonSize" @click="emit('confirm')">
+        <EgButton :tone="tone" :variant="variant" :size="buttonSize" @click="emit('confirm')">
           {{ confirmLabel }}
         </EgButton>
       </div>

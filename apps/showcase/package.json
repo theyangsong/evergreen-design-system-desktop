@@ -4,20 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "pnpm --dir ../.. build:tokens && pnpm --dir ../.. build:animations && pnpm --dir ../../../eds-website build:tokens && pnpm --dir ../../../eds-website build:animations && pnpm --dir ../../../eds-website build:components",
+    "predev": "pnpm --dir ../.. build:tokens && pnpm --dir ../.. build:animations",
     "dev": "vite",
-    "prebuild": "pnpm --dir ../.. build:tokens && pnpm --dir ../.. build:animations && pnpm --dir ../.. build:components && pnpm --dir ../../../eds-website build:tokens && pnpm --dir ../../../eds-website build:animations && pnpm --dir ../../../eds-website build:components",
+    "prebuild": "pnpm --dir ../.. build:tokens && pnpm --dir ../.. build:animations && pnpm --dir ../.. build:components",
     "build": "vue-tsc --noEmit && vite build",
     "build:pages": "vite build && cp dist/index.html dist/404.html && touch dist/.nojekyll",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@eds/website-components": "link:../../../eds-website/packages/components",
     "@eds/desktop-components": "workspace:*",
     "@eds/desktop-animations": "workspace:*",
     "@eds/desktop-tokens": "link:../../packages/tokens",
-    "@eds/website-tokens": "link:../../../eds-website/packages/tokens",
     "highlight.js": "^11.11.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

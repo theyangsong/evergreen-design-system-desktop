@@ -29,20 +29,41 @@ import {
 } from './popupDocCustomize';
 import {
   ORGANISM_IMPORT,
-  popupCustomizeControls,
-  popupCustomizeDefaults,
+  buildPopupCustomizeControls,
+  buildPopupCustomizeDefaults,
   popupPropRows,
+  type PopupCustomizeUses,
+  type PopupSceneUses,
 } from './organismTemplateDocData';
 
-type PopupUses = 'detail' | 'dialog' | 'verify' | 'custom';
+type PopupUses = PopupCustomizeUses;
+
+const props = withDefaults(
+  defineProps<{
+    lockedUses?: PopupSceneUses;
+    pageTitle?: string;
+  }>(),
+  {},
+);
+
+const resolvedUses = computed((): PopupUses => props.lockedUses ?? 'custom');
+
+const customizeDefaults = computed(() => buildPopupCustomizeDefaults(resolvedUses.value));
 
 const customize = reactive({
-  ...popupCustomizeDefaults,
-  uses: popupCustomizeDefaults.uses as PopupUses,
-  alertVerticalAlign: popupCustomizeDefaults.alertVerticalAlign as 'center' | 'offset-top',
-  dialogType: popupCustomizeDefaults.dialogType as DialogType,
-  verifyType: popupCustomizeDefaults.verifyType as VerifyType,
+  ...buildPopupCustomizeDefaults(props.lockedUses),
 });
+
+const docCustomizeControls = computed(() => buildPopupCustomizeControls(resolvedUses.value));
+
+const docAnchorId = computed(() => {
+  if (resolvedUses.value === 'detail') return 'popup-scene-detail';
+  if (resolvedUses.value === 'dialog') return 'popup-scene-dialog';
+  if (resolvedUses.value === 'verify') return 'popup-scene-verify';
+  return 'popup';
+});
+
+const docTitle = computed(() => props.pageTitle ?? 'Popup');
 
 const popupCustomSystemBarProps = computed(() => resolvePopupCustomSystemBarProps(customize));
 const popupCustomToolbarProps = computed(() => resolvePopupCustomToolbarProps(customize));
@@ -63,18 +84,17 @@ const { verify, onComplete, onRecover, reset: resetVerifySubmit } = useVerifySub
 
 const verifyType = computed(() => customize.verifyType as VerifyType);
 
-watch(
-  () => customize.uses,
-  (uses) => {
-    if (uses === 'detail') {
-      return;
-    }
-    customize.alertVerticalAlign = uses === 'custom' ? 'center' : 'offset-top';
-    if (uses === 'verify') {
-      resetVerifySubmit();
-    }
-  },
-);
+watch(resolvedUses, (uses) => {
+  customize.uses = uses;
+  if (uses === 'custom') {
+    customize.alertVerticalAlign = 'center';
+    return;
+  }
+  customize.alertVerticalAlign = 'offset-top';
+  if (uses === 'verify') {
+    resetVerifySubmit();
+  }
+});
 
 watch(popupOpen, (open) => {
   if (open) {
@@ -109,17 +129,17 @@ function closePopup() {
   <div :class="styles.previewPage">
     <ComponentDocLayout
       v-model:customize-state="customize"
-      title="Popup"
+      :anchor-id="docAnchorId"
+      :title="docTitle"
       doc-tier="template"
       :show-doc-title="false"
       component-tag="EgPopup"
       :import-code="ORGANISM_IMPORT"
-      :customize-controls="popupCustomizeControls"
-      :customize-defaults="popupCustomizeDefaults"
+      :customize-controls="docCustomizeControls"
+      :customize-defaults="customizeDefaults"
       :prop-rows="popupPropRows"
       :slot-rows="popupDocSlotRows"
       props-section-id="popup-props"
-      tall-preview
     >
       <template #preview>
         <div
@@ -173,34 +193,30 @@ function closePopup() {
         </div>
       </template>
 
-      <template #customize-after>
-        <CustomizePanel
-          v-if="customize.uses === 'custom'"
-          v-model="customize"
-          title="System Bar"
-          nested
-          embedded
-          :controls="popupCustomSystemBarCustomizeControls"
-        />
-        <CustomizePanel
-          v-if="customize.uses === 'custom'"
-          v-model="customize"
-          title="Toolbar"
-          nested
-          embedded
-          :controls="popupCustomToolbarCustomizeControls"
-        />
-        <CustomizePanel
-          v-if="customize.uses === 'custom'"
-          v-model="customize"
-          title="Content"
-          nested
-          embedded
-          :controls="popupCustomContentCustomizeControls"
-        />
-      </template>
-
       <template #customize-extra>
+        <div v-if="customize.uses === 'custom'" :class="docStyles.customizeExtraStack">
+          <CustomizePanel
+            v-model="customize"
+            title="System Bar"
+            nested
+            embedded
+            :controls="popupCustomSystemBarCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="Toolbar"
+            nested
+            embedded
+            :controls="popupCustomToolbarCustomizeControls"
+          />
+          <CustomizePanel
+            v-model="customize"
+            title="Content"
+            nested
+            embedded
+            :controls="popupCustomContentCustomizeControls"
+          />
+        </div>
         <div v-if="!popupOpen" :class="docStyles.previewReopenHint">
           <EgButton size="md" tone="brand" @click="popupOpen = true">重新打开 Popup</EgButton>
         </div>

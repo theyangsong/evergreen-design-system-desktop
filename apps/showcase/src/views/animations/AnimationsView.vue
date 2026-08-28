@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/styles/desktop-components-scope.css';
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import PageHeader from '@/components/shared/PageHeader.vue';
@@ -27,7 +26,7 @@ watch(activeSlug, () => {
 </script>
 
 <template>
-  <div :class="styles.pageWithAnchors">
+  <div :class="[styles.pageWithAnchors, styles.pageWithAnchorsWithAside]">
     <div :class="[shared.page, styles.componentPage]">
       <PageHeader :title="headerTitle" :lead="headerLead" />
 

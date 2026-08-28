@@ -59,6 +59,8 @@ const props = withDefaults(
     /** 自定义/自适应宽度时的交叉轴对齐；等宽触发器时固定 start。 */
     align?: TooltipAlign;
     disabled?: boolean;
+    /** 主轴与触发器间距（px）；未传时读 --spacing-025。 */
+    offset?: number;
     /** 交叉轴偏移（px）；未传时 start=-spacing-2、end=+spacing-2、center=0。 */
     crossAxisOffset?: number;
     widthMode?: FlotationWidthMode;
@@ -93,6 +95,8 @@ const props = withDefaults(
     trigger?: TooltipTrigger;
     openDelay?: number;
     closeDelay?: number;
+    /** 菜单高亮行；定制区等需与当前值对齐时传入。未传时默认 0。 */
+    selectedIndex?: number | null;
   }>(),
   {
     placement: 'bottom',
@@ -137,7 +141,7 @@ const emit = defineEmits<{
 
 const slots = useSlots();
 const menuOpen = ref(false);
-const selectedIndex = ref<number | null>(0);
+const selectedIndex = ref<number | null>(props.selectedIndex ?? 0);
 const anchoredRef = ref<AnchoredApi | null>(null);
 const triggerMatchWidth = ref<number | undefined>(undefined);
 const mainAxisGapPx = ref(FALLBACK_MAIN_AXIS_PX);
@@ -194,8 +198,8 @@ const menuAlign = computed((): TooltipAlign =>
   props.widthMode === 'trigger' ? 'start' : props.align,
 );
 
-/** 主轴间距固定为 --spacing-025。 */
-const menuOffset = computed(() => mainAxisGapPx.value);
+/** 主轴间距固定为 --spacing-025，可经 offset 覆盖。 */
+const menuOffset = computed(() => props.offset ?? mainAxisGapPx.value);
 
 /** 交叉轴 inset：start 向左扩 spacing-2；end 向右扩 spacing-2；center 不额外偏移。 */
 const menuCrossAxisOffset = computed(() => {
@@ -278,6 +282,15 @@ watch(
 
 function syncSelectedIndex() {
   const len = resolvedItems.value.length;
+  if (props.selectedIndex !== undefined) {
+    if (len === 0) {
+      selectedIndex.value = null;
+      return;
+    }
+    const index = props.selectedIndex ?? 0;
+    selectedIndex.value = index >= 0 && index < len ? index : 0;
+    return;
+  }
   if (len === 0) {
     if (selectedIndex.value !== null) {
       selectedIndex.value = null;
@@ -292,6 +305,14 @@ function syncSelectedIndex() {
 }
 
 watch(() => props.items, syncSelectedIndex);
+
+watch(
+  () => props.selectedIndex,
+  (index) => {
+    if (index === undefined) return;
+    syncSelectedIndex();
+  },
+);
 
 watch(
   () =>

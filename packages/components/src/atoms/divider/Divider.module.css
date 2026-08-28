@@ -20,14 +20,10 @@
 
 .typeModule.horizontal {
   height: var(--stroke-sm);
-  min-height: var(--stroke-sm);
-  max-height: var(--stroke-sm);
 }
 
 .typeModule.vertical {
   width: var(--stroke-sm);
-  min-width: var(--stroke-sm);
-  max-width: var(--stroke-sm);
 }
 
 .typePage {

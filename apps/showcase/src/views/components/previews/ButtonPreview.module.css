@@ -96,9 +96,9 @@
 
 .docSizeLabel {
   color: var(--text-base-secondary);
-  font-size: var(--eds-footnote-large-size);
-  font-weight: var(--eds-footnote-large-strong-weight);
-  line-height: var(--eds-footnote-large-line-height);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .heroPreview {
@@ -154,8 +154,8 @@
   background: transparent;
   color: var(--text-base-secondary);
   cursor: default;
-  font-size: var(--eds-footnote-large-size);
-  line-height: var(--eds-footnote-large-line-height);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .copyButton:hover,

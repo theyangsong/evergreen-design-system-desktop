@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { EgButton } from '../button';
+import type { ButtonVariant } from '../button/Button.vue';
 import styles from './ComboAction.module.css';
 
 export type ComboActionPopupTone = 'brand' | 'decor';
@@ -8,6 +9,7 @@ export type ComboActionPopupTone = 'brand' | 'decor';
 const props = withDefaults(
   defineProps<{
     tone?: ComboActionPopupTone;
+    variant?: ButtonVariant;
     count?: 1 | 2 | '1' | '2';
     confirmLabel?: string;
     cancelLabel?: string;
@@ -15,6 +17,7 @@ const props = withDefaults(
   }>(),
   {
     tone: 'brand',
+    variant: 'solid',
     count: 2,
     confirmLabel: 'Confirm',
     cancelLabel: 'Cancel',
@@ -35,7 +38,7 @@ const resolvedCount = computed(() => (Number(props.count) === 1 ? 1 : 2));
     <EgButton
       :class="styles.fullWidth"
       :tone="tone"
-      variant="solid"
+      :variant="variant"
       size="md"
       :disabled="confirmDisabled"
       @click="emit('confirm')"

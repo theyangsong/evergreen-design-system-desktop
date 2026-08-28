@@ -4,10 +4,10 @@ import {
   catalogBodyWithScenesSection,
   catalogFamilyBodyAndScenes,
   catalogFamilyBodyWithBusinessPresets,
+  catalogFamilyBodyWithSelectiveBusinessPresets,
   catalogScene,
   catalogScenesSection,
   catalogSubgroup,
-  catalogSubgroupScene,
 } from '../catalogHelpers';
 
 export const componentCatalog: CatalogSection[] = [
@@ -52,9 +52,9 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('input-input', 'Input'),
           'input-scenes',
           [
-            { id: 'input-combo-input', label: 'InputCombo' },
-            { id: 'input-verify-input', label: 'InputVerify' },
-            { id: 'input-search', label: 'InputSearch' },
+            { id: 'input-combo-input', label: '标准组合' },
+            { id: 'input-verify-input', label: '验证码' },
+            { id: 'input-search', label: '搜索框' },
           ],
         ),
       },
@@ -66,7 +66,7 @@ export const componentCatalog: CatalogSection[] = [
         children: catalogFamilyBodyAndScenes(
           catalogBody('input-textarea', 'Textarea'),
           'textarea-scenes',
-          [{ id: 'input-combo-textarea', label: 'TextareaCombo' }],
+          [{ id: 'input-combo-textarea', label: '标准组合' }],
         ),
       },
       {
@@ -78,11 +78,11 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('button-text', 'Button'),
           'button-scenes',
           [
-            { id: 'button-combo', label: 'ButtonCombo' },
-            { id: 'button-icon', label: 'IconButton' },
-            { id: 'button-icon-pro', label: 'IconButtonPro' },
-            { id: 'button-link', label: 'Link' },
-            { id: 'button-pagination', label: 'Pagination' },
+            { id: 'button-combo', label: '标准组合' },
+            { id: 'button-icon', label: '符号' },
+            { id: 'button-icon-pro', label: '符号组合' },
+            { id: 'button-link', label: '文本' },
+            { id: 'button-pagination', label: '分页器组' },
           ],
         ),
       },
@@ -95,9 +95,12 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('tooltip-flotation', 'Tooltip'),
           'tooltip-scenes',
           [
-            { id: 'tooltip-container', label: 'ContainerBox' },
-            { id: 'tooltip-popup', label: 'PopupBox' },
-            { id: 'tooltip-molde', label: 'ModeLevel' },
+            { id: 'tooltip-scene-text-overflow', label: '字段溢出' },
+            { id: 'tooltip-scene-paragraph-overflow', label: '段落溢出' },
+            {
+              id: 'tooltip-scene-multi-address',
+              label: '地址溢出（Item、可复制）',
+            },
           ],
         ),
       },
@@ -110,9 +113,9 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('popovers-popover', 'Popover'),
           'popover-scenes',
           [
-            { id: 'popovers-scens-guidance', label: 'Guidance' },
-            { id: 'popovers-scens-notes', label: 'Notes' },
-            { id: 'popovers-scens-gas-fee', label: 'GasFee' },
+            { id: 'popovers-scens-guidance', label: '引导' },
+            { id: 'popovers-scens-notes', label: '备注' },
+            { id: 'popovers-scens-gas-fee', label: '矿工费' },
           ],
         ),
       },
@@ -123,38 +126,34 @@ export const componentCatalog: CatalogSection[] = [
           '浮层下拉：#trigger / #content 插槽；预置 Trigger（Style/Size）与 Box（Type），Menu 嵌套 EgTooltip。',
         status: 'implemented',
         children: [
-          catalogSubgroup('flotation-trigger-line', 'Trigger'),
-          catalogBody('flotation-trigger', 'Trigger', 'flotation-trigger'),
-          catalogScenesSection('flotation-trigger-scenes'),
-          catalogScene(
+          catalogSubgroup('flotation-interaction-group', '本体'),
+          catalogBody('flotation-overview', 'Flotation', 'flotation'),
+          catalogSubgroup('flotation-trigger-group', '触发器'),
+          catalogBody('flotation-trigger', '标准触发器', 'flotation-trigger'),
+          catalogBody(
             'flotation-trigger-scene-module-menu',
-            'ModuleMenu',
-            'flotation-trigger-scenes',
+            '模块菜单',
             'flotation-trigger-scene-module-menu',
           ),
-          catalogSubgroup('flotation-box-line', 'Box'),
-          catalogBody('flotation-box', 'DropDownMenu', 'flotation-box'),
-          catalogSubgroup('flotation-box-slot', 'Slot'),
-          catalogSubgroupScene(
+          catalogSubgroup('flotation-container-group', '容器'),
+          catalogBody('flotation-container-tooltip', '标准容器', 'flotation-container-tooltip'),
+          catalogSubgroup('flotation-slot-group', '插槽'),
+          catalogBody('flotation-box', '标准菜单', 'flotation-box'),
+          catalogBody(
             'flotation-box-cascade-menu',
-            'CascadeMenu',
-            'flotation-box-slot',
+            '标准级联菜单',
             'flotation-box-cascade-menu',
           ),
-          catalogSubgroupScene(
+          catalogBody(
             'flotation-box-address-dropdown',
-            'DropDownAddress',
-            'flotation-box-slot',
+            '下拉地址',
             'flotation-box-address-dropdown',
           ),
-          catalogSubgroupScene(
+          catalogBody(
             'flotation-box-address-hover',
-            'AddressHover',
-            'flotation-box-slot',
+            '地址悬浮',
             'flotation-box-address-hover',
           ),
-          catalogSubgroup('flotation-combo-line', 'Combo'),
-          catalogBody('flotation-overview', 'Interaction', 'flotation'),
         ],
       },
       {
@@ -166,9 +165,9 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('tag-system', 'Tag'),
           'tag-scenes',
           [
-            { id: 'tag-status', label: 'Status' },
-            { id: 'tag-colorful', label: 'Colorful' },
-            { id: 'tag-palette', label: 'Palette' },
+            { id: 'tag-status', label: '状态' },
+            { id: 'tag-colorful', label: '彩色' },
+            { id: 'tag-palette', label: '业务' },
           ],
         ),
       },
@@ -273,8 +272,8 @@ export const componentCatalog: CatalogSection[] = [
           catalogBody('dialog-standard', 'Dialog'),
           'dialog-scenes',
           [
-            { id: 'dialog-symbol', label: 'DialogSymbol' },
-            { id: 'dialog-compose', label: 'Compose' },
+            { id: 'dialog-symbol', label: '带符号的对话' },
+            { id: 'dialog-compose', label: '业务对话' },
           ],
         ),
       },
@@ -327,7 +326,12 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'nav-bar',
             description: 'Top application navigation bar.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets('nav-bar', 'NavBar', 'nav-bar'),
+            children: catalogFamilyBodyWithSelectiveBusinessPresets(
+              'nav-bar',
+              'NavBar',
+              'nav-bar',
+              ['cregis'],
+            ),
           },
           {
             name: 'ModuleMenu',
@@ -346,14 +350,14 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'tool-bar',
             description: 'Contextual toolbar for page-level actions.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets('tool-bar', 'ToolBar', 'tool-bar'),
+            children: catalogBodyWithScenesSection('tool-bar', 'ToolBar', 'tool-bar-scenes'),
           },
           {
             name: 'BatchBar',
             slug: 'batch-bar',
             description: 'Bulk action bar for multi-selected items.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets('batch-bar', 'BatchBar', 'batch-bar'),
+            children: catalogBodyWithScenesSection('batch-bar', 'BatchBar', 'batch-bar-scenes'),
           },
           {
             name: 'DataGrid',
@@ -403,9 +407,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-email',
             description: 'Email verification step.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-email',
               'Email',
+              'verify-email-scenes',
               'verify-email',
             ),
           },
@@ -414,9 +419,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-google',
             description: 'Google authenticator verification step.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-google',
               'Google',
+              'verify-google-scenes',
               'verify-google',
             ),
           },
@@ -425,9 +431,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-login-password',
             description: 'Login password verification step.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-login-password',
               'LoginPassword',
+              'verify-login-password-scenes',
               'verify-login-password',
             ),
           },
@@ -436,9 +443,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-transaction-password',
             description: 'Transaction password verification step.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-transaction-password',
               'TransactionPassword',
+              'verify-transaction-password-scenes',
               'verify-transaction-password',
             ),
           },
@@ -447,9 +455,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-passkey',
             description: 'PassKey verification step.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-passkey',
               'PassKey',
+              'verify-passkey-scenes',
               'verify-passkey',
             ),
           },
@@ -458,9 +467,10 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'verify-locked',
             description: 'Account locked verification state.',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets(
+            children: catalogBodyWithScenesSection(
               'verify-locked',
               'Locked',
+              'verify-locked-scenes',
               'verify-locked',
             ),
           },
@@ -474,7 +484,7 @@ export const componentCatalog: CatalogSection[] = [
             slug: 'detail',
             description: 'Popup detail layout for entity inspection (880px).',
             status: 'implemented',
-            children: catalogFamilyBodyWithBusinessPresets('detail', 'Detail', 'detail'),
+            children: catalogBodyWithScenesSection('detail', 'Detail', 'detail-scenes'),
           },
         ],
       },
@@ -488,28 +498,36 @@ export const componentCatalog: CatalogSection[] = [
         slug: 'container',
         description: 'Page container with standard content width.',
         status: 'implemented',
-        children: catalogFamilyBodyWithBusinessPresets('container', 'Container', 'container'),
+        children: catalogBodyWithScenesSection('container', 'Container', 'container-scenes'),
       },
       {
         name: 'Layout',
         slug: 'layout',
         description: 'Application shell layout scaffold.',
         status: 'implemented',
-        children: catalogFamilyBodyWithBusinessPresets('layout', 'Layout', 'layout'),
+        children: catalogBodyWithScenesSection('layout', 'Layout', 'layout-scenes'),
       },
       {
         name: 'Popup',
         slug: 'popup',
         description: 'Modal and popup page framing.',
         status: 'implemented',
-        children: catalogFamilyBodyWithBusinessPresets('popup', 'Popup', 'popup'),
+        children: catalogFamilyBodyAndScenes(
+          catalogBody('popup', 'Popup'),
+          'popup-scenes',
+          [
+            { id: 'popup-scene-detail', label: '详情', pageSlug: 'popup-scene-detail' },
+            { id: 'popup-scene-dialog', label: '提醒', pageSlug: 'popup-scene-dialog' },
+            { id: 'popup-scene-verify', label: '安全', pageSlug: 'popup-scene-verify' },
+          ],
+        ),
       },
       {
         name: 'Skid',
         slug: 'skid',
         description: 'Sliding panel template for secondary flows.',
         status: 'implemented',
-        children: catalogFamilyBodyWithBusinessPresets('skid', 'Skid', 'skid'),
+        children: catalogBodyWithScenesSection('skid', 'Skid', 'skid-scenes'),
       },
     ],
   },
