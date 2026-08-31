@@ -22,6 +22,11 @@ import {
   scheduleOverflowMeasureAfterLayoutSettle,
   type LayoutSettleTimerRef,
 } from '../../utils/overflowMeasureDuringLayout';
+import {
+  isClippedInsideBoundary,
+  isElementTextOverflowing,
+  isTextWiderThanContainers,
+} from '../../utils/overflowTextMeasure';
 import EgAnchoredTooltip, { type TooltipTrigger } from './AnchoredTooltip.vue';
 import styles from './TextOverflowTooltip.module.css';
 import {
@@ -224,8 +229,18 @@ function measureOverflow() {
   }
 
   const scrollWidth = el.scrollWidth;
-  const clientWidth = el.clientWidth;
-  if (scrollWidth > clientWidth + 1) {
+  if (isElementTextOverflowing(el)) {
+    overflowing.value = true;
+    return;
+  }
+
+  if (
+    isTextWiderThanContainers(el, [
+      host,
+      host?.parentElement,
+      host?.parentElement?.parentElement,
+    ])
+  ) {
     overflowing.value = true;
     return;
   }
@@ -233,6 +248,14 @@ function measureOverflow() {
   if (host && scrollWidth > host.clientWidth + 1) {
     overflowing.value = true;
     return;
+  }
+
+  if (host) {
+    const cell = host.closest('td') ?? host.closest('th');
+    if (isClippedInsideBoundary(host, cell)) {
+      overflowing.value = true;
+      return;
+    }
   }
 
   overflowing.value = false;
@@ -255,6 +278,18 @@ function bindResizeObserver() {
   }
   if (hostRef.value) {
     resizeObserver.observe(hostRef.value);
+    const wrap = hostRef.value.parentElement;
+    const segment = wrap?.parentElement;
+    if (wrap) {
+      resizeObserver.observe(wrap);
+    }
+    if (segment) {
+      resizeObserver.observe(segment);
+    }
+    const cell = hostRef.value.closest('td') ?? hostRef.value.closest('th');
+    if (cell) {
+      resizeObserver.observe(cell);
+    }
   }
 }
 

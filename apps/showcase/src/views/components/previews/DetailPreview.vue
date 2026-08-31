@@ -186,6 +186,7 @@ function closeOrdersPopup() {
               :show-toolbar="Boolean(customize.showToolbar)"
               :toolbar-divider-pinned="Boolean(customize.toolbarDividerPinned)"
               :show-toolbar-nav="Boolean(customize.showToolbarNav)"
+              :show-toolbar-note="Boolean(customize.showToolbarNote)"
               :toolbar-current="String(customize.toolbarCurrent)"
               :toolbar-total="String(customize.toolbarTotal)"
               :toolbar-prev-disabled="toolbarPrevDisabled"

@@ -70,7 +70,7 @@ function buildAddressList(
   );
 }
 
-const displayText = computed(() => truncateAddressMiddle(props.text, 6, 6));
+const displayText = computed(() => truncateAddressMiddle(props.text));
 const normalizedAddressCount = computed(() => normalizeAddressCount(props.addressCount));
 const showAddressCollection = computed(() => normalizedAddressCount.value > 2);
 const showAddressCount = computed(() => showAddressCollection.value);

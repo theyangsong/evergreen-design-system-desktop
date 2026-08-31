@@ -11,6 +11,11 @@ import {
   scheduleOverflowMeasureAfterLayoutSettle,
   type LayoutSettleTimerRef,
 } from '../../utils/overflowMeasureDuringLayout';
+import {
+  isClippedInsideBoundary,
+  isElementTextOverflowing,
+  isTextWiderThanContainers,
+} from '../../utils/overflowTextMeasure';
 import styles from './DataList.module.css';
 
 const props = withDefaults(
@@ -82,17 +87,17 @@ function measureOverflow() {
     return;
   }
 
-  const scrollWidth = el.scrollWidth;
-  const clientWidth = el.clientWidth;
-  if (scrollWidth > clientWidth + 1) {
+  if (isElementTextOverflowing(el)) {
     overflowing.value = true;
     return;
   }
 
-  /** Combo 表头：文本节点未收缩但 host 已收缩（列宽钳制）时仍视为溢出。 */
   if (props.context === 'header') {
     const host = wrapRef.value;
-    if (host && scrollWidth > host.clientWidth + 1) {
+    if (
+      isTextWiderThanContainers(el, [el, host, host?.parentElement])
+      || isClippedInsideBoundary(host ?? el, host?.closest('th') ?? el.closest('th'))
+    ) {
       overflowing.value = true;
       return;
     }
@@ -124,6 +129,18 @@ function bindResizeObserver() {
   }
   if (props.context === 'header' && wrapRef.value) {
     resizeObserver.observe(wrapRef.value);
+    const textWrap = wrapRef.value.parentElement;
+    const segment = textWrap?.parentElement;
+    if (textWrap) {
+      resizeObserver.observe(textWrap);
+    }
+    if (segment) {
+      resizeObserver.observe(segment);
+    }
+    const th = wrapRef.value.closest('th');
+    if (th) {
+      resizeObserver.observe(th);
+    }
   }
 }
 

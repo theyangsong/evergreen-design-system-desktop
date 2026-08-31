@@ -75,16 +75,18 @@ function onSubmit(event: MouseEvent) {
       @focus="onFocus"
       @blur="onBlur"
     />
-    <EgPaginationItem
-      v-if="showSubmit"
-      kind="button"
-      tone="decor"
-      :disabled="submitDisabled"
-      :label="submitLabel"
-      @mousedown.prevent
-      @click="onSubmit"
-    >
-      <EgIcon name="eds-arrow-right" fit />
-    </EgPaginationItem>
+    <div :class="styles.setInputSubmitSlot" :aria-hidden="!showSubmit">
+      <EgPaginationItem
+        kind="button"
+        tone="decor"
+        :class="!showSubmit && styles.setInputSubmitHidden"
+        :disabled="submitDisabled"
+        :label="submitLabel"
+        @mousedown.prevent
+        @click="onSubmit"
+      >
+        <EgIcon name="eds-arrow-right" fit />
+      </EgPaginationItem>
+    </div>
   </div>
 </template>

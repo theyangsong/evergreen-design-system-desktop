@@ -1,7 +1,7 @@
 /** 中间省略：前 head + … + 后 tail */
 export function truncateAddressMiddle(
   value: string,
-  head = 6,
+  head = 8,
   tail = 6,
 ): string {
   if (!value || value.includes('...')) return value;
@@ -18,7 +18,7 @@ export function formatAddressDisplayText(options: {
   const alias = options.alias?.trim();
   if (alias) return alias;
 
-  return truncateAddressMiddle(options.address, 6, 6);
+  return truncateAddressMiddle(options.address);
 }
 
 export function formatAddressTooltipLine(address: string, alias?: string): string {

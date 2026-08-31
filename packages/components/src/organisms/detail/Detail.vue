@@ -295,6 +295,8 @@ const props = withDefaults(
     toolbarDirection?: 'left' | 'right';
     /** 工具栏顶部分割线常驻（不依赖底部是否仍有内容被裁切）。 */
     toolbarDividerPinned?: boolean;
+    showToolbarNote?: boolean;
+    toolbarNoteLabel?: string;
     toolbarConfirmLabel?: string;
     toolbarCancelLabel?: string;
     valueCopyLabel?: string;
@@ -324,6 +326,8 @@ const props = withDefaults(
     toolbarTone: 'decor',
     toolbarDirection: 'right',
     toolbarDividerPinned: false,
+    showToolbarNote: true,
+    toolbarNoteLabel: 'Info.',
     toolbarConfirmLabel: 'Confirm',
     toolbarCancelLabel: 'Cancel',
     valueCopyLabel: 'Copy',
@@ -337,6 +341,7 @@ const emit = defineEmits<{
   close: [];
   toolbarPrev: [];
   toolbarNext: [];
+  toolbarNote: [];
   toolbarConfirm: [];
   toolbarCancel: [];
   itemValueLinkClick: [key: string];
@@ -1278,6 +1283,19 @@ onBeforeUnmount(() => {
                 :hide="!showToolbarDivider"
               />
               <div :class="styles.toolbarBar">
+                <div v-if="showToolbarNote" :class="styles.toolbarLeading">
+                  <EgButton
+                    tone="subtle"
+                    variant="outline"
+                    size="md"
+                    @click="emit('toolbarNote')"
+                  >
+                    <template #icon>
+                      <EgIcon name="eds-editor" fit size="md" />
+                    </template>
+                    {{ toolbarNoteLabel }}
+                  </EgButton>
+                </div>
                 <div v-if="showToolbarNav" :class="styles.toolbarStart">
                   <div :class="styles.toolbarNav">
                     <EgPaginationItem
@@ -1289,6 +1307,10 @@ onBeforeUnmount(() => {
                     >
                       <EgIcon name="eds-arrow-left" fit />
                     </EgPaginationItem>
+                    <span :class="styles.toolbarCounter">
+                      <span :class="styles.toolbarCounterCurrent">{{ toolbarCounterCurrentText }}</span>
+                      <span :class="styles.toolbarCounterRest">/ {{ toolbarCounterTotalText }}</span>
+                    </span>
                     <EgPaginationItem
                       kind="borderArrow"
                       label="下一项"
@@ -1300,10 +1322,6 @@ onBeforeUnmount(() => {
                     </EgPaginationItem>
                   </div>
                 </div>
-                <span v-if="showToolbarNav" :class="styles.toolbarCounter">
-                  <span :class="styles.toolbarCounterCurrent">{{ toolbarCounterCurrentText }}</span>
-                  <span :class="styles.toolbarCounterRest">/ {{ toolbarCounterTotalText }}</span>
-                </span>
                 <div
                   :class="[
                     styles.toolbarActions,

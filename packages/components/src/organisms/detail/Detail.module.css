@@ -210,12 +210,11 @@
   box-sizing: border-box;
 }
 
-.sectionDivider {
+.sections > .sectionDivider {
   flex-shrink: 0;
-  width: 100%;
-  padding-inline: var(--spacing-3);
+  width: calc(100% - 2 * var(--spacing-3));
+  margin-inline: var(--spacing-3);
   box-sizing: border-box;
-  background-clip: content-box;
 }
 
 .sectionTitleRow {
@@ -471,11 +470,22 @@
   box-sizing: border-box;
 }
 
-.toolbarStart {
+.toolbarLeading {
   display: flex;
-  flex: 1 1 auto;
+  flex-shrink: 0;
   align-items: center;
   min-width: 0;
+}
+
+.toolbarStart {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
 }
 
 .toolbarNav {
@@ -483,21 +493,18 @@
   flex-shrink: 0;
   align-items: center;
   gap: var(--spacing-2);
+  pointer-events: auto;
 }
 
 .toolbarCounter {
-  position: absolute;
-  left: 50%;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
   min-width: 0;
-  max-width: calc(100% - var(--spacing-4) * 2);
+  max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  pointer-events: none;
-  transform: translateX(-50%);
 }
 
 .toolbarCounterCurrent {
@@ -529,4 +536,5 @@
 
 .toolbarActionsRight {
   justify-content: flex-end;
+  margin-left: auto;
 }

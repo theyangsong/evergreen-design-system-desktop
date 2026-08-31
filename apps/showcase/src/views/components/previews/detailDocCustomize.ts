@@ -194,7 +194,8 @@ export const detailCustomizeDefaults = {
   section1EditItemIndex: '1',
   section2EditItemIndex: '1',
   showToolbar: true,
-  showToolbarNav: true,
+  showToolbarNav: false,
+  showToolbarNote: true,
   toolbarDividerPinned: true,
   toolbarCurrent: '12',
   toolbarTotal: '1000',
@@ -592,6 +593,12 @@ export const detailToolbarCustomizeControls: DocCustomizeControl[] = [
     visibleWhen: (state) => Boolean(state.showToolbar),
   },
   {
+    kind: 'boolean',
+    key: 'showToolbarNote',
+    label: '备注',
+    visibleWhen: (state) => Boolean(state.showToolbar),
+  },
+  {
     kind: 'text',
     key: 'toolbarCurrent',
     label: '当前序号',
@@ -821,6 +828,12 @@ export function buildDetailUsageSnippet(state: Record<string, unknown>): string 
       `  toolbar-current="${String(state.toolbarCurrent ?? '12')}"`,
       `  toolbar-total="${String(state.toolbarTotal ?? '1000')}"`,
     );
+  } else if (state.showToolbar) {
+    lines.push('  :show-toolbar-nav="false"');
+  }
+
+  if (state.showToolbar && state.showToolbarNote === false) {
+    lines.push('  :show-toolbar-note="false"');
   }
 
   lines.push(
@@ -861,7 +874,8 @@ export const detailPropRows: DocPropRow[] = [
   { name: 'activeTab', type: 'number', defaultValue: '0', description: 'v-model:activeTab — Headline Tabs 选中索引。' },
   { name: 'showToolbar', type: 'boolean', defaultValue: 'true', description: '底部工具栏（翻页 + Cancel / Confirm）。' },
   { name: 'toolbarDividerPinned', type: 'boolean', defaultValue: 'false', description: '工具栏顶部分割线常驻；false 时仅在底部仍有内容被裁切时显示。' },
-  { name: 'showToolbarNav', type: 'boolean', defaultValue: 'true', description: '工具栏左侧 EgPaginationItem borderArrow 与序号计数。' },
+  { name: 'showToolbarNav', type: 'boolean', defaultValue: 'true', description: '工具栏中部 EgPaginationItem borderArrow 与序号计数。' },
+  { name: 'showToolbarNote', type: 'boolean', defaultValue: 'true', description: '工具栏左侧备注按钮（EgButton subtle outline）。' },
   { name: 'toolbarCurrent', type: 'string | number', defaultValue: '12', description: '当前序号（千分位格式化）。' },
   { name: 'toolbarTotal', type: 'string | number', defaultValue: '1000', description: '总条数（千分位格式化）。' },
   { name: 'toolbarPrevDisabled', type: 'boolean', defaultValue: 'false', description: '上一项 borderArrow 禁用。' },
@@ -881,6 +895,7 @@ export const detailEventRows: DocPropRow[] = [
   { name: 'close', type: '[]', defaultValue: '-', description: '系统条关闭按钮；键盘 Esc（非输入焦点时）。' },
   { name: 'toolbarPrev', type: '[]', defaultValue: '-', description: '工具栏上一项 borderArrow。' },
   { name: 'toolbarNext', type: '[]', defaultValue: '-', description: '工具栏下一项 borderArrow。' },
+  { name: 'toolbarNote', type: '[]', defaultValue: '-', description: '工具栏备注按钮。' },
   { name: 'toolbarConfirm', type: '[]', defaultValue: '-', description: '工具栏确认按钮。' },
   { name: 'toolbarCancel', type: '[]', defaultValue: '-', description: '工具栏取消按钮。' },
   { name: 'itemValueLinkClick', type: '[key: string]', defaultValue: '-', description: 'Item 行尾 EgLink（showValueLink / 多地址 Expand·Orders 链）点击；payload 为 item.key 或 `${sectionIndex}-${itemIndex}`。' },

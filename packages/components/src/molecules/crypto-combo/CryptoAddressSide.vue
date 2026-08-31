@@ -92,7 +92,7 @@ const addressList = computed(() =>
 
 const primaryAlias = computed(() => props.alias?.trim() || undefined);
 
-const displayAddress = computed(() => truncateAddressMiddle(props.address, 6, 6));
+const displayAddress = computed(() => truncateAddressMiddle(props.address));
 
 const addressDisplayText = computed(
   () => primaryAlias.value ?? displayAddress.value,
