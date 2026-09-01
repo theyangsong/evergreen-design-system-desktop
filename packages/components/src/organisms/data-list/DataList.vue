@@ -450,15 +450,14 @@ function buildColumnMetas() {
   });
 }
 
-const selectColumnBudgetPx = computed(() =>
-  selectColumnInDom.value ? SELECT_COLUMN_WIDTH : 0,
-);
-
+// 列显隐的预算跟随勾选列在动画中的**实际**占位（0↔40 连续变化），而非「是否在 DOM 里」这个布尔量：
+// 这样某列的收起 / 展开就发生在真正放不下 / 放得下的那一帧，且两个方向阈值相同、时间点对称；
+// 若挂在布尔量上，退出时整轮重排会被推到动画结束之后，表现为动画走完再抖一下。
 const visibleSlotIndices = computed(() =>
   getVisibleColumnSlotIndices(buildColumnMetas(), size.value.width, {
     clientViewportWidth: clientViewportWidth.value,
     skidOpen: effectiveSkidOpen.value,
-    selectOffsetPx: selectColumnBudgetPx.value,
+    selectOffsetPx: selectOffsetPx.value,
   }),
 );
 
@@ -709,8 +708,13 @@ const columnLayoutWidths = computed((): string[] => {
 
 const selectColumnWidthCss = computed(() => formatColWidthPx(selectOffsetPx.value));
 
+// 可见列集合变化时快照必须同帧跟上（含动画中途），否则宽度插值仍按旧列集算。
+watch(visibleSlotIndices, () => {
+  syncColumnWidthSnapshots();
+});
+
 watch(
-  [() => size.value.width, () => bodyColumns.value.length, visibleSlotIndices],
+  [() => size.value.width, () => bodyColumns.value.length],
   () => {
     if (!selectAnimating.value) {
       syncColumnWidthSnapshots();
