@@ -7,7 +7,7 @@ import { EgLink } from '../link';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import type { MinerFeeCustomDraft, MinerFeeCustomSaved } from './minerFeeCustomTypes';
 import MinerFeeCustomAnchoredPopover from './MinerFeeCustomAnchoredPopover.vue';
-import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
+import MinerFeeBatchAppendix from './MinerFeeBatchAppendix.vue';
 import { buildEvmMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
 import {
   formatMinerFeeOptionCryptoDisplay,
@@ -91,10 +91,6 @@ const batchTotalDisplay = computed(() =>
     props.symbol,
     props.transactionCount,
   ),
-);
-
-const showBatchTotal = computed(
-  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
 );
 
 function dotToneClass(tone: 'success' | 'warning' | 'danger') {
@@ -296,13 +292,12 @@ defineExpose({
           </template>
           </div>
 
-          <template v-if="showBatchTotal">
-            <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
-            <MinerFeeBatchTotalSummary
-              :total-display="batchTotalDisplay"
-              :transaction-count="transactionCount"
-            />
-          </template>
+          <MinerFeeBatchAppendix
+            :symbol="symbol"
+            profile-kind="evm"
+            :transaction-count="transactionCount"
+            :batch-total-display="batchTotalDisplay"
+          />
         </div>
       </section>
     </div>

@@ -52,9 +52,16 @@ const linkVisible = computed(
     <span :class="[styles.formIcon, iconClass]">
       <EgIcon :name="iconName" fit fill-tone="primary" />
     </span>
-    <span :class="textClass">{{ text }}</span>
-    <EgLink v-if="linkVisible" tone="brand" size="sm" :href="href">
-      {{ linkLabel }}
-    </EgLink>
+    <span :class="styles.formBody">
+      <span :class="[styles.formText, textClass]">{{ text }}</span><EgLink
+        v-if="linkVisible"
+        :class="styles.formLink"
+        tone="brand"
+        size="sm"
+        :href="href"
+      >
+        {{ linkLabel }}
+      </EgLink>
+    </span>
   </div>
 </template>

@@ -153,13 +153,34 @@
 }
 
 .formSubmission {
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
   align-items: center;
   gap: var(--spacing-1);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-size: var(--eds-footnote-size);
   line-height: var(--eds-footnote-line-height);
   color: var(--text-base-primary);
+}
+
+.formBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.formText {
+  display: inline;
+}
+
+.formLink {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-left: var(--spacing-1);
+  vertical-align: baseline;
+  white-space: nowrap;
 }
 
 .formIcon {

@@ -17,6 +17,7 @@ import { hasOpenClickAnchoredTooltip } from '../../molecules/tooltip/anchoredToo
 import cryptoComboStyles from '../../molecules/crypto-combo/CryptoCombo.module.css';
 import CryptoAddressTags from '../../molecules/crypto-combo/CryptoAddressTags.vue';
 import { hasAddressTags } from '../../molecules/crypto-combo/cryptoAddressTagUtils';
+import { EgFormSubmission } from '../../molecules/feedback';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { formatGroupedNumber } from '../../utils/formatGroupedNumber';
 import chromeScrimStyles from '../../styles/popupChromeScrim.module.css';
@@ -885,6 +886,13 @@ onBeforeUnmount(() => {
                               styles.itemValueAddressTagsBelow,
                             ]"
                           />
+                          <EgFormSubmission
+                            v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideFeedback"
+                            :class="styles.itemValueAddressFeedbackBelow"
+                            :type="entry.valueAddressSideFeedback.type ?? 'notes'"
+                            :text="entry.valueAddressSideFeedback.text"
+                            :show-link="entry.valueAddressSideFeedback.showLink ?? false"
+                          />
                           <template v-if="!entryAddressTagsBelow(entry)">
                             <EgTag
                               v-if="itemValueTagText(item, entry) && itemValueTagBeforeValue(item, entry)"
@@ -1149,6 +1157,13 @@ onBeforeUnmount(() => {
                                 styles.itemValueAddressTags,
                                 styles.itemValueAddressTagsBelow,
                               ]"
+                            />
+                            <EgFormSubmission
+                              v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideFeedback"
+                              :class="styles.itemValueAddressFeedbackBelow"
+                              :type="entry.valueAddressSideFeedback.type ?? 'notes'"
+                              :text="entry.valueAddressSideFeedback.text"
+                              :show-link="entry.valueAddressSideFeedback.showLink ?? false"
                             />
                             <template v-if="!entryAddressTagsBelow(entry)">
                               <EgTag

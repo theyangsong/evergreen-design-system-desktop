@@ -20,8 +20,8 @@ import {
   fillMinerFeeUiTemplate,
   resolveTronMinerFeeQuote,
 } from './minerFeeTronDisplay';
+import MinerFeeBatchAppendix from './MinerFeeBatchAppendix.vue';
 import { buildTronMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
-import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
 import styles from './MinerFeePopoverPanel.module.css';
 
 const props = withDefaults(
@@ -89,10 +89,6 @@ function onConfirm() {
 
 const batchTotalDisplay = computed(() =>
   buildTronMinerFeeBatchTotalDisplay(props.transactionCount),
-);
-
-const showBatchTotal = computed(
-  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
 );
 
 defineExpose({
@@ -247,13 +243,12 @@ defineExpose({
         </div>
       </section>
 
-      <div v-if="showBatchTotal" :class="styles.minerFeeBatchTotalAppendix">
-        <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
-        <MinerFeeBatchTotalSummary
-          :total-display="batchTotalDisplay"
-          :transaction-count="transactionCount"
-        />
-      </div>
+      <MinerFeeBatchAppendix
+        symbol="TRX"
+        profile-kind="tron"
+        :transaction-count="transactionCount"
+        :batch-total-display="batchTotalDisplay"
+      />
     </div>
 
     <div

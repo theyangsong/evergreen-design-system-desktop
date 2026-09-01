@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { EgComboActionPopupWindow } from '../combo';
-import { EgDivider } from '../../atoms/divider';
 import { computed } from 'vue';
 import { useMinerFeeTranslate } from './minerFeeTranslate';
 import {
   buildTonLikeMinerFeeDisplay,
   resolveTonLikeMinerFeeQuote,
 } from './minerFeeTonLikeDisplay';
+import MinerFeeBatchAppendix from './MinerFeeBatchAppendix.vue';
 import { buildTonLikeMinerFeeBatchTotalDisplay } from './minerFeeBatchTotalDisplay';
-import MinerFeeBatchTotalSummary from './MinerFeeBatchTotalSummary.vue';
 import type { MinerFeeConfirmPayload } from './minerFeeTypes';
 import styles from './MinerFeePopoverPanel.module.css';
 
@@ -45,10 +44,6 @@ const batchTotalDisplay = computed(() =>
   buildTonLikeMinerFeeBatchTotalDisplay(props.symbol, props.transactionCount),
 );
 
-const showBatchTotal = computed(
-  () => props.transactionCount > 1 && batchTotalDisplay.value.length > 0,
-);
-
 function onConfirm() {
   emit('confirm', {
     displayValue: buildTonLikeMinerFeeDisplay(props.symbol, feeQuote.value),
@@ -70,15 +65,12 @@ defineExpose({
           <p :class="styles.minerFeeFixedQuoteUsd">{{ usdApproxLine }}</p>
         </div>
 
-        <template v-if="showBatchTotal">
-          <div :class="styles.minerFeeBatchTotalAppendix">
-            <EgDivider type="page" :class="styles.minerFeePageInsetDivider" />
-            <MinerFeeBatchTotalSummary
-              :total-display="batchTotalDisplay"
-              :transaction-count="transactionCount"
-            />
-          </div>
-        </template>
+        <MinerFeeBatchAppendix
+          :symbol="symbol"
+          profile-kind="ton-xrp"
+          :transaction-count="transactionCount"
+          :batch-total-display="batchTotalDisplay"
+        />
       </section>
     </div>
 

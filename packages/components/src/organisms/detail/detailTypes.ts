@@ -1,4 +1,11 @@
 import type { CryptoAddressSideTags } from '../../molecules/crypto-combo/cryptoAddressTypes';
+import type { FormSubmissionType } from '../../molecules/feedback/FormSubmission.vue';
+
+export type DetailItemValueAddressSideFeedback = {
+  type?: FormSubmissionType;
+  text: string;
+  showLink?: boolean;
+};
 
 export type DetailValueType = 'text' | 'crypto' | 'user';
 
@@ -38,6 +45,8 @@ export type DetailItemValueEntry = {
   valueAddressSideTagsRevealAll?: boolean;
   /** Tag 置于别名/地址行下方。 */
   valueAddressSideTagsBelow?: boolean;
+  /** Tag 下方 EgFormSubmission 反馈（如黑名单提示）。 */
+  valueAddressSideFeedback?: DetailItemValueAddressSideFeedback;
   /** 次要 value 文案（60% 字色，如钱包编号）。 */
   valueMuted?: boolean;
 };

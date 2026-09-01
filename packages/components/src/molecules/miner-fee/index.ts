@@ -1,4 +1,5 @@
 export { default as EgMinerFeeBitcoinPanel } from './MinerFeeBitcoinPanel.vue';
+export { default as EgMinerFeeBatchStubPanel } from './MinerFeeBatchStubPanel.vue';
 export { default as EgMinerFeeEthereumPanel } from './MinerFeeEthereumPanel.vue';
 export { default as EgMinerFeeTonPanel } from './MinerFeeTonPanel.vue';
 export { default as EgMinerFeeTronPanel } from './MinerFeeTronScenarioPanel.vue';
@@ -20,3 +21,13 @@ export {
   buildTronMinerFeeDisplay,
   resolveTronMinerFeeQuote,
 } from './minerFeeTronDisplay';
+export {
+  minerFeeBatchStubMessageKey,
+  minerFeeBatchStubStreamerMessageKey,
+  resolveMinerFeeBatchStubKind,
+  splitMinerFeeBatchStubParagraphs,
+  parseMinerFeeBatchStubBlocks,
+  type MinerFeeBatchProfileKind,
+  type MinerFeeBatchStubBlock,
+  type MinerFeeBatchStubKind,
+} from './minerFeeBatchStub';

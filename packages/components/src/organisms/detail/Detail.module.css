@@ -362,6 +362,11 @@
   width: 100%;
 }
 
+.itemValueAddressFeedbackBelow {
+  width: 100%;
+  min-width: 0;
+}
+
 .itemValueText {
   color: var(--text-base-primary);
   font-size: var(--eds-body-small-size);
@@ -527,7 +532,7 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 .toolbarActionsLeft {

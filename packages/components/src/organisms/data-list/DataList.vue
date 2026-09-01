@@ -57,8 +57,7 @@ const LOADING_DONE_VISIBLE_MS = 1500;
 const LOADING_TRANSITION_MS = 300;
 const SELECT_COLUMN_WIDTH = 40;
 const SELECT_COLUMN_ANIM_MS = 300;
-const SELECT_CONTENT_SLIDE_ENTER_PX = 16;
-const SELECT_CONTENT_SLIDE_EXIT_PX = 32;
+const SELECT_CONTENT_SLIDE_PX = 16;
 const RESIZE_DEBOUNCE_MS = 100;
 const SCROLL_EDGE_EPSILON = 2;
 
@@ -148,6 +147,12 @@ const selectOffsetPx = ref(0);
 const selectAnimating = ref(false);
 const dataColumnWidthsFullPx = ref<number[]>([]);
 const selectedList = ref<Array<DataListItem & { _index: number }>>([]);
+// 退出多选时 selectedList 立即清空以通知消费方，渲染层则沿用这份快照直到收起动画结束；
+// 否则勾选态与计数会在收起的第一帧被抹掉，而展开并没有对应的瞬时内容变化。
+const selectionExitSnapshot = ref<Array<DataListItem & { _index: number }> | null>(null);
+const renderedSelectedList = computed(
+  () => selectionExitSnapshot.value ?? selectedList.value,
+);
 const scrollTop = ref(0);
 const batchLoadingKey = ref<string | null>(null);
 let resizeDebounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -158,6 +163,7 @@ watch(
     if (enabled === undefined || enabled === selectMode.value) return;
     selectMode.value = enabled;
     if (!enabled) {
+      selectionExitSnapshot.value = selectedList.value;
       selectedList.value = [];
     }
   },
@@ -169,6 +175,7 @@ watch(selectMode, async (enabled) => {
   syncColumnWidthSnapshots();
   if (enabled) {
     closeAllAnchoredTooltips();
+    selectionExitSnapshot.value = null;
     selectColumnInDom.value = true;
     selectOffsetPx.value = 0;
     await nextTick();
@@ -178,6 +185,7 @@ watch(selectMode, async (enabled) => {
 
   animateSelectOffset(0, () => {
     selectColumnInDom.value = false;
+    selectionExitSnapshot.value = null;
   });
 }, { flush: 'post' });
 
@@ -188,10 +196,7 @@ const selectContentOpacity = computed(() => {
 
 const selectContentTranslateX = computed(() => {
   const progress = Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH));
-  const slideDistance = selectMode.value
-    ? SELECT_CONTENT_SLIDE_ENTER_PX * (1 - progress)
-    : SELECT_CONTENT_SLIDE_EXIT_PX * (1 - progress);
-  return `${-slideDistance}px`;
+  return `${-SELECT_CONTENT_SLIDE_PX * (1 - progress)}px`;
 });
 
 const headerHeightCss = computed(() => `${props.headerHeight}px`);
@@ -199,6 +204,7 @@ const headerHeightCss = computed(() => `${props.headerHeight}px`);
 watch(
   () => props.dataList,
   () => {
+    selectionExitSnapshot.value = null;
     selectedList.value = [];
   },
   { immediate: true },
@@ -774,14 +780,43 @@ function setSelectMode(enabled: boolean) {
   selectMode.value = enabled;
   emit('update:select-mode', enabled);
   if (!enabled) {
+    selectionExitSnapshot.value = selectedList.value;
     selectedList.value = [];
     emit('update:selected-list', []);
     emit('selected-change', []);
   }
 }
 
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3;
+// --motion-easing-standard（ease-in-out ≙ cubic-bezier(0.42, 0, 0.58, 1)）的 JS 采样：
+// 与 Batch Bar 的 CSS 过渡同曲线；曲线对称，故收起即展开的时间反演。
+const STANDARD_EASE_X1 = 0.42;
+const STANDARD_EASE_X2 = 0.58;
+
+const STANDARD_EASE_C = 3 * STANDARD_EASE_X1;
+const STANDARD_EASE_B = 3 * (STANDARD_EASE_X2 - STANDARD_EASE_X1) - STANDARD_EASE_C;
+const STANDARD_EASE_A = 1 - STANDARD_EASE_C - STANDARD_EASE_B;
+
+function standardEaseX(t: number) {
+  return ((STANDARD_EASE_A * t + STANDARD_EASE_B) * t + STANDARD_EASE_C) * t;
+}
+
+function standardEaseSlope(t: number) {
+  return (3 * STANDARD_EASE_A * t + 2 * STANDARD_EASE_B) * t + STANDARD_EASE_C;
+}
+
+function easeStandard(progress: number) {
+  if (progress <= 0) return 0;
+  if (progress >= 1) return 1;
+  let t = progress;
+  for (let i = 0; i < 6; i += 1) {
+    const error = standardEaseX(t) - progress;
+    if (Math.abs(error) < 1e-4) break;
+    const slope = standardEaseSlope(t);
+    if (slope === 0) break;
+    t -= error / slope;
+  }
+  // y 控制点为 0 / 1，故纵向多项式退化为 3t²(1 - t) + t³。
+  return (3 * (1 - t) + t) * t * t;
 }
 
 let selectAnimFrame: number | undefined;
@@ -818,7 +853,7 @@ function animateSelectOffset(to: number, onComplete?: () => void) {
 
   function tick(now: number) {
     const progress = Math.min(1, (now - start) / SELECT_COLUMN_ANIM_MS);
-    selectOffsetPx.value = from + (to - from) * easeOutCubic(progress);
+    selectOffsetPx.value = from + (to - from) * easeStandard(progress);
     if (progress < 1) {
       selectAnimFrame = requestAnimationFrame(tick);
     } else {
@@ -990,7 +1025,7 @@ function renderCellSlot(
 }
 
 function isRowSelected(index: number) {
-  return selectedList.value.some((row) => row._index === index);
+  return renderedSelectedList.value.some((row) => row._index === index);
 }
 
 function showBatchError(message: string) {
@@ -1100,7 +1135,7 @@ function onTableScroll(event: Event) {
         @pointerdown.capture="onOperationBarInteract"
       >
         <EgBatchBar
-          :selected-count="selectedList.length"
+          :selected-count="renderedSelectedList.length"
           :count-suffix="batchCountSuffix"
           :labels="useBuiltinBatchBar ? batchActionLabels : undefined"
           :label-danger="useBuiltinBatchBar ? batchActionDanger : undefined"
@@ -1121,7 +1156,7 @@ function onTableScroll(event: Event) {
             <slot
               name="batch-popover"
               :action="batchActions[slotProps.index]"
-              :selected-count="selectedList.length"
+              :selected-count="renderedSelectedList.length"
               v-bind="slotProps"
             />
           </template>
@@ -1170,9 +1205,9 @@ function onTableScroll(event: Event) {
               :bg="headerBg"
               :select-mode="selectMode"
               :select-all-mode="
-                selectedList.length === 0
+                renderedSelectedList.length === 0
                   ? 'none'
-                  : selectedList.length === dataList.length
+                  : renderedSelectedList.length === dataList.length
                     ? 'all'
                     : 'some'
               "
