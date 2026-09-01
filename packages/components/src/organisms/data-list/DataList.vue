@@ -712,12 +712,46 @@ function syncColumnWidthSnapshots() {
   dataColumnWidthsFullPx.value = computeRestDataColumnWidthsPx();
 }
 
+/** 按给定列集与勾选列占位算出一套停态布局，返回 slotIndex → 宽度。 */
+function columnWidthsBySlot(slots: number[], selectOffset: number) {
+  const cols = slots.map((slotIndex) => mapColumnConfig(allColumnNodes.value[slotIndex]));
+  const widths = computeDataColumnLayoutWidthsPx(
+    selectOffset,
+    cols,
+    computeRestDataColumnWidthsPx(cols),
+  );
+  const bySlot = new Map<number, number>();
+  slots.forEach((slotIndex, index) => bySlot.set(slotIndex, widths[index] ?? 0));
+  return bySlot;
+}
+
+// 插值的两个端点：都与动画进度无关，故整轮动画只算一次。
+const idleColumnWidthsBySlot = computed(() => columnWidthsBySlot(idleSlotIndices.value, 0));
+const selectModeColumnWidthsBySlot = computed(() =>
+  columnWidthsBySlot(selectModeSlotIndices.value, SELECT_COLUMN_WIDTH),
+);
+
 const columnLayoutWidths = computed((): string[] => {
   if (!size.value.width || bodyColumns.value.length === 0) return [];
   if (dataColumnWidthsFullPx.value.length === 0) {
     syncColumnWidthSnapshots();
   }
-  return computeDataColumnLayoutWidthsPx(selectOffsetPx.value).map(formatColWidthPx);
+
+  const progress = selectProgress.value;
+  if (progress <= 0 || progress >= 1) {
+    return computeDataColumnLayoutWidthsPx(selectOffsetPx.value).map(formatColWidthPx);
+  }
+
+  // 动画中：在「常态」与「多选停态」两套停态布局之间按进度插值。被挤掉的列在多选端取 0 宽，
+  // 于是它的出现 / 消失与其余列的宽度变化落在同一条连续曲线上；两端各列合计恒为
+  // 容器宽 - 勾选列占位 - reserve，因此中途既不会溢出也不会跳变。
+  const idleWidths = idleColumnWidthsBySlot.value;
+  const selectedWidths = selectModeColumnWidthsBySlot.value;
+  return visibleSlotIndices.value.map((slotIndex) => {
+    const idleWidth = idleWidths.get(slotIndex) ?? 0;
+    const selectedWidth = selectedWidths.get(slotIndex) ?? 0;
+    return formatColWidthPx(idleWidth + (selectedWidth - idleWidth) * progress);
+  });
 });
 
 const selectColumnWidthCss = computed(() => formatColWidthPx(selectOffsetPx.value));
