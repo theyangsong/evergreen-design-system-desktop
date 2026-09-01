@@ -1,8 +1,11 @@
-/** 矿工费列表页：选项区贴 spacing-1；备注/分割线另行缩进至 spacing-4。 */
+/** 矿工费列表页 / batch stub：选项区贴 spacing-1；备注/分割线另行缩进至 spacing-4。 */
 :global(
   .eds-popover-content [class*='contentSlotPaddingTop']:has(
     .motion-layout-deform[data-miner-fee-screen='list']
   )
+),
+:global(
+  .eds-popover-content [class*='contentSlotPaddingTop']:has([data-miner-fee-batch-stub])
 ) {
   padding-right: var(--spacing-1);
   padding-left: var(--spacing-1);
@@ -18,23 +21,28 @@
   padding-left: var(--spacing-4);
 }
 
-/** 矿工费 Popover：contentSlot 随 layout-deform 自然高度，勿撑满留空、勿外层滚动。 */
-:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-popover])) {
+/** 矿工费 Popover：contentSlot 随 layout-deform / batch stub 自然高度，勿撑满留空、勿外层滚动。 */
+:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-popover])),
+:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-batch-stub])),
+:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-ton-like])),
+:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-tron])) {
   display: block;
   flex: 0 0 auto;
   min-height: 0;
   overflow: visible;
 }
 
-/** 列表 / 自定义子页：去掉 ComboAction PopupWindow 默认 padding。 */
+/** 列表 / 自定义子页 / batch stub：去掉 ComboAction PopupWindow 默认 padding。 */
 :global(.eds-popover:has([data-miner-fee-popover]) [class*='popupRoot']),
+:global(.eds-popover:has([data-miner-fee-batch-stub]) [class*='popupRoot']),
 :global(.eds-popover:has([data-miner-fee-ton-like]) [class*='popupRoot']),
 :global(.eds-popover:has([data-miner-fee-tron]) [class*='popupRoot']) {
   padding: 0;
 }
 
-/** 矿工费 Popover（EVM/BTC / TON / TRON）：隐藏 topTool 底部分割线。 */
+/** 矿工费 Popover（EVM/BTC / batch stub / TON / TRON）：隐藏 topTool 底部分割线。 */
 :global(.eds-popover-content:has([data-miner-fee-popover]) > .eds-divider),
+:global(.eds-popover-content:has([data-miner-fee-batch-stub]) > .eds-divider),
 :global(.eds-popover-content:has([data-miner-fee-ton-like]) > .eds-divider),
 :global(.eds-popover-content:has([data-miner-fee-tron]) > .eds-divider) {
   display: none;
@@ -42,24 +50,17 @@
 
 /** 矿工费 Popover topTool 标题：上 spacing-3 / 左右 spacing-4 / 下 spacing-2。 */
 :global(.eds-popover-content:has([data-miner-fee-popover]) [class*='topToolTitle']),
+:global(.eds-popover-content:has([data-miner-fee-batch-stub]) [class*='topToolTitle']),
 :global(.eds-popover-content:has([data-miner-fee-ton-like]) [class*='topToolTitle']),
 :global(.eds-popover-content:has([data-miner-fee-tron]) [class*='topToolTitle']) {
   padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
 }
 
 :global(.eds-popover-content:has([data-miner-fee-popover]) [class*='topToolTitleWithClose']),
+:global(.eds-popover-content:has([data-miner-fee-batch-stub]) [class*='topToolTitleWithClose']),
 :global(.eds-popover-content:has([data-miner-fee-ton-like]) [class*='topToolTitleWithClose']),
 :global(.eds-popover-content:has([data-miner-fee-tron]) [class*='topToolTitleWithClose']) {
   padding-right: calc(var(--spacing-1) * 2 + var(--icon-md) + var(--spacing-4));
-}
-
-/** TON / TRON：contentSlot 随内容自然高度。 */
-:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-ton-like])),
-:global(.eds-popover-content [class*='contentSlotWithTopTool']:has([data-miner-fee-tron])) {
-  display: block;
-  flex: 0 0 auto;
-  min-height: 0;
-  overflow: visible;
 }
 
 /** 自定义子页（内嵌 deform 翻页）：隐藏 Popover 原标题，由 Teleport 注入顶栏。 */

@@ -73,6 +73,7 @@ async function onTriggerClick() {
   if (props.disabled || showLoading.value || prepBusy.value) return;
 
   if (expanded.value) {
+    closePopover();
     return;
   }
 
