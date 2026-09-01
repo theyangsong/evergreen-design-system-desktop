@@ -140,6 +140,10 @@
   background-color: var(--box-page);
 }
 
+.layoutColumn {
+  transition: width var(--motion-duration-shift) var(--motion-easing-standard);
+}
+
 .body {
   position: relative;
 }
@@ -373,8 +377,19 @@
   align-self: stretch;
   opacity: var(--eds-data-list-select-content-opacity);
   transform: translateX(var(--eds-data-list-select-content-translate-x));
+  transition:
+    opacity var(--motion-duration-shift) var(--motion-easing-standard),
+    transform var(--motion-duration-shift) var(--motion-easing-standard);
   pointer-events: none;
   will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layoutColumn,
+  .headerSelect,
+  .cellSelect {
+    transition: none;
+  }
 }
 
 .rootSelectMode .headerSelect,

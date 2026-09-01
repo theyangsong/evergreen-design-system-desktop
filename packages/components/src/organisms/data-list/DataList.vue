@@ -142,8 +142,6 @@ const clientViewportWidth = ref(
 );
 const tableKey = ref(0);
 const selectMode = ref(false);
-const selectColumnInDom = ref(false);
-const selectOffsetPx = ref(0);
 const selectAnimating = ref(false);
 const dataColumnWidthsFullPx = ref<number[]>([]);
 const selectedList = ref<Array<DataListItem & { _index: number }>>([]);
@@ -156,6 +154,7 @@ const renderedSelectedList = computed(
 const scrollTop = ref(0);
 const batchLoadingKey = ref<string | null>(null);
 let resizeDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+let selectionExitSnapshotTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
   () => props.selectMode,
@@ -170,36 +169,29 @@ watch(
   { immediate: true },
 );
 
-watch(selectMode, async (enabled) => {
+watch(selectMode, (enabled) => {
   emit('update:pagination-locked', enabled);
   syncColumnWidthSnapshots();
+  startSelectLayoutTransition();
   if (enabled) {
     closeAllAnchoredTooltips();
+    if (selectionExitSnapshotTimer !== undefined) {
+      clearTimeout(selectionExitSnapshotTimer);
+      selectionExitSnapshotTimer = undefined;
+    }
     selectionExitSnapshot.value = null;
-    selectColumnInDom.value = true;
-    selectOffsetPx.value = 0;
-    await nextTick();
-    animateSelectOffset(SELECT_COLUMN_WIDTH);
     return;
   }
 
-  animateSelectOffset(0, () => {
-    selectColumnInDom.value = false;
+  selectionExitSnapshotTimer = window.setTimeout(() => {
     selectionExitSnapshot.value = null;
-  });
+    selectionExitSnapshotTimer = undefined;
+  }, SELECT_COLUMN_ANIM_MS);
 }, { flush: 'post' });
 
-/** 勾选列的展开进度：0 = 常态，1 = 多选停态。收起即展开的时间反演。 */
-const selectProgress = computed(() =>
-  Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH)),
-);
-
-const selectContentOpacity = computed(() =>
-  selectColumnInDom.value ? selectProgress.value : 0,
-);
-
-const selectContentTranslateX = computed(
-  () => `${-SELECT_CONTENT_SLIDE_PX * (1 - selectProgress.value)}px`,
+const selectContentOpacity = computed(() => selectMode.value ? 1 : 0);
+const selectContentTranslateX = computed(() =>
+  `${selectMode.value ? 0 : -SELECT_CONTENT_SLIDE_PX}px`,
 );
 
 const headerHeightCss = computed(() => `${props.headerHeight}px`);
@@ -466,12 +458,9 @@ const selectModeSlotIndices = computed(() => visibleSlotsForSelectOffset(SELECT_
 /** 常态可容纳的列，恒为多选停态列集的超集。 */
 const idleSlotIndices = computed(() => visibleSlotsForSelectOffset(0));
 
-// 动画期间一律保留常态列集，被挤掉的列以 0 宽驻留、宽度随进度插值，
-// 列的增减因此本身就是一段连续的宽度变化，而不是某一帧的突变；
-// 只有完全停在多选态（进度 = 1，那几列已经是 0 宽）时才真正把它们移出 DOM。
-const visibleSlotIndices = computed(() =>
-  selectProgress.value >= 1 ? selectModeSlotIndices.value : idleSlotIndices.value,
-);
+// 常态列集始终驻留。多选容纳不下的列只把 <col> 宽度过渡到 0，不卸载对应业务单元格；
+// 因而退出点击后没有重组件挂载，也没有 Vue 逐帧整表更新。
+const visibleSlotIndices = idleSlotIndices;
 
 const visibleColumnNodes = computed(() => {
   const visible = new Set(visibleSlotIndices.value);
@@ -737,24 +726,18 @@ const columnLayoutWidths = computed((): string[] => {
     syncColumnWidthSnapshots();
   }
 
-  const progress = selectProgress.value;
-  if (progress <= 0 || progress >= 1) {
-    return computeDataColumnLayoutWidthsPx(selectOffsetPx.value).map(formatColWidthPx);
-  }
-
-  // 动画中：在「常态」与「多选停态」两套停态布局之间按进度插值。被挤掉的列在多选端取 0 宽，
-  // 于是它的出现 / 消失与其余列的宽度变化落在同一条连续曲线上；两端各列合计恒为
-  // 容器宽 - 勾选列占位 - reserve，因此中途既不会溢出也不会跳变。
   const idleWidths = idleColumnWidthsBySlot.value;
   const selectedWidths = selectModeColumnWidthsBySlot.value;
   return visibleSlotIndices.value.map((slotIndex) => {
     const idleWidth = idleWidths.get(slotIndex) ?? 0;
     const selectedWidth = selectedWidths.get(slotIndex) ?? 0;
-    return formatColWidthPx(idleWidth + (selectedWidth - idleWidth) * progress);
+    return formatColWidthPx(selectMode.value ? selectedWidth : idleWidth);
   });
 });
 
-const selectColumnWidthCss = computed(() => formatColWidthPx(selectOffsetPx.value));
+const selectColumnWidthCss = computed(() =>
+  formatColWidthPx(selectMode.value ? SELECT_COLUMN_WIDTH : 0),
+);
 
 // 可见列集合变化时快照必须同帧跟上（含动画中途），否则宽度插值仍按旧列集算。
 watch(visibleSlotIndices, () => {
@@ -839,84 +822,23 @@ function setSelectMode(enabled: boolean) {
   }
 }
 
-// --motion-easing-standard（ease-in-out ≙ cubic-bezier(0.42, 0, 0.58, 1)）的 JS 采样：
-// 与 Batch Bar 的 CSS 过渡同曲线；曲线对称，故收起即展开的时间反演。
-const STANDARD_EASE_X1 = 0.42;
-const STANDARD_EASE_X2 = 0.58;
+let selectLayoutTimer: ReturnType<typeof setTimeout> | undefined;
 
-const STANDARD_EASE_C = 3 * STANDARD_EASE_X1;
-const STANDARD_EASE_B = 3 * (STANDARD_EASE_X2 - STANDARD_EASE_X1) - STANDARD_EASE_C;
-const STANDARD_EASE_A = 1 - STANDARD_EASE_C - STANDARD_EASE_B;
-
-function standardEaseX(t: number) {
-  return ((STANDARD_EASE_A * t + STANDARD_EASE_B) * t + STANDARD_EASE_C) * t;
-}
-
-function standardEaseSlope(t: number) {
-  return (3 * STANDARD_EASE_A * t + 2 * STANDARD_EASE_B) * t + STANDARD_EASE_C;
-}
-
-function easeStandard(progress: number) {
-  if (progress <= 0) return 0;
-  if (progress >= 1) return 1;
-  let t = progress;
-  for (let i = 0; i < 6; i += 1) {
-    const error = standardEaseX(t) - progress;
-    if (Math.abs(error) < 1e-4) break;
-    const slope = standardEaseSlope(t);
-    if (slope === 0) break;
-    t -= error / slope;
-  }
-  // y 控制点为 0 / 1，故纵向多项式退化为 3t²(1 - t) + t³。
-  return (3 * (1 - t) + t) * t * t;
-}
-
-let selectAnimFrame: number | undefined;
-
-function stopSelectAnim() {
-  if (selectAnimFrame !== undefined) {
-    cancelAnimationFrame(selectAnimFrame);
-    selectAnimFrame = undefined;
-  }
-  selectAnimating.value = false;
-}
-
-function animateSelectOffset(to: number, onComplete?: () => void) {
-  stopSelectAnim();
-  const from = selectOffsetPx.value;
-  if (from === to) {
-    onComplete?.();
-    return;
-  }
-
+function startSelectLayoutTransition() {
+  if (selectLayoutTimer !== undefined) clearTimeout(selectLayoutTimer);
   const reducedMotion =
     typeof window !== 'undefined'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   if (reducedMotion) {
     selectAnimating.value = false;
-    selectOffsetPx.value = to;
-    onComplete?.();
     return;
   }
 
   selectAnimating.value = true;
-  const start = performance.now();
-
-  function tick(now: number) {
-    const progress = Math.min(1, (now - start) / SELECT_COLUMN_ANIM_MS);
-    selectOffsetPx.value = from + (to - from) * easeStandard(progress);
-    if (progress < 1) {
-      selectAnimFrame = requestAnimationFrame(tick);
-    } else {
-      selectOffsetPx.value = to;
-      selectAnimFrame = undefined;
-      selectAnimating.value = false;
-      onComplete?.();
-    }
-  }
-
-  selectAnimFrame = requestAnimationFrame(tick);
+  selectLayoutTimer = window.setTimeout(() => {
+    selectAnimating.value = false;
+    selectLayoutTimer = undefined;
+  }, SELECT_COLUMN_ANIM_MS);
 }
 
 function openSelect() {
@@ -1049,10 +971,11 @@ onBeforeUnmount(() => {
   unbindTableContentWheelListener();
   if (viewportResizeTimer !== undefined) clearTimeout(viewportResizeTimer);
   resizeObserver?.disconnect();
-  stopSelectAnim();
+  if (selectLayoutTimer !== undefined) clearTimeout(selectLayoutTimer);
   if (initingTimer !== undefined) clearTimeout(initingTimer);
   if (loadingTimer !== undefined) clearTimeout(loadingTimer);
   if (resizeDebounceTimer !== undefined) clearTimeout(resizeDebounceTimer);
+  if (selectionExitSnapshotTimer !== undefined) clearTimeout(selectionExitSnapshotTimer);
   clearLoadingLeaveTimer();
 });
 
@@ -1239,19 +1162,19 @@ function onTableScroll(event: Event) {
       <table :key="tableKey" :class="styles.table">
         <colgroup>
           <col
-            v-if="selectColumnInDom"
+            :class="styles.layoutColumn"
             :style="{ width: selectColumnWidthCss }"
           />
           <col
             v-for="(width, index) in columnLayoutWidths"
             :key="index"
+            :class="styles.layoutColumn"
             :style="{ width }"
           />
         </colgroup>
         <thead :style="{ height: headerHeightCss }">
           <tr>
             <DataListHeaderCell
-              v-if="selectColumnInDom"
               type="select"
               :height="headerHeightCss"
               :bg="headerBg"
@@ -1290,7 +1213,7 @@ function onTableScroll(event: Event) {
           :class="[styles.body, showLoadingBar && styles.bodyLoading]"
         >
           <tr :class="styles.loadingRow" :style="loadingRowStyle">
-            <td :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)">
+            <td :colspan="bodyColumns.length + 1">
               <div
                 :class="[
                   styles.loadingSlot,
@@ -1320,7 +1243,7 @@ function onTableScroll(event: Event) {
             aria-hidden="true"
           >
             <td
-              :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)"
+              :colspan="bodyColumns.length + 1"
               :style="{ height: `${virtualTopSpacerPx}px` }"
             />
           </tr>
@@ -1333,7 +1256,6 @@ function onTableScroll(event: Event) {
             @click="onRowClick(dataList[rowIndex], rowIndex)"
           >
             <DataListColumn
-              v-if="selectColumnInDom"
               type="select"
               :index="rowIndex"
               :column-height="columnHeight"
@@ -1368,7 +1290,7 @@ function onTableScroll(event: Event) {
             aria-hidden="true"
           >
             <td
-              :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)"
+              :colspan="bodyColumns.length + 1"
               :style="{ height: `${virtualBottomSpacerPx}px` }"
             />
           </tr>
@@ -1380,7 +1302,7 @@ function onTableScroll(event: Event) {
             :style="rowStyle()"
             aria-hidden="true"
           >
-            <td :colspan="bodyColumns.length + (selectColumnInDom ? 1 : 0)" />
+            <td :colspan="bodyColumns.length + 1" />
           </tr>
         </tbody>
       </table>
