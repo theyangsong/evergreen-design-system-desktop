@@ -1,14 +1,19 @@
-/** 矿工费列表页 / batch stub：选项区贴 spacing-1；备注/分割线另行缩进至 spacing-4。 */
+/** 矿工费 EVM 列表页：选项区贴 spacing-1；备注/分割线另行缩进至 spacing-4。 */
 :global(
   .eds-popover-content [class*='contentSlotPaddingTop']:has(
     .motion-layout-deform[data-miner-fee-screen='list']
   )
-),
-:global(
-  .eds-popover-content [class*='contentSlotPaddingTop']:has([data-miner-fee-batch-stub])
 ) {
   padding-right: var(--spacing-1);
   padding-left: var(--spacing-1);
+}
+
+/** BTC / ADA / FIL / TRON batch stub：说明文案区保持 Popover spacing-4（勿用 EVM 选项 spacing-1）。 */
+:global(
+  .eds-popover-content [class*='contentSlotPaddingTop']:has([data-miner-fee-batch-stub])
+) {
+  padding-right: var(--spacing-4);
+  padding-left: var(--spacing-4);
 }
 
 /** 矿工费自定义页：保持 Popover 默认 spacing-4 左右边距。 */
