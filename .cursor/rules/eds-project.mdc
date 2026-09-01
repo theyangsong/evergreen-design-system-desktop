@@ -28,7 +28,7 @@ alwaysApply: true
    - **base**：primitive only（`--eds-motion-*`）。**禁止**场景名。
    - **recipe**：`--motion-recipe-*`。**仅 DS glue**。
    - **semantic**：`.motion-page`、`.motion-flotation`、`.motion-layout-deform` 等完整场景默认。**禁止** `enter-from`/`leave-to`/`host*`/方向 modifier。
-   - **DS glue**：Vue lifecycle、叠层、方向状态。**禁止**写入 `spec/motion/semantic.json`。详案：`layout-deform-page-switch.md`、`overlay-microfloat-flash-fix.md`。
+   - **DS glue**：Vue lifecycle、叠层、方向状态；例：`DataList` 批选 `<col>` 宽度过渡、selection snapshot、overflow 测量冻结 — **非** semantic 场景类。**禁止**写入 `spec/motion/semantic.json`。详案：`layout-deform-page-switch.md`、`overlay-microfloat-flash-fix.md`。
 4. **microFloat**：`opacity`/`transform` 与 `backdrop-filter` **同在 glass**（`.effect-flotation-box` / `.effect-popup-box`）；glue `overlayGlassMicroFloat.module.css`；业务 `.motion-flotation`。
 5. **EgPopover（视觉锁死）**：宽 336（`popoverShape.ts`）；只说改 shadow/颜色时 **禁止**动 layout。`effect-popover-box`（非 flotation）；阴影仅 SVG `.outline` filter。禁止为修闪烁去掉 opacity 动画或 hover `v-if` 销毁 Teleport。
 6. **Typography**：整组角色 → `.typography-*`（`@eds/desktop-tokens/text/styles`）；单轴覆盖用 `--eds-*-size/weight/line-height`。
@@ -114,6 +114,20 @@ alwaysApply: true
 
 多地址：`addressLayout: 'multi-collapsed'` + `addressCount` + `valueEntries`；禁手拼 `address (N)`。`toolbarDividerPinned` 控制分割线，禁 CSS 强写。
 
+### EgDataList · 批选布局动效（DS internal）
+
+**公共 API**：仅 `EgDataList`。**禁止**导出独立动效 Vue 组件（如 `EgSelectionMotion`）；业务只控 `selectMode`、选中数据与批处理流程，consumer 规范见 `work-cregis-desktop` `.cursor/rules/work.mdc` §7.6。
+
+**Motion 分层**：共享 recipe — `--motion-duration-shift`、`--motion-easing-standard`、`--motion-recipe-shift`（`<col>`）、`--motion-recipe-float`（Batch Bar）。**禁止**写入 `spec/motion/semantic.json` 或新增 `.motion-*` 场景类；列宽 morph、`<colgroup>`、responsive 端点、snapshot、settle 均属 DS glue，留在 `data-list/` internal。
+
+**真源**：`DataList.vue`、`DataList.module.css`、`useResponsiveColumns.ts`、`overflowMeasureDuringLayout.ts`。详案：`work-cregis-desktop/docs/eds-data-list-selection-layout-motion-handoff.md`。
+
+**契约**：`visibleSlotIndices = idleSlotIndices`（常态列 DOM 常驻）；idle / select 两套 width endpoint，`selectMode` 一次切换目标值；`<col class="layoutColumn">` + `data-eds-data-list-layout-animating`；`selectionExitSnapshot` 服务退场画面；入场/离场同一距离、时长、easing。`--motion-duration-shift`（300ms）、`SELECT_COLUMN_ANIM_MS`、`DATA_LIST_LAYOUT_SETTLE_MS`（320ms）**三处同步**。
+
+**禁止回退**：rAF 每帧写列宽响应式状态；动画中 `v-if` 切列集或 `visibleSlotIndices` 随 progress 变化；普通退出 remount `EgDataList`（`:key`）；为批选新建 semantic 动效类或从 `index.ts` 导出 layout controller。
+
+**未来抽取**：仅 DS 内出现第二个 table/grid 消费方时，才从 internal composable 提取 `usePersistentWidthTransition`；responsive column、Batch Bar、virtual rows 仍属 DataList domain。
+
 ### 其它
 
 NavBar preset → `presets/<domain>/`；hover 过渡 only，选中 `.motion-none`。Data List 空态 `eds-business-7`。Module Menu：Cregis/UDun 独立 preset。
@@ -166,6 +180,7 @@ Variants → Props+Slots → Composition → Scenarios。最低：atom→Props+S
 
 ## 9. 变更记录
 
+- 2026-09-01：§7 增补 `EgDataList` 批选布局动效 — DS glue 边界、recipe 复用、禁止 semantic 场景类；§1 Motion 补 DataList 示例。
 - 2026-08-25：Showcase 全 desktop 自包含 — 移除 `@eds/website-*` 依赖；与 eds-website 零关联。
 - 2026-08-24：规则整合为单文件；全文精简浓缩。
 - 更早见 git history。
