@@ -189,15 +189,18 @@ watch(selectMode, async (enabled) => {
   });
 }, { flush: 'post' });
 
-const selectContentOpacity = computed(() => {
-  if (!selectColumnInDom.value) return 0;
-  return Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH));
-});
+/** 勾选列的展开进度：0 = 常态，1 = 多选停态。收起即展开的时间反演。 */
+const selectProgress = computed(() =>
+  Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH)),
+);
 
-const selectContentTranslateX = computed(() => {
-  const progress = Math.min(1, Math.max(0, selectOffsetPx.value / SELECT_COLUMN_WIDTH));
-  return `${-SELECT_CONTENT_SLIDE_PX * (1 - progress)}px`;
-});
+const selectContentOpacity = computed(() =>
+  selectColumnInDom.value ? selectProgress.value : 0,
+);
+
+const selectContentTranslateX = computed(
+  () => `${-SELECT_CONTENT_SLIDE_PX * (1 - selectProgress.value)}px`,
+);
 
 const headerHeightCss = computed(() => `${props.headerHeight}px`);
 
@@ -450,15 +453,24 @@ function buildColumnMetas() {
   });
 }
 
-// 列显隐的预算跟随勾选列在动画中的**实际**占位（0↔40 连续变化），而非「是否在 DOM 里」这个布尔量：
-// 这样某列的收起 / 展开就发生在真正放不下 / 放得下的那一帧，且两个方向阈值相同、时间点对称；
-// 若挂在布尔量上，退出时整轮重排会被推到动画结束之后，表现为动画走完再抖一下。
-const visibleSlotIndices = computed(() =>
-  getVisibleColumnSlotIndices(buildColumnMetas(), size.value.width, {
+function visibleSlotsForSelectOffset(selectOffset: number) {
+  return getVisibleColumnSlotIndices(buildColumnMetas(), size.value.width, {
     clientViewportWidth: clientViewportWidth.value,
     skidOpen: effectiveSkidOpen.value,
-    selectOffsetPx: selectOffsetPx.value,
-  }),
+    selectOffsetPx: selectOffset,
+  });
+}
+
+/** 多选停态可容纳的列：勾选列占去 40px，尾部若干列会被挤掉。 */
+const selectModeSlotIndices = computed(() => visibleSlotsForSelectOffset(SELECT_COLUMN_WIDTH));
+/** 常态可容纳的列，恒为多选停态列集的超集。 */
+const idleSlotIndices = computed(() => visibleSlotsForSelectOffset(0));
+
+// 动画期间一律保留常态列集，被挤掉的列以 0 宽驻留、宽度随进度插值，
+// 列的增减因此本身就是一段连续的宽度变化，而不是某一帧的突变；
+// 只有完全停在多选态（进度 = 1，那几列已经是 0 宽）时才真正把它们移出 DOM。
+const visibleSlotIndices = computed(() =>
+  selectProgress.value >= 1 ? selectModeSlotIndices.value : idleSlotIndices.value,
 );
 
 const visibleColumnNodes = computed(() => {
@@ -526,8 +538,7 @@ function isTrailingFlexColumn(
 }
 
 /** Figma Apply_Data Table-Grids: trailing column shrink-0, leading columns flex equally with min-width. */
-function computeRestDataColumnWidthsPx(): number[] {
-  const cols = bodyColumns.value;
+function computeRestDataColumnWidthsPx(cols = bodyColumns.value): number[] {
   const containerWidth = size.value.width;
   if (!containerWidth || cols.length === 0) return [];
 
@@ -604,14 +615,17 @@ function formatColWidthPx(width: number): string {
 }
 
 /** 勾选列占用 selectOffset；仅 flex 列按比例收缩，尾列宽高与右缘位置不变。 */
-function computeDataColumnLayoutWidthsPx(selectOffset: number): number[] {
-  const cols = bodyColumns.value;
+function computeDataColumnLayoutWidthsPx(
+  selectOffset: number,
+  cols = bodyColumns.value,
+  restWidths?: number[],
+): number[] {
   const containerWidth = size.value.width;
   if (!containerWidth || cols.length === 0) return [];
 
-  const rest = dataColumnWidthsFullPx.value;
+  let rest = restWidths ?? dataColumnWidthsFullPx.value;
   if (rest.length !== cols.length) {
-    syncColumnWidthSnapshots();
+    rest = computeRestDataColumnWidthsPx(cols);
   }
 
   if (selectOffset <= 0) {
