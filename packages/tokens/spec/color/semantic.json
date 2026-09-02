@@ -258,6 +258,11 @@
       "dark": "color(var(--eds-danger) / 1)"
     },
     {
+      "name": "stroke-color-warning",
+      "light": "color(var(--eds-warning) / 1)",
+      "dark": "color(var(--eds-warning) / 1)"
+    },
+    {
       "name": "stroke-same-white-primary",
       "light": "color(var(--eds-same-white) / 1)",
       "dark": "color(var(--eds-same-white) / 1)"

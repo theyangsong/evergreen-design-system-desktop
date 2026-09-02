@@ -39,6 +39,8 @@ const props = withDefaults(
     symbolIcon?: string;
     /** 文案区允许多行换行（场景化地址等长文本）。 */
     labelWrap?: boolean;
+    /** 行内嵌套 EgIconButton 等交互控件时用 div，避免 button 嵌套导致复制等点击失效。 */
+    hostTag?: 'button' | 'div';
   }>(),
   {
     boxType: 'text',
@@ -58,6 +60,7 @@ const props = withDefaults(
     messageType: 'subtle',
     symbolIcon: 'eds-add',
     labelWrap: false,
+    hostTag: 'button',
   },
 );
 
@@ -102,16 +105,28 @@ function onClick(event: MouseEvent) {
   if (props.disabled) return;
   emit('click', event);
 }
+
+function onKeydown(event: KeyboardEvent) {
+  if (props.disabled) return;
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  emit('click', event as unknown as MouseEvent);
+}
 </script>
 
 <template>
-  <button
-    type="button"
+  <component
+    :is="hostTag"
+    :type="hostTag === 'button' ? 'button' : undefined"
     class="eds-flotation-menu-item"
     :class="itemClass"
-    :disabled="disabled"
-    :aria-pressed="focused || undefined"
+    :disabled="hostTag === 'button' ? disabled : undefined"
+    :aria-disabled="hostTag === 'div' && disabled ? true : undefined"
+    :role="hostTag === 'div' ? 'menuitem' : undefined"
+    :tabindex="hostTag === 'div' && !disabled ? 0 : undefined"
+    :aria-pressed="hostTag === 'button' && (focused || undefined)"
     @click="onClick"
+    @keydown="hostTag === 'div' ? onKeydown : undefined"
   >
     <span
       v-if="showCheckbox || slots.checkbox"
@@ -175,5 +190,5 @@ function onClick(event: MouseEvent) {
         </span>
       </slot>
     </span>
-  </button>
+  </component>
 </template>

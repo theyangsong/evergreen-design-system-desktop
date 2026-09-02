@@ -154,16 +154,14 @@ async function onCopy(event: Event) {
 async function onMenuCopy(key: string, address: string, event: MouseEvent) {
   event.stopPropagation();
   event.preventDefault();
-  try {
-    await navigator.clipboard.writeText(address);
-    copiedRowKey.value = key;
-    if (menuCopiedResetTimer) clearTimeout(menuCopiedResetTimer);
-    menuCopiedResetTimer = setTimeout(() => {
-      if (copiedRowKey.value === key) copiedRowKey.value = null;
-    }, 2000);
-  } catch {
-    // 复制失败时保持默认图标
-  }
+  const copied = await copyToClipboard(address);
+  if (!copied) return;
+
+  copiedRowKey.value = key;
+  if (menuCopiedResetTimer) clearTimeout(menuCopiedResetTimer);
+  menuCopiedResetTimer = setTimeout(() => {
+    if (copiedRowKey.value === key) copiedRowKey.value = null;
+  }, 2000);
 }
 </script>
 

@@ -309,6 +309,7 @@ export const showcaseTagCustomStyleLabels = {
   rose: tokenLabel('玫瑰', 'rose'),
   peach: tokenLabel('蜜桃', 'peach'),
   'aml-danger': tokenLabel('AML 危险', 'aml-danger'),
+  'aml-safe': tokenLabel('AML 安全', 'aml-safe'),
   'aml-suspicious': tokenLabel('AML 可疑', 'aml-suspicious'),
   'aml-invalid': tokenLabel('AML 无效', 'aml-invalid'),
 } as const;

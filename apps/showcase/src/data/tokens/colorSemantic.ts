@@ -177,6 +177,7 @@ export const strokeColorTokenOrder = [
   'stroke-color-success',
   'stroke-color-decor',
   'stroke-color-danger',
+  'stroke-color-warning',
   'stroke-same-white-primary',
   'stroke-same-white-secondary',
   'stroke-same-black-primary',

@@ -97,7 +97,7 @@
   padding-top: var(--eds-layout-chrome-inset-top, 0);
   padding-bottom: var(--eds-layout-chrome-inset-bottom, 0);
   background-color: transparent;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -575,23 +575,11 @@
   padding: var(--spacing-1) var(--spacing-2);
 }
 
-/* Body cell — max-width:0 仅用于 flex 列 ellipsis；尾列有操作按钮，不参与压缩。 */
 .column {
   cursor: default;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 0;
-}
-
-.column:last-child {
-  max-width: none;
-}
-
-/* 选择列不参与 flex 列 max-width:0 压缩；须写在 .column 之后以免被覆盖。 */
-.headerCellSelect,
-.column.columnSelect {
-  max-width: var(--eds-data-list-select-column-width);
 }
 
 .column.columnSelect {

@@ -9,8 +9,7 @@ import {
   watch,
 } from 'vue';
 import { EgFlotation, EgFlotationMenu, EgFlotationMenuItem } from '../flotation';
-import { EgIcon } from '../../atoms/icons';
-import { EgIconButton } from '../icon-button';
+import CopyActionIconButton from '../icon-button/CopyActionIconButton.vue';
 import { EgTag } from '../tag';
 import CryptoAddressTags from '../crypto-combo/CryptoAddressTags.vue';
 import type { CryptoAddressSideTags } from '../crypto-combo/cryptoAddressTypes';
@@ -105,17 +104,14 @@ const hasMenuAlias = computed(() => Boolean(props.menuAlias?.trim()));
 
 const hasMenuSecondaryText = computed(() => Boolean(props.menuSecondaryText?.trim()));
 
-const showCopyTooltip = computed(() => {
+const showMenuFlotation = computed(() => {
+  if (hasMenuAlias.value || hasMenuMetaRow.value) return true;
   if (!props.showTooltipCopy) return false;
-  if (overflowing.value) return true;
-  if (props.semanticTruncated) return true;
-  if (hasMenuAlias.value) return true;
-  if (hasMenuMetaRow.value) return true;
-  return false;
+  return overflowing.value || props.semanticTruncated;
 });
 
 const showHoverTrigger = computed(() => {
-  if (!showCopyTooltip.value) return false;
+  if (!showMenuFlotation.value) return false;
   if (props.trigger === 'focus') return true;
   return (
     overflowing.value ||
@@ -132,7 +128,7 @@ const showFlatHoverTrigger = computed(
 const tooltipDisabled = computed(
   () =>
     props.disabled ||
-    (!props.showTooltipCopy && !overflowing.value && !props.semanticTruncated) ||
+    (!showMenuFlotation.value && !overflowing.value && !props.semanticTruncated) ||
     !resolvedTooltipText.value,
 );
 
@@ -346,7 +342,7 @@ async function onTooltipCopy(event: Event) {
 <template>
   <span ref="hostRef" :class="hostClasses">
     <EgFlotation
-      v-if="showTooltipCopy && showCopyTooltip"
+      v-if="showMenuFlotation"
       :trigger="trigger"
       placement="bottom"
       align="start"
@@ -363,8 +359,8 @@ async function onTooltipCopy(event: Event) {
           :class="[
             styles.wrap,
             wrapClass,
-            showHoverTrigger && 'eds-hover-tooltip-trigger',
-            showHoverTrigger && hoverTriggerClass,
+            showHoverTrigger && !deferHoverTarget && 'eds-hover-tooltip-trigger',
+            showHoverTrigger && !deferHoverTarget && hoverTriggerClass,
           ]"
         >
           <span
@@ -415,8 +411,9 @@ async function onTooltipCopy(event: Event) {
           <EgFlotationMenuItem
             box-type="text"
             label-wrap
+            host-tag="div"
             :show-tag="false"
-            @click="onTooltipCopy"
+            @click="showTooltipCopy ? onTooltipCopy($event) : undefined"
           >
             <span :class="cryptoComboStyles.menuRowContent">
               <span :class="cryptoComboStyles.menuRowMain">
@@ -431,23 +428,19 @@ async function onTooltipCopy(event: Event) {
                 <span :class="cryptoComboStyles.menuAddressLine">
                   <span :class="menuTextClasses">{{ resolvedTooltipText }}</span>
                   <span
+                    v-if="showTooltipCopy"
                     :class="[
                       cryptoComboStyles.menuCopyButton,
                       tooltipCopied && cryptoComboStyles.menuCopyButtonCopied,
                     ]"
                     @click.stop
                   >
-                    <EgIconButton
-                      shape="square"
-                      size="xs"
+                    <CopyActionIconButton
                       :label="copyLabel"
+                      :icon="tooltipCopied ? 'eds-enable-fill' : 'eds-copy'"
+                      :boundary-selector="resolvedBoundarySelector"
                       @click="onTooltipCopy"
-                    >
-                      <EgIcon
-                        :name="tooltipCopied ? 'eds-enable-fill' : 'eds-copy'"
-                        fit
-                      />
-                    </EgIconButton>
+                    />
                   </span>
                 </span>
               </span>

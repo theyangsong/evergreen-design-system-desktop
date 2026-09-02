@@ -378,6 +378,7 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
+  vertical-align: middle;
 }
 
 .menuCopyButtonCopied :global(.eds-icon-button .symbol) {

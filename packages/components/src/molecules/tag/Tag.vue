@@ -47,6 +47,7 @@ export type TagCustomStyle =
   | 'rose'
   | 'peach'
   | 'aml-danger'
+  | 'aml-safe'
   | 'aml-suspicious'
   | 'aml-invalid';
 
@@ -85,6 +86,7 @@ const CUSTOM_STYLE_CLASS: Record<TagCustomStyle, string> = {
   rose: styles.customRose,
   peach: styles.customPeach,
   'aml-danger': styles.customAmlDanger,
+  'aml-safe': styles.customAmlSafe,
   'aml-suspicious': styles.customAmlSuspicious,
   'aml-invalid': styles.customAmlInvalid,
 };

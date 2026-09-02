@@ -1,3 +1,7 @@
+.mnemonicVerify {
+  --mnemonic-verify-size: 20px;
+}
+
 /* 对齐 Tooltip flotation slotDemo（body-medium 15px + primary 100%）。 */
 .tooltipLabel {
   display: flex;

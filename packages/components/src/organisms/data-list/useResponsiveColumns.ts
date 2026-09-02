@@ -63,5 +63,5 @@ export function getVisibleColumnSlotIndices(
     visible.delete(last.slotIndex);
   }
 
-  return sorted.filter((col) => visible.has(col.slotIndex)).map((col) => col.slotIndex);
+  return columns.map((col) => col.slotIndex).filter((slotIndex) => visible.has(slotIndex));
 }

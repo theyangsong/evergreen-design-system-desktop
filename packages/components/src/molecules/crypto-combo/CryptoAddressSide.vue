@@ -14,6 +14,7 @@ import {
   FLOTATION_OVERFLOW_CLOSE_DELAY,
   FLOTATION_OVERFLOW_OPEN_DELAY,
 } from '../tooltip/textOverflowTooltipConstants';
+import { copyToClipboard } from '../../utils/copyToClipboard';
 
 /**
  * CryptoAddress 侧：
@@ -178,16 +179,14 @@ const sideMenuFlotationProps = {
 async function onCopyAddress(key: string, address: string, event: MouseEvent) {
   event.stopPropagation();
   event.preventDefault();
-  try {
-    await navigator.clipboard.writeText(address);
-    copiedRowKey.value = key;
-    if (copiedResetTimer) clearTimeout(copiedResetTimer);
-    copiedResetTimer = setTimeout(() => {
-      if (copiedRowKey.value === key) copiedRowKey.value = null;
-    }, 2000);
-  } catch {
-    // 复制失败时保持默认图标
-  }
+  const copied = await copyToClipboard(address);
+  if (!copied) return;
+
+  copiedRowKey.value = key;
+  if (copiedResetTimer) clearTimeout(copiedResetTimer);
+  copiedResetTimer = setTimeout(() => {
+    if (copiedRowKey.value === key) copiedRowKey.value = null;
+  }, 2000);
 }
 
 onBeforeUnmount(() => {

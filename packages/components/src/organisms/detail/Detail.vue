@@ -7,6 +7,7 @@ import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
 import { EgLink } from '../../molecules/link';
 import DetailValueActionIcon from './DetailValueActionIcon.vue';
+import DetailAddressSideFlotation from './DetailAddressSideFlotation.vue';
 import { EgTag, type TagSize, type TagStatus } from '../../molecules/tag';
 import { EgButton, type ButtonTone } from '../../molecules/button';
 import type { ComboActionPageTone } from '../../molecules/combo';
@@ -215,6 +216,15 @@ function itemValueTagSystemType(
   return entry.tagSystemType ?? item.tagSystemType ?? 'stroke-subtle';
 }
 
+function entryAddressSideMenuAlias(
+  item: DetailItemData,
+  entry: DetailItemResolvedValueEntry,
+): string | undefined {
+  const tag = itemValueTagText(item, entry);
+  if (!tag || !itemValueTagBeforeValue(item, entry)) return undefined;
+  return tag;
+}
+
 function inlineValueSegmentClass(
   segment: DetailItemValueEntry,
   styles: Record<string, string>,
@@ -304,6 +314,7 @@ const props = withDefaults(
     valueAddressBookLabel?: string;
     valueAmlSearchLabel?: string;
     valueBrowserLabel?: string;
+    amlSearchActiveItemKey?: string | null;
   }>(),
   {
     eyebrow: 'Title',
@@ -335,6 +346,7 @@ const props = withDefaults(
     valueAddressBookLabel: 'Add to address book',
     valueAmlSearchLabel: 'AML Search',
     valueBrowserLabel: 'Block explorer',
+    amlSearchActiveItemKey: null,
   },
 );
 
@@ -346,7 +358,18 @@ const emit = defineEmits<{
   toolbarConfirm: [];
   toolbarCancel: [];
   itemValueLinkClick: [key: string];
+  itemValueAmlSearchClick: [key: string];
 }>();
+
+function isAmlSearchActive(copyKey: string): boolean {
+  return props.amlSearchActiveItemKey === copyKey;
+}
+
+function onAmlSearchClick(copyKey: string, event: MouseEvent) {
+  event.stopPropagation();
+  event.preventDefault();
+  emit('itemValueAmlSearchClick', copyKey);
+}
 
 function onItemValueLinkClick(
   item: DetailItemData,
@@ -771,10 +794,10 @@ onBeforeUnmount(() => {
                           v-for="(entry, entryIndex) in [itemPrimaryValueEntry(item)]"
                           :key="`${item.key ?? itemIndex}-primary`"
                         >
-                          <div
-                            v-if="entryAddressTagsBelow(entry)"
-                            :class="styles.itemValueAddressMainLine"
-                          >
+                            <div
+                              v-if="entryAddressTagsBelow(entry)"
+                              :class="styles.itemValueAddressMainLine"
+                            >
                             <EgTag
                               v-if="itemValueTagText(item, entry) && itemValueTagBeforeValue(item, entry)"
                               :family="itemValueTagFamily(item, entry)"
@@ -807,24 +830,21 @@ onBeforeUnmount(() => {
                                 {{ segment.value }}
                               </span>
                             </template>
-                            <span
+                            <div
                               v-else-if="!item.valueTagOnly && entry.value"
-                              :class="[
-                                styles.itemValueText,
-                                !itemShowsValueAvatar(item) && styles.itemValueTextNowrap,
-                              ]"
+                              :class="styles.itemValueAddressInlineCluster"
                             >
-                              {{ entry.value }}
-                            </span>
-                            <EgTag
-                              v-if="itemValueTagText(item, entry) && !itemValueTagBeforeValue(item, entry)"
-                              :family="itemValueTagFamily(item, entry)"
-                              :status="entry.tagStatus ?? item.tagStatus"
-                              :system-type="itemValueTagSystemType(item, entry)"
-                              size="sm"
-                            >
-                              {{ itemValueTagText(item, entry) }}
-                            </EgTag>
+                            <DetailAddressSideFlotation
+                              :address="resolveItemCopyValue(item, entry)"
+                              :alias="entryAddressSideMenuAlias(item, entry)"
+                              :tags="entry.valueAddressSideTags"
+                              :tags-reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                              :embed-tags-in-trigger="false"
+                              :copy-key="itemCopyKey(sectionIndex, itemIndex, item, entryIndex)"
+                              :show-copy="itemRowCopyable(item, entry)"
+                              :copied-item-key="copiedItemKey"
+                              @copy="onCopyItemValue"
+                            />
                             <div
                               v-if="itemHasValueTrailingActions(item)"
                               :class="styles.itemValueTrailing"
@@ -869,6 +889,13 @@ onBeforeUnmount(() => {
                                   v-if="item.showValueAmlSearch"
                                   :label="valueAmlSearchLabel"
                                   icon="eds-aml-search"
+                                  :verifying="isAmlSearchActive(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                  )"
+                                  @click="onAmlSearchClick(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                    $event,
+                                  )"
                                 />
                                 <DetailValueActionIcon
                                   v-if="item.showValueBrowser"
@@ -876,9 +903,24 @@ onBeforeUnmount(() => {
                                   icon="eds-earth"
                                 />
                             </div>
+                            </div>
+                            <EgTag
+                              v-if="itemValueTagText(item, entry) && !itemValueTagBeforeValue(item, entry)"
+                              :family="itemValueTagFamily(item, entry)"
+                              :status="entry.tagStatus ?? item.tagStatus"
+                              :system-type="itemValueTagSystemType(item, entry)"
+                              size="sm"
+                            >
+                              {{ itemValueTagText(item, entry) }}
+                            </EgTag>
                           </div>
                           <CryptoAddressTags
-                            v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                            v-if="entryAddressTagsBelow(entry)
+                              && entry.valueAddressSideTags
+                              && hasAddressTags(
+                                entry.valueAddressSideTags.system,
+                                entry.valueAddressSideTags.custom,
+                              )"
                             :tags="entry.valueAddressSideTags"
                             :reveal-all="entry.valueAddressSideTagsRevealAll === true"
                             :class="[
@@ -994,6 +1036,13 @@ onBeforeUnmount(() => {
                                   v-if="item.showValueAmlSearch"
                                   :label="valueAmlSearchLabel"
                                   icon="eds-aml-search"
+                                  :verifying="isAmlSearchActive(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                  )"
+                                  @click="onAmlSearchClick(
+                                    itemCopyKey(sectionIndex, itemIndex, item, entryIndex),
+                                    $event,
+                                  )"
                                 />
                                 <DetailValueActionIcon
                                   v-if="item.showValueBrowser"
@@ -1095,12 +1144,21 @@ onBeforeUnmount(() => {
                               >
                                 {{ entry.tag }}
                               </EgTag>
-                              <span
+                              <div
                                 v-if="entry.value"
-                                :class="[styles.itemValueText, styles.itemValueTextNowrap]"
+                                :class="styles.itemValueAddressInlineCluster"
                               >
-                                {{ entry.value }}
-                              </span>
+                              <DetailAddressSideFlotation
+                                :address="resolveItemCopyValue(item, entry)"
+                                :alias="entryAddressSideMenuAlias(item, entry)"
+                                :tags="entry.valueAddressSideTags"
+                                :tags-reveal-all="entry.valueAddressSideTagsRevealAll === true"
+                                :embed-tags-in-trigger="false"
+                                :copy-key="itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1)"
+                                :show-copy="itemRowCopyable(item, entry)"
+                                :copied-item-key="copiedItemKey"
+                                @copy="onCopyItemValue"
+                              />
                               <div
                                 v-if="itemHasValueTrailingActions(item)"
                                 :class="styles.itemValueTrailing"
@@ -1146,11 +1204,24 @@ onBeforeUnmount(() => {
                                   v-if="item.showValueAmlSearch"
                                   :label="valueAmlSearchLabel"
                                   icon="eds-aml-search"
+                                  :verifying="isAmlSearchActive(
+                                    itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                  )"
+                                  @click="onAmlSearchClick(
+                                    itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                    $event,
+                                  )"
                                 />
+                              </div>
                               </div>
                             </div>
                             <CryptoAddressTags
-                              v-if="entryAddressTagsBelow(entry) && entry.valueAddressSideTags && hasAddressTags(entry.valueAddressSideTags.system, entry.valueAddressSideTags.custom)"
+                              v-if="entryAddressTagsBelow(entry)
+                                && entry.valueAddressSideTags
+                                && hasAddressTags(
+                                  entry.valueAddressSideTags.system,
+                                  entry.valueAddressSideTags.custom,
+                                )"
                               :tags="entry.valueAddressSideTags"
                               :reveal-all="entry.valueAddressSideTagsRevealAll === true"
                               :class="[
@@ -1232,6 +1303,13 @@ onBeforeUnmount(() => {
                                   v-if="item.showValueAmlSearch"
                                   :label="valueAmlSearchLabel"
                                   icon="eds-aml-search"
+                                  :verifying="isAmlSearchActive(
+                                    itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                  )"
+                                  @click="onAmlSearchClick(
+                                    itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1),
+                                    $event,
+                                  )"
                                 />
                               </div>
                             </template>

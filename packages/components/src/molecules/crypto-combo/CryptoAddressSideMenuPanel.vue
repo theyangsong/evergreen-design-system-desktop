@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { EgIcon } from '../../atoms/icons';
-import { EgIconButton } from '../icon-button';
+import CopyActionIconButton from '../icon-button/CopyActionIconButton.vue';
 import { EgFlotationMenu, EgFlotationMenuItem } from '../flotation';
 import { EgTag } from '../tag';
 import CryptoAddressTags from './CryptoAddressTags.vue';
@@ -22,10 +21,16 @@ export type CryptoAddressSideMenuRow = {
   showExpandedTags?: boolean;
 };
 
-defineProps<{
-  rows: CryptoAddressSideMenuRow[];
-  copiedRowKey: string | null;
-}>();
+withDefaults(
+  defineProps<{
+    rows: CryptoAddressSideMenuRow[];
+    copiedRowKey: string | null;
+    boundarySelector?: string;
+  }>(),
+  {
+    boundarySelector: '.eds-data-list',
+  },
+);
 
 const emit = defineEmits<{
   copy: [key: string, address: string, event: MouseEvent];
@@ -47,6 +52,7 @@ const emit = defineEmits<{
       :key="row.key"
       box-type="text"
       label-wrap
+      host-tag="div"
       :show-tag="false"
       @click="emit('copy', row.key, row.address, $event)"
     >
@@ -69,17 +75,12 @@ const emit = defineEmits<{
               ]"
               @click.stop
             >
-              <EgIconButton
-                shape="square"
-                size="xs"
+              <CopyActionIconButton
                 label="复制"
+                :icon="copiedRowKey === row.key ? 'eds-enable-fill' : 'eds-copy'"
+                :boundary-selector="boundarySelector"
                 @click="emit('copy', row.key, row.address, $event)"
-              >
-                <EgIcon
-                  :name="copiedRowKey === row.key ? 'eds-enable-fill' : 'eds-copy'"
-                  fit
-                />
-              </EgIconButton>
+              />
             </span>
           </span>
         </span>

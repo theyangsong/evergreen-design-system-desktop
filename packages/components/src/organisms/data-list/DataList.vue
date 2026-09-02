@@ -519,6 +519,45 @@ function parsePx(value?: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+/**
+ * 将 flex 列宽写入 widths：每列不低于 min-width；预算有余时在 min 之上均分 extra。
+ */
+function assignFlexColumnWidths(
+  widths: number[],
+  flexIndices: number[],
+  flexMinWidths: number[],
+  flexSpace: number,
+): void {
+  if (flexIndices.length === 0) return;
+
+  const minSum = flexMinWidths.reduce((sum, min) => sum + min, 0);
+  if (minSum <= 0) return;
+
+  if (flexSpace <= minSum) {
+    flexIndices.forEach((colIndex, flexOffset) => {
+      widths[colIndex] = flexMinWidths[flexOffset];
+    });
+    return;
+  }
+
+  const extra = flexSpace - minSum;
+  const extraPerCol = extra / flexIndices.length;
+  flexIndices.forEach((colIndex, flexOffset) => {
+    widths[colIndex] = Math.round(flexMinWidths[flexOffset] + extraPerCol);
+  });
+
+  const flexTotal = flexIndices.reduce((sum, colIndex) => sum + widths[colIndex], 0);
+  const delta = flexSpace - flexTotal;
+  if (delta !== 0) {
+    const lastFlexIndex = flexIndices[flexIndices.length - 1];
+    const lastFlexOffset = flexIndices.length - 1;
+    widths[lastFlexIndex] = Math.max(
+      flexMinWidths[lastFlexOffset] ?? 0,
+      widths[lastFlexIndex] + delta,
+    );
+  }
+}
+
 function isTrailingFlexColumn(
   cols: ReturnType<typeof mapColumnConfig>[],
   lastIndex: number,
@@ -573,28 +612,11 @@ function computeRestDataColumnWidthsPx(cols = bodyColumns.value): number[] {
   }
 
   const flexMinWidths = flexIndices.map((index) => parsePx(cols[index]?.minWidth));
-  const minSum = flexMinWidths.reduce((sum, min) => sum + min, 0);
   const flexSpace = Math.max(
     0,
     containerWidth - trailingWidth - fixedLeadingTotal - DATA_LIST_FLEX_RESERVE_PX,
   );
-  const extra = Math.max(0, flexSpace - minSum);
-  const extraPerCol = flexIndices.length > 0 ? extra / flexIndices.length : 0;
-
-  flexIndices.forEach((colIndex, flexOffset) => {
-    widths[colIndex] = Math.round(flexMinWidths[flexOffset] + extraPerCol);
-  });
-
-  const flexTotal = flexIndices.reduce((sum, colIndex) => sum + widths[colIndex], 0);
-  const delta = flexSpace - flexTotal;
-  if (delta !== 0 && flexIndices.length > 0) {
-    const lastFlexIndex = flexIndices[flexIndices.length - 1];
-    const lastFlexOffset = flexIndices.length - 1;
-    widths[lastFlexIndex] = Math.max(
-      flexMinWidths[lastFlexOffset] ?? 0,
-      widths[lastFlexIndex] + delta,
-    );
-  }
+  assignFlexColumnWidths(widths, flexIndices, flexMinWidths, flexSpace);
 
   return widths;
 }
@@ -603,7 +625,7 @@ function formatColWidthPx(width: number): string {
   return `${Math.round(width * 100) / 100}px`;
 }
 
-/** 勾选列占用 selectOffset；仅 flex 列按比例收缩，尾列宽高与右缘位置不变。 */
+/** 批选勾选列占位不压缩数据列：保持 idle 宽度，且不低于 min-width。 */
 function computeDataColumnLayoutWidthsPx(
   selectOffset: number,
   cols = bodyColumns.value,
@@ -621,22 +643,6 @@ function computeDataColumnLayoutWidthsPx(
     return [...rest];
   }
 
-  const hasLegacyPercent = cols.some((col) => col.widthPercent && !col.width);
-  if (hasLegacyPercent) {
-    const tableWidth = Math.max(0, containerWidth - selectOffset);
-    return cols.map((col, index) => {
-      if (col.width) return parsePx(col.width);
-      if (col.widthPercent) {
-        return Math.round((tableWidth * col.widthPercent) / 100);
-      }
-      return rest[index] ?? 0;
-    });
-  }
-
-  if (cols.length === 1) {
-    return [Math.max(0, containerWidth - selectOffset - DATA_LIST_FLEX_RESERVE_PX)];
-  }
-
   const lastIndex = cols.length - 1;
   const trailingIsFlex = isTrailingFlexColumn(cols, lastIndex);
   const trailingWidth = trailingIsFlex
@@ -644,56 +650,11 @@ function computeDataColumnLayoutWidthsPx(
     : rest[lastIndex] ??
       Math.round(parsePx(cols[lastIndex]?.width) || parsePx(cols[lastIndex]?.minWidth));
 
-  let fixedLeadingTotal = 0;
-  const flexIndices: number[] = [];
-  const leadingEnd = trailingIsFlex ? cols.length : lastIndex;
-  for (let index = 0; index < leadingEnd; index += 1) {
-    if (cols[index]?.width) {
-      fixedLeadingTotal += rest[index] ?? Math.round(parsePx(cols[index]?.width));
-    } else {
-      flexIndices.push(index);
-    }
-  }
-
-  const flexBudget = Math.max(
-    0,
-    containerWidth - selectOffset - trailingWidth - fixedLeadingTotal - DATA_LIST_FLEX_RESERVE_PX,
-  );
-  const restFlexWidths = flexIndices.map((index) => rest[index] ?? parsePx(cols[index]?.minWidth));
-  const restFlexTotal = restFlexWidths.reduce((sum, width) => sum + width, 0);
-
-  if (restFlexTotal <= 0 || flexIndices.length === 0) {
-    return cols.map((col, index) => {
-      if (!trailingIsFlex && index === lastIndex) return trailingWidth;
-      if (col?.width) return rest[index] ?? Math.round(parsePx(col.width));
-      return rest[index] ?? parsePx(col.minWidth);
-    });
-  }
-
-  const flexWidthsByIndex = new Map<number, number>();
-  flexIndices.forEach((colIndex, flexOffset) => {
-    const minWidth = parsePx(cols[colIndex]?.minWidth);
-    const scaled = Math.max(
-      minWidth,
-      (restFlexWidths[flexOffset] / restFlexTotal) * flexBudget,
-    );
-    flexWidthsByIndex.set(colIndex, scaled);
-  });
-
-  const flexSum = flexIndices.reduce((sum, colIndex) => sum + (flexWidthsByIndex.get(colIndex) ?? 0), 0);
-  const delta = flexBudget - flexSum;
-  if (Math.abs(delta) > 0.001 && flexIndices.length > 0) {
-    const lastFlexIndex = flexIndices[flexIndices.length - 1];
-    flexWidthsByIndex.set(
-      lastFlexIndex,
-      (flexWidthsByIndex.get(lastFlexIndex) ?? 0) + delta,
-    );
-  }
-
   return cols.map((col, index) => {
     if (!trailingIsFlex && index === lastIndex) return trailingWidth;
     if (col?.width) return rest[index] ?? Math.round(parsePx(col.width));
-    return flexWidthsByIndex.get(index) ?? rest[index] ?? parsePx(col.minWidth);
+    const minWidth = parsePx(col.minWidth);
+    return Math.max(rest[index] ?? minWidth, minWidth);
   });
 }
 
@@ -728,7 +689,9 @@ const columnLayoutWidths = computed((): string[] => {
 
   const idleWidths = idleColumnWidthsBySlot.value;
   const selectedWidths = selectModeColumnWidthsBySlot.value;
-  return visibleSlotIndices.value.map((slotIndex) => {
+  const nodes = allColumnNodes.value;
+  return visibleColumnNodes.value.map((node) => {
+    const slotIndex = nodes.indexOf(node);
     const idleWidth = idleWidths.get(slotIndex) ?? 0;
     const selectedWidth = selectedWidths.get(slotIndex) ?? 0;
     return formatColWidthPx(selectMode.value ? selectedWidth : idleWidth);
@@ -738,6 +701,13 @@ const columnLayoutWidths = computed((): string[] => {
 const selectColumnWidthCss = computed(() =>
   formatColWidthPx(selectMode.value ? SELECT_COLUMN_WIDTH : 0),
 );
+
+const tableLayoutWidthCss = computed(() => {
+  const selectWidth = parsePx(selectColumnWidthCss.value);
+  const dataSum = columnLayoutWidths.value.reduce((sum, width) => sum + parsePx(width), 0);
+  const contentWidth = selectWidth + dataSum;
+  return formatColWidthPx(Math.max(size.value.width, contentWidth));
+});
 
 // 可见列集合变化时快照必须同帧跟上（含动画中途），否则宽度插值仍按旧列集算。
 watch(visibleSlotIndices, () => {
@@ -1159,7 +1129,7 @@ function onTableScroll(event: Event) {
         }"
         aria-hidden="true"
       />
-      <table :key="tableKey" :class="styles.table">
+      <table :key="tableKey" :class="styles.table" :style="{ width: tableLayoutWidthCss }">
         <colgroup>
           <col
             :class="styles.layoutColumn"
