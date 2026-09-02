@@ -7,7 +7,6 @@ import { EgIcon } from '../../atoms/icons';
 import { EgIconButton } from '../../molecules/icon-button';
 import { EgLink } from '../../molecules/link';
 import DetailValueActionIcon from './DetailValueActionIcon.vue';
-import DetailAddressSideFlotation from './DetailAddressSideFlotation.vue';
 import { EgTag, type TagSize, type TagStatus } from '../../molecules/tag';
 import { EgButton, type ButtonTone } from '../../molecules/button';
 import type { ComboActionPageTone } from '../../molecules/combo';
@@ -214,15 +213,6 @@ function itemValueTagSystemType(
   entry: DetailItemResolvedValueEntry,
 ): NonNullable<DetailItemData['tagSystemType']> {
   return entry.tagSystemType ?? item.tagSystemType ?? 'stroke-subtle';
-}
-
-function entryAddressSideMenuAlias(
-  item: DetailItemData,
-  entry: DetailItemResolvedValueEntry,
-): string | undefined {
-  const tag = itemValueTagText(item, entry);
-  if (!tag || !itemValueTagBeforeValue(item, entry)) return undefined;
-  return tag;
 }
 
 function inlineValueSegmentClass(
@@ -834,17 +824,11 @@ onBeforeUnmount(() => {
                               v-else-if="!item.valueTagOnly && entry.value"
                               :class="styles.itemValueAddressInlineCluster"
                             >
-                            <DetailAddressSideFlotation
-                              :address="resolveItemCopyValue(item, entry)"
-                              :alias="entryAddressSideMenuAlias(item, entry)"
-                              :tags="entry.valueAddressSideTags"
-                              :tags-reveal-all="entry.valueAddressSideTagsRevealAll === true"
-                              :embed-tags-in-trigger="false"
-                              :copy-key="itemCopyKey(sectionIndex, itemIndex, item, entryIndex)"
-                              :show-copy="itemRowCopyable(item, entry)"
-                              :copied-item-key="copiedItemKey"
-                              @copy="onCopyItemValue"
-                            />
+                            <span
+                              :class="[styles.itemValueText, styles.itemValueTextNowrap]"
+                            >
+                              {{ resolveItemCopyValue(item, entry) }}
+                            </span>
                             <div
                               v-if="itemHasValueTrailingActions(item)"
                               :class="styles.itemValueTrailing"
@@ -1148,17 +1132,11 @@ onBeforeUnmount(() => {
                                 v-if="entry.value"
                                 :class="styles.itemValueAddressInlineCluster"
                               >
-                              <DetailAddressSideFlotation
-                                :address="resolveItemCopyValue(item, entry)"
-                                :alias="entryAddressSideMenuAlias(item, entry)"
-                                :tags="entry.valueAddressSideTags"
-                                :tags-reveal-all="entry.valueAddressSideTagsRevealAll === true"
-                                :embed-tags-in-trigger="false"
-                                :copy-key="itemCopyKey(sectionIndex, itemIndex, item, branchIndex + 1)"
-                                :show-copy="itemRowCopyable(item, entry)"
-                                :copied-item-key="copiedItemKey"
-                                @copy="onCopyItemValue"
-                              />
+                              <span
+                                :class="[styles.itemValueText, styles.itemValueTextNowrap]"
+                              >
+                                {{ resolveItemCopyValue(item, entry) }}
+                              </span>
                               <div
                                 v-if="itemHasValueTrailingActions(item)"
                                 :class="styles.itemValueTrailing"
