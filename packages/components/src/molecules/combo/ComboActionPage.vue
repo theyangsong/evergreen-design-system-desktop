@@ -54,7 +54,7 @@ const emit = defineEmits<{
         direction === 'left' ? styles.pageActionsLeft : styles.pageActionsRight,
       ]"
     >
-      <EgButton :tone="tone" variant="text" size="md" @click="emit('cancel')">
+      <EgButton tone="subtle" variant="text" size="md" @click="emit('cancel')">
         {{ cancelLabel }}
       </EgButton>
       <EgButton :tone="tone" :variant="variant" size="md" @click="emit('confirm')">

@@ -48,7 +48,7 @@ const resolvedCount = computed(() => (Number(props.count) === 1 ? 1 : 2));
     <EgButton
       v-if="resolvedCount === 2"
       :class="styles.fullWidth"
-      :tone="tone"
+      tone="subtle"
       variant="text"
       size="md"
       @click="emit('cancel')"

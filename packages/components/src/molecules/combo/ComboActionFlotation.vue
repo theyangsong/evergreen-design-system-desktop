@@ -68,7 +68,7 @@ const emit = defineEmits<{
         Clear
       </EgButton>
       <div :class="styles.flotationActions">
-        <EgButton :tone="tone" variant="text" :size="buttonSize" @click="emit('cancel')">
+        <EgButton tone="subtle" variant="text" :size="buttonSize" @click="emit('cancel')">
           {{ cancelLabel }}
         </EgButton>
         <EgButton :tone="tone" :variant="variant" :size="buttonSize" @click="emit('confirm')">
