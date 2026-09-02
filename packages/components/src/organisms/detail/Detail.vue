@@ -669,19 +669,21 @@ onBeforeUnmount(() => {
           <div :key="resolvedToolbarPageKey" :class="['motion-page', styles.scrollBody]">
       <slot name="body">
           <header :class="styles.headline">
-            <span v-if="showEyebrow" :class="styles.eyebrow">{{ eyebrow }}</span>
-            <div :class="styles.headlineRow">
-              <h2 :class="styles.headlineText">
-                <slot name="headline-text">{{ headline }}</slot>
-              </h2>
-              <EgTag
-                v-if="showStatusTag && statusTag"
-                family="status"
-                :status="statusTagStatus"
-                :size="statusTagSize"
-              >
-                {{ statusTag }}
-              </EgTag>
+            <div :class="styles.headlineMain">
+              <span v-if="showEyebrow" :class="styles.eyebrow">{{ eyebrow }}</span>
+              <div :class="styles.headlineRow">
+                <h2 :class="styles.headlineText">
+                  <slot name="headline-text">{{ headline }}</slot>
+                </h2>
+                <EgTag
+                  v-if="showStatusTag && statusTag"
+                  family="status"
+                  :status="statusTagStatus"
+                  :size="statusTagSize"
+                >
+                  {{ statusTag }}
+                </EgTag>
+              </div>
             </div>
 
             <div v-if="showTabs" :class="styles.tabsWrap">
