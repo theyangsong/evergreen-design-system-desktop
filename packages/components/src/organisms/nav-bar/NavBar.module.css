@@ -201,10 +201,10 @@
 }
 
 .rootWide .moduleRegionDivider {
-  align-self: center;
-  width: 100%;
-  max-width: var(--scale-6);
-  margin-inline: 0;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
+  margin-inline: var(--spacing-3);
 }
 
 .rootWide .individuals {
