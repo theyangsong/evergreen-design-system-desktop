@@ -54,7 +54,7 @@
   line-height: var(--eds-footnote-strong-line-height);
   white-space: nowrap;
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .filterItem:hover {

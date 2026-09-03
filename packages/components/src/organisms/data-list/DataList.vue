@@ -1221,7 +1221,7 @@ function onTableScroll(event: Event) {
           <tr
             v-for="rowIndex in renderedRowIndices"
             :key="rowIndex"
-            class="motion-ease is-hover"
+            class="motion-ease is-paint"
             :style="rowStyle()"
             @click="onRowClick(dataList[rowIndex], rowIndex)"
           >

@@ -1,6 +1,6 @@
 /**
  * 文本 Tooltip 触发器 — Semantic + recipe glue：
- * - __target 文案：`.motion-ease.is-hover`（focus：`.motion-ease.is-focus`）
+ * - __target 文案：`.motion-ease.is-paint`（focus：`.motion-ease.is-paint-fade`）
  * - ::after 虚线：recipe fade（由 markup 挂 motion-ease + state modifier）
  *
  * 结构：.eds-hover-tooltip-trigger > .eds-hover-tooltip-trigger__target

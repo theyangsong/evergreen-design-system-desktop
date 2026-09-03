@@ -206,9 +206,9 @@ export const iconButtonCustomizeControls: DocCustomizeControl[] = [
     key: 'motion',
     label: '动效',
     options: [
-      { value: 'ease', label: 'is-hover（入+出）' },
-      { value: 'hover-enter-only', label: 'is-hover-enter-only（仅入场）' },
-      { value: 'asym', label: 'is-hover-enter-only（asym 别名）' },
+      { value: 'ease', label: 'is-paint（入+出）' },
+      { value: 'hover-enter-only', label: 'is-enter-only（仅入场）' },
+      { value: 'asym', label: 'is-enter-only（asym 别名）' },
       { value: 'none', label: 'none' },
     ],
   },

@@ -94,7 +94,7 @@ const hoverTriggerClass = computed(() =>
   props.tooltipTrigger === 'focus' ? 'eds-hover-tooltip-trigger--focus' : undefined,
 );
 const hoverMotionClass = computed(() =>
-  props.tooltipTrigger === 'focus' ? ['motion-ease', 'is-focus'] : ['motion-ease', 'is-hover'],
+  props.tooltipTrigger === 'focus' ? ['motion-ease', 'is-paint-fade'] : ['motion-ease', 'is-paint'],
 );
 
 const sideMenuRows = computed((): CryptoAddressSideMenuRow[] => {

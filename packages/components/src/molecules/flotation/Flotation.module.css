@@ -151,7 +151,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .addRow:hover {
@@ -226,7 +226,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .triggerWidthAdaptive {
@@ -420,7 +420,7 @@
   line-height: var(--eds-body-medium-line-height);
   text-align: left;
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .boxRoot:hover:not(:disabled):not(.boxFocused) {

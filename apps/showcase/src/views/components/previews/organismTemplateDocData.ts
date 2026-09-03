@@ -923,7 +923,7 @@ export const moduleMenuPropRows: OrganismPropRow[] = [
     type: '—',
     defaultValue: '—',
     description:
-      'EgModuleMenuItem 内置 `.motion-ease.is-hover-enter-only`：悬浮入场 600ms（--motion-recipe-hover-asym + enter easing）；离场 / focus / active 无过渡。须全局引入 @eds/desktop-tokens/motion/*。',
+      'EgModuleMenuItem 内置 `.motion-ease.is-enter-only`：悬浮入场 600ms（--motion-recipe-hover-asym + enter easing）；离场 / focus / active 无过渡。须全局引入 @eds/desktop-tokens/motion/*。',
   },
 ];
 
@@ -976,7 +976,7 @@ export const moduleMenuItemPropRows: OrganismPropRow[] = [
     type: '—',
     defaultValue: '—',
     description:
-      '内置 `.motion-ease.is-hover-enter-only`（token semantic · 悬浮入）：仅 hover 入场有过渡；mouseleave / :focus-visible / :active 无动效。背景 hover 由 CSS `--event-hover` 驱动。',
+      '内置 `.motion-ease.is-enter-only`（token semantic · 悬浮入）：仅 hover 入场有过渡；mouseleave / :focus-visible / :active 无动效。背景 hover 由 CSS `--event-hover` 驱动。',
   },
   { name: 'label', type: 'string', defaultValue: "'Label'", description: 'Body Medium 文案。' },
   {

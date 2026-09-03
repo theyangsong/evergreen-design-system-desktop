@@ -14,11 +14,11 @@
 }
 
 .targetShellHoverMotion {
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .targetShellFocusMotion {
-  composes: motion-ease is-focus from global;
+  composes: motion-ease is-paint-fade from global;
 }
 
 .measure {

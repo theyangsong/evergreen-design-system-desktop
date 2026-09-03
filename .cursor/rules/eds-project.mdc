@@ -106,7 +106,7 @@ alwaysApply: true
 
 - Combo 须 `EgFlotation` 链路 + `flotationDocCustomize.ts`；禁手搓 AnchoredTooltip 菜单。
 - Box 页：场景 `scene*` 键独立；`eds-flotation-menu--box-doc`；scroll-fade 仅 `menuListScrollable` mask。
-- `EgModuleMenuItem`：`.motion-ease.is-hover-enter-only`；禁 NavBar `is-hover`。
+- `EgModuleMenuItem`：`.motion-ease.is-enter-only`；禁 NavBar `is-paint`。
 
 ### EgDetail · Apply_Item（详案 `detail-apply-item.md`）
 

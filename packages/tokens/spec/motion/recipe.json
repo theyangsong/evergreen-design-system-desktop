@@ -9,7 +9,7 @@
         { "name": "motion-duration-fade", "value": "var(--eds-motion-2)", "comment": "Opacity / 虚线" },
         { "name": "motion-duration-enter", "value": "var(--eds-motion-3)", "comment": "浮层进入" },
         { "name": "motion-duration-float", "value": "var(--eds-motion-4)", "comment": "微浮动 / hover 反馈" },
-        { "name": "motion-duration-hover", "value": "var(--eds-motion-4)", "comment": "Hover paint（is-hover / is-focus）" },
+        { "name": "motion-duration-hover", "value": "var(--eds-motion-4)", "comment": "Hover paint（is-paint / is-paint-fade）" },
         { "name": "motion-duration-hover-asym", "value": "var(--eds-motion-5)", "comment": "600ms · is-asym 入场（仅 motion-recipe-hover-asym）" },
         { "name": "motion-duration-shift", "value": "var(--eds-motion-4)", "comment": "Layout / Skid" },
         { "name": "motion-duration-emphasis", "value": "var(--eds-motion-5)", "comment": "强调 / 大面板" },

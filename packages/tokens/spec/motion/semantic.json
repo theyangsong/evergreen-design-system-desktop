@@ -5,26 +5,26 @@
       "comment": "1 · Ease（缓入缓出 · 挂状态 modifier）",
       "styles": [
         {
-          "title": "Ease — 基类（与 .is-focus / .is-hover / .is-hover-enter-only / .is-asym 组合）",
+          "title": "Ease — 基类（与 .is-paint-fade / .is-paint / .is-enter-only / .is-asym 组合）",
           "className": "motion-ease",
           "properties": {},
           "stateStyles": [
             {
-              "hostClass": "motion-ease.is-focus",
-              "title": "a · 悬浮+聚焦 入+出",
+              "hostClass": "motion-ease.is-paint-fade",
+              "title": "a · paint + fade 对称入出",
               "properties": {
                 "transition": "var(--motion-recipe-hover), var(--motion-recipe-fade)"
               },
               "notes": ["eds-hover-tooltip-trigger--focus"]
             },
             {
-              "hostClass": "motion-ease.is-hover",
-              "title": "b · 悬浮入+出",
+              "hostClass": "motion-ease.is-paint",
+              "title": "b · paint 对称入出",
               "properties": { "transition": "var(--motion-recipe-hover)" }
             },
             {
-              "hostClass": "motion-ease.is-hover-enter-only",
-              "title": "c · 悬浮入",
+              "hostClass": "motion-ease.is-enter-only",
+              "title": "c · 仅入场",
               "properties": {
                 "transition": "var(--motion-recipe-hover-asym)",
                 "transition-duration": "0ms"
@@ -157,9 +157,9 @@
     }
   ],
   "reducedMotionScenarioClasses": [
-    "motion-ease.is-focus",
-    "motion-ease.is-hover",
-    "motion-ease.is-hover-enter-only",
+    "motion-ease.is-paint-fade",
+    "motion-ease.is-paint",
+    "motion-ease.is-enter-only",
     "motion-ease.is-asym",
     "motion-layout",
     "motion-flotation",

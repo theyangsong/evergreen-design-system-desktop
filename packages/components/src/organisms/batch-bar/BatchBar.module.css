@@ -42,7 +42,7 @@
   color: var(--text-base-primary);
   white-space: nowrap;
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .action:hover:not(:disabled) {
@@ -68,7 +68,7 @@
   font-size: var(--eds-body-small-strong-size);
   font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .actionTextBody {

@@ -15,7 +15,7 @@
   /* 环宽 = --stroke-lg（1.4px）；inset 不占内容区，与 Figma 16×16 内图标坐标一致 */
   box-shadow: inset 0 0 0 var(--stroke-lg) var(--stroke-base-quaternary);
   cursor: default;
-  composes: motion-ease is-hover from global;
+  composes: motion-ease is-paint from global;
 }
 
 .root:disabled {

@@ -27,7 +27,7 @@ const wide = useNavBarWide();
 
 const isFocused = computed(() => moduleFocus?.focusedId.value === itemId);
 
-const itemMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-hover'));
+const itemMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-paint'));
 
 onMounted(() => {
   moduleFocus?.register(itemId, 'module');

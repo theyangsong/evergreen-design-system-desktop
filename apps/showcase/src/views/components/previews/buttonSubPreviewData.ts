@@ -31,7 +31,7 @@ export const iconButtonPropRows: DocPropRow[] = [
     type: "'ease' | 'hover-enter-only' | 'asym' | 'none'",
     defaultValue: "'ease'",
     description:
-      'Motion semantic：ease → `.motion-ease.is-hover`（入+出）；hover-enter-only / asym → `.motion-ease.is-hover-enter-only`（仅 hover 入场，离场与 focus/active 无过渡）；none → `.motion-none`。',
+      'Motion semantic：ease → `.motion-ease.is-paint`（入+出）；hover-enter-only / asym → `.motion-ease.is-enter-only`（仅 hover 入场，离场与 focus/active 无过渡）；none → `.motion-none`。',
   },
   {
     name: 'as',

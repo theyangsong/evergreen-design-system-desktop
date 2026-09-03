@@ -96,7 +96,7 @@ function onCorporationClick(event: MouseEvent) {
     class="eds-nav-bar-corporation"
     :class="[
       styles.corporationMark,
-      isFocused ? 'motion-none' : 'motion-ease is-hover',
+      isFocused ? 'motion-none' : 'motion-ease is-paint',
       isFocused && styles.corporationMarkFocused,
     ]"
     :aria-label="corporationAriaLabel"

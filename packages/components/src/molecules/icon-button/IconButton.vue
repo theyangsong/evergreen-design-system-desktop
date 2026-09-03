@@ -43,7 +43,7 @@ const motionClass = computed(() => {
   if (props.motion === 'none') {
     return 'motion-none';
   }
-  return 'motion-ease is-hover';
+  return 'motion-ease is-paint';
 });
 </script>
 

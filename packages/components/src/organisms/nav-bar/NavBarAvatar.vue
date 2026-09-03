@@ -41,7 +41,7 @@ function onAvatarClick(event: MouseEvent) {
     class="eds-nav-bar-avatar"
     :class="[
       styles.avatarHost,
-      isFocused ? 'motion-none' : 'motion-ease is-hover',
+      isFocused ? 'motion-none' : 'motion-ease is-paint',
       isFocused && styles.avatarHostFocused,
     ]"
     :aria-label="label"

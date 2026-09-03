@@ -18,7 +18,7 @@ const navFocus = useNavBarModuleFocus();
 
 const isFocused = computed(() => navFocus?.focusedId.value === itemId);
 
-const iconMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-hover'));
+const iconMotionClass = computed(() => (isFocused.value ? 'motion-none' : 'motion-ease is-paint'));
 
 onMounted(() => {
   navFocus?.register(itemId, 'chrome');
